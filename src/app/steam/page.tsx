@@ -1,9 +1,7 @@
-import { getOwnedGames, getPlayerSummary } from 'app/api/steam';
+import { getOwnedGames } from 'app/api/steam';
 import Game from 'components/Game';
 
 import styles from 'styles/components/Steam.module.scss';
-
-// Last Two Weeks: .filter(game => game.rtime_last_played > 1676768400)
 
 const Steam = async () => {
   const games = await getOwnedGames();
