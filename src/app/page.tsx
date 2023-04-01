@@ -2,6 +2,7 @@ import HomeLink from 'components/HomeLink';
 import GitHubIcon from 'components/icons/GitHubIcon';
 import LinkedinIcon from 'components/icons/LinkedinIcon';
 import MailIcon from 'components/icons/MailIcon';
+import SteamIcon from 'components/icons/SteamIcon';
 
 import styles from 'styles/components/Home.module.scss';
 
@@ -25,6 +26,9 @@ export default function Home() {
           </HomeLink>
           <HomeLink name="Email" path={'mailto:drwb333@gmail.com'}>
             <MailIcon />
+          </HomeLink>
+          <HomeLink name="Steam" path={'/steam'} openNewTab={false}>
+            <SteamIcon />
           </HomeLink>
         </div>
       </main>

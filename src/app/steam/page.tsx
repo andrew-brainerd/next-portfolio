@@ -6,15 +6,17 @@ import styles from 'styles/components/Steam.module.scss';
 // Last Two Weeks: .filter(game => game.rtime_last_played > 1676768400)
 
 const Steam = async () => {
-  const playerSummary = await getPlayerSummary();
   const games = await getOwnedGames();
 
   return (
     <div className={styles.steam}>
-      {(games || [])
-        .sort((a, b) => b.playtime_forever - a.playtime_forever)
-        .map(game => <Game key={game.appid} {...game} />)
-        .slice(0, 10)}
+      <h1>My Top 10 Steam Games</h1>
+      <div className={styles.games}>
+        {(games || [])
+          .sort((a, b) => b.playtime_forever - a.playtime_forever)
+          .map((game, g) => <Game key={game.appid} rank={g + 1} {...game} />)
+          .slice(0, 10)}
+      </div>
     </div>
   );
 };

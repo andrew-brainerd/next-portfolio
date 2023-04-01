@@ -1,13 +1,32 @@
 .game {
   align-items: center;
+  background-color: #2f2f2f;
+  border-radius: 5px;
   display: flex;
+  justify-content: space-between;
   margin-top: 10px;
+  padding: 5px 15px;
+  transition: 0.3s border ease;
 
-  > div {
+  .text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 2em;
     margin: 0 15px;
+
+    .rank {
+      display: inline-block;
+      opacity: 0.4;
+      width: 50px;
+    }
   }
 
-  img {
-    width: 50px;
+  .iconContainer {
+    display: flex;
+    justify-content: center;
+
+    img {
+      border-radius: 5px;
+      width: 60px;
+    }
   }
 }
