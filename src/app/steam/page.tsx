@@ -20,11 +20,14 @@ const Steam = async ({ searchParams: { steamId, count } }: SteamProps) => {
 
   const numGames = count && count <= 25 ? count : 10;
 
+  const userHeading = `${!steamId ? 'My ' : ''}Top ${numGames} Steam Games${!steamId ? '' : ` for ${personaname}`}`;
+  const pageHeading = personaname === 'Invalid User' ? personaname : userHeading;
+
   return (
     <div className={styles.steam}>
-      <h1>{`${!steamId ? 'My ' : ''}Top ${numGames} Steam Games${!steamId ? '' : ` for ${personaname}`}`}</h1>
+      <h1>{pageHeading}</h1>
       <div className={styles.games}>
-        {games.length ? (
+        {(games || []).length ? (
           games
             .sort((a, b) => b.playtime_forever - a.playtime_forever)
             /* @ts-expect-error Async Server Component */

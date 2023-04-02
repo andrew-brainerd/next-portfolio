@@ -12,6 +12,7 @@
     "verify": "npx tsc && npm run lint"
   },
   "dependencies": {
+    "@sentry/nextjs": "^7.46.0",
     "@types/node": "18.15.11",
     "@types/react": "18.0.31",
     "@types/react-dom": "18.0.11",

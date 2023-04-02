@@ -12,13 +12,16 @@ const getSteamUrl = (path: string, steamId?: string, isMultipleUsers = false, ha
 export const getPlayerSummary = async (steamId?: string): Promise<PlayerSummary> => {
   try {
     const response = await fetch(getSteamUrl(`ISteamUser/GetPlayerSummaries/v0002`, steamId, true));
+
     const {
       response: { players }
     } = await response.json();
 
-    return players[0];
+    const player = players[0] ?? { personaname: 'Invalid User' };
+
+    return player;
   } catch (error) {
-    return new Promise(res => res({} as PlayerSummary));
+    return new Promise(res => res({ personaname: 'Invalid User' } as PlayerSummary));
   }
 };
 

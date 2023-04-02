@@ -36,3 +36,9 @@ yarn-error.log*
 next-env.d.ts
 
 .vscode/
+
+# Sentry
+.sentryclirc
+
+# Sentry
+next.config.original.js
