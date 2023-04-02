@@ -1,8 +1,6 @@
 import { OwnedGame } from 'types/steam';
-import { buildImageUrl } from 'utils/steam';
-import { getGameMedia } from 'app/api/rawg';
-
-import styles from 'styles/components/Game.module.scss';
+import { getGameData } from 'app/api/rawg';
+import GameDisplay from 'components/GameDisplay';
 
 type GameProps = OwnedGame & { rank: number };
 
@@ -14,27 +12,19 @@ const formatName = (name: string) => {
   return formatted;
 };
 
-const Game = async ({ rank, appid, name, img_logo_url, img_icon_url }: GameProps) => {
+const Game = async ({ rank, appid, name, img_icon_url }: GameProps) => {
   const formattedName = formatName(name);
-  const gameMedia = await getGameMedia(formattedName);
-
-  if (!gameMedia) {
-    console.log('Missing Game', { name: formattedName });
-  } else {
-    console.log(`${rank}) ${formattedName} | ${gameMedia.color} | [${gameMedia.image}]`);
-  }
+  const gameData = await getGameData(formattedName);
 
   return (
-    <div key={appid} className={styles.game} style={{ backgroundImage: `url(${gameMedia.image})` }}>
-      <div className={styles.text}>
-        <span className={styles.rank}>{rank}</span>
-        <span className={styles.name}>{formattedName}</span>
-      </div>
-      <div className={styles.iconContainer}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img alt={appid.toString()} src={buildImageUrl(appid, img_logo_url || img_icon_url)} width={60} height={60} />
-      </div>
-    </div>
+    <GameDisplay
+      rank={rank}
+      appId={appid.toString()}
+      name={formattedName}
+      icon={img_icon_url}
+      image={gameData.image}
+      href={gameData.website}
+    />
   );
 };
 

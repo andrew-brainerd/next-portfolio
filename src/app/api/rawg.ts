@@ -6,15 +6,18 @@ export interface Params {
   [param: string]: any;
 }
 
-interface GameMedia {
+interface GameDetails {
   image: string;
   color: string;
+  website: string;
 }
 
 interface SearchGame {
+  id: number;
   name: string;
   background_image: string;
   dominant_color: string;
+  stores: any[],
 }
 
 interface SearchGamesResponse {
@@ -33,18 +36,25 @@ const getRawgUrl = (path: string, params: Params) => {
 };
 
 export const searchGames = async (name: string): Promise<SearchGamesResponse> => {
-  console.log('Searching games', RAWG_API_KEY);
-
   const response = await fetch(getRawgUrl('games', { search: name }));
   const data = await response.json() as SearchGamesResponse;
 
   return data;
 };
 
-export const getGameMedia = async (name: string): Promise<GameMedia> => {
-  const { results } = await searchGames(name);
+export const getGameDetails = async (gameId: number) => {
+  const response = await fetch(getRawgUrl(`games/${gameId}`, {}));
+  const data = await response.json() as GameDetails;
 
-  const { background_image, dominant_color } = results[0];
+  return data;
+};
 
-  return { image: background_image, color: dominant_color };
+export const getGameData = async (name: string): Promise<GameDetails> => {
+  const { results: searchData } = await searchGames(name);
+  const gameDetails = await getGameDetails(searchData[0].id);
+
+  const { background_image, dominant_color } = searchData[0];
+  const { website } = gameDetails;
+
+  return { image: background_image, color: dominant_color, website };
 };
