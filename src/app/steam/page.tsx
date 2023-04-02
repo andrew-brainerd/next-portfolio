@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { getOwnedGames } from 'app/api/steam';
+import { fetchTwitchAuth } from 'app/api/twitch';
 import Game from 'components/Game';
 
 import styles from 'styles/components/Steam.module.scss';
@@ -13,6 +14,7 @@ interface SteamProps {
 
 const Steam = async ({ searchParams: { steamId } }: SteamProps) => {
   const games = await getOwnedGames(steamId);
+  const { token } = await fetchTwitchAuth();
 
   return (
     <div className={styles.steam}>
