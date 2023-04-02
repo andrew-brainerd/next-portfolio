@@ -1,6 +1,6 @@
 import { OwnedGame } from 'types/steam';
 import { buildImageUrl } from 'utils/steam';
-import { searchGames } from 'app/api/igdb';
+import { getArtworks, searchGames } from 'app/api/igdb';
 
 import styles from 'styles/components/Game.module.scss';
 
@@ -14,20 +14,15 @@ const formatName = (name: string) => {
   return formatted;
 };
 
-const Game = async ({
-  rank,
-  appid,
-  name,
-  img_logo_url,
-  img_icon_url
-}: GameProps) => {
+const Game = async ({ rank, appid, name, img_logo_url, img_icon_url }: GameProps) => {
   const formattedName = formatName(name);
   const [game] = await searchGames(formattedName);
+  const [artwork] = await getArtworks(game?.id);
 
   if (!game) {
     console.log('Missing Game', { name: formattedName, game });
   } else {
-    console.log(`${rank}) ${game.name} [${game.id}]`);
+    console.log(`${rank}) ${game.name} [${game.id}]`, artwork);
   }
 
   return (

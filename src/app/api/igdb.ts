@@ -1,5 +1,5 @@
 import { fetchTwitchAuth } from 'app/api/twitch';
-import { SearchGame } from 'types/igdb';
+import { GameArtwork, SearchGame } from 'types/igdb';
 
 const { TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET } = process.env;
 
@@ -35,10 +35,22 @@ export const igdbRequest = async (url: string, body = '') => {
   }
 };
 
-export const searchGames = async (name: string) => {
+export const searchGames = async (name: string): Promise<SearchGame[]> => {
   const url = `${baseUrl}/games`;
   const body = `search "${name}"; fields: name,artworks,cover;`;
   const games = (await igdbRequest(url, body)) as SearchGame[];
 
   return games;
+};
+
+export const getArtworks = async (gameId?: number): Promise<GameArtwork[]> => {
+  if (!gameId) {
+    return new Promise(res => res([]));
+  }
+
+  const url = `${baseUrl}/artworks`;
+  const body = `where id = ${gameId}; fields: animated,url,image_id,width,height;`;
+  const artworks = (await igdbRequest(url, body)) as GameArtwork[];
+
+  return artworks;
 };

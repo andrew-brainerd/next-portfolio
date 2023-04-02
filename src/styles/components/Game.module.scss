@@ -26,9 +26,12 @@
   .iconContainer {
     display: flex;
     justify-content: center;
+    overflow: hidden;
 
     img {
+      border: 1px solid whitesmoke;
       border-radius: 5px;
+      height: 60px;
       width: 60px;
     }
   }
