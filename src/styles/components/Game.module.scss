@@ -11,11 +11,13 @@
   transition: 0.3s border ease;
 
   .text {
+    background: rgba(47, 47, 47, 0.3);
     flex: 1;
     font-family: 'Oswald', sans-serif;
     font-size: 2em;
-    margin: 0 15px;
+    margin: 0 5px;
     overflow: hidden;
+    padding-left: 15px;
     white-space: nowrap;
 
     .rank {
@@ -25,10 +27,8 @@
     }
 
     .name {
-      background: rgba(47, 47, 47, 0.3);
       display: inline-block;
       min-width: 600px;
-      padding-left: 15px;
       width: 80%;
     }
   }
