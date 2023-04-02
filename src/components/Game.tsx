@@ -1,6 +1,6 @@
 import { OwnedGame } from 'types/steam';
 import { buildImageUrl } from 'utils/steam';
-import { getArtworks, searchGames } from 'app/api/igdb';
+import { getGameMedia } from 'app/api/rawg';
 
 import styles from 'styles/components/Game.module.scss';
 
@@ -16,19 +16,19 @@ const formatName = (name: string) => {
 
 const Game = async ({ rank, appid, name, img_logo_url, img_icon_url }: GameProps) => {
   const formattedName = formatName(name);
-  const [game] = await searchGames(formattedName);
-  const [artwork] = await getArtworks(game?.id);
+  const gameMedia = await getGameMedia(formattedName);
 
-  if (!game) {
-    console.log('Missing Game', { name: formattedName, game });
+  if (!gameMedia) {
+    console.log('Missing Game', { name: formattedName });
   } else {
-    console.log(`${rank}) ${game.name} [${game.id}]`, artwork);
+    console.log(`${rank}) ${formattedName} | ${gameMedia.color} | [${gameMedia.image}]`);
   }
 
   return (
-    <div key={appid} className={styles.game}>
+    <div key={appid} className={styles.game} style={{ backgroundImage: `url(${gameMedia.image})` }}>
       <div className={styles.text}>
-        <span className={styles.rank}>{rank}</span> {formattedName}
+        <span className={styles.rank}>{rank}</span>
+        <span className={styles.name}>{formattedName}</span>
       </div>
       <div className={styles.iconContainer}>
         {/* eslint-disable-next-line @next/next/no-img-element */}

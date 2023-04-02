@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import { searchGames } from 'app/api/rawg';
 import { getOwnedGames } from 'app/api/steam';
 import Game from 'components/Game';
 
@@ -13,6 +14,7 @@ interface SteamProps {
 
 const Steam = async ({ searchParams: { steamId } }: SteamProps) => {
   const games = await getOwnedGames(steamId);
+  const game = await searchGames('Halo: Master Chief Collection');
 
   return (
     <div className={styles.steam}>

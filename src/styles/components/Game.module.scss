@@ -1,6 +1,8 @@
 .game {
   align-items: center;
   background-color: #2f2f2f;
+  background-repeat: no-repeat;
+  background-size: 100%;
   border-radius: 5px;
   display: flex;
   justify-content: space-between;
@@ -9,17 +11,25 @@
   transition: 0.3s border ease;
 
   .text {
+    flex: 1;
     font-family: 'Oswald', sans-serif;
     font-size: 2em;
     margin: 0 15px;
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
 
     .rank {
       display: inline-block;
-      opacity: 0.4;
-      width: 50px;
+      opacity: 0.8;
+      min-width: 40px;
+    }
+
+    .name {
+      background: rgba(47, 47, 47, 0.3);
+      display: inline-block;
+      min-width: 600px;
+      padding-left: 15px;
+      width: 80%;
     }
   }
 
