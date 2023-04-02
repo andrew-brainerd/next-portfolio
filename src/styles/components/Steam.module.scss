@@ -15,3 +15,11 @@
     margin: 50px 15px;
   }
 }
+
+@media screen and (max-width: 1000px) {
+  .steam {
+    h1 {
+      font-size: 5vw;
+    }
+  }
+}
