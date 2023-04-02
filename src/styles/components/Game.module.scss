@@ -33,3 +33,24 @@
     }
   }
 }
+
+@media screen and (max-width: 600px) {
+  .game {
+    padding: 5px;
+
+    .text {
+      font-size: 1em;
+
+      .rank {
+        width: 15px;
+      }
+    }
+
+    .iconContainer {  
+      img {
+        height: 25px;
+        width: 25px;
+      }
+    }
+  }
+}
