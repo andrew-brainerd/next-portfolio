@@ -1,7 +1,7 @@
 .game {
   align-items: center;
   background-color: #2f2f2f;
-  background-position: 25% 75%;
+  background-position: 0 75%;
   background-repeat: no-repeat;
   background-size: 100%;
   border-radius: 5px;
@@ -10,9 +10,10 @@
   justify-content: space-between;
   margin-top: 10px;
   padding: 5px 15px;
-  transition: 0.3s all ease-in-out;
+  transition: 0.3s border ease-in-out, 0.3s filter ease-in-out;
 
   &:hover {
+    animation: 3s infinite alternate slide;
     border: 2px solid whitesmoke;
     filter: contrast(1.5)
   }
@@ -73,5 +74,15 @@
         width: 25px;
       }
     }
+  }
+}
+
+@keyframes slide {
+  from {
+    background-position: top;
+  }
+
+  to {
+    background-position: bottom;
   }
 }
