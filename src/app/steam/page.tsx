@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getOwnedGames } from 'app/api/steam';
 import Game from 'components/Game';
 
