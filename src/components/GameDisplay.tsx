@@ -26,7 +26,8 @@ const GameDisplay = ({ rank, appId, name, icon, image, href }: GameProps) => {
       key={appId}
       className={styles.game}
       onClick={handleClick}
-      style={{ background: `url(${image})`, cursor: href ? 'pointer' : 'default' }}
+      style={{ backgroundImage: `url(${image})`, cursor: href ? 'pointer' : 'default' }}
+      title={href}
     >
       <div className={styles.text}>
         <span className={styles.rank}>{rank}</span> {name}
