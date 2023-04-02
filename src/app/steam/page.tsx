@@ -3,17 +3,27 @@ import Game from 'components/Game';
 
 import styles from 'styles/components/Steam.module.scss';
 
-const Steam = async () => {
-  const games = await getOwnedGames();
+interface SteamProps {
+  searchParams: {
+    steamId?: string;
+  };
+}
+
+const Steam = async ({ searchParams: { steamId } }: SteamProps) => {
+  const games = await getOwnedGames(steamId);
 
   return (
     <div className={styles.steam}>
-      <h1>My Top 10 Steam Games</h1>
+      <h1>{`${!steamId ? 'My ' : ''}Top 10 Steam Games`}</h1>
       <div className={styles.games}>
-        {(games || [])
-          .sort((a, b) => b.playtime_forever - a.playtime_forever)
-          .map((game, g) => <Game key={game.appid} rank={g + 1} {...game} />)
-          .slice(0, 10)}
+        {games.length ? (
+          games
+            .sort((a, b) => b.playtime_forever - a.playtime_forever)
+            .map((game, g) => <Game key={game.appid} rank={g + 1} {...game} />)
+            .slice(0, 10)
+        ) : (
+          <h3>Invalid Steam ID Provided</h3>
+        )}
       </div>
     </div>
   );
