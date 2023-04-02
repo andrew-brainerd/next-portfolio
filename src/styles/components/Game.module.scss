@@ -12,6 +12,9 @@
     font-family: 'Oswald', sans-serif;
     font-size: 2em;
     margin: 0 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     .rank {
       display: inline-block;
