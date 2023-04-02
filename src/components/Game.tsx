@@ -8,7 +8,7 @@ type GameProps = OwnedGame & { rank: number };
 
 const formatName = (name: string) => {
   let formatted = name;
-  formatted = formatted.replaceAll('(2009) - Multiplayer', '');
+  formatted = formatted.replaceAll('(2009) - Multiplayer', ''); // CoD: MW2
   formatted = formatted.replaceAll('®', '');
   formatted = formatted.replaceAll('™', '');
   return formatted;
@@ -19,9 +19,7 @@ const Game = async ({
   appid,
   name,
   img_logo_url,
-  img_icon_url,
-  playtime_forever,
-  rtime_last_played
+  img_icon_url
 }: GameProps) => {
   const formattedName = formatName(name);
   const [game] = await searchGames(formattedName);
