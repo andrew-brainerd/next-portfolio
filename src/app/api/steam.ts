@@ -9,16 +9,16 @@ const getSteamUrl = (path: string, steamId?: string, isMultipleUsers = false, ha
   return `https://api.steampowered.com/${route}`;
 };
 
-export const getPlayerSummary = async (steamId?: string): Promise<PlayerSummary[]> => {
+export const getPlayerSummary = async (steamId?: string): Promise<PlayerSummary> => {
   try {
     const response = await fetch(getSteamUrl(`ISteamUser/GetPlayerSummaries/v0002`, steamId, true));
     const {
       response: { players }
     } = await response.json();
 
-    return players;
+    return players[0];
   } catch (error) {
-    return new Promise(res => res([] as PlayerSummary[]));
+    return new Promise(res => res({} as PlayerSummary));
   }
 };
 
