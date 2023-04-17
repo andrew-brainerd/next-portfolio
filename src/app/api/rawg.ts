@@ -37,14 +37,14 @@ const getRawgUrl = (path: string, params: Params) => {
 
 export const searchGames = async (name: string): Promise<SearchGamesResponse> => {
   const response = await fetch(getRawgUrl('games', { search: name }));
-  const data = await response.json() as SearchGamesResponse;
+  const data: SearchGamesResponse = await response.json();
 
   return data;
 };
 
 export const getGameDetails = async (gameId: number) => {
   const response = await fetch(getRawgUrl(`games/${gameId}`, {}));
-  const data = await response.json() as GameDetails;
+  const data: GameDetails = await response.json();
 
   return data;
 };

@@ -9,7 +9,7 @@ const getSteamUrl = (path: string, steamId?: string, isMultipleUsers = false, ha
   return `https://api.steampowered.com/${route}`;
 };
 
-export const getPlayerSummary = async (steamId?: string): Promise<PlayerSummary> => {
+export const getPlayerSummary = async (steamId?: string): Promise<Partial<PlayerSummary>> => {
   try {
     const response = await fetch(getSteamUrl(`ISteamUser/GetPlayerSummaries/v0002`, steamId, true));
 
@@ -21,11 +21,11 @@ export const getPlayerSummary = async (steamId?: string): Promise<PlayerSummary>
 
     return player;
   } catch (error) {
-    return new Promise(res => res({ personaname: 'Invalid User' } as PlayerSummary));
+    return new Promise(res => res({ personaname: 'Invalid User' }));
   }
 };
 
-export const getOwnedGames = async (steamId?: string): Promise<OwnedGame[]> => {
+export const getOwnedGames = async (steamId?: string): Promise<Partial<OwnedGame[]>> => {
   try {
     const response = await fetch(
       getSteamUrl('IPlayerService/GetOwnedGames/v0001?include_appinfo=true', steamId, false, true)
@@ -36,6 +36,6 @@ export const getOwnedGames = async (steamId?: string): Promise<OwnedGame[]> => {
 
     return games;
   } catch (error) {
-    return new Promise(res => res([] as OwnedGame[]));
+    return new Promise(res => res([]));
   }
 };

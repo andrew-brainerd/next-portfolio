@@ -29,7 +29,7 @@ const Steam = async ({ searchParams: { steamId, count } }: SteamProps) => {
       <div className={styles.games}>
         {(games || []).length ? (
           games
-            .sort((a, b) => b.playtime_forever - a.playtime_forever)
+            .sort((a, b) => (b?.playtime_forever || 0) - (a?.playtime_forever || 0))
             /* @ts-expect-error Async Server Component */
             .map((game, g) => <Game key={game.appid} rank={g + 1} {...game} />)
             .slice(0, numGames)
