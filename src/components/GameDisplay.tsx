@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { buildImageUrl } from 'utils/steam';
 
 import styles from 'styles/components/Game.module.scss';
@@ -33,8 +34,7 @@ const GameDisplay = ({ rank, appId, name, icon, image, href }: GameProps) => {
         <span className={styles.rank}>{rank}</span> {name}
       </div>
       <div className={styles.iconContainer}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img alt={appId} src={buildImageUrl(appId, icon)} width={60} height={60} />
+        <Image alt={appId} src={buildImageUrl(appId, icon)} width={60} height={60} />
       </div>
     </div>
   );
