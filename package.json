@@ -12,6 +12,7 @@
     "verify": "npx tsc && npm run lint"
   },
   "dependencies": {
+    "@lottiefiles/react-lottie-player": "^3.5.3",
     "@sentry/nextjs": "^7.46.0",
     "@types/node": "18.15.11",
     "@types/react": "18.0.31",

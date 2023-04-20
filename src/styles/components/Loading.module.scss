@@ -1,0 +1,17 @@
+.loading {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  margin: 20px auto;
+  position: relative;
+  width: 300px;
+  z-index: 10;
+
+  .message {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.5em;
+    text-align: center;
+  }
+}
