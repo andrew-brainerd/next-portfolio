@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic';
 
-import { searchGames } from 'app/api/rawg';
 import { getOwnedGames, getPlayerSummary } from 'app/api/steam';
 import Game from 'components/Game';
 
