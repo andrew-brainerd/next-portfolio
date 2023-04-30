@@ -20,6 +20,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'media.steampowered.com'
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.freebiesupply.com'
+      }
     ],
   }
 };

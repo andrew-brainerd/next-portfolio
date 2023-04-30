@@ -17,9 +17,7 @@ const Steam = async ({ searchParams: { steamId, count } }: SteamProps) => {
   const gamesData = getOwnedGames(steamId);
   const [{ personaname }, games] = await Promise.all([playerData, gamesData]);
 
-  const numGames = count && count <= 25 ? count : 10;
-
-  const userHeading = `${!steamId ? 'My ' : ''}Top ${numGames} Steam Games${!steamId ? '' : ` for ${personaname}`}`;
+  const userHeading = `${!steamId ? 'My ' : ''} Steam Games${!steamId ? '' : ` for ${personaname}`}`;
   const pageHeading = personaname === 'Invalid User' ? personaname : userHeading;
 
   return (
@@ -31,7 +29,7 @@ const Steam = async ({ searchParams: { steamId, count } }: SteamProps) => {
             .sort((a, b) => (b?.playtime_forever || 0) - (a?.playtime_forever || 0))
             /* @ts-expect-error Async Server Component */
             .map((game, g) => <Game key={game.appid} rank={g + 1} {...game} />)
-            .slice(0, numGames)
+            .slice(0, count || games.length)
         ) : (
           <h3>Invalid Steam ID Provided</h3>
         )}

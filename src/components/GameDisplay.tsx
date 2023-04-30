@@ -10,8 +10,8 @@ type GameProps = {
   name: string;
   rank: number;
   icon: string;
-  image: string;
-  href: string;
+  image?: string;
+  href?: string;
 };
 
 const GameDisplay = ({ rank, appId, name, icon, image, href }: GameProps) => {
@@ -27,7 +27,7 @@ const GameDisplay = ({ rank, appId, name, icon, image, href }: GameProps) => {
       key={appId}
       className={styles.game}
       onClick={handleClick}
-      style={{ backgroundImage: `url(${image})`, cursor: href ? 'pointer' : 'default' }}
+      style={{ backgroundImage: image ? `url(${image})` : 'none', cursor: href ? 'pointer' : 'default' }}
       title={href}
     >
       <div className={styles.text}>

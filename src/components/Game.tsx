@@ -1,5 +1,4 @@
 import { OwnedGame } from 'types/steam';
-import { getGameData } from 'app/api/rawg';
 import GameDisplay from 'components/GameDisplay';
 
 type GameProps = OwnedGame & { rank: number };
@@ -14,7 +13,6 @@ const formatName = (name: string) => {
 
 const Game = async ({ rank, appid, name, img_icon_url }: GameProps) => {
   const formattedName = formatName(name);
-  const gameData = await getGameData(formattedName);
 
   return (
     <GameDisplay
@@ -22,8 +20,6 @@ const Game = async ({ rank, appid, name, img_icon_url }: GameProps) => {
       appId={appid.toString()}
       name={formattedName}
       icon={img_icon_url}
-      image={gameData.image}
-      href={gameData.website}
     />
   );
 };

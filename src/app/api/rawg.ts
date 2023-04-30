@@ -7,7 +7,7 @@ export interface Params {
 }
 
 interface GameDetails {
-  image: string;
+  image?: string;
   color: string;
   website: string;
 }
