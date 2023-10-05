@@ -12,9 +12,10 @@ type GameProps = {
   icon: string;
   image?: string;
   href?: string;
+  playtime: number;
 };
 
-const GameDisplay = ({ rank, appId, name, icon, image, href }: GameProps) => {
+const GameDisplay = ({ rank, appId, name, icon, image, href, playtime }: GameProps) => {
   const handleClick = (e: any) => {
     e.preventDefault();
     if (href) {
@@ -31,7 +32,7 @@ const GameDisplay = ({ rank, appId, name, icon, image, href }: GameProps) => {
       title={href}
     >
       <div className={styles.text}>
-        <span className={styles.rank}>{rank}</span> {name}
+        <span className={styles.rank}>{(playtime / 60).toFixed(0)}</span> {name}
       </div>
       <div className={styles.iconContainer}>
         <Image alt={appId} src={buildImageUrl(appId, icon)} width={60} height={60} />

@@ -11,7 +11,7 @@ const formatName = (name: string) => {
   return formatted;
 };
 
-const Game = async ({ rank, appid, name, img_icon_url }: GameProps) => {
+const Game = async ({ rank, appid, name, img_icon_url, playtime_forever }: GameProps) => {
   const formattedName = formatName(name);
 
   return (
@@ -20,6 +20,7 @@ const Game = async ({ rank, appid, name, img_icon_url }: GameProps) => {
       appId={appid.toString()}
       name={formattedName}
       icon={img_icon_url}
+      playtime={playtime_forever}
     />
   );
 };
