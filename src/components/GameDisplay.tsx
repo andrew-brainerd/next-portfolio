@@ -29,10 +29,10 @@ const GameDisplay = ({ rank, appId, name, icon, image, href, playtime }: GamePro
       className={styles.game}
       onClick={handleClick}
       style={{ backgroundImage: image ? `url(${image})` : 'none', cursor: href ? 'pointer' : 'default' }}
-      title={href}
+      title={(playtime / 60).toFixed(0)}
     >
       <div className={styles.text}>
-        <span className={styles.rank}>{(playtime / 60).toFixed(0)}</span> {name}
+        <span className={styles.rank}>{rank}</span> {name}
       </div>
       <div className={styles.iconContainer}>
         <Image alt={appId} src={buildImageUrl(appId, icon)} width={60} height={60} />
