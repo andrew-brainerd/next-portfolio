@@ -15,7 +15,6 @@
   &:hover {
     border: 2px solid whitesmoke;
     filter: contrast(1.5);
-    // padding-bottom: 50%;
   }
 
   .text {
@@ -30,15 +29,17 @@
     white-space: nowrap;
 
     .rank {
+      color: #a3a3a3;
       display: inline-block;
       opacity: 0.8;
       min-width: 40px;
     }
 
     .name {
-      display: inline-block;
-      min-width: 600px;
-      width: 80%;
+      &.completed {
+        color: #ffdf80
+        ;
+      }
     }
   }
 

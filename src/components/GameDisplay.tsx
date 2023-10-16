@@ -1,7 +1,9 @@
 'use client';
 
+import cn from 'clsx';
 import Image from 'next/image';
 import { buildImageUrl } from 'utils/steam';
+import { COMPLETED_GAMES } from 'constants/steam';
 
 import styles from 'styles/components/Game.module.scss';
 
@@ -32,7 +34,8 @@ const GameDisplay = ({ rank, appId, name, icon, image, href, playtime }: GamePro
       title={(playtime / 60).toFixed(0)}
     >
       <div className={styles.text}>
-        <span className={styles.rank}>{rank}</span> {name}
+        <span className={styles.rank}>{rank}</span>{' '}
+        <span className={cn(styles.name, { [styles.completed]: COMPLETED_GAMES.includes(appId) })}>{name}</span>
       </div>
       <div className={styles.iconContainer}>
         <Image alt={appId} src={buildImageUrl(appId, icon)} width={60} height={60} />
