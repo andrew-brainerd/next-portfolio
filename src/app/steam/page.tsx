@@ -22,7 +22,13 @@ const Steam = async ({ searchParams: { steamId, count } }: SteamProps) => {
 
   return (
     <div className={styles.steam}>
-      <h1>{pageHeading}</h1>
+      <div className={styles.headerContainer}>
+        <h1>{pageHeading}</h1>
+        <div className={styles.legend}>
+          <div className={styles.color} />
+          <span>Completed</span>
+        </div>
+      </div>
       <div className={styles.games}>
         {(games || []).length ? (
           games
