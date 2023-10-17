@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { getOwnedGames, getPlayerSummary } from 'app/api/steam';
+import { getOwnedGames, getPlayerSummary } from 'api/steam';
 import Game from 'components/Game';
 
 import styles from 'styles/components/Steam.module.scss';
