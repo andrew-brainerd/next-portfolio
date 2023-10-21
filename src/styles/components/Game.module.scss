@@ -37,8 +37,11 @@
 
     .name {
       &.completed {
-        color: #ffdf80;
-        ;
+        color: #a3daed;
+      }
+
+      &.recent {
+        color: #aef49e;
       }
     }
   }

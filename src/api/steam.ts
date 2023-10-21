@@ -25,11 +25,25 @@ export const getPlayerSummary = async (steamId?: string): Promise<Partial<Player
   }
 };
 
-export const getOwnedGames = async (steamId?: string): Promise<Partial<OwnedGame[]>> => {
+export const getOwnedGames = async (steamId?: string): Promise<OwnedGame[]> => {
   try {
     const response = await fetch(
       getSteamUrl('IPlayerService/GetOwnedGames/v0001?include_appinfo=true', steamId, false, true)
     );
+    const {
+      response: { games }
+    } = await response.json();
+
+    return games;
+  } catch (error) {
+    return new Promise(res => res([]));
+  }
+};
+
+export const getRecentGames = async (steamId?: string): Promise<OwnedGame[]> => {
+  try {
+    const response = await fetch(getSteamUrl('IPlayerService/GetRecentlyPlayedGames/v0001', steamId, false, false));
+
     const {
       response: { games }
     } = await response.json();

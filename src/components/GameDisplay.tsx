@@ -9,15 +9,16 @@ import styles from 'styles/components/Game.module.scss';
 
 type GameProps = {
   appId: string;
-  name: string;
-  rank: number;
+  href?: string;
   icon: string;
   image?: string;
-  href?: string;
+  isRecent: boolean;
+  name: string;
+  rank: number;
   playtime: number;
 };
 
-const GameDisplay = ({ rank, appId, name, icon, image, href, playtime }: GameProps) => {
+const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank }: GameProps) => {
   const handleClick = (e: any) => {
     e.preventDefault();
     if (href) {
@@ -35,7 +36,14 @@ const GameDisplay = ({ rank, appId, name, icon, image, href, playtime }: GamePro
     >
       <div className={styles.text}>
         <span className={styles.rank}>{rank}</span>{' '}
-        <span className={cn(styles.name, { [styles.completed]: COMPLETED_GAMES.includes(appId) })}>{name}</span>
+        <span
+          className={cn(styles.name, {
+            [styles.recent]: isRecent,
+            [styles.completed]: COMPLETED_GAMES.includes(appId)
+          })}
+        >
+          {name}
+        </span>
       </div>
       <div className={styles.iconContainer}>
         <Image alt={appId} src={buildImageUrl(appId, icon)} width={60} height={60} />

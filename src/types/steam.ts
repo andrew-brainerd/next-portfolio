@@ -21,6 +21,7 @@ export interface PlayerSummary {
 
 export interface OwnedGame {
   appid: number;
+  playtime_2weeks: number;
   playtime_forever: number;
   playtime_windows_forever: number;
   playtime_mac_forever: number;
