@@ -1,11 +1,12 @@
-export const dynamic = 'force-dynamic';
+'use client';
 
+import { useEffect, useState } from 'react';
 import cn from 'clsx';
-import { getOwnedGames, getPlayerSummary, getRecentGames } from 'api/steam';
+import { COMPLETED_GAMES } from 'constants/steam';
+import { useSteam } from 'hooks/useSteam';
 import Game from 'components/Game';
 
 import styles from 'styles/components/Steam.module.scss';
-import { COMPLETED_GAMES } from 'constants/steam';
 
 interface SteamProps {
   searchParams: {
@@ -16,14 +17,18 @@ interface SteamProps {
   };
 }
 
-const Steam = async ({ searchParams: { completed, count, recent, steamId } }: SteamProps) => {
-  const playerData = getPlayerSummary(steamId);
-  const gamesData = getOwnedGames(steamId);
-  const recentGamesData = getRecentGames(steamId);
-  const [{ personaname }, games, recentGames] = await Promise.all([playerData, gamesData, recentGamesData]);
+const Steam = ({ searchParams: { completed, count, recent, steamId } }: SteamProps) => {
+  const [isMounted, setIsMounted] = useState(false);
+  const { games, recentGames, username } = useSteam();
 
-  const userHeading = `${!steamId ? 'My ' : ''} Steam Games${!steamId ? '' : ` for ${personaname}`}`;
-  const pageHeading = personaname === 'Invalid User' ? personaname : userHeading;
+  const userHeading = `${!steamId ? 'My ' : ''} Steam Games${!steamId ? '' : ` for ${username}`}`;
+  const pageHeading = username === 'Invalid User' ? username : userHeading;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return <></>;
 
   return (
     <div className={styles.steam}>

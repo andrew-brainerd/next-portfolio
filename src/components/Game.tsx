@@ -12,7 +12,7 @@ const formatName = (name: string) => {
   return formatted;
 };
 
-const Game = async ({ appid, img_icon_url, name, isRecent, playtime_forever, rank }: GameProps) => {
+const Game = ({ appid, img_icon_url, name, isRecent, playtime_forever, rank }: GameProps) => {
   const formattedName = formatName(name);
 
   return (
