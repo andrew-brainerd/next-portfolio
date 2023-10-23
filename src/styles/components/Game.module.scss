@@ -36,12 +36,12 @@
     }
 
     .name {
-      &.completed {
-        color: #a3daed;
-      }
-
       &.recent {
         color: #aef49e;
+      }
+
+      &.completed {
+        color: #a3daed;
       }
     }
   }

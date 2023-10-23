@@ -53,7 +53,6 @@ const Steam = ({ searchParams: { count, steamId } }: SteamProps) => {
         {(games || []).length ? (
           games
             .sort((a, b) => (b?.playtime_forever || 0) - (a?.playtime_forever || 0))
-            .slice(0, count || 100)
             .map(game => {
               const recentGame = recentGames.find(recentGame => game.appid === recentGame.appid);
               const isRecent = (recentGame?.playtime_2weeks || 0) / 60 > 1;
@@ -71,6 +70,7 @@ const Steam = ({ searchParams: { count, steamId } }: SteamProps) => {
             })
             .filter(game => !!game)
             .map((game, g) => game && <Game key={game.appid} rank={g + 1} {...game} />)
+            .slice(0, count || games.length)
         ) : (
           <h3>Invalid Steam ID Provided</h3>
         )}

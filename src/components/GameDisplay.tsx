@@ -22,6 +22,7 @@ const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank 
     className={styles.game}
     style={{ backgroundImage: image ? `url(${image})` : 'none', cursor: href ? 'pointer' : 'default' }}
     title={(playtime / 60).toFixed(0)}
+    data-app-id={appId}
   >
     <div className={styles.text}>
       <span className={styles.rank}>{rank}</span>{' '}

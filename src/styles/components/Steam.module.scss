@@ -24,12 +24,12 @@
         margin-right: 8px;
         width: 20px;
 
-        &.completed {
-          background: #a3daed;
-        }
-  
         &.recent {
           background: #aef49e;
+        }
+
+        &.completed {
+          background: #a3daed;
         }
       }
 
@@ -37,7 +37,8 @@
         cursor: pointer;
         user-select: none;
 
-        &.completed, &.recent {
+        &.completed,
+        &.recent {
           font-weight: bold;
         }
       }

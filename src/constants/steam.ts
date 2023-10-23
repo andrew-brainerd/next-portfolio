@@ -45,4 +45,5 @@ export const COMPLETED_GAMES: string[] = [
   '501300',    // What Remains of Edith Finch
   '582500',    // We Were Here
   '3540',      // Peggle Nights
+  '1817190',   // Marvel's Spider-Man: Miles Morales
 ];
