@@ -32,6 +32,15 @@
           background: #aef49e;
         }
       }
+
+      .label {
+        cursor: pointer;
+        user-select: none;
+
+        &.completed, &.recent {
+          font-weight: bold;
+        }
+      }
     }
   }
 

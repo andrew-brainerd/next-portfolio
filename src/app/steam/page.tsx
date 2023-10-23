@@ -10,16 +10,14 @@ import styles from 'styles/components/Steam.module.scss';
 
 interface SteamProps {
   searchParams: {
-    completed?: boolean;
     count?: number;
-    recent?: boolean;
     steamId?: string;
   };
 }
 
-const Steam = ({ searchParams: { completed, count, recent, steamId } }: SteamProps) => {
+const Steam = ({ searchParams: { count, steamId } }: SteamProps) => {
   const [isMounted, setIsMounted] = useState(false);
-  const { games, recentGames, username } = useSteam();
+  const { games, recentGames, showCompleted, showRecent, username, setShowRecent, setShowCompleted } = useSteam();
 
   const userHeading = `${!steamId ? 'My ' : ''} Steam Games${!steamId ? '' : ` for ${username}`}`;
   const pageHeading = username === 'Invalid User' ? username : userHeading;
@@ -36,25 +34,36 @@ const Steam = ({ searchParams: { completed, count, recent, steamId } }: SteamPro
         <h1>{pageHeading}</h1>
         <div className={styles.legend}>
           <div className={cn(styles.color, styles.recent)} />
-          <span className={styles.label}>Recent</span>
+          <span
+            className={cn(styles.label, { [styles.recent]: showRecent })}
+            onClick={() => setShowRecent(!showRecent)}
+          >
+            Recent
+          </span>
           <div className={cn(styles.color, styles.completed)} />
-          <span className={styles.label}>Completed</span>
+          <span
+            className={cn(styles.label, { [styles.completed]: showCompleted })}
+            onClick={() => setShowCompleted(!showCompleted)}
+          >
+            Completed
+          </span>
         </div>
       </div>
       <div className={styles.games}>
         {(games || []).length ? (
           games
             .sort((a, b) => (b?.playtime_forever || 0) - (a?.playtime_forever || 0))
+            .slice(0, count || 100)
             .map(game => {
               const recentGame = recentGames.find(recentGame => game.appid === recentGame.appid);
               const isRecent = (recentGame?.playtime_2weeks || 0) / 60 > 1;
               const isCompleted = !!COMPLETED_GAMES.find(completedGame => game.appid === Number(completedGame));
 
-              if (recent && !isRecent) {
+              if (showRecent && !isRecent) {
                 return undefined;
               }
 
-              if (completed && !isCompleted) {
+              if (showCompleted && !isCompleted) {
                 return undefined;
               }
 
@@ -62,7 +71,6 @@ const Steam = ({ searchParams: { completed, count, recent, steamId } }: SteamPro
             })
             .filter(game => !!game)
             .map((game, g) => game && <Game key={game.appid} rank={g + 1} {...game} />)
-            .slice(0, count || games.length)
         ) : (
           <h3>Invalid Steam ID Provided</h3>
         )}
