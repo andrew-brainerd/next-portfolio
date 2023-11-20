@@ -1,6 +1,8 @@
 import { OwnedGame, PlayerSummary } from 'types/steam';
 import { MY_STEAM_ID, STEAM_API_KEY } from 'constants/steam';
 
+const steamFetchOpts = { next: { revalidate: 3600 } };
+
 const getSteamUrl = (path: string, steamId?: string, isMultipleUsers = false, hasExtraParams = false) => {
   const route = `${path}${hasExtraParams ? '&' : '?'}key=${STEAM_API_KEY}&steamid${isMultipleUsers ? 's' : ''}=${
     steamId ?? MY_STEAM_ID
@@ -11,7 +13,7 @@ const getSteamUrl = (path: string, steamId?: string, isMultipleUsers = false, ha
 
 export const getPlayerSummary = async (steamId?: string): Promise<Partial<PlayerSummary>> => {
   try {
-    const response = await fetch(getSteamUrl(`ISteamUser/GetPlayerSummaries/v0002`, steamId, true));
+    const response = await fetch(getSteamUrl(`ISteamUser/GetPlayerSummaries/v0002`, steamId, true), steamFetchOpts);
 
     const {
       response: { players }
@@ -28,7 +30,8 @@ export const getPlayerSummary = async (steamId?: string): Promise<Partial<Player
 export const getOwnedGames = async (steamId?: string): Promise<OwnedGame[]> => {
   try {
     const response = await fetch(
-      getSteamUrl('IPlayerService/GetOwnedGames/v0001?include_appinfo=true', steamId, false, true)
+      getSteamUrl('IPlayerService/GetOwnedGames/v0001?include_appinfo=true', steamId, false, true),
+      steamFetchOpts
     );
     const {
       response: { games }
@@ -42,7 +45,10 @@ export const getOwnedGames = async (steamId?: string): Promise<OwnedGame[]> => {
 
 export const getRecentGames = async (steamId?: string): Promise<OwnedGame[]> => {
   try {
-    const response = await fetch(getSteamUrl('IPlayerService/GetRecentlyPlayedGames/v0001', steamId, false, false));
+    const response = await fetch(
+      getSteamUrl('IPlayerService/GetRecentlyPlayedGames/v0001', steamId, false, false),
+      steamFetchOpts
+    );
 
     const {
       response: { games }
