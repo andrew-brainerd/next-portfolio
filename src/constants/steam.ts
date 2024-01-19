@@ -47,4 +47,5 @@ export const COMPLETED_GAMES: string[] = [
   '3540',      // Peggle Nights
   '1817190',   // Marvel's Spider-Man: Miles Morales
   '1687950',   // Persona 5 Royal
+  '593280'     // Cat_Quest
 ];
