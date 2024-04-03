@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import cn from 'clsx';
-import { COMPLETED_GAMES } from 'constants/steam';
+import { COMPLETED_GAMES, MINIMUM_PLAYTIME } from 'constants/steam';
 import { useSteam } from 'hooks/useSteam';
 import Game from 'components/Game';
 
@@ -54,9 +54,9 @@ const Steam = ({ searchParams: { count, steamId } }: SteamProps) => {
           games
             .sort((a, b) => (b?.playtime_forever || 0) - (a?.playtime_forever || 0))
             .map(game => {
-              const hasPlaytime = (game?.playtime_forever || 0) / 60 > 1;
+              const hasPlaytime = (game?.playtime_forever || 0) / 60 > MINIMUM_PLAYTIME;
               const recentGame = recentGames.find(recentGame => game.appid === recentGame.appid);
-              const isRecent = (recentGame?.playtime_2weeks || 0) / 60 > 1;
+              const isRecent = (recentGame?.playtime_2weeks || 0) / 60 > MINIMUM_PLAYTIME;
               const isCompleted = !!COMPLETED_GAMES.find(completedGame => game.appid === Number(completedGame));
 
               if (!hasPlaytime) {

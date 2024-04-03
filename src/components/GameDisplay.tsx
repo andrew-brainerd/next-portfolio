@@ -14,15 +14,17 @@ type GameProps = {
   name: string;
   rank: number;
   playtime: number;
+  hoursToBeat?: number;
 };
 
-const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank }: GameProps) => (
+const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank, hoursToBeat }: GameProps) => (
   <div
     key={appId}
     className={styles.game}
     style={{ backgroundImage: image ? `url(${image})` : 'none', cursor: href ? 'pointer' : 'default' }}
     title={(playtime / 60).toFixed(0)}
     data-app-id={appId}
+    data-hours={hoursToBeat}
   >
     <div className={styles.text}>
       <span className={styles.rank}>{rank}</span>{' '}

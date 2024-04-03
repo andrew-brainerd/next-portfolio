@@ -30,4 +30,5 @@ export interface OwnedGame {
   img_icon_url: string;
   img_logo_url: string;
   name: string;
+  hoursToBeat: number;
 }

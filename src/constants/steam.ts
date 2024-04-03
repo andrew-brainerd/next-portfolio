@@ -1,3 +1,5 @@
+export const MINIMUM_PLAYTIME = 5;
+
 export const MY_STEAM_ID = '76561197998637344';
 
 export const STEAM_API_KEY = process.env.STEAM_API_KEY;
@@ -47,5 +49,5 @@ export const COMPLETED_GAMES: string[] = [
   '3540',      // Peggle Nights
   '1817190',   // Marvel's Spider-Man: Miles Morales
   '1687950',   // Persona 5 Royal
-  '593280'     // Cat_Quest
+  '593280'     // Cat Quest
 ];

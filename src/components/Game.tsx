@@ -12,7 +12,7 @@ const formatName = (name: string) => {
   return formatted;
 };
 
-const Game = ({ appid, img_icon_url, name, isRecent, playtime_forever, rank }: GameProps) => {
+const Game = ({ appid, img_icon_url, name, isRecent, playtime_forever, rank, hoursToBeat }: GameProps) => {
   const formattedName = formatName(name);
 
   return (
@@ -23,6 +23,7 @@ const Game = ({ appid, img_icon_url, name, isRecent, playtime_forever, rank }: G
       icon={img_icon_url}
       isRecent={isRecent}
       playtime={playtime_forever}
+      hoursToBeat={hoursToBeat}
     />
   );
 };
