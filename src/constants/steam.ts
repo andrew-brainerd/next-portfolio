@@ -1,4 +1,4 @@
-export const MINIMUM_PLAYTIME = 0;
+export const MINIMUM_PLAYTIME = 2;
 
 export const MY_STEAM_ID = '76561197998637344';
 
