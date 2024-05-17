@@ -22,12 +22,16 @@ const Steam = async ({ children, params: { steamId } }: SteamProps) => {
     games
       .filter(game => (game?.playtime_forever || 0) / 60 > MINIMUM_PLAYTIME)
       .map(async game => {
-        const [timeToBeat] = await hltbService.search(game.name);
+        try {
+          const [timeToBeat] = await hltbService.search(game.name);
 
-        return {
-          ...game,
-          hoursToBeat: timeToBeat?.gameplayMain
-        };
+          return {
+            ...game,
+            hoursToBeat: timeToBeat?.gameplayMain
+          };
+        } catch (e) {
+          return game;
+        }
       })
   );
 

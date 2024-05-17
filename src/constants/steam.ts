@@ -1,4 +1,4 @@
-export const MINIMUM_PLAYTIME = 5;
+export const MINIMUM_PLAYTIME = 0;
 
 export const MY_STEAM_ID = '76561197998637344';
 
@@ -49,5 +49,6 @@ export const COMPLETED_GAMES: string[] = [
   '3540',      // Peggle Nights
   '1817190',   // Marvel's Spider-Man: Miles Morales
   '1687950',   // Persona 5 Royal
-  '593280'     // Cat Quest
+  '593280',    // Cat Quest
+  '2222540',   // BIT.TRIP RERUNNER
 ];
