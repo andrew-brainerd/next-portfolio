@@ -51,4 +51,5 @@ export const COMPLETED_GAMES: string[] = [
   '1687950',   // Persona 5 Royal
   '593280',    // Cat Quest
   '2222540',   // BIT.TRIP RERUNNER
+  '1237970',   // Titanfall 2
 ];
