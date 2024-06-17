@@ -52,4 +52,5 @@ export const COMPLETED_GAMES: string[] = [
   '593280',    // Cat Quest
   '2222540',   // BIT.TRIP RERUNNER
   '1237970',   // Titanfall 2
+  '2161700',   // Persona 3: Reload
 ];
