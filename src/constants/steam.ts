@@ -53,4 +53,5 @@ export const COMPLETED_GAMES: string[] = [
   '2222540',   // BIT.TRIP RERUNNER
   '1237970',   // Titanfall 2
   '2161700',   // Persona 3: Reload
+  '1244090',   // Sea of Stars
 ];
