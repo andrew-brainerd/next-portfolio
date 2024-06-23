@@ -54,4 +54,5 @@ export const COMPLETED_GAMES: string[] = [
   '1237970',   // Titanfall 2
   '2161700',   // Persona 3: Reload
   '1244090',   // Sea of Stars
+  '2316580',   // Tales of Kenzera: ZAU
 ];
