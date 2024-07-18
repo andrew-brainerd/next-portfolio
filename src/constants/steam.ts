@@ -56,4 +56,5 @@ export const COMPLETED_GAMES: string[] = [
   '1244090',   // Sea of Stars
   '2316580',   // Tales of Kenzera: ZAU
   '881020',    // Granblue Fantasy Relink
+  '1290000',   // PowerWash Simulator
 ];
