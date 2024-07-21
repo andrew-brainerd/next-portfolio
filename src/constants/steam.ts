@@ -57,4 +57,5 @@ export const COMPLETED_GAMES: string[] = [
   '2316580',   // Tales of Kenzera: ZAU
   '881020',    // Granblue Fantasy Relink
   '1290000',   // PowerWash Simulator
+  '1681430',   // RoboCop: Rogue City
 ];
