@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import cn from 'clsx';
-import { COMPLETED_GAMES, MINIMUM_PLAYTIME } from 'constants/steam';
+import { COMPLETED_GAMES, MINIMUM_PLAYTIME, MY_STEAM_ID } from 'constants/steam';
 import { useSteam } from 'hooks/useSteam';
 import Game from 'components/Game';
 
@@ -29,7 +29,7 @@ const Steam = ({ searchParams: { count, steamId } }: SteamProps) => {
   if (!isMounted) return <></>;
 
   return (
-    <div className={styles.steam}>
+    <div className={styles.steam} data-steam-id={steamId || MY_STEAM_ID}>
       <div className={styles.headerContainer}>
         <h1>{pageHeading}</h1>
         <div className={styles.legend}>

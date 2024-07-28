@@ -12,26 +12,26 @@
     "verify": "npx tsc && npm run lint"
   },
   "dependencies": {
-    "@lottiefiles/react-lottie-player": "^3.5.3",
-    "@types/node": "20.12.7",
-    "@types/react": "18.2.79",
-    "@types/react-dom": "18.2.25",
-    "axios": "^1.6.8",
-    "clsx": "^2.1.0",
+    "@lottiefiles/react-lottie-player": "^3.5.4",
+    "@types/node": "22.0.0",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "axios": "^1.7.2",
+    "clsx": "^2.1.1",
     "eslint": "8.57.0",
-    "eslint-config-next": "14.1.4",
+    "eslint-config-next": "14.2.5",
     "howlongtobeat": "^1.8.0",
-    "next": "14.2.2",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "typescript": "5.4.5",
-    "zustand": "^4.5.2"
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "typescript": "5.5.4",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "husky": "^8.0.3",
-    "sass": "^1.75.0",
-    "stylelint": "^16.3.1",
-    "stylelint-config-standard": "^36.0.0"
+    "sass": "^1.77.8",
+    "stylelint": "^16.7.0",
+    "stylelint-config-standard": "^36.0.1"
   },
   "lint-staged": {
     "**/*": "npx prettier --write --ignore-unknown"

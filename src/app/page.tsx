@@ -21,13 +21,13 @@ export default function Home() {
           <HomeLink name="GitHub" path="https://github.com/andrew-brainerd">
             <GitHubIcon />
           </HomeLink>
-          <HomeLink name="LinkedIn" path={'https://www.linkedin.com/in/andrewbrainerd3'}>
+          <HomeLink name="LinkedIn" path="https://www.linkedin.com/in/andrewbrainerd3">
             <LinkedinIcon />
           </HomeLink>
-          <HomeLink name="Email" path={'mailto:drwb333@gmail.com'}>
+          <HomeLink name="Email" path="mailto:andrew@brainerd.dev">
             <MailIcon />
           </HomeLink>
-          <HomeLink name="Steam" path={'/steam'} openNewTab={false}>
+          <HomeLink name="Steam" path="/steam" openNewTab={false}>
             <SteamIcon />
           </HomeLink>
         </div>

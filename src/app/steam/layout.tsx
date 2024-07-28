@@ -8,36 +8,39 @@ interface SteamProps {
   children: React.ReactNode;
   params: {
     steamId?: string;
+    ttb?: boolean;
   };
 }
 
-const Steam = async ({ children, params: { steamId } }: SteamProps) => {
+const Steam = async ({ children, params: { steamId, ttb } }: SteamProps) => {
   const playerData = getPlayerSummary(steamId);
   const gamesData = getOwnedGames(steamId);
   const recentGamesData = getRecentGames(steamId);
-  const [{ personaname }, games, recentGames] = await Promise.all([playerData, gamesData, recentGamesData]);
+  const [{ personaname }, steamGames, recentGames] = await Promise.all([playerData, gamesData, recentGamesData]);
   const hltbService = new HowLongToBeatService();
 
-  const gamesWithTimeToBeat = await Promise.all(
-    games
-      .filter(game => (game?.playtime_forever || 0) / 60 > MINIMUM_PLAYTIME)
-      .map(async game => {
-        try {
-          const [timeToBeat] = await hltbService.search(game.name);
+  const games = ttb
+    ? await Promise.all(
+        steamGames
+          .filter(game => (game?.playtime_forever || 0) / 60 > MINIMUM_PLAYTIME)
+          .map(async game => {
+            try {
+              const [timeToBeat] = await hltbService.search(game.name);
 
-          return {
-            ...game,
-            hoursToBeat: timeToBeat?.gameplayMain
-          };
-        } catch (e) {
-          return game;
-        }
-      })
-  );
+              return {
+                ...game,
+                hoursToBeat: timeToBeat?.gameplayMain
+              };
+            } catch (e) {
+              return game;
+            }
+          })
+      )
+    : steamGames;
 
   return (
     <>
-      <GamesProvider games={gamesWithTimeToBeat} recentGames={recentGames} username={personaname} />
+      <GamesProvider games={games} recentGames={recentGames} username={personaname} />
       {children}
     </>
   );
