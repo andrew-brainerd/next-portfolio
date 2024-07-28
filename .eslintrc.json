@@ -2,7 +2,6 @@
   "extends": "next/core-web-vitals",
   "rules": {
     "semi": [2, "always"],
-    "operator-linebreak": [2, "after"],
     "no-multiple-empty-lines": [2, { "max": 2 }],
     "no-extra-boolean-cast": "off",
     "space-before-function-paren": "off",
