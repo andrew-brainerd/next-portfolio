@@ -60,4 +60,5 @@ export const COMPLETED_GAMES: string[] = [
   '1681430',   // RoboCop: Rogue City
   '2567870',   // Chained Together
   '1341290',   // We Were Here Forever
+  '396710',    // The Adventure Pals
 ];
