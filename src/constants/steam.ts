@@ -20,7 +20,6 @@ export const COMPLETED_GAMES: string[] = [
   '1593500',   // God of War
   '924980',    // Trials of Mana
   '311770',    // LEGO Pirates of the Caribbean The Video Game,
-  '356190',    // Middle-earth: Shadow of War
   '1240440',   // Halo Infinite
   '742420',    // Saints Row
   '1599020',   // Tinykin
