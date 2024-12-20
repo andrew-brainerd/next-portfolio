@@ -61,5 +61,6 @@ export const COMPLETED_GAMES: string[] = [
   '1341290',   // We Were Here Forever
   '396710',    // The Adventure Pals
   '990080',    // Hogwarts Legacy
-  '2322010',   // God of War Ragnark
+  '2322010',   // God of War Ragnarok
+  '2515020',   // Final Fantasy XVI
 ];
