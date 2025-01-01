@@ -19,7 +19,7 @@ const Steam = ({ searchParams: { count, steamId } }: SteamProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const { games, recentGames, showCompleted, showRecent, username, setShowRecent, setShowCompleted } = useSteam();
 
-  const userHeading = `${!steamId ? 'My ' : ''} Steam Games${!steamId ? '' : ` for ${username}`}`;
+  const userHeading = `${!steamId ? 'My ' : ''} Games${!steamId ? '' : ` for ${username}`}`;
   const pageHeading = username === 'Invalid User' ? username : userHeading;
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const Steam = ({ searchParams: { count, steamId } }: SteamProps) => {
   return (
     <div className={styles.steam} data-steam-id={steamId || MY_STEAM_ID}>
       <div className={styles.headerContainer}>
-        <h1>{pageHeading}</h1>
+        <h2>{pageHeading}</h2>
         <div className={styles.legend}>
           <div className={cn(styles.color, styles.recent)} />
           <span
