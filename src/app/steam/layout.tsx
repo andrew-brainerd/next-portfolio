@@ -1,7 +1,7 @@
 import React from 'react';
 import { HowLongToBeatService } from 'howlongtobeat';
 import { getOwnedGames, getPlayerSummary, getRecentGames } from 'api/steam';
-import GamesProvider from 'providers/SteamProvider';
+import GamesProvider from 'providers/GamesProvider';
 import { MINIMUM_PLAYTIME } from 'constants/steam';
 
 interface SteamProps {

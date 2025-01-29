@@ -40,13 +40,13 @@ const Steam = ({ searchParams: { count, steamId } }: SteamProps) => {
           >
             Recent
           </span>
-          <div className={cn(styles.color, styles.completed)} />
-          <span
+          {/* <div className={cn(styles.color, styles.completed)} /> */}
+          {/* <span
             className={cn(styles.label, { [styles.completed]: showCompleted })}
             onClick={() => setShowCompleted(!showCompleted)}
           >
             Completed
-          </span>
+          </span> */}
         </div>
       </div>
       <div className={styles.games}>

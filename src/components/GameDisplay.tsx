@@ -1,7 +1,7 @@
 import cn from 'clsx';
 import Image from 'next/image';
 import { buildImageUrl } from 'utils/steam';
-import { COMPLETED_GAMES } from 'constants/steam';
+// import { COMPLETED_GAMES } from 'constants/steam';
 
 import styles from 'styles/components/Game.module.scss';
 
@@ -30,8 +30,8 @@ const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank,
       <span className={styles.rank}>{rank}</span>{' '}
       <span
         className={cn(styles.name, {
-          [styles.recent]: isRecent,
-          [styles.completed]: COMPLETED_GAMES.includes(appId)
+          [styles.recent]: isRecent
+          // [styles.completed]: COMPLETED_GAMES.includes(appId)
         })}
       >
         {name}
