@@ -30,7 +30,7 @@ const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank,
       <span className={styles.rank}>{rank}</span>{' '}
       <span
         className={cn(styles.name, {
-          [styles.recent]: isRecent
+          // [styles.recent]: isRecent
           // [styles.completed]: COMPLETED_GAMES.includes(appId)
         })}
       >
