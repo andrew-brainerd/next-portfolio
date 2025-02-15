@@ -62,13 +62,14 @@
 
 @media screen and (max-width: 600px) {
   .game {
-    padding: 5px;
+    padding: 3px;
 
     .text {
       font-size: 1.3em;
-      margin: 0 5px;
+      margin: 0;
 
       .rank {
+        min-width: 25px;
         width: 25px;
       }
     }
