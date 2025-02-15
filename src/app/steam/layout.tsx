@@ -12,16 +12,19 @@ interface SteamProps {
   };
 }
 
+const HIDDEN_GAMES = [1454400];
+
 const Steam = async ({ children, params: { steamId, ttb } }: SteamProps) => {
   const playerData = getPlayerSummary(steamId);
   const gamesData = getOwnedGames(steamId);
   const recentGamesData = getRecentGames(steamId);
   const [{ personaname }, steamGames, recentGames] = await Promise.all([playerData, gamesData, recentGamesData]);
   const hltbService = new HowLongToBeatService();
+  const filteredGames = steamGames.filter(game => !HIDDEN_GAMES.includes(game.appid));
 
   const games = ttb
     ? await Promise.all(
-        steamGames
+        filteredGames
           .filter(game => (game?.playtime_forever || 0) / 60 > MINIMUM_PLAYTIME)
           .map(async game => {
             try {
@@ -36,7 +39,7 @@ const Steam = async ({ children, params: { steamId, ttb } }: SteamProps) => {
             }
           })
       )
-    : steamGames;
+    : filteredGames;
 
   return (
     <>
