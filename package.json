@@ -14,11 +14,11 @@
     "verify": "npx tsc && npm run lint"
   },
   "dependencies": {
-    "@lottiefiles/react-lottie-player": "^3.5.4",
-    "@types/node": "22.0.0",
+    "@lottiefiles/react-lottie-player": "^3.6.0",
+    "@types/node": "22.13.8",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
-    "axios": "^1.7.2",
+    "axios": "^1.8.1",
     "clsx": "^2.1.1",
     "eslint": "8.57.0",
     "eslint-config-next": "15.2.0",
@@ -26,14 +26,14 @@
     "next": "15.2.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "typescript": "5.5.4",
-    "zustand": "^4.5.4"
+    "typescript": "5.8.2",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "husky": "^8.0.3",
-    "sass": "^1.77.8",
-    "stylelint": "^16.7.0",
-    "stylelint-config-standard": "^36.0.1"
+    "sass": "^1.85.1",
+    "stylelint": "^16.15.0",
+    "stylelint-config-standard": "^37.0.0"
   },
   "lint-staged": {
     "**/*": "npx prettier --write --ignore-unknown"
