@@ -1,5 +1,3 @@
-import styles from 'styles/components/HomeLink.module.scss';
-
 interface HomeLinkProps {
   name: string;
   children?: React.ReactNode;
@@ -11,7 +9,7 @@ interface HomeLinkProps {
 const HomeLink = ({ name, children, text, path, openNewTab = true }: HomeLinkProps) => {
   return (
     <a
-      className={styles.homeLink}
+      className="shadow animate-fade items-center bg-[#333333] rounded-2xl cursor-pointer flex justify-center p-4 px-5 transition-all duration-500 ease-in-out hover:scale-110"
       title={name}
       aria-label={name}
       href={path}

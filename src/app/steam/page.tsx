@@ -6,8 +6,6 @@ import { COMPLETED_GAMES, MINIMUM_PLAYTIME, MY_STEAM_ID } from 'constants/steam'
 import { useSteam } from 'hooks/useSteam';
 import Game from 'components/Game';
 
-import styles from 'styles/components/Steam.module.scss';
-
 interface SteamProps {
   searchParams: Promise<{
     count?: number;
@@ -16,12 +14,7 @@ interface SteamProps {
 }
 
 const Steam = (props: SteamProps) => {
-  const searchParams = use(props.searchParams);
-
-  const {
-    count,
-    steamId
-  } = searchParams;
+  const { count, steamId } = use(props.searchParams);
 
   const [isMounted, setIsMounted] = useState(false);
   const { games, recentGames, showCompleted, showRecent, username, setShowRecent, setShowCompleted } = useSteam();
@@ -33,30 +26,32 @@ const Steam = (props: SteamProps) => {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) return <></>;
+  if (!isMounted) {
+    return null;
+  }
 
   return (
-    <div className={styles.steam} data-steam-id={steamId || MY_STEAM_ID}>
-      <div className={styles.headerContainer}>
-        <h2>{pageHeading}</h2>
-        <div className={styles.legend}>
-          <div className={cn(styles.color, styles.recent)} />
+    <div className="font-roboto my-0 mx-0 sm:mx-auto max-w-[1200px] p-2 sm:p-12" data-steam-id={steamId || MY_STEAM_ID}>
+      <div className="items-center flex flex-wrap justify-between mb-3">
+        <h2 className="font-pacifico text-4xl m-3.5">{pageHeading}</h2>
+        <div className="hidden">
+          <div className="h-5 ml-6 mr-2 w-5 bg-[#aef49e]" />
           <span
-            className={cn(styles.label, { [styles.recent]: showRecent })}
+            className={cn('cursor-pointer select-none', { ['font-bold']: showRecent })}
             onClick={() => setShowRecent(!showRecent)}
           >
             Recent
           </span>
-          {/* <div className={cn(styles.color, styles.completed)} /> */}
+          {/* <div className="h-5 ml-6 mr-2 w-5 bg-[#a3daed]" /> */}
           {/* <span
-            className={cn(styles.label, { [styles.completed]: showCompleted })}
+            className={cn("cursor-pointer select-none", { "font-bold": showRecent })}
             onClick={() => setShowCompleted(!showCompleted)}
           >
             Completed
           </span> */}
         </div>
       </div>
-      <div className={styles.games}>
+      <div>
         {(games || []).length ? (
           games
             .sort((a, b) => (b?.playtime_forever || 0) - (a?.playtime_forever || 0))
