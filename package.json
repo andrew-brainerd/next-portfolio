@@ -9,6 +9,7 @@
     "lint": "npm run lint:js",
     "lint:js": "next lint",
     "lint:css": "npx stylelint --config stylelint.json **/*.css",
+    "update-packages": "npx npm-check-updates@latest -u -x eslint -x husky && pnpm i && git add . && git commit -m \"Update packages\"",
     "verify": "npx tsc && npm run lint"
   },
   "dependencies": {
