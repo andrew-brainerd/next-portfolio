@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import cn from 'clsx';
 import { COMPLETED_GAMES, MINIMUM_PLAYTIME, MY_STEAM_ID } from 'constants/steam';
 import { useSteam } from 'hooks/useSteam';
@@ -9,13 +9,20 @@ import Game from 'components/Game';
 import styles from 'styles/components/Steam.module.scss';
 
 interface SteamProps {
-  searchParams: {
+  searchParams: Promise<{
     count?: number;
     steamId?: string;
-  };
+  }>;
 }
 
-const Steam = ({ searchParams: { count, steamId } }: SteamProps) => {
+const Steam = (props: SteamProps) => {
+  const searchParams = use(props.searchParams);
+
+  const {
+    count,
+    steamId
+  } = searchParams;
+
   const [isMounted, setIsMounted] = useState(false);
   const { games, recentGames, showCompleted, showRecent, username, setShowRecent, setShowCompleted } = useSteam();
 

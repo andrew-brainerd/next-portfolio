@@ -6,15 +6,26 @@ import { MINIMUM_PLAYTIME } from 'constants/steam';
 
 interface SteamProps {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     steamId?: string;
     ttb?: boolean;
-  };
+  }>;
 }
 
 const HIDDEN_GAMES = [1454400];
 
-const Steam = async ({ children, params: { steamId, ttb } }: SteamProps) => {
+const Steam = async (props: SteamProps) => {
+  const params = await props.params;
+
+  const {
+    steamId,
+    ttb
+  } = params;
+
+  const {
+    children
+  } = props;
+
   const playerData = getPlayerSummary(steamId);
   const gamesData = getOwnedGames(steamId);
   const recentGamesData = getRecentGames(steamId);
