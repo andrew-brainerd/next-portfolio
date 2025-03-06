@@ -1,5 +1,5 @@
 import { OwnedGame } from 'types/steam';
-import GameDisplay from 'components/GameDisplay';
+import { GameDisplay } from 'components/GameDisplay';
 
 type GameProps = OwnedGame & { isCompleted: boolean; isRecent: boolean; rank: number };
 
@@ -12,7 +12,7 @@ const formatName = (name: string) => {
   return formatted;
 };
 
-const Game = ({ appid, img_icon_url, name, isRecent, playtime_forever, rank, hoursToBeat }: GameProps) => {
+export const Game = ({ appid, img_icon_url, name, isRecent, playtime_forever, rank, hoursToBeat }: GameProps) => {
   const formattedName = formatName(name);
 
   return (
@@ -27,5 +27,3 @@ const Game = ({ appid, img_icon_url, name, isRecent, playtime_forever, rank, hou
     />
   );
 };
-
-export default Game;

@@ -6,7 +6,7 @@ interface HomeLinkProps {
   openNewTab?: boolean;
 }
 
-const HomeLink = ({ name, children, text, path, openNewTab = true }: HomeLinkProps) => {
+export const HomeLink = ({ name, children, text, path, openNewTab = true }: HomeLinkProps) => {
   return (
     <a
       className="shadow animate-fade items-center bg-[#333333] rounded-2xl cursor-pointer flex justify-center p-4 px-5 transition-all duration-500 ease-in-out hover:scale-110"
@@ -20,5 +20,3 @@ const HomeLink = ({ name, children, text, path, openNewTab = true }: HomeLinkPro
     </a>
   );
 };
-
-export default HomeLink;

@@ -1,11 +1,9 @@
-'use client';
-
 interface LoadingProps {
   message?: string;
   size?: number;
 }
 
-const Loading = ({ message, size = 100 }: LoadingProps) => {
+export const Loading = ({ message, size = 100 }: LoadingProps) => {
   return (
     <div role="status">
       <svg
@@ -28,5 +26,3 @@ const Loading = ({ message, size = 100 }: LoadingProps) => {
     </div>
   );
 };
-
-export default Loading;

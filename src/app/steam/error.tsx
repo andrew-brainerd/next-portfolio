@@ -1,9 +1,7 @@
 'use client';
 
-const SteamError = () => {
+export const SteamError = () => {
   return (
     <div>Steam Error</div>
   );
 };
-
-export default SteamError;

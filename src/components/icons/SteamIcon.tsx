@@ -29,6 +29,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const SteamIcon = memo(SvgIcon);
-
-export default SteamIcon;
+export const SteamIcon = memo(SvgIcon);
