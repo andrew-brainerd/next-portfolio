@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { OwnedGame } from 'types/steam';
 import { useSteam } from 'hooks/useSteam';
 
@@ -10,7 +10,7 @@ interface GamesProviderProps {
   username?: string;
 }
 
-export default function GamesProvider({ games, recentGames, username }: GamesProviderProps) {
+export const GamesProvider = ({ games, recentGames, username }: GamesProviderProps) => {
   const { setGames, setRecentGames, setUsername } = useSteam();
 
   useEffect(() => {
@@ -25,5 +25,5 @@ export default function GamesProvider({ games, recentGames, username }: GamesPro
     username && setUsername(username);
   }, [username, setUsername]);
 
-  return <></>;
-}
+  return null;
+};
