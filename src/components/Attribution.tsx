@@ -13,7 +13,7 @@ const iconCreators = [
   }
 ];
 
-export const Attribution = () => {
+const Attribution = () => {
   return (
     <div>
       <h2>Icons Made By</h2>
@@ -33,3 +33,5 @@ export const Attribution = () => {
     </div>
   );
 };
+
+export default Attribution;
