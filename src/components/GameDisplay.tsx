@@ -15,7 +15,7 @@ type GameProps = {
   hoursToBeat?: number;
 };
 
-export const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank, hoursToBeat }: GameProps) => (
+const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank, hoursToBeat }: GameProps) => (
   <div
     key={appId}
     className="items-center bg-[#2f2f2f] bg-no-repeat rounded border-2 border-solid border-transparent flex justify-between mt-2.5 p-1 sm:py-1 sm:px-4"
@@ -46,3 +46,5 @@ export const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime
     </div>
   </div>
 );
+
+export default GameDisplay;
