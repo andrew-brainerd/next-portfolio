@@ -1,10 +1,10 @@
 'use client';
 
-interface MangaProps {
+interface MangaDetailsProps {
   page: string;
 }
 
-export const Manga = ({ page }: MangaProps) => {
+export const MangaDetails = ({ page }: MangaDetailsProps) => {
   const parser = new DOMParser();
   const manga = parser.parseFromString(page, 'text/html');
   const chapters = manga.querySelectorAll('.chapter-list .row');

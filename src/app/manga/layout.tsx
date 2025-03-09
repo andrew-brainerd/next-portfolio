@@ -3,5 +3,5 @@ export interface MangaLayoutProps {
 }
 
 export default function MangaLayout({ children }: MangaLayoutProps) {
-  return <div className="w-full h-screen bg-fuchsia-950 p-20">{children}</div>;
+  return <div className="w-full h-full bg-neutral-600 p-20">{children}</div>;
 }

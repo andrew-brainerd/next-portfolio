@@ -1,49 +1,100 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useDebounce } from '@uidotdev/usehooks';
 import { Button, TextField } from '@mui/material';
+
+import { postRequest } from 'api/client';
+import { MANGA_ROUTE } from 'constants/routes';
+
+interface MangePostData {
+  searchTerm: string;
+}
+
+interface Manga {
+  id: number;
+  author: string;
+  name: string;
+  chapterLatest: string;
+  url: string;
+  thumb: string;
+  slug: string;
+}
 
 export default function MangePage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchData, setSearchData] = useState<Manga[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
+  const hasValidSearchTerm = debouncedSearchTerm.length > 2;
+  const router = useRouter();
 
-  const handleSearch = async () => {
+  const handleSearch = async (term: string) => {
     setIsSearching(true);
 
-    const searchWord = searchTerm.replace(' ', '_');
-    const searchResponse = await fetch(`https://www.nelomanga.com/home/search/json?searchword=${searchWord}`, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    const searchData = await searchResponse.json();
+    const searchData = await postRequest<MangePostData, Manga[]>('/manga/search', { searchTerm: term });
 
     console.log('Search Data', searchData);
+
+    setSearchData(searchData);
+    setIsSearching(false);
   };
 
+  useEffect(() => {
+    if (hasValidSearchTerm && !isSearching) {
+      handleSearch(debouncedSearchTerm);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm]);
+
   return (
-    <div className="flex items-center gap-x-3">
-      <TextField
-        label="Search"
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        autoFocus={true}
-        // onKeyDown={handleSearch}
-        data-testid="searchInput"
-        autoCapitalize="off"
-        disabled={isSearching}
-        size="small"
-        sx={{
-          'width': 300,
-          '& .MuiOutlinedInput-root': {
-            backgroundColor: 'white'
-          }
-        }}
-        variant="outlined"
-      />
-      <Button onClick={handleSearch} variant="contained">
-        Search
-      </Button>
-    </div>
+    <>
+      <div className="flex items-center gap-x-3 mb-10">
+        <TextField
+          label="Search"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          autoFocus={true}
+          data-testid="searchInput"
+          autoCapitalize="off"
+          autoComplete="off"
+          // disabled={isSearching}
+          size="small"
+          sx={{
+            'width': 300,
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: 'white'
+            }
+          }}
+          variant="outlined"
+        />
+        {/* <Button onClick={() => handleSearch(searchTerm)} variant="contained">
+          Search
+        </Button> */}
+      </div>
+      {isSearching && <h1>Searching...</h1>}
+      {hasValidSearchTerm && !isSearching && !searchData.length && <h1>No Results</h1>}
+      {searchData.map(searchResult => (
+        <div
+          key={searchResult.id}
+          className="flex flex-col mt-4 bg-brand-600 px-5 py-3 rounded gap-y-2 hover:bg-brand-700 cursor-pointer transition-colors"
+          onClick={() => router.push(`${MANGA_ROUTE}/${searchResult.id}`)}
+        >
+          <div className="flex gap-x-4">
+            {false && !searchResult.thumb.includes('2xstorage') && (
+              <img src={searchResult.thumb} alt={`${searchResult.name} thumbnail`} width={38} height={56} />
+            )}
+            <div className="text-xl">
+              <a href={searchResult.url} target="_blank">
+                {searchResult.name}
+              </a>
+            </div>
+          </div>
+          <div className="text-sm italic">{searchResult.author}</div>
+        </div>
+      ))}
+    </>
   );
 }

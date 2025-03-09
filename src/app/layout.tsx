@@ -14,7 +14,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${roboto.className} ${oswald.className} ${pacifico.className}`}>
-      <body className="bg-[#191919] text-[#ffffff] m-0 overflow-y-scroll">{children}</body>
+      <body className="bg-neutral-600 text-[#ffffff] m-0 overflow-y-scroll">{children}</body>
     </html>
   );
 }
