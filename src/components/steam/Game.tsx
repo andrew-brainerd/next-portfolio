@@ -1,5 +1,5 @@
 import { OwnedGame } from 'types/steam';
-import GameDisplay from 'components/GameDisplay';
+import GameDisplay from 'components/steam/GameDisplay';
 
 type GameProps = OwnedGame & { isCompleted: boolean; isRecent: boolean; rank: number };
 

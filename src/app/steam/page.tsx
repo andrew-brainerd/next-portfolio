@@ -4,7 +4,7 @@ import { useEffect, useState, use } from 'react';
 import cn from 'clsx';
 import { COMPLETED_GAMES, MINIMUM_PLAYTIME, MY_STEAM_ID } from 'constants/steam';
 import { useSteam } from 'hooks/useSteam';
-import Game from 'components/Game';
+import Game from 'components/steam/Game';
 
 interface SteamProps {
   searchParams: Promise<{

@@ -1,10 +1,22 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 interface MangaDetailsProps {
   page: string;
 }
 
 export const MangaDetails = ({ page }: MangaDetailsProps) => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   const parser = new DOMParser();
   const manga = parser.parseFromString(page, 'text/html');
   const chapters = manga.querySelectorAll('.chapter-list .row');

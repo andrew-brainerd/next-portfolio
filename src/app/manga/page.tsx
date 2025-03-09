@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from '@uidotdev/usehooks';
-import { Button, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
 
 import { postRequest } from 'api/client';
 import { MANGA_ROUTE } from 'constants/routes';
@@ -36,8 +36,6 @@ export default function MangePage() {
 
     const searchData = await postRequest<MangePostData, Manga[]>('/manga/search', { searchTerm: term });
 
-    console.log('Search Data', searchData);
-
     setSearchData(searchData);
     setIsSearching(false);
   };
@@ -46,7 +44,7 @@ export default function MangePage() {
     if (hasValidSearchTerm && !isSearching) {
       handleSearch(debouncedSearchTerm);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchTerm]);
 
   return (
@@ -80,17 +78,13 @@ export default function MangePage() {
         <div
           key={searchResult.id}
           className="flex flex-col mt-4 bg-brand-600 px-5 py-3 rounded gap-y-2 hover:bg-brand-700 cursor-pointer transition-colors"
-          onClick={() => router.push(`${MANGA_ROUTE}/${searchResult.id}`)}
+          onClick={() => router.push(`${MANGA_ROUTE}/${searchResult.slug}`)}
         >
           <div className="flex gap-x-4">
             {false && !searchResult.thumb.includes('2xstorage') && (
               <img src={searchResult.thumb} alt={`${searchResult.name} thumbnail`} width={38} height={56} />
             )}
-            <div className="text-xl">
-              <a href={searchResult.url} target="_blank">
-                {searchResult.name}
-              </a>
-            </div>
+            <div className="text-xl">{searchResult.name}</div>
           </div>
           <div className="text-sm italic">{searchResult.author}</div>
         </div>
