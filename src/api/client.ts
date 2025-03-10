@@ -30,7 +30,6 @@ const handleError = (method: Method, url: string, err: AxiosError) => {
 
 export const postRequest = async <T, R>(url: string, data?: T): Promise<R> => {
   const headers = await getAuthHeaders();
-  console.log('POST request', { headers, url, data });
   return client.post(url, data || {}, { headers }).then(response => response?.data);
 };
 

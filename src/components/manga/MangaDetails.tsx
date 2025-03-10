@@ -31,6 +31,7 @@ export const MangaDetails = ({ page }: MangaDetailsProps) => {
   useEffect(() => {
     const parser = new DOMParser();
     const manga = parser.parseFromString(page, 'text/html');
+    const mangaTitle = manga.querySelector('manga-info-text h1')?.textContent;
     const chapterRows = manga.querySelectorAll('.chapter-list .row');
 
     const mangaChapters: ChapterDetails[] = [];
@@ -54,6 +55,7 @@ export const MangaDetails = ({ page }: MangaDetailsProps) => {
 
   return (
     <div>
+      {/* <h1>{man}</h1> */}
       {chapters.map(chapter => (
         <div key={chapter.name}>
           <a href={chapter.link} target="_blank">
