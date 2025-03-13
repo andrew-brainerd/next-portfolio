@@ -25,7 +25,7 @@ const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank,
     data-beat-hours={hoursToBeat}
   >
     <div className="bg-[#2f2f2f80] font-oswald sm:text-3xl mx-1 overflow-hidden pl-2.5 text-ellipsis whitespace-nowrap text-xl m-0">
-      <span className="text-[#a3a3a3] inline-block opacity-80 sm:min-w-10 w-6 sm:w-10 min-w-6">{rank}</span>{' '}
+      <span className="text-[#a3a3a3] inline-block opacity-80 sm:min-w-10 w-8 sm:w-10 min-w-8 relative right-3 text-center">{rank}</span>{' '}
       <span
         className={cn({
           // [styles.recent]: isRecent
