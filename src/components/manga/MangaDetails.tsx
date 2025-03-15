@@ -2,8 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
+import { Button } from '@mui/material';
+import { followManga } from 'api/manga';
+import { formatChapterName } from 'utils/manga';
+
 interface MangaDetailsProps {
   page: string;
+  slug: string;
 }
 
 interface ChapterDetails {
@@ -12,16 +17,9 @@ interface ChapterDetails {
   releaseDate: string;
 }
 
-const formatChapterName = (chapterLink: string) => {
-  const parts = chapterLink.split('/');
-  const chapterLinkName = parts[parts.length - 1];
-  const chapterNumParts = chapterLinkName.split('-').slice(1).join('.');
-
-  return `Chapter ${chapterNumParts}`;
-};
-
-export const MangaDetails = ({ page }: MangaDetailsProps) => {
+export const MangaDetails = ({ page, slug }: MangaDetailsProps) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [title, setTitle] = useState('');
   const [chapters, setChapters] = useState<ChapterDetails[]>([]);
 
   useEffect(() => {
@@ -31,7 +29,7 @@ export const MangaDetails = ({ page }: MangaDetailsProps) => {
   useEffect(() => {
     const parser = new DOMParser();
     const manga = parser.parseFromString(page, 'text/html');
-    const mangaTitle = manga.querySelector('manga-info-text h1')?.textContent;
+    const mangaTitle = manga.querySelector('.manga-info-text h1')?.textContent;
     const chapterRows = manga.querySelectorAll('.chapter-list .row');
 
     const mangaChapters: ChapterDetails[] = [];
@@ -46,6 +44,7 @@ export const MangaDetails = ({ page }: MangaDetailsProps) => {
       mangaChapters.push({ link: chapterLink, name: chapterName, releaseDate: chapterReleaseDate });
     });
 
+    setTitle(mangaTitle || '');
     setChapters(mangaChapters);
   }, [page]);
 
@@ -55,7 +54,10 @@ export const MangaDetails = ({ page }: MangaDetailsProps) => {
 
   return (
     <div>
-      {/* <h1>{man}</h1> */}
+      <div>
+        <h1>{title}</h1>
+        <Button onClick={() => followManga({ name: title, slug })}>Follow</Button>
+      </div>
       {chapters.map(chapter => (
         <div key={chapter.name}>
           <a href={chapter.link} target="_blank">

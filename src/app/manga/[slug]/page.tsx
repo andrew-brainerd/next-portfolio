@@ -12,5 +12,5 @@ export default async function MangaPage({ params }: MangaPageProps) {
   const response = await fetch(`https://www.nelomanga.com/manga/${slug}`);
   const pageContent = await response.text();
 
-  return <MangaDetails page={pageContent} />;
+  return <MangaDetails page={pageContent} slug={slug} />;
 }

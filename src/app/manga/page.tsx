@@ -7,6 +7,7 @@ import { useDebounce } from '@uidotdev/usehooks';
 import { TextField } from '@mui/material';
 
 import { postRequest } from 'api/client';
+import { formatChapterName } from 'utils/manga';
 import { MANGA_ROUTE } from 'constants/routes';
 
 interface MangePostData {
@@ -26,6 +27,7 @@ interface Manga {
 export default function MangePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchData, setSearchData] = useState<Manga[]>([]);
+  const [searchPage, setSearchPage] = useState<string>('');
   const [isSearching, setIsSearching] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 1000);
   const hasValidSearchTerm = debouncedSearchTerm.length > 2;
@@ -34,10 +36,14 @@ export default function MangePage() {
   const handleSearch = async (term: string) => {
     setIsSearching(true);
 
-    const searchData = await postRequest<MangePostData, Manga[]>('/manga/search', { searchTerm: term });
+    const searchData = await postRequest<MangePostData, Manga[] | string>('/manga/search', { searchTerm: term });
 
-    setSearchData(searchData);
-    setIsSearching(false);
+    if (typeof searchData === 'string') {
+      setSearchPage(searchData);
+    } else {
+      setSearchData(searchData);
+      setIsSearching(false);
+    }
   };
 
   useEffect(() => {
@@ -46,6 +52,38 @@ export default function MangePage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchTerm]);
+
+  useEffect(() => {
+    if (searchPage) {
+      const parser = new DOMParser();
+      const page = parser.parseFromString(searchPage, 'text/html');
+      const searchResults = page.querySelectorAll('.story_item_right');
+
+      const mangaList: Manga[] = [];
+
+      searchResults.forEach((result, id) => {
+        const mangaAuthor = result.querySelectorAll('span')[0].innerText;
+        const mangaLink = result.querySelector('a');
+        const mangaName = mangaLink?.innerText || '';
+        const mangaUrl = mangaLink?.href || '';
+        const urlParts = mangaUrl.split('/');
+        const mangaSlug = urlParts[urlParts.length - 1];
+
+        mangaList.push({
+          author: mangaAuthor.replace('Author(s) : ', ''),
+          chapterLatest: '',
+          id,
+          name: mangaName,
+          slug: mangaSlug,
+          thumb: '',
+          url: mangaUrl
+        });
+      });
+
+      setSearchData(mangaList);
+      setIsSearching(false);
+    }
+  }, [searchPage]);
 
   return (
     <>
