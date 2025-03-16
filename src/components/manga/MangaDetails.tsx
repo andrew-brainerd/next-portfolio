@@ -2,10 +2,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-
 import { Button } from '@mui/material';
+import Image from 'next/image';
+
 import { followManga, getMangaCover } from 'api/manga';
 import { formatChapterName } from 'utils/manga';
+import Loading from 'components/Loading';
 
 interface MangaDetailsProps {
   page: string;
@@ -67,20 +69,34 @@ export const MangaDetails = ({ page, slug }: MangaDetailsProps) => {
     return null;
   }
 
-  return (
-    <div>
-      <div>
-        {!!thumb && <img src={thumb} alt={`${title}`} />}
-        <h1>{title}</h1>
-        <Button onClick={() => followManga({ author, name: title, slug, thumb })}>Follow</Button>
-      </div>
-      {chapters.map(chapter => (
-        <div key={chapter.name}>
-          <a href={chapter.link} target="_blank">
-            {chapter.name}
-          </a>
+  return !thumb ? (
+    <Loading />
+  ) : (
+    <div className="flex flex-col gap-y-10">
+      <div className="flex justify-center items-center gap-y-3 sm:gap-x-4 flex-col">
+        <Image
+          className="rounded-full w-20 h-20 object-cover"
+          src={thumb}
+          alt={`${title} cover`}
+          height={150}
+          width={150}
+        />
+        <div className="flex flex-col items-center gap-y-2">
+          <h1 className="text-3xl text-center sm:text-left">{title}</h1>
+          <Button onClick={() => followManga({ author, name: title, slug, thumb })} variant="contained">
+            Follow
+          </Button>
         </div>
-      ))}
+      </div>
+      <div className="sm:grid sm:grid-cols-3 gap-2 text-center">
+        {chapters.map(chapter => (
+          <div key={chapter.name}>
+            <a href={chapter.link} target="_blank">
+              {chapter.name}
+            </a>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
