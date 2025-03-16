@@ -8,3 +8,7 @@ export const followManga = (manga: FollowedManga) => {
 export const getFollowedManaga = () => {
   return getRequest<FollowedManga[]>('/manga/following');
 };
+
+export const getMangaCover = (slug: string) => {
+  return getRequest<{ imageUrl: string }>(`/manga/cover?slug=${slug}`);
+};

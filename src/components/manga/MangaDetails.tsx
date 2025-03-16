@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@mui/material';
-import { followManga } from 'api/manga';
+import { followManga, getMangaCover } from 'api/manga';
 import { formatChapterName } from 'utils/manga';
 
 interface MangaDetailsProps {
@@ -19,17 +20,30 @@ interface ChapterDetails {
 
 export const MangaDetails = ({ page, slug }: MangaDetailsProps) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [thumb, setThumb] = useState('');
   const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
   const [chapters, setChapters] = useState<ChapterDetails[]>([]);
+
+  const fetchCover = useCallback(async () => {
+    const coverResponse = await getMangaCover(slug);
+
+    if (coverResponse?.imageUrl) {
+      setThumb(coverResponse.imageUrl);
+    }
+  }, [slug]);
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    fetchCover();
+  }, [fetchCover]);
 
   useEffect(() => {
     const parser = new DOMParser();
     const manga = parser.parseFromString(page, 'text/html');
+    const mangaThumb = manga.querySelector('.manga-info-pic img')?.getAttribute('src');
     const mangaTitle = manga.querySelector('.manga-info-text h1')?.textContent;
+    const mangaAuthor = manga.querySelectorAll('.manga-info-text li a').item(0).innerHTML.split('\n')[1].trim();
     const chapterRows = manga.querySelectorAll('.chapter-list .row');
 
     const mangaChapters: ChapterDetails[] = [];
@@ -45,6 +59,7 @@ export const MangaDetails = ({ page, slug }: MangaDetailsProps) => {
     });
 
     setTitle(mangaTitle || '');
+    setAuthor(mangaAuthor || '');
     setChapters(mangaChapters);
   }, [page]);
 
@@ -55,8 +70,9 @@ export const MangaDetails = ({ page, slug }: MangaDetailsProps) => {
   return (
     <div>
       <div>
+        {!!thumb && <img src={thumb} alt={`${title}`} />}
         <h1>{title}</h1>
-        <Button onClick={() => followManga({ name: title, slug })}>Follow</Button>
+        <Button onClick={() => followManga({ author, name: title, slug, thumb })}>Follow</Button>
       </div>
       {chapters.map(chapter => (
         <div key={chapter.name}>
