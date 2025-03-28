@@ -64,4 +64,5 @@ export const COMPLETED_GAMES: string[] = [
   '2322010',   // God of War Ragnarok
   '2515020',   // Final Fantasy XVI
   '1608070',   // CRISIS CORE FINAL FANTASY VII REUNION
+  '1462040',   // FINAL FANTASY VII REMAKE INTERGRADE
 ];
