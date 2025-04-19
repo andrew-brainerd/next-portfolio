@@ -38,6 +38,8 @@ export default function MangePage() {
 
     const searchData = await postRequest<MangePostData, Manga[] | string>('/manga/search', { searchTerm: term });
 
+    console.log('Search Data', searchData);
+
     if (typeof searchData === 'string') {
       setSearchPage(searchData);
     } else {
