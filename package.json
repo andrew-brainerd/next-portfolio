@@ -11,7 +11,7 @@
     "lint:js": "next lint",
     "lint:css": "npx stylelint --config stylelint.json **/*.css",
     "start": "next start",
-    "update-packages": "npx npm-check-updates@latest -u -x eslint -x husky && pnpm i && git add . && git commit -m \"Update packages\"",
+    "update-packages": "npx npm-check-updates@latest -u -x husky && pnpm i && git add . && git commit -m \"Update packages\"",
     "verify": "npx tsc && npm run lint"
   },
   "dependencies": {
@@ -28,7 +28,7 @@
     "axios": "^1.8.4",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
-    "eslint": "8.57.0",
+    "eslint": "9.30.0",
     "eslint-config-next": "15.3.1",
     "firebase": "^11.6.0",
     "howlongtobeat": "^1.8.0",
@@ -41,6 +41,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
     "husky": "^8.0.3",
     "sass": "^1.86.3",
     "stylelint": "^16.18.0",
