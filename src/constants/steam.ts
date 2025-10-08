@@ -66,5 +66,6 @@ export const COMPLETED_GAMES: string[] = [
   '1608070', // CRISIS CORE FINAL FANTASY VII REUNION
   '1462040', // FINAL FANTASY VII REMAKE INTERGRADE
   '3017860', // DOOM The Dark Ages
-  '3240220' // Grand Theft Auto V Enhanced
+  '3240220', // Grand Theft Auto V Enhanced
+  '397540' // Borderlands 3
 ];
