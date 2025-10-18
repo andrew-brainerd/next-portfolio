@@ -49,11 +49,11 @@ export const firebaseStorage = getStorage(firebaseApp);
 export const firebaseDb = getDatabase(firebaseApp);
 export const firebaseStore = getFirestore(firebaseApp);
 
-export const resetPassword = (code: string, newPassword: string) => {
+export const resetPassword = (code: string, newPassword: string): Promise<void> => {
   return confirmPasswordReset(firebaseAuth, code, newPassword);
 };
 
-export const sendForgotPasswordEmail = (email: string) => {
+export const sendForgotPasswordEmail = (email: string): Promise<void> => {
   return sendPasswordResetEmail(firebaseAuth, email);
 };
 
@@ -80,43 +80,45 @@ export const signInUser = (email: string, password: string): Promise<AuthRespons
     });
 };
 
-export const signOutUser = () => {
+export const signOutUser = (): Promise<Response> => {
   return fetch('/api/auth', { method: 'DELETE' });
 };
 
-export const updateUser = async (user: User, updates: UserUpdates) => {
+export const updateUser = async (user: User, updates: UserUpdates): Promise<void> => {
   if (user) {
-    return await updateProfile(user, updates)
-      .then(() => {
-        console.debug('User updated');
-      })
-      .catch(error => {
-        const err = error as AuthError;
-        console.error('Error updating profile', err.message);
-      });
-  }
-};
-
-export const updateUserPassword = async (password: string) => {
-  if (firebaseAuth.currentUser) {
-    updatePassword(firebaseAuth.currentUser, password)
-      .then(() => {
-        localStorage.clear();
-        return;
-      })
-      .catch(error => {
-        const err = error as AuthError;
-        console.error('Error updating password', err.message);
-      });
-  }
-};
-
-export const updateUserProfile = async (updates: UserUpdates) => {
-  if (firebaseAuth.currentUser) {
-    return await updateProfile(firebaseAuth.currentUser, updates).catch(error => {
-      const err = error as AuthError;
+    try {
+      await updateProfile(user, updates);
+      console.debug('User updated');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error updating profile');
       console.error('Error updating profile', err.message);
-    });
+      throw err;
+    }
+  }
+};
+
+export const updateUserPassword = async (password: string): Promise<void> => {
+  if (firebaseAuth.currentUser) {
+    try {
+      await updatePassword(firebaseAuth.currentUser, password);
+      localStorage.clear();
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error updating password');
+      console.error('Error updating password', err.message);
+      throw err;
+    }
+  }
+};
+
+export const updateUserProfile = async (updates: UserUpdates): Promise<void> => {
+  if (firebaseAuth.currentUser) {
+    try {
+      await updateProfile(firebaseAuth.currentUser, updates);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error updating profile');
+      console.error('Error updating profile', err.message);
+      throw err;
+    }
   }
 };
 
@@ -187,66 +189,69 @@ export const renameUserDocument = async (documentPath: string, name: string) => 
   return updateMetadata(documentRef, { customMetadata: { displayName: name } });
 };
 
-export const deleteUserDocument = async (documentPath: string) => {
+export const deleteUserDocument = async (documentPath: string): Promise<void> => {
   const documentRef = storageRef(firebaseStorage, documentPath);
 
   return deleteObject(documentRef);
 };
 
-export const getDocumentDisplayName = (filePath: string) => {
+export const getDocumentDisplayName = (filePath: string): Promise<string | undefined> => {
   const fileRef = storageRef(firebaseStorage, filePath);
 
   return getMetadata(fileRef)
     .then(({ customMetadata }) => {
       return customMetadata?.displayName || '';
     })
-    .catch((error: any) => {
-      console.error('Failed to get document download URL', error);
+    .catch((error: unknown) => {
+      const err = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Failed to get document display name', err);
       return undefined;
     });
 };
 
-export const getDocumentOriginalName = (filePath: string) => {
+export const getDocumentOriginalName = (filePath: string): Promise<string | undefined> => {
   const fileRef = storageRef(firebaseStorage, filePath);
 
   return getMetadata(fileRef)
     .then(({ customMetadata }) => {
       return customMetadata?.originalName || '';
     })
-    .catch((error: any) => {
-      console.error('Failed to get document original name', error);
+    .catch((error: unknown) => {
+      const err = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Failed to get document original name', err);
       return undefined;
     });
 };
 
-export const getDocumentUpdateDate = async (filePath: string) => {
+export const getDocumentUpdateDate = async (filePath: string): Promise<string> => {
   const fileRef = storageRef(firebaseStorage, filePath);
   const { updated } = await getMetadata(fileRef);
 
   return getDateTime(updated);
 };
 
-export const getDocumentUploadDate = async (filePath: string) => {
+export const getDocumentUploadDate = async (filePath: string): Promise<string> => {
   const fileRef = storageRef(firebaseStorage, filePath);
   const { timeCreated } = await getMetadata(fileRef);
 
   return getDateTime(timeCreated);
 };
 
-export const getFirebaseDownloadUrl = (filePath: string) => {
+export const getFirebaseDownloadUrl = (filePath: string): Promise<string | undefined> => {
   const fileRef = storageRef(firebaseStorage, filePath);
 
   return getDownloadURL(fileRef)
     .then((url: string) => {
       return url;
     })
-    .catch((error: any) => {
-      console.error('Failed to get download URL', error);
+    .catch((error: unknown) => {
+      const err = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Failed to get download URL', err);
       return undefined;
     });
 };
 
-export const getFilename = (documentUrl: string, includeExtension = true) => {
+export const getFilename = (documentUrl: string, includeExtension = true): string => {
   const urlSplit = documentUrl.split('/');
   const filenameWithExtension = urlSplit[urlSplit.length - 1] || '';
 
@@ -257,14 +262,14 @@ export const getFilename = (documentUrl: string, includeExtension = true) => {
   return filenameWithExtension;
 };
 
-export const getFileExtension = (documentUrl: string) => {
+export const getFileExtension = (documentUrl: string): string => {
   const urlSplit = documentUrl.split('/');
   const filenameWithExtension = urlSplit[urlSplit.length - 1] || '';
 
   return filenameWithExtension.split('.')[1].toLocaleLowerCase();
 };
 
-export const getFirstName = (user?: User) => {
+export const getFirstName = (user?: User): string => {
   if (user) {
     return user?.displayName?.split(' ')[0] || '';
   }
@@ -272,7 +277,7 @@ export const getFirstName = (user?: User) => {
   return '';
 };
 
-export const getLastName = (user?: User) => {
+export const getLastName = (user?: User): string => {
   if (user) {
     const splitDisplayName = user?.displayName?.split(' ');
     if (splitDisplayName?.length == 2) {
