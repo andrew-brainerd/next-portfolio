@@ -3,7 +3,7 @@ import GameDisplay from 'components/steam/GameDisplay';
 
 type GameProps = OwnedGame & { isCompleted: boolean; isRecent: boolean; rank: number };
 
-const formatName = (name: string) => {
+const formatName = (name: string): string => {
   let formatted = name;
   formatted = formatted.replaceAll('(2009) - Multiplayer', ''); // CoD: MW2
   formatted = formatted.replaceAll('®', '');

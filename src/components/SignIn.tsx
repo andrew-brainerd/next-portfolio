@@ -33,23 +33,30 @@ export const SignIn = ({ redirectRoute }: SignInProps) => {
   const [authResponse, setAuthResponse] = useState<AuthResponse>({ isError: false, message: '' });
   const router = useRouter();
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
       handleSignIn();
     }
   };
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (): Promise<void> => {
     setIsLoading(true);
-    signInUser(email, password).then(response => {
+    try {
+      const response = await signInUser(email, password);
       setAuthResponse(response);
 
       if (!response.isError) {
-        router.push(redirectRoute);
+        await router.push(redirectRoute);
       } else {
         setIsLoading(false);
       }
-    });
+    } catch (error) {
+      setAuthResponse({
+        isError: true,
+        message: error instanceof Error ? error.message : 'Sign in failed'
+      });
+      setIsLoading(false);
+    }
   };
 
   return (

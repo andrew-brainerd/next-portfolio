@@ -20,13 +20,19 @@ export const ForgotPassword = () => {
   const [authResponse, setAuthResponse] = useState<AuthResponse>({ isError: false, message: '' });
   const router = useRouter();
 
-  const handleForgotPassword = async () => {
-    sendForgotPasswordEmail(email).then(response => {
+  const handleForgotPassword = async (): Promise<void> => {
+    try {
+      await sendForgotPasswordEmail(email);
       setAuthResponse({ isError: false, message: 'Password reset email sent' });
-    });
+    } catch (error) {
+      setAuthResponse({
+        isError: true,
+        message: error instanceof Error ? error.message : 'Failed to send reset email'
+      });
+    }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
       handleForgotPassword();
     }

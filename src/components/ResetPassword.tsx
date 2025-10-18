@@ -40,19 +40,23 @@ export const ResetPassword = () => {
     return { isError: false, message: 'Looks good' };
   }, [password, confirmPassword]);
 
-  const handleResetPassword = async () => {
+  const handleResetPassword = async (): Promise<void> => {
     const code = searchParams.get('code');
 
     if (!code) {
       return;
     }
 
-    resetPassword(code, password).then(() => {
+    try {
+      await resetPassword(code, password);
       router.replace(LOGIN_ROUTE);
-    });
+    } catch (error) {
+      console.error('Password reset failed:', error);
+      // Error will be shown in Firebase auth UI
+    }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
       handleResetPassword();
     }
