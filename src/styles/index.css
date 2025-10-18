@@ -57,6 +57,7 @@
   --font-pacifico: pacifico, cursive;
   --font-roboto: 'Roboto Mono', sans-serif;
   --animate-fade: fade-in-scale 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --animate-fade-in-up: fade-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 
   @keyframes fade-in-scale {
     from {
@@ -67,6 +68,18 @@
     to {
       opacity: 1;
       transform: scale(1);
+    }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }

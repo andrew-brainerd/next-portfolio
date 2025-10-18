@@ -64,6 +64,7 @@
     },
     "onlyBuiltDependencies": [
       "@firebase/util",
+      "@parcel/watcher",
       "@tailwindcss/oxide",
       "protobufjs",
       "sharp"
