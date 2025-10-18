@@ -27,7 +27,7 @@ interface SearchGamesResponse {
   results: SearchGame[];
 }
 
-const getRawgUrl = (path: string, params: Params) => {
+const getRawgUrl = (path: string, params: Params): string => {
   const apiKey = `?key=${RAWG_API_KEY}`;
   const parameters = Object.keys(params);
   const paramString = parameters.length ? parameters.map(param => `&${param}=${params[param]}`) : '';

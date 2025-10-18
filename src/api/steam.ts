@@ -3,7 +3,7 @@ import { MY_STEAM_ID, STEAM_API_KEY } from 'constants/steam';
 
 const steamFetchOpts = { next: { revalidate: 3600 } };
 
-const getSteamUrl = (path: string, steamId?: string, isMultipleUsers = false, hasExtraParams = false) => {
+const getSteamUrl = (path: string, steamId?: string, isMultipleUsers = false, hasExtraParams = false): string => {
   const route = `${path}${hasExtraParams ? '&' : '?'}key=${STEAM_API_KEY}&steamid${isMultipleUsers ? 's' : ''}=${
     steamId ?? MY_STEAM_ID
   }`;

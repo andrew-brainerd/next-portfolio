@@ -14,7 +14,7 @@ const client = axios.create({
   withCredentials: true
 });
 
-const getAuthHeaders = async () => {
+const getAuthHeaders = async (): Promise<Record<string, string>> => {
   const cookieJar = await cookies();
   const token = cookieJar.get(TOKEN_COOKIE)?.value;
 
@@ -24,7 +24,7 @@ const getAuthHeaders = async () => {
   };
 };
 
-const handleError = (method: Method, url: string, err: AxiosError) => {
+const handleError = (method: Method, url: string, err: AxiosError): void => {
   console.error(`${method} ${url}: ${err.message}`, global.window);
 };
 
