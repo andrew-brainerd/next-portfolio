@@ -1,0 +1,71 @@
+{
+  "project": {
+    "name": "next-portfolio",
+    "description": "Personal portfolio website built with Next.js 15, React 19, and TypeScript",
+    "language": "TypeScript",
+    "framework": "Next.js"
+  },
+  "preferences": {
+    "commitMessageStyle": "simple",
+    "commitCoAuthorship": false,
+    "commitEmoji": false,
+    "codeStyle": {
+      "quotes": "single",
+      "semi": true,
+      "trailingComma": "none",
+      "tabWidth": 2,
+      "printWidth": 120
+    }
+  },
+  "context": {
+    "techStack": [
+      "Next.js 15.5.6",
+      "React 19.2.0",
+      "TypeScript 5.9.3",
+      "Tailwind CSS 4.x",
+      "Zustand",
+      "Firebase",
+      "Material-UI"
+    ],
+    "packageManager": "pnpm",
+    "deploymentTarget": "Vercel",
+    "envFile": ".env",
+    "buildCommand": "pnpm build",
+    "devCommand": "pnpm dev",
+    "lintCommand": "pnpm lint"
+  },
+  "conventions": {
+    "fileNaming": "camelCase for components, kebab-case for utilities",
+    "componentStyle": "Server Components by default, 'use client' only when necessary",
+    "importStyle": "Absolute paths using src/* alias",
+    "cssFramework": "Tailwind CSS with custom theme",
+    "stateManagement": "Zustand for client state, Server Components for server state"
+  },
+  "aiGuidelines": {
+    "codeQuality": [
+      "Prefer Server Components over Client Components",
+      "Use TypeScript strict mode",
+      "Implement proper error handling with logging",
+      "Add proper accessibility attributes (aria-labels, semantic HTML)",
+      "Use proper SEO metadata with generateMetadata"
+    ],
+    "commitGuidelines": [
+      "Use simple, clear commit messages",
+      "No emojis or special formatting",
+      "No co-authorship tags",
+      "One logical change per commit"
+    ],
+    "testing": ["Write tests for critical business logic", "Use React Testing Library for component tests"]
+  },
+  "files": {
+    "ignore": ["node_modules", ".next", "out", "build", ".env", "*.log"],
+    "important": [
+      "src/app/layout.tsx",
+      "src/app/page.tsx",
+      "tsconfig.json",
+      "next.config.js",
+      "tailwind.config.*",
+      ".env.example"
+    ]
+  }
+}
