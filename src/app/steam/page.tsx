@@ -1,88 +1,116 @@
-'use client';
-
-import { useEffect, useState, use } from 'react';
-import cn from 'clsx';
 import { COMPLETED_GAMES, MINIMUM_PLAYTIME, MY_STEAM_ID } from 'constants/steam';
-import { useSteam } from 'hooks/useSteam';
+import { getOwnedGames, getPlayerSummary, getRecentGames } from 'api/steam';
 import Game from 'components/steam/Game';
+import { HowLongToBeatService } from 'howlongtobeat';
+import type { Metadata } from 'next';
 
 interface SteamProps {
   searchParams: Promise<{
-    count?: number;
+    count?: string;
     steamId?: string;
+    ttb?: string;
   }>;
 }
 
-const Steam = (props: SteamProps) => {
-  const { count, steamId } = use(props.searchParams);
+const HIDDEN_GAMES = [1454400];
 
-  const [isMounted, setIsMounted] = useState(false);
-  const { games, recentGames, showCompleted, showRecent, username, setShowRecent, setShowCompleted } = useSteam();
+export async function generateMetadata(props: SteamProps): Promise<Metadata> {
+  const { steamId } = await props.searchParams;
+  const { personaname } = await getPlayerSummary(steamId);
 
-  const userHeading = `${!steamId ? 'My ' : ''} Games${!steamId ? '' : ` for ${username}`}`;
-  const pageHeading = username === 'Invalid User' ? username : userHeading;
+  const title = steamId ? `${personaname}'s Steam Games` : 'My Steam Games';
+  const description = `Browse ${personaname}'s Steam gaming library and stats`;
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description
+    },
+    twitter: {
+      title,
+      description
+    }
+  };
+}
 
-  if (!isMounted) {
-    return null;
-  }
+const Steam = async (props: SteamProps) => {
+  const { count, steamId, ttb } = await props.searchParams;
+
+  const countNumber = count ? parseInt(count, 10) : undefined;
+  const shouldFetchTTB = ttb === 'true';
+
+  // Fetch data in parallel
+  const [{ personaname }, steamGames, recentGames] = await Promise.all([
+    getPlayerSummary(steamId),
+    getOwnedGames(steamId),
+    getRecentGames(steamId)
+  ]);
+
+  const userHeading = `${!steamId ? 'My ' : ''} Games${!steamId ? '' : ` for ${personaname}`}`;
+  const pageHeading = personaname === 'Invalid User' ? personaname : userHeading;
+
+  // Filter hidden games and add time-to-beat if requested
+  const filteredGames = steamGames.filter(game => !HIDDEN_GAMES.includes(game.appid));
+
+  const hltbService = shouldFetchTTB ? new HowLongToBeatService() : null;
+
+  const gamesWithTTB =
+    shouldFetchTTB && hltbService
+      ? await Promise.all(
+          filteredGames
+            .filter(game => (game?.playtime_forever || 0) / 60 > MINIMUM_PLAYTIME)
+            .map(async game => {
+              try {
+                const [timeToBeat] = await hltbService.search(game.name);
+                return {
+                  ...game,
+                  hoursToBeat: timeToBeat?.gameplayMain
+                };
+              } catch (e) {
+                return game;
+              }
+            })
+        )
+      : filteredGames;
+
+  // Process games: sort, filter by playtime, mark recent and completed
+  const processedGames = gamesWithTTB
+    .sort((a, b) => (b?.playtime_forever || 0) - (a?.playtime_forever || 0))
+    .map(game => {
+      const hasPlaytime = (game?.playtime_forever || 0) / 60 > MINIMUM_PLAYTIME;
+      const recentGame = recentGames.find(rg => game.appid === rg.appid);
+      const isRecent = (recentGame?.playtime_2weeks || 0) / 60 > MINIMUM_PLAYTIME;
+      const isCompleted = !!COMPLETED_GAMES.find(completedGame => game.appid === Number(completedGame));
+
+      return hasPlaytime ? { ...game, isRecent, isCompleted } : null;
+    })
+    .filter((game): game is NonNullable<typeof game> => game !== null)
+    .slice(0, countNumber || gamesWithTTB.length);
 
   return (
-    <div className="font-roboto my-0 mx-0 sm:mx-auto max-w-[1200px] p-2 sm:p-12" data-steam-id={steamId || MY_STEAM_ID}>
-      <div className="items-center flex flex-wrap justify-between mb-3">
-        <h2 className="font-pacifico text-4xl m-3.5">{pageHeading}</h2>
-        <div className="hidden">
-          <div className="h-5 ml-6 mr-2 w-5 bg-[#aef49e]" />
-          <span
-            className={cn('cursor-pointer select-none', { ['font-bold']: showRecent })}
-            onClick={() => setShowRecent(!showRecent)}
-          >
-            Recent
-          </span>
-          {/* <div className="h-5 ml-6 mr-2 w-5 bg-[#a3daed]" /> */}
-          {/* <span
-            className={cn("cursor-pointer select-none", { "font-bold": showRecent })}
-            onClick={() => setShowCompleted(!showCompleted)}
-          >
-            Completed
-          </span> */}
-        </div>
-      </div>
-      <div>
-        {(games || []).length ? (
-          games
-            .sort((a, b) => (b?.playtime_forever || 0) - (a?.playtime_forever || 0))
-            .map(game => {
-              const hasPlaytime = (game?.playtime_forever || 0) / 60 > MINIMUM_PLAYTIME;
-              const recentGame = recentGames.find(recentGame => game.appid === recentGame.appid);
-              const isRecent = (recentGame?.playtime_2weeks || 0) / 60 > MINIMUM_PLAYTIME;
-              const isCompleted = !!COMPLETED_GAMES.find(completedGame => game.appid === Number(completedGame));
-
-              if (!hasPlaytime) {
-                return undefined;
-              }
-
-              if (showRecent && !isRecent) {
-                return undefined;
-              }
-
-              if (showCompleted && !isCompleted) {
-                return undefined;
-              }
-
-              return { ...game, isRecent, isCompleted };
-            })
-            .filter(game => !!game)
-            .map((game, g) => game && <Game key={game.appid} rank={g + 1} {...game} />)
-            .slice(0, count || games.length)
+    <main
+      className="font-roboto my-0 mx-0 sm:mx-auto max-w-[1200px] p-2 sm:p-12"
+      data-steam-id={steamId || MY_STEAM_ID}
+    >
+      <header className="items-center flex flex-wrap justify-between mb-3">
+        <h1 className="font-pacifico text-4xl m-3.5">{pageHeading}</h1>
+      </header>
+      <section aria-label="Game library">
+        {processedGames.length > 0 ? (
+          <ul className="list-none p-0 m-0">
+            {processedGames.map((game, index) => (
+              <li key={game.appid}>
+                <Game rank={index + 1} {...game} />
+              </li>
+            ))}
+          </ul>
         ) : (
-          <h3>Invalid Steam ID Provided</h3>
+          <p role="alert">Invalid Steam ID Provided</p>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 
