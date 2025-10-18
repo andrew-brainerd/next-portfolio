@@ -3,7 +3,7 @@ const baseUrl = 'https://api.rawg.io/api';
 const { RAWG_API_KEY } = process.env;
 
 export interface Params {
-  [param: string]: any;
+  [param: string]: string | number | boolean | undefined;
 }
 
 interface GameDetails {
@@ -12,12 +12,21 @@ interface GameDetails {
   website: string;
 }
 
+interface Store {
+  id: number;
+  store: {
+    id: number;
+    name: string;
+    slug: string;
+  };
+}
+
 interface SearchGame {
   id: number;
   name: string;
   background_image: string;
   dominant_color: string;
-  stores: any[];
+  stores: Store[];
 }
 
 interface SearchGamesResponse {
