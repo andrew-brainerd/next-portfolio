@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Manga Search',
+  description: 'Search and browse manga collection'
+};
+
 export interface MangaLayoutProps {
   children: React.ReactNode;
 }
