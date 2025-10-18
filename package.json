@@ -2,6 +2,7 @@
   "name": "next-portfolio",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.18.3",
   "scripts": {
     "build": "next build",
@@ -11,8 +12,8 @@
     "lint:fix": "pnpm lint:js:fix && pnpm lint:css:fix",
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
-    "lint:css": "npx stylelint --config stylelint.json **/*.css",
-    "lint:css:fix": "npx stylelint --fix --config stylelint.json **/*.css",
+    "lint:css": "stylelint \"**/*.css\"",
+    "lint:css:fix": "stylelint \"**/*.css\" --fix",
     "prepare": "husky",
     "start": "next start",
     "update-packages": "npx npm-check-updates@latest -u && pnpm i && git add . && git commit -m \"Update packages\"",
@@ -50,9 +51,11 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.4",
+    "postcss-html": "^1.8.0",
     "sass": "^1.93.2",
     "stylelint": "^16.25.0",
-    "stylelint-config-standard": "^39.0.1"
+    "stylelint-config-standard": "^39.0.1",
+    "stylelint-order": "^7.0.0"
   },
   "lint-staged": {
     "**/*": "npx prettier --write --ignore-unknown"

@@ -99,6 +99,9 @@ importers:
       lint-staged:
         specifier: ^16.2.4
         version: 16.2.4
+      postcss-html:
+        specifier: ^1.8.0
+        version: 1.8.0
       sass:
         specifier: ^1.93.2
         version: 1.93.2
@@ -108,6 +111,9 @@ importers:
       stylelint-config-standard:
         specifier: ^39.0.1
         version: 39.0.1(stylelint@16.25.0(typescript@6.0.0-dev.20251017))
+      stylelint-order:
+        specifier: ^7.0.0
+        version: 7.0.0(stylelint@16.25.0(typescript@6.0.0-dev.20251017))
 
 packages:
   '@aashutoshrathi/word-wrap@1.2.6':
@@ -2698,6 +2704,10 @@ packages:
     resolution:
       { integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ== }
 
+  js-tokens@9.0.1:
+    resolution:
+      { integrity: sha512-mxa9E9ITFOt0ban3j6L5MpjwegGz6lBQmM1IJkWeBZGcMxto50+eWdjC/52xDbS2vy0k7vIMK0Fe2wfL9OQSpQ== }
+
   js-yaml@4.1.0:
     resolution:
       { integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA== }
@@ -3159,9 +3169,21 @@ packages:
       { integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg== }
     engines: { node: '>= 0.4' }
 
+  postcss-html@1.8.0:
+    resolution:
+      { integrity: sha512-5mMeb1TgLWoRKxZ0Xh9RZDfwUUIqRrcxO2uXO+Ezl1N5lqpCiSU5Gk6+1kZediBfBHFtPCdopr2UZ2SgUsKcgQ== }
+    engines: { node: ^12 || >=14 }
+
   postcss-resolve-nested-selector@0.1.6:
     resolution:
       { integrity: sha512-0sglIs9Wmkzbr8lQwEyIzlDOOC9bGmfVKcJTaxv3vMmd3uo4o4DerC3En0bnmgceeql9BfC8hRkp7cg0fjdVqw== }
+
+  postcss-safe-parser@6.0.0:
+    resolution:
+      { integrity: sha512-FARHN8pwH+WiS2OPCxJI8FuRJpTVnn6ZNFiqAM2aeW2LwTHWWmWgIyKC6cUo0L8aeKiF/14MNvnpls6R2PBeMQ== }
+    engines: { node: '>=12.0' }
+    peerDependencies:
+      postcss: ^8.3.3
 
   postcss-safe-parser@7.0.1:
     resolution:
@@ -3174,6 +3196,12 @@ packages:
     resolution:
       { integrity: sha512-8sLjZwK0R+JlxlYcTuVnyT2v+htpdrjDOKuMcOVdYjt52Lh8hWRYpxBPoKx/Zg+bcjc3wx6fmQevMmUztS/ccA== }
     engines: { node: '>=4' }
+
+  postcss-sorting@9.1.0:
+    resolution:
+      { integrity: sha512-Mn8KJ45HNNG6JBpBizXcyf6LqY/qyqetGcou/nprDnFwBFBLGj0j/sNKV2lj2KMOVOwdXu14aEzqJv8CIV6e8g== }
+    peerDependencies:
+      postcss: ^8.4.20
 
   postcss-value-parser@4.2.0:
     resolution:
@@ -3529,6 +3557,13 @@ packages:
     engines: { node: '>=18.12.0' }
     peerDependencies:
       stylelint: ^16.23.0
+
+  stylelint-order@7.0.0:
+    resolution:
+      { integrity: sha512-rSWxx0KscYfxU02wEskKXES9lkRzuuONMMNkZ7SUc6uiF3tDKm7e+sE0Ax/SBlG4TUf1sp1R6f3/SlsPGmzthg== }
+    engines: { node: '>=20.19.0' }
+    peerDependencies:
+      stylelint: ^16.18.0
 
   stylelint@16.25.0:
     resolution:
@@ -6244,6 +6279,8 @@ snapshots:
 
   js-tokens@4.0.0: {}
 
+  js-tokens@9.0.1: {}
+
   js-yaml@4.1.0:
     dependencies:
       argparse: 2.0.1
@@ -6585,7 +6622,18 @@ snapshots:
 
   possible-typed-array-names@1.1.0: {}
 
+  postcss-html@1.8.0:
+    dependencies:
+      htmlparser2: 8.0.2
+      js-tokens: 9.0.1
+      postcss: 8.5.6
+      postcss-safe-parser: 6.0.0(postcss@8.5.6)
+
   postcss-resolve-nested-selector@0.1.6: {}
+
+  postcss-safe-parser@6.0.0(postcss@8.5.6):
+    dependencies:
+      postcss: 8.5.6
 
   postcss-safe-parser@7.0.1(postcss@8.5.6):
     dependencies:
@@ -6595,6 +6643,10 @@ snapshots:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
+
+  postcss-sorting@9.1.0(postcss@8.5.6):
+    dependencies:
+      postcss: 8.5.6
 
   postcss-value-parser@4.2.0: {}
 
@@ -6954,6 +7006,12 @@ snapshots:
     dependencies:
       stylelint: 16.25.0(typescript@6.0.0-dev.20251017)
       stylelint-config-recommended: 17.0.0(stylelint@16.25.0(typescript@6.0.0-dev.20251017))
+
+  stylelint-order@7.0.0(stylelint@16.25.0(typescript@6.0.0-dev.20251017)):
+    dependencies:
+      postcss: 8.5.6
+      postcss-sorting: 9.1.0(postcss@8.5.6)
+      stylelint: 16.25.0(typescript@6.0.0-dev.20251017)
 
   stylelint@16.25.0(typescript@6.0.0-dev.20251017):
     dependencies:

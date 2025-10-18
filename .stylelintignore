@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+build/
+dist/
+out/
+
+# Testing
+coverage/
+
+# Misc
+*.min.css

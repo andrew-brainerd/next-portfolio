@@ -1,6 +1,7 @@
 {
   "permissions": {
-    "allow": ["Bash(git *)", "Bash(node *)", "Bash(npx *)", "Bash(pnpm *)", "WebSearch"],
+    "allow": ["Bash(git*)", "Bash(node*)", "Bash(npx*)", "Bash(pnpm*)", "WebSearch"],
+    "defaultMode": "acceptEdits",
     "deny": [],
     "ask": []
   }
