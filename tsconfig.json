@@ -21,8 +21,14 @@
       }
     ],
     "paths": {
-      "*": ["./src/*"],
-      "src/*": ["./src/*"]
+      "api/*": ["./src/api/*"],
+      "components/*": ["./src/components/*"],
+      "constants/*": ["./src/constants/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "providers/*": ["./src/providers/*"],
+      "styles/*": ["./src/styles/*"],
+      "types/*": ["./src/types/*"],
+      "utils/*": ["./src/utils/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next\\dev/types/**/*.ts"],
