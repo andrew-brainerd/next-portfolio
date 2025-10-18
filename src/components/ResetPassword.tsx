@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Alert from '@mui/material/Alert';
@@ -24,10 +24,21 @@ export const ResetPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
-  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [authResponse, setAuthResponse] = useState<AuthResponse>({ isError: false, message: '' });
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Derive validation state from password values - useMemo avoids setState in effect
+  const authResponse = useMemo<AuthResponse>(() => {
+    if (!confirmPassword) {
+      return { isError: false, message: '' };
+    }
+
+    if (password !== confirmPassword) {
+      return { isError: true, message: 'Passwords do not match' };
+    }
+
+    return { isError: false, message: 'Looks good' };
+  }, [password, confirmPassword]);
 
   const handleResetPassword = async () => {
     const code = searchParams.get('code');
@@ -46,16 +57,6 @@ export const ResetPassword = () => {
       handleResetPassword();
     }
   };
-
-  useEffect(() => {
-    if (confirmPassword) {
-      if (password !== confirmPassword) {
-        setAuthResponse({ isError: true, message: 'Passwords do not match' });
-      } else {
-        setAuthResponse({ isError: false, message: 'Looks good' });
-      }
-    }
-  }, [password, confirmPassword]);
 
   return (
     <div className="mt-[5%] flex flex-col items-center gap-y-6 sm:bg-inherit">

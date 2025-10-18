@@ -6,14 +6,17 @@
   "scripts": {
     "build": "next build",
     "clean": "rm -rf node_modules .next",
-    "dev": "next dev --turbopack",
-    "lint": "npm run lint:js",
-    "lint:js": "next lint",
+    "dev": "next dev",
+    "lint": "pnpm lint:js && pnpm lint:css",
+    "lint:fix": "pnpm lint:js:fix && pnpm lint:css:fix",
+    "lint:js": "eslint .",
+    "lint:js:fix": "eslint . --fix",
     "lint:css": "npx stylelint --config stylelint.json **/*.css",
+    "lint:css:fix": "npx stylelint --fix --config stylelint.json **/*.css",
     "prepare": "husky",
     "start": "next start",
     "update-packages": "npx npm-check-updates@latest -u && pnpm i && git add . && git commit -m \"Update packages\"",
-    "verify": "npx tsc && npm run lint"
+    "verify": "npx tsc && pnpm lint"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -30,10 +33,10 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.18",
     "eslint": "9.38.0",
-    "eslint-config-next": "15.5.6",
+    "eslint-config-next": "16.0.0-beta.0",
     "firebase": "^12.4.0",
     "howlongtobeat": "^1.8.0",
-    "next": "15.5.6",
+    "next": "16.0.0-beta.0",
     "postcss": "^8.5.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -43,6 +46,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@typescript-eslint/parser": "^8.25.0",
+    "babel-plugin-react-compiler": "^1.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.4",
     "sass": "^1.93.2",

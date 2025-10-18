@@ -5,7 +5,7 @@ import { TOKEN_COOKIE } from 'constants/authentication';
 import { LOGIN_ROUTE, MANGA_ROUTE } from 'constants/routes';
 import { getCookie } from 'utils/server';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const authCookie = await getCookie(TOKEN_COOKIE);
   const requestHeaders = await headers();
   const hostname = requestHeaders.get('host');

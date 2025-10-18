@@ -2,6 +2,10 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable React Compiler (stable in Next.js 16)
+  // Automatically optimizes component rendering and reduces need for manual memoization
+  reactCompiler: true,
+
   sassOptions: {
     includePaths: [path.join(__dirname, 'styles')]
   },
@@ -19,7 +23,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'firebasestorage.googleapis.com'
       }
-    ],
+    ]
   }
 };
 
