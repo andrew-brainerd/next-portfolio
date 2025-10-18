@@ -17,7 +17,7 @@ interface SearchGame {
   name: string;
   background_image: string;
   dominant_color: string;
-  stores: any[],
+  stores: any[];
 }
 
 interface SearchGamesResponse {
@@ -36,25 +36,60 @@ const getRawgUrl = (path: string, params: Params) => {
 };
 
 export const searchGames = async (name: string): Promise<SearchGamesResponse> => {
-  const response = await fetch(getRawgUrl('games', { search: name }));
-  const data: SearchGamesResponse = await response.json();
+  try {
+    const response = await fetch(getRawgUrl('games', { search: name }));
 
-  return data;
+    if (!response.ok) {
+      console.error(`RAWG API error: ${response.status} ${response.statusText}`);
+      return { count: 0, next: null, previous: null, results: [] };
+    }
+
+    const data: SearchGamesResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to search games:', error instanceof Error ? error.message : error);
+    return { count: 0, next: null, previous: null, results: [] };
+  }
 };
 
-export const getGameDetails = async (gameId: number) => {
-  const response = await fetch(getRawgUrl(`games/${gameId}`, {}));
-  const data: GameDetails = await response.json();
+export const getGameDetails = async (gameId: number): Promise<GameDetails | null> => {
+  try {
+    const response = await fetch(getRawgUrl(`games/${gameId}`, {}));
 
-  return data;
+    if (!response.ok) {
+      console.error(`RAWG API error: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data: GameDetails = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to get game details:', error instanceof Error ? error.message : error);
+    return null;
+  }
 };
 
-export const getGameData = async (name: string): Promise<GameDetails> => {
-  const { results: searchData } = await searchGames(name);
-  const gameDetails = await getGameDetails(searchData[0].id);
+export const getGameData = async (name: string): Promise<GameDetails | null> => {
+  try {
+    const { results: searchData } = await searchGames(name);
 
-  const { background_image, dominant_color } = searchData[0];
-  const { website } = gameDetails;
+    if (!searchData || searchData.length === 0) {
+      console.error('No game found with name:', name);
+      return null;
+    }
 
-  return { image: background_image, color: dominant_color, website };
+    const gameDetails = await getGameDetails(searchData[0].id);
+
+    if (!gameDetails) {
+      return null;
+    }
+
+    const { background_image, dominant_color } = searchData[0];
+    const { website } = gameDetails;
+
+    return { image: background_image, color: dominant_color, website };
+  } catch (error) {
+    console.error('Failed to get game data:', error instanceof Error ? error.message : error);
+    return null;
+  }
 };

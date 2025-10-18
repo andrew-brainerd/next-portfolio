@@ -15,15 +15,24 @@ export const getPlayerSummary = async (steamId?: string): Promise<Partial<Player
   try {
     const response = await fetch(getSteamUrl(`ISteamUser/GetPlayerSummaries/v0002`, steamId, true), steamFetchOpts);
 
-    const {
-      response: { players }
-    } = await response.json();
+    if (!response.ok) {
+      console.error(`Steam API error: ${response.status} ${response.statusText}`);
+      return { personaname: 'Invalid User' };
+    }
 
-    const player = players[0] ?? { personaname: 'Invalid User' };
+    const data = await response.json();
+
+    if (!data?.response?.players) {
+      console.error('Invalid Steam API response structure');
+      return { personaname: 'Invalid User' };
+    }
+
+    const player = data.response.players[0] ?? { personaname: 'Invalid User' };
 
     return player;
   } catch (error) {
-    return new Promise(res => res({ personaname: 'Invalid User' }));
+    console.error('Failed to fetch player summary:', error instanceof Error ? error.message : error);
+    return { personaname: 'Invalid User' };
   }
 };
 
@@ -33,13 +42,23 @@ export const getOwnedGames = async (steamId?: string): Promise<OwnedGame[]> => {
       getSteamUrl('IPlayerService/GetOwnedGames/v0001?include_appinfo=true', steamId, false, true),
       steamFetchOpts
     );
-    const {
-      response: { games }
-    } = await response.json();
 
-    return games;
+    if (!response.ok) {
+      console.error(`Steam API error: ${response.status} ${response.statusText}`);
+      return [];
+    }
+
+    const data = await response.json();
+
+    if (!data?.response?.games) {
+      console.error('Invalid Steam API response structure');
+      return [];
+    }
+
+    return data.response.games;
   } catch (error) {
-    return new Promise(res => res([]));
+    console.error('Failed to fetch owned games:', error instanceof Error ? error.message : error);
+    return [];
   }
 };
 
@@ -50,12 +69,21 @@ export const getRecentGames = async (steamId?: string): Promise<OwnedGame[]> => 
       steamFetchOpts
     );
 
-    const {
-      response: { games }
-    } = await response.json();
+    if (!response.ok) {
+      console.error(`Steam API error: ${response.status} ${response.statusText}`);
+      return [];
+    }
 
-    return games;
+    const data = await response.json();
+
+    if (!data?.response?.games) {
+      console.error('Invalid Steam API response structure');
+      return [];
+    }
+
+    return data.response.games;
   } catch (error) {
-    return new Promise(res => res([]));
+    console.error('Failed to fetch recent games:', error instanceof Error ? error.message : error);
+    return [];
   }
 };
