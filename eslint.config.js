@@ -1,13 +1,4 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname
-});
+import nextConfig from 'eslint-config-next';
 
 const config = [
   // Global ignores
@@ -15,7 +6,7 @@ const config = [
     ignores: ['node_modules/**', 'coverage/**', '.next/**', 'out/**', 'build/**']
   },
   // Extend Next.js config
-  ...compat.extends('next/core-web-vitals'),
+  ...nextConfig,
   // Custom rules
   {
     rules: {
