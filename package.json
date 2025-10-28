@@ -20,6 +20,8 @@
     "verify": "npx tsc && pnpm lint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.919.0",
+    "@aws-sdk/s3-request-presigner": "^3.919.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@lottiefiles/react-lottie-player": "^3.6.0",

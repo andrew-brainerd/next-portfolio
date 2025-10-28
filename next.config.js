@@ -25,6 +25,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'firebasestorage.googleapis.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'brainerd.s3.us-east-1.amazonaws.com'
       }
     ]
   }
