@@ -19,7 +19,7 @@ export default function UsPage() {
         setImages(imageUrls);
 
         // Load music URL
-        const musicResponse = await fetch('/api/s3-music');
+        const musicResponse = await fetch('/api/audio');
         const musicData = await musicResponse.json();
         if (musicData.url) {
           setMusicUrl(musicData.url);

@@ -5,7 +5,7 @@
  */
 export async function fetchS3Images(): Promise<string[]> {
   try {
-    const response = await fetch('/api/s3-images', {
+    const response = await fetch('/api/images', {
       cache: 'no-store' // Always fetch fresh images
     });
 
