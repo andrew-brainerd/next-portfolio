@@ -39,11 +39,19 @@
     "componentStyle": "Server Components by default, 'use client' only when necessary",
     "importStyle": "Absolute paths using src/* alias",
     "cssFramework": "Tailwind CSS with custom theme",
-    "stateManagement": "Zustand for client state, Server Components for server state"
+    "stateManagement": "Zustand for client state, Server Components for server state",
+    "nextjs": {
+      "layouts": "ALWAYS use Server Components (async) for layouts",
+      "pages": "PREFER Server Components (async) for pages - use 'use client' only when interactivity is required",
+      "dataFetching": "Use cookies() and headers() APIs in Server Components for authentication",
+      "clientComponents": "Only mark as 'use client' when using React hooks, browser APIs, or event handlers"
+    }
   },
   "aiGuidelines": {
     "codeQuality": [
-      "Prefer Server Components over Client Components",
+      "Prefer Server Components over Client Components for all Next.js layouts and pages",
+      "Next.js pages should be async Server Components by default, accessing cookies/headers for auth",
+      "Only use 'use client' directive when component needs React hooks, state, or browser APIs",
       "Use TypeScript strict mode",
       "Implement proper error handling with logging",
       "Add proper accessibility attributes (aria-labels, semantic HTML)",
