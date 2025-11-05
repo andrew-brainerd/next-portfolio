@@ -1,6 +1,9 @@
 import { Oswald, Pacifico, Roboto_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
+import { cookies, headers } from 'next/headers';
 
+import Navigation from '@/components/Navigation';
+import { USER_COOKIE } from '@/constants/authentication';
 import 'styles/index.css';
 
 const oswald = Oswald({ subsets: ['latin'], display: 'swap', variable: '--font-oswald' });
@@ -45,7 +48,15 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieJar = await cookies();
+  const userId = cookieJar.get(USER_COOKIE)?.value;
+  const isLoggedIn = !!userId;
+
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '/';
+  const isHomePage = pathname === '/';
+
   return (
     <html lang="en" className={`${roboto.variable} ${oswald.variable} ${pacifico.variable}`}>
       <head>
@@ -59,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to main content
         </a>
+        {!isHomePage && <Navigation isLoggedIn={isLoggedIn} />}
         <div id="main-content">{children}</div>
       </body>
     </html>

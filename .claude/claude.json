@@ -1,7 +1,7 @@
 {
   "project": {
     "name": "next-portfolio",
-    "description": "Personal portfolio website built with Next.js 15, React 19, and TypeScript",
+    "description": "Personal portfolio website built with Next.js 16, React 19, and TypeScript",
     "language": "TypeScript",
     "framework": "Next.js"
   },
@@ -19,7 +19,7 @@
   },
   "context": {
     "techStack": [
-      "Next.js 15.5.6",
+      "Next.js 16",
       "React 19.2.0",
       "TypeScript 5.9.3",
       "Tailwind CSS 4.x",
@@ -37,21 +37,26 @@
   "conventions": {
     "fileNaming": "camelCase for components, kebab-case for utilities",
     "componentStyle": "Server Components by default, 'use client' only when necessary",
+    "exportStyle": "Prefer named exports for components instead of default exports",
     "importStyle": "Absolute paths using src/* alias",
     "cssFramework": "Tailwind CSS with custom theme",
     "stateManagement": "Zustand for client state, Server Components for server state",
     "nextjs": {
+      "version": "Next.js 16 - middleware should use 'proxy' instead of 'middleware' in next.config",
       "layouts": "ALWAYS use Server Components (async) for layouts",
       "pages": "PREFER Server Components (async) for pages - use 'use client' only when interactivity is required",
       "dataFetching": "Use cookies() and headers() APIs in Server Components for authentication",
-      "clientComponents": "Only mark as 'use client' when using React hooks, browser APIs, or event handlers"
+      "clientComponents": "Only mark as 'use client' when using React hooks, browser APIs, or event handlers",
+      "middleware": "In Next.js 16, use proxy configuration instead of middleware.ts for request handling where applicable"
     }
   },
   "aiGuidelines": {
     "codeQuality": [
+      "This project uses Next.js 16 - prefer proxy configuration over middleware.ts where applicable",
       "Prefer Server Components over Client Components for all Next.js layouts and pages",
       "Next.js pages should be async Server Components by default, accessing cookies/headers for auth",
       "Only use 'use client' directive when component needs React hooks, state, or browser APIs",
+      "Use named exports for components instead of default exports (except for Next.js pages/layouts/route handlers)",
       "Use TypeScript strict mode",
       "Implement proper error handling with logging",
       "Add proper accessibility attributes (aria-labels, semantic HTML)",

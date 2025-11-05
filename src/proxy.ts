@@ -17,9 +17,16 @@ export async function proxy(request: NextRequest) {
   if (isProtectedRoute && !authCookie && hostname) {
     const protocol = process.env.NODE_ENV === 'production' ? 'https://' : 'http://';
     const baseUrl = `${protocol}${hostname}`;
+    const redirectUrl = new URL(`${LOGIN_ROUTE}?returnTo=${encodeURIComponent(pathname)}`, baseUrl);
 
-    return NextResponse.redirect(new URL(LOGIN_ROUTE, baseUrl));
+    return NextResponse.redirect(redirectUrl);
   }
+
+  // Add pathname to headers so layouts can access it
+  const response = NextResponse.next();
+  response.headers.set('x-pathname', pathname);
+
+  return response;
 }
 
 export const config = {

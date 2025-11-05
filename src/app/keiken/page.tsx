@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 
 import { getExperienceGroups } from '@/api/keiken';
 import { USER_COOKIE } from '@/constants/authentication';
+import CreateExperienceGroupForm from '@/components/keiken/CreateExperienceGroupForm';
 
 export default async function KeikenPage() {
   const cookieJar = await cookies();
@@ -19,7 +20,10 @@ export default async function KeikenPage() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Experience Groups</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Experience Groups</h1>
+        <CreateExperienceGroupForm userId={userId} />
+      </div>
 
       {!experienceGroups || experienceGroups.length === 0 ? (
         <p className="text-gray-400">No experience groups found.</p>

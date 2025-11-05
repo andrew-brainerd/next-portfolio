@@ -4,6 +4,7 @@ import LinkedinIcon from 'components/icons/LinkedinIcon';
 import MangaIcon from 'components/icons/MangaIcon';
 import MailIcon from 'components/icons/MailIcon';
 import SteamIcon from 'components/icons/SteamIcon';
+import KeikenIcon from 'components/icons/KeikenIcon';
 
 export default function Home() {
   return (
@@ -62,14 +63,22 @@ export default function Home() {
             <h2 id="play-heading" className="text-brand-400 text-3xl sm:text-5xl font-bold mb-4">
               Play
             </h2>
-            <p className="text-neutral-300 text-lg max-w-2xl mx-auto">Explore my gaming stats and manga collection</p>
+            <p className="text-neutral-300 text-lg max-w-2xl mx-auto">
+              Explore my gaming stats, manga collection, and experience tracker
+            </p>
           </div>
-          <nav className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 max-w-2xl mx-auto" aria-label="Gaming links">
+          <nav
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto"
+            aria-label="Gaming links"
+          >
             <HomeLink name="Steam Gaming Stats" path="/steam" openNewTab={false}>
               <SteamIcon className="fill-white h-20 w-20 sm:h-24 sm:w-24" aria-hidden="true" />
             </HomeLink>
             <HomeLink name="Manga Collection" path="/manga" openNewTab={false}>
               <MangaIcon className="fill-white h-20 w-20 sm:h-24 sm:w-24" aria-hidden="true" />
+            </HomeLink>
+            <HomeLink name="Experience Tracker" path="/keiken" openNewTab={false}>
+              <KeikenIcon className="fill-white h-20 w-20 sm:h-24 sm:w-24" aria-hidden="true" />
             </HomeLink>
           </nav>
         </div>
