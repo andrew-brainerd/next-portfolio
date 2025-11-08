@@ -30,6 +30,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'brainerd.s3.us-east-1.amazonaws.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'photos.zillowstatic.com'
       }
     ]
   }
