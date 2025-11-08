@@ -76,9 +76,13 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
-      return <span className="text-gray-500 ml-1">↕</span>;
+      return <span className="text-amber-300 ml-1">↕</span>;
     }
-    return sortDirection === 'asc' ? <span className="ml-1">↑</span> : <span className="ml-1">↓</span>;
+    return sortDirection === 'asc' ? (
+      <span className="ml-1 text-amber-100">↑</span>
+    ) : (
+      <span className="ml-1 text-amber-100">↓</span>
+    );
   };
 
   const formatCurrency = (value: string) => {
@@ -91,35 +95,35 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
   return (
     <>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-brand-600 rounded-lg overflow-hidden">
-          <thead className="bg-brand-700">
+        <table className="min-w-full bg-amber-50/85 rounded-lg overflow-hidden shadow-2xl backdrop-blur-sm">
+          <thead className="bg-gradient-to-r from-orange-900 to-amber-800 text-amber-50">
             <tr>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-brand-800 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
                 onClick={() => handleSort('address')}
               >
                 Address {getSortIcon('address')}
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-brand-800 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
                 onClick={() => handleSort('price')}
               >
                 Rent {getSortIcon('price')}
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-brand-800 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
                 onClick={() => handleSort('beds')}
               >
                 Beds {getSortIcon('beds')}
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-brand-800 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
                 onClick={() => handleSort('baths')}
               >
                 Baths {getSortIcon('baths')}
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-brand-800 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
                 onClick={() => handleSort('sqft')}
               >
                 Sqft {getSortIcon('sqft')}
@@ -131,7 +135,7 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
             {sortedProperties.map((property, index) => (
               <tr
                 key={`${property.address}-${index}`}
-                className="border-t border-brand-700 hover:bg-brand-700 transition-colors"
+                className="border-t border-amber-200 hover:bg-amber-200/60 transition-colors text-amber-950"
                 onMouseEnter={() => handleMouseEnter(index)}
                 onMouseLeave={handleMouseLeave}
               >
@@ -145,7 +149,7 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
                     href={property.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline"
+                    className="text-orange-700 hover:text-orange-900 underline font-semibold"
                   >
                     View
                   </a>
@@ -157,7 +161,7 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
       </div>
       {hoveredProperty?.image && (
         <div className="fixed left-4 top-1/2 -translate-y-1/2 z-50 pointer-events-none">
-          <div className="bg-brand-900 p-2 rounded-lg shadow-2xl border-2 border-brand-500">
+          <div className="bg-gradient-to-br from-orange-900 to-amber-800 p-2 rounded-lg shadow-2xl border-2 border-amber-600">
             <Image
               src={hoveredProperty.image}
               alt={hoveredProperty.address}

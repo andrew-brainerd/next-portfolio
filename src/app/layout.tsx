@@ -70,7 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           Skip to main content
         </a>
-        {!isHomePage && <Navigation isLoggedIn={isLoggedIn} />}
+        {!isHomePage && <Navigation isLoggedIn={isLoggedIn} pathname={pathname} />}
         <div id="main-content">{children}</div>
       </body>
     </html>
