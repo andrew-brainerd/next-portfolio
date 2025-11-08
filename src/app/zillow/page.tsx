@@ -123,8 +123,8 @@ export default async function ZillowPage() {
                   <span className="font-semibold text-amber-950">{property.price}</span>
                 </div>
                 <div>
-                  <span className="text-orange-700">Type:</span>{' '}
-                  <span className="text-amber-950">{property.propertyType}</span>
+                  <span className="text-orange-700">Sqft:</span>{' '}
+                  <span className="text-amber-950">{property.sqft?.toLocaleString()}</span>
                 </div>
                 <div>
                   <span className="text-orange-700">Beds:</span> <span className="text-amber-950">{property.beds}</span>
@@ -132,14 +132,6 @@ export default async function ZillowPage() {
                 <div>
                   <span className="text-orange-700">Baths:</span>{' '}
                   <span className="text-amber-950">{property.baths}</span>
-                </div>
-                <div>
-                  <span className="text-orange-700">Sqft:</span>{' '}
-                  <span className="text-amber-950">{property.sqft?.toLocaleString()}</span>
-                </div>
-                <div>
-                  <span className="text-orange-700">Year:</span>{' '}
-                  <span className="text-amber-950">{property.yearBuilt}</span>
                 </div>
               </div>
               {property.amenities && property.amenities.length > 0 && (
@@ -154,10 +146,7 @@ export default async function ZillowPage() {
                   </div>
                 </div>
               )}
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-orange-700">
-                  Available: {property.availableDate ? new Date(property.availableDate).toLocaleDateString() : 'N/A'}
-                </span>
+              <div className="flex justify-end items-center">
                 <a
                   href={property.link}
                   target="_blank"
