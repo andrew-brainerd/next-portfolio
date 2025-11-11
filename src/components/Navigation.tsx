@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { signOutUser } from '@/utils/firebase';
 
 interface NavigationProps {
@@ -32,7 +33,7 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
     >
       <div className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          <a
+          <Link
             href="/"
             className={
               isZillowPage
@@ -41,7 +42,7 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
             }
           >
             Home
-          </a>
+          </Link>
 
           {isLoggedIn && (
             <button

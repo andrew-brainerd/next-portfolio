@@ -1,5 +1,5 @@
 import { getZillowProperties } from '@/api/zillow';
-import PropertyTable from '@/components/zillow/PropertyTable';
+import PropertyViews from '@/components/zillow/PropertyViews';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 
@@ -97,7 +97,7 @@ export default async function ZillowPage() {
         </div>
 
         <div className="hidden md:block">
-          <PropertyTable properties={properties} />
+          <PropertyViews properties={properties} />
         </div>
 
         {/* Property Cards for Mobile View */}
