@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import PropertyTable from './PropertyTable';
 import PropertyMap from './PropertyMap';
 import type { ZillowProperty } from '@/types/zillow';
@@ -12,7 +13,30 @@ interface PropertyViewsProps {
 type ViewMode = 'table' | 'map';
 
 export default function PropertyViews({ properties }: PropertyViewsProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get('view');
+  const isInitialMount = useRef(true);
+
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    // Initialize from URL param if valid, otherwise default to table
+    return viewParam === 'map' || viewParam === 'table' ? viewParam : 'table';
+  });
+
+  useEffect(() => {
+    // Skip updating URL on initial mount
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Update URL when view mode changes from user interaction
+    const params = new URLSearchParams(searchParams.toString());
+    if (params.get('view') !== viewMode) {
+      params.set('view', viewMode);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
+  }, [viewMode, router, searchParams]);
 
   return (
     <>
