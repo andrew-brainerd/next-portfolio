@@ -1,8 +1,8 @@
 import { Oswald, Pacifico, Roboto_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 
-import Navigation from '@/components/Navigation';
+import ConditionalNavigation from '@/components/ConditionalNavigation';
 import { USER_COOKIE } from '@/constants/authentication';
 import 'styles/index.css';
 
@@ -53,10 +53,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const userId = cookieJar.get(USER_COOKIE)?.value;
   const isLoggedIn = !!userId;
 
-  const headersList = await headers();
-  const pathname = headersList.get('x-pathname') || '/';
-  const isHomePage = pathname === '/';
-
   return (
     <html lang="en" className={`${roboto.variable} ${oswald.variable} ${pacifico.variable}`}>
       <head>
@@ -70,7 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           Skip to main content
         </a>
-        {!isHomePage && <Navigation isLoggedIn={isLoggedIn} pathname={pathname} />}
+        <ConditionalNavigation isLoggedIn={isLoggedIn} />
         <div id="main-content">{children}</div>
       </body>
     </html>
