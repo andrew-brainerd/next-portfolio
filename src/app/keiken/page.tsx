@@ -1,14 +1,15 @@
 import { cookies } from 'next/headers';
 
 import { getExperienceGroups } from '@/api/keiken';
-import { USER_COOKIE } from '@/constants/authentication';
+import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
 import CreateExperienceGroupForm from '@/components/keiken/CreateExperienceGroupForm';
 
 export default async function KeikenPage() {
   const cookieJar = await cookies();
+  const token = cookieJar.get(TOKEN_COOKIE)?.value;
   const userId = cookieJar.get(USER_COOKIE)?.value;
 
-  if (!userId) {
+  if (!token || !userId) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-white text-xl">Please log in to view your experience groups.</p>

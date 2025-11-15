@@ -76,7 +76,7 @@ importers:
         version: 1.9.4
       next:
         specifier: 16.0.0
-        version: 16.0.0(@babel/core@7.28.4)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.93.2)
+        version: 16.0.0(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.93.2)
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
@@ -1326,6 +1326,11 @@ packages:
     resolution:
       { integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg== }
     engines: { node: '>= 8' }
+
+  '@opentelemetry/api@1.9.0':
+    resolution:
+      { integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg== }
+    engines: { node: '>=8.0.0' }
 
   '@parcel/watcher-android-arm64@2.5.1':
     resolution:
@@ -5887,6 +5892,9 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
+  '@opentelemetry/api@1.9.0':
+    optional: true
+
   '@parcel/watcher-android-arm64@2.5.1':
     optional: true
 
@@ -8069,7 +8077,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next@16.0.0(@babel/core@7.28.4)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.93.2):
+  next@16.0.0(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.93.2):
     dependencies:
       '@next/env': 16.0.0
       '@swc/helpers': 0.5.15
@@ -8087,6 +8095,7 @@ snapshots:
       '@next/swc-linux-x64-musl': 16.0.0
       '@next/swc-win32-arm64-msvc': 16.0.0
       '@next/swc-win32-x64-msvc': 16.0.0
+      '@opentelemetry/api': 1.9.0
       babel-plugin-react-compiler: 1.0.0
       sass: 1.93.2
       sharp: 0.34.4

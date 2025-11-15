@@ -8,11 +8,12 @@ import type { ZillowProperty } from '@/types/zillow';
 
 interface PropertyViewsProps {
   properties: ZillowProperty[];
+  isLoggedIn: boolean;
 }
 
 type ViewMode = 'table' | 'map';
 
-export default function PropertyViews({ properties }: PropertyViewsProps) {
+export default function PropertyViews({ properties, isLoggedIn }: PropertyViewsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const viewParam = searchParams.get('view');
@@ -63,7 +64,11 @@ export default function PropertyViews({ properties }: PropertyViewsProps) {
         </button>
       </div>
 
-      {viewMode === 'table' ? <PropertyTable properties={properties} /> : <PropertyMap properties={properties} />}
+      {viewMode === 'table' ? (
+        <PropertyTable properties={properties} isLoggedIn={isLoggedIn} />
+      ) : (
+        <PropertyMap properties={properties} />
+      )}
     </>
   );
 }

@@ -6,5 +6,5 @@ import { getRequest } from '@/api/client';
  * @returns Promise with array of Zillow properties or undefined
  */
 export const getZillowProperties = (): Promise<ZillowProperty[] | undefined> => {
-  return getRequest<ZillowProperty[]>('/api/zillow');
+  return getRequest<ZillowProperty[]>('/zillow');
 };

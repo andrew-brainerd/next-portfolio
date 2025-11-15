@@ -1,7 +1,9 @@
+import { cookies } from 'next/headers';
 import { getZillowProperties } from '@/api/zillow';
 import PropertyViews from '@/components/zillow/PropertyViews';
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import { TOKEN_COOKIE } from '@/constants/authentication';
 
 export const metadata: Metadata = {
   title: 'Zillow Properties',
@@ -17,6 +19,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ZillowPage() {
+  const cookieJar = await cookies();
+  const token = cookieJar.get(TOKEN_COOKIE)?.value;
+  const isLoggedIn = !!token;
+
   const properties = await getZillowProperties();
 
   if (!properties || properties.length === 0) {
@@ -97,7 +103,7 @@ export default async function ZillowPage() {
         </div>
 
         <div className="hidden md:block">
-          <PropertyViews properties={properties} />
+          <PropertyViews properties={properties} isLoggedIn={isLoggedIn} />
         </div>
 
         {/* Property Cards for Mobile View */}

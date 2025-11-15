@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
 import ConditionalNavigation from '@/components/ConditionalNavigation';
-import { USER_COOKIE } from '@/constants/authentication';
+import { TOKEN_COOKIE } from '@/constants/authentication';
 import 'styles/index.css';
 
 const oswald = Oswald({ subsets: ['latin'], display: 'swap', variable: '--font-oswald' });
@@ -50,8 +50,8 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieJar = await cookies();
-  const userId = cookieJar.get(USER_COOKIE)?.value;
-  const isLoggedIn = !!userId;
+  const token = cookieJar.get(TOKEN_COOKIE)?.value;
+  const isLoggedIn = !!token;
 
   return (
     <html lang="en" className={`${roboto.variable} ${oswald.variable} ${pacifico.variable}`}>

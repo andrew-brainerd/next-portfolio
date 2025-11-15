@@ -23,15 +23,44 @@ const INPUT_WIDTH = 300;
 
 interface SignInProps {
   redirectRoute: string;
+  fromPath: string;
 }
 
-export const SignIn = ({ redirectRoute }: SignInProps) => {
+export const SignIn = ({ redirectRoute, fromPath }: SignInProps) => {
   const { isLoading, setIsLoading } = useAppLoading();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [authResponse, setAuthResponse] = useState<AuthResponse>({ isError: false, message: '' });
   const router = useRouter();
+
+  // Determine theme based on fromPath
+  const isZillowTheme = fromPath === '/zillow';
+  const isMangaTheme = fromPath.startsWith('/manga');
+
+  const getThemeClasses = () => {
+    if (isZillowTheme) {
+      return {
+        background: 'bg-brand-800',
+        title: 'text-brand-700',
+        titleText: 'Zillow Login'
+      };
+    }
+    if (isMangaTheme) {
+      return {
+        background: 'bg-brand-800',
+        title: 'text-brand-700',
+        titleText: 'Manga Login'
+      };
+    }
+    return {
+      background: 'bg-brand-800',
+      title: 'text-brand-700',
+      titleText: 'Login'
+    };
+  };
+
+  const theme = getThemeClasses();
 
   const handleKeyPress = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
@@ -60,9 +89,9 @@ export const SignIn = ({ redirectRoute }: SignInProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-y-6 bg-brand-800 w-full h-screen">
+    <div className={`flex flex-col items-center gap-y-6 ${theme.background} w-full h-screen`}>
       <div className=" mt-[5%] input-box flex max-w-[572px] flex-col gap-y-2 rounded bg-white shadow p-8">
-        <h1 className="mb-7 overflow-visible text-2xl text-brand-700 text-center">Manga Login</h1>
+        <h1 className={`mb-7 overflow-visible text-2xl ${theme.title} text-center`}>{theme.titleText}</h1>
         <div className="mb-3">
           <TextField
             label="Email"

@@ -44,7 +44,7 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
             Home
           </Link>
 
-          {isLoggedIn && (
+          {isLoggedIn ? (
             <button
               onClick={handleLogout}
               className={
@@ -56,6 +56,17 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
             >
               Logout
             </button>
+          ) : (
+            <Link
+              href={`/login?from=${encodeURIComponent(pathname)}`}
+              className={
+                isZillowPage
+                  ? 'bg-orange-800 hover:bg-orange-700 px-4 py-2 rounded transition-colors text-amber-50'
+                  : 'bg-brand-600 hover:bg-brand-500 px-4 py-2 rounded transition-colors'
+              }
+            >
+              Login
+            </Link>
           )}
         </div>
       </div>

@@ -1,29 +1,45 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import type { ZillowProperty } from '@/types/zillow';
+import { getPropertyRank, setPropertyRank } from '@/api/propertyRankings';
 
-type SortField = keyof ZillowProperty;
+type SortField = keyof ZillowProperty | 'rank';
 type SortDirection = 'asc' | 'desc';
 
 interface PropertyTableProps {
   properties: ZillowProperty[];
+  isLoggedIn: boolean;
 }
 
-export default function PropertyTable({ properties }: PropertyTableProps) {
-  const [sortField, setSortField] = useState<SortField>('updatedOn');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+interface PropertyWithRank extends ZillowProperty {
+  rank: number | null;
+  commuteTime?: number | null;
+}
+
+export default function PropertyTable({ properties, isLoggedIn }: PropertyTableProps) {
+  const [sortField, setSortField] = useState<SortField>(isLoggedIn ? 'rank' : 'updatedOn');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [propertiesWithRanks, setPropertiesWithRanks] = useState<PropertyWithRank[]>([]);
+  const [editingRank, setEditingRank] = useState<string | null>(null);
+  const [rankInputValue, setRankInputValue] = useState<string>('');
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
 
   useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-      }
-    };
-  }, []);
+    // Load rankings from API for all properties
+    async function loadRankings() {
+      const propertiesWithRankData = await Promise.all(
+        properties.map(async property => {
+          const rank = await getPropertyRank(property.address);
+          return { ...property, rank };
+        })
+      );
+      setPropertiesWithRanks(propertiesWithRankData);
+    }
+
+    loadRankings();
+  }, [properties]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -34,26 +50,61 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
     }
   };
 
-  const handleMouseEnter = (index: number) => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
-    hoverTimeoutRef.current = setTimeout(() => {
-      setHoveredIndex(index);
-    }, 1000);
+  const handleRankEdit = (address: string, currentRank: number | null) => {
+    setEditingRank(address);
+    setRankInputValue(currentRank !== null ? String(currentRank) : '');
   };
 
-  const handleMouseLeave = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
+  const handleRankSave = async (address: string) => {
+    const rank = parseInt(rankInputValue, 10);
+
+    if (!isNaN(rank) && rank > 0) {
+      try {
+        const result = await setPropertyRank(address, rank);
+
+        if (result.success) {
+          setPropertiesWithRanks(prev => prev.map(p => (p.address === address ? { ...p, rank } : p)));
+        } else {
+          console.error('Failed to save rank:', result.error);
+        }
+      } catch (error) {
+        console.error('Failed to save rank:', error);
+      }
     }
-    setHoveredIndex(null);
+
+    setEditingRank(null);
+    setRankInputValue('');
+  };
+
+  const handleRankCancel = () => {
+    setEditingRank(null);
+    setRankInputValue('');
+  };
+
+  const handleImageMouseEnter = (image: string) => {
+    setHoveredImage(image);
+  };
+
+  const handleImageMouseLeave = () => {
+    setHoveredImage(null);
   };
 
   const sortedProperties = useMemo(() => {
-    return [...properties].sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
+    return [...propertiesWithRanks].sort((a, b) => {
+      // Special handling for rank field
+      if (sortField === 'rank') {
+        const aRank = a.rank;
+        const bRank = b.rank;
+
+        if (aRank == null && bRank == null) return 0;
+        if (aRank == null) return 1;
+        if (bRank == null) return -1;
+
+        return sortDirection === 'asc' ? aRank - bRank : bRank - aRank;
+      }
+
+      const aValue = a[sortField as keyof ZillowProperty];
+      const bValue = b[sortField as keyof ZillowProperty];
 
       // Handle null/undefined values
       if (aValue == null && bValue == null) return 0;
@@ -72,7 +123,7 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
 
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [properties, sortField, sortDirection]);
+  }, [propertiesWithRanks, sortField, sortDirection]);
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
@@ -90,14 +141,21 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
     return isNaN(num) ? value : `$${num.toLocaleString()}`;
   };
 
-  const hoveredProperty = hoveredIndex !== null ? sortedProperties[hoveredIndex] : null;
-
   return (
     <>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-amber-50/85 rounded-lg overflow-hidden shadow-2xl backdrop-blur-sm">
           <thead className="bg-gradient-to-r from-orange-900 to-amber-800 text-amber-50">
             <tr>
+              {isLoggedIn && (
+                <th
+                  className="px-2 py-3 text-center cursor-pointer hover:bg-orange-950/80 transition-colors select-none w-20"
+                  onClick={() => handleSort('rank')}
+                >
+                  Rank {getSortIcon('rank')}
+                </th>
+              )}
+              <th className="px-4 py-3 text-left"></th>
               <th
                 className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
                 onClick={() => handleSort('address')}
@@ -128,6 +186,7 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
               >
                 Sqft {getSortIcon('sqft')}
               </th>
+              <th className="px-4 py-3 text-left">Commute</th>
               <th className="px-4 py-3 text-left">Link</th>
             </tr>
           </thead>
@@ -135,16 +194,78 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
             {sortedProperties.map((property, index) => (
               <tr
                 key={`${property.address}-${index}`}
-                className="border-t border-amber-200 hover:bg-amber-200/60 transition-colors text-amber-950"
-                onMouseEnter={() => handleMouseEnter(index)}
-                onMouseLeave={handleMouseLeave}
+                className={`border-t border-amber-200 hover:bg-amber-200/60 transition-colors text-amber-950 ${
+                  isLoggedIn && editingRank !== property.address ? 'cursor-pointer' : ''
+                }`}
+                onClick={() => {
+                  if (isLoggedIn && editingRank !== property.address) {
+                    handleRankEdit(property.address, property.rank);
+                  }
+                }}
               >
+                {isLoggedIn && (
+                  <td className="px-2 py-3 text-center" onClick={e => e.stopPropagation()}>
+                    {editingRank === property.address ? (
+                      <div className="flex gap-1 justify-center">
+                        <input
+                          type="number"
+                          min="1"
+                          value={rankInputValue}
+                          onChange={e => setRankInputValue(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              handleRankSave(property.address);
+                            } else if (e.key === 'Escape') {
+                              handleRankCancel();
+                            }
+                          }}
+                          className="w-12 px-1 py-1 border border-orange-300 rounded bg-white text-amber-950 text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleRankSave(property.address)}
+                          className="px-1.5 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800"
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={handleRankCancel}
+                          className="px-1.5 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="font-semibold">{property.rank || '-'}</span>
+                    )}
+                  </td>
+                )}
+                <td className="px-2 py-3 text-center">
+                  {property.image ? (
+                    <div className="inline-block">
+                      <Image
+                        src={property.image}
+                        alt={property.address}
+                        width={100}
+                        height={75}
+                        className="rounded object-cover border-2 border-amber-300 cursor-pointer"
+                        onMouseEnter={() => handleImageMouseEnter(property.image)}
+                        onMouseLeave={handleImageMouseLeave}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-[100px] h-[75px] bg-amber-200 rounded flex items-center justify-center text-xs text-amber-700 mx-auto">
+                      No Image
+                    </div>
+                  )}
+                </td>
                 <td className="px-4 py-3">{property.address}</td>
                 <td className="px-4 py-3">{formatCurrency(property.price)}</td>
                 <td className="px-4 py-3">{property.beds}</td>
                 <td className="px-4 py-3">{property.baths}</td>
                 <td className="px-4 py-3">{property.sqft?.toLocaleString()}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3">{property.commuteTime || '-'}</td>
+                <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                   <a
                     href={property.link}
                     target="_blank"
@@ -159,17 +280,17 @@ export default function PropertyTable({ properties }: PropertyTableProps) {
           </tbody>
         </table>
       </div>
-      {hoveredProperty?.image && (
-        <div className="fixed left-4 top-1/2 -translate-y-1/2 z-50 pointer-events-none">
-          <div className="bg-gradient-to-br from-orange-900 to-amber-800 p-2 rounded-lg shadow-2xl border-2 border-amber-600">
-            <Image
-              src={hoveredProperty.image}
-              alt={hoveredProperty.address}
-              width={600}
-              height={450}
-              className="rounded object-cover"
-            />
-          </div>
+
+      {/* Image preview overlay - centered on page */}
+      {hoveredImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none bg-black/50">
+          <Image
+            src={hoveredImage}
+            alt="Property preview"
+            width={800}
+            height={600}
+            className="rounded-lg shadow-2xl border-4 border-amber-300 object-cover max-w-[90vw] max-h-[90vh]"
+          />
         </div>
       )}
     </>
