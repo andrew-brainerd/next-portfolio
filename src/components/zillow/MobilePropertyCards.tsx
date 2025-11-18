@@ -106,13 +106,13 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
                     />
                     <button
                       onClick={() => handleRankSave(property.address)}
-                      className="px-2 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800"
+                      className="px-2 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800 select-none cursor-pointer"
                     >
                       ✓
                     </button>
                     <button
                       onClick={handleRankCancel}
-                      className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
+                      className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 select-none cursor-pointer"
                     >
                       ✕
                     </button>
@@ -120,7 +120,7 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
                 ) : (
                   <button
                     onClick={() => handleRankEdit(property.address, property.rank)}
-                    className="px-3 py-1 bg-orange-700 text-amber-50 rounded-full text-sm font-bold hover:bg-orange-800 transition-colors"
+                    className="px-3 py-1 bg-orange-700 text-amber-50 rounded-full text-sm font-bold hover:bg-orange-800 transition-colors select-none cursor-pointer"
                   >
                     {property.rank || '—'}
                   </button>

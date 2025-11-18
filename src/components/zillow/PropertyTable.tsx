@@ -194,7 +194,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
             {sortedProperties.map((property, index) => (
               <tr
                 key={`${property.address}-${index}`}
-                className={`border-t border-amber-200 hover:bg-amber-200/60 transition-colors text-amber-950 ${
+                className={`hover:bg-amber-200/60 transition-colors text-amber-950 ${
                   isLoggedIn && editingRank !== property.address ? 'cursor-pointer' : ''
                 }`}
                 onClick={() => {
@@ -224,13 +224,13 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
                         />
                         <button
                           onClick={() => handleRankSave(property.address)}
-                          className="px-1.5 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800"
+                          className="px-1.5 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800 select-none cursor-pointer"
                         >
                           ✓
                         </button>
                         <button
                           onClick={handleRankCancel}
-                          className="px-1.5 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
+                          className="px-1.5 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 select-none cursor-pointer"
                         >
                           ✕
                         </button>
@@ -248,7 +248,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
                         alt={property.address}
                         width={100}
                         height={75}
-                        className="rounded object-cover border-2 border-amber-300 cursor-pointer"
+                        className="rounded object-cover cursor-pointer"
                         onMouseEnter={() => handleImageMouseEnter(property.image)}
                         onMouseLeave={handleImageMouseLeave}
                       />
@@ -289,7 +289,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
             alt="Property preview"
             width={800}
             height={600}
-            className="rounded-lg shadow-2xl border-4 border-amber-300 object-cover max-w-[90vw] max-h-[90vh]"
+            className="rounded-lg shadow-2xl object-cover max-w-[90vw] max-h-[90vh]"
           />
         </div>
       )}
