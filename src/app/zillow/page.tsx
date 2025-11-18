@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { getZillowProperties } from '@/api/zillow';
 import PropertyViews from '@/components/zillow/PropertyViews';
-import Image from 'next/image';
+import MobilePropertyCards from '@/components/zillow/MobilePropertyCards';
 import type { Metadata } from 'next';
 import { TOKEN_COOKIE } from '@/constants/authentication';
 
@@ -107,64 +107,7 @@ export default async function ZillowPage() {
         </div>
 
         {/* Property Cards for Mobile View */}
-        <div className="grid gap-4 md:hidden">
-          {properties.map((property, index) => (
-            <div
-              key={`${property.address}-${index}`}
-              className="bg-amber-50/85 rounded-lg p-4 hover:bg-amber-100/85 transition-colors shadow-lg backdrop-blur-sm border border-amber-200"
-            >
-              {property.image && (
-                <Image
-                  src={property.image}
-                  alt={property.address}
-                  width={800}
-                  height={400}
-                  className="w-full h-48 object-cover rounded-lg mb-4 border-2 border-amber-300"
-                />
-              )}
-              <h2 className="text-xl font-semibold mb-2 text-orange-900">{property.address}</h2>
-              <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-                <div>
-                  <span className="text-orange-700">Rent:</span>{' '}
-                  <span className="font-semibold text-amber-950">{property.price}</span>
-                </div>
-                <div>
-                  <span className="text-orange-700">Sqft:</span>{' '}
-                  <span className="text-amber-950">{property.sqft?.toLocaleString()}</span>
-                </div>
-                <div>
-                  <span className="text-orange-700">Beds:</span> <span className="text-amber-950">{property.beds}</span>
-                </div>
-                <div>
-                  <span className="text-orange-700">Baths:</span>{' '}
-                  <span className="text-amber-950">{property.baths}</span>
-                </div>
-              </div>
-              {property.amenities && property.amenities.length > 0 && (
-                <div className="mb-3">
-                  <span className="text-orange-700 text-sm">Amenities:</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {property.amenities.map((amenity, i) => (
-                      <span key={i} className="text-xs bg-orange-800 text-amber-50 px-2 py-1 rounded">
-                        {amenity}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="flex justify-end items-center">
-                <a
-                  href={property.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-orange-700 hover:text-orange-900 underline text-sm font-semibold"
-                >
-                  View Listing
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
+        <MobilePropertyCards properties={properties} isLoggedIn={isLoggedIn} />
       </div>
     </div>
   );
