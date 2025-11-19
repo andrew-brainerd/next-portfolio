@@ -186,7 +186,6 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
               >
                 Sqft {getSortIcon('sqft')}
               </th>
-              <th className="px-4 py-3 text-left">Commute</th>
               <th className="px-4 py-3 text-left">Link</th>
             </tr>
           </thead>
@@ -264,7 +263,6 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
                 <td className="px-4 py-3">{property.beds}</td>
                 <td className="px-4 py-3">{property.baths}</td>
                 <td className="px-4 py-3">{property.sqft?.toLocaleString()}</td>
-                <td className="px-4 py-3">{property.commuteTime || '-'}</td>
                 <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                   <a
                     href={property.link}
