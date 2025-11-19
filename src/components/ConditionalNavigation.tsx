@@ -10,8 +10,9 @@ interface ConditionalNavigationProps {
 export default function ConditionalNavigation({ isLoggedIn }: ConditionalNavigationProps) {
   const pathname = usePathname();
   const isHomePage = pathname === '/';
+  const isUsPage = pathname === '/us';
 
-  if (isHomePage) {
+  if (isHomePage || isUsPage) {
     return null;
   }
 
