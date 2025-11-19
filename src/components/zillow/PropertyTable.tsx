@@ -21,6 +21,8 @@ interface PropertyWithRank extends ZillowProperty {
 export default function PropertyTable({ properties, isLoggedIn }: PropertyTableProps) {
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [backupSortField, setBackupSortField] = useState<SortField>('price');
+  const [backupSortDirection, setBackupSortDirection] = useState<SortDirection>('desc');
   const [propertiesWithRanks, setPropertiesWithRanks] = useState<PropertyWithRank[]>([]);
   const [editingRank, setEditingRank] = useState<string | null>(null);
   const [rankInputValue, setRankInputValue] = useState<string>('');
@@ -47,6 +49,15 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
     } else {
       setSortField(field);
       setSortDirection('asc');
+    }
+  };
+
+  const handleBackupSort = (field: SortField) => {
+    if (backupSortField === field) {
+      setBackupSortDirection(backupSortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setBackupSortField(field);
+      setBackupSortDirection('asc');
     }
   };
 
@@ -89,47 +100,68 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
     setHoveredImage(null);
   };
 
-  const sortedProperties = useMemo(() => {
-    return [...propertiesWithRanks].sort((a, b) => {
-      // Special handling for rank field
-      if (sortField === 'rank') {
-        const aRank = a.rank;
-        const bRank = b.rank;
+  const { rankedProperties, backupProperties } = useMemo(() => {
+    const ranked = propertiesWithRanks.filter(p => p.rank != null);
+    const backups = propertiesWithRanks.filter(p => p.rank == null);
 
-        if (aRank == null && bRank == null) return 0;
-        if (aRank == null) return 1;
-        if (bRank == null) return -1;
+    const createSortFn = (field: SortField, direction: SortDirection) => {
+      return (a: PropertyWithRank, b: PropertyWithRank) => {
+        // Special handling for rank field
+        if (field === 'rank') {
+          const aRank = a.rank;
+          const bRank = b.rank;
 
-        return sortDirection === 'asc' ? aRank - bRank : bRank - aRank;
-      }
+          if (aRank == null && bRank == null) return 0;
+          if (aRank == null) return 1;
+          if (bRank == null) return -1;
 
-      const aValue = a[sortField as keyof ZillowProperty];
-      const bValue = b[sortField as keyof ZillowProperty];
+          return direction === 'asc' ? aRank - bRank : bRank - aRank;
+        }
 
-      // Handle null/undefined values
-      if (aValue == null && bValue == null) return 0;
-      if (aValue == null) return 1;
-      if (bValue == null) return -1;
+        const aValue = a[field as keyof ZillowProperty];
+        const bValue = b[field as keyof ZillowProperty];
 
-      // Compare values
-      let comparison = 0;
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        comparison = aValue.localeCompare(bValue);
-      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-        comparison = aValue - bValue;
-      } else {
-        comparison = String(aValue).localeCompare(String(bValue));
-      }
+        // Handle null/undefined values
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return 1;
+        if (bValue == null) return -1;
 
-      return sortDirection === 'asc' ? comparison : -comparison;
-    });
-  }, [propertiesWithRanks, sortField, sortDirection]);
+        // Compare values
+        let comparison = 0;
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          comparison = aValue.localeCompare(bValue);
+        } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+          comparison = aValue - bValue;
+        } else {
+          comparison = String(aValue).localeCompare(String(bValue));
+        }
+
+        return direction === 'asc' ? comparison : -comparison;
+      };
+    };
+
+    return {
+      rankedProperties: [...ranked].sort(createSortFn(sortField, sortDirection)),
+      backupProperties: [...backups].sort(createSortFn(backupSortField, backupSortDirection))
+    };
+  }, [propertiesWithRanks, sortField, sortDirection, backupSortField, backupSortDirection]);
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
       return <span className="text-amber-300 ml-1">↕</span>;
     }
     return sortDirection === 'asc' ? (
+      <span className="ml-1 text-amber-100">↑</span>
+    ) : (
+      <span className="ml-1 text-amber-100">↓</span>
+    );
+  };
+
+  const getBackupSortIcon = (field: SortField) => {
+    if (backupSortField !== field) {
+      return <span className="text-gray-400 ml-1">↕</span>;
+    }
+    return backupSortDirection === 'asc' ? (
       <span className="ml-1 text-amber-100">↑</span>
     ) : (
       <span className="ml-1 text-amber-100">↓</span>
@@ -188,7 +220,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
             </tr>
           </thead>
           <tbody>
-            {sortedProperties.map((property, index) => (
+            {rankedProperties.map((property, index) => (
               <tr
                 key={`${property.address}-${index}`}
                 className={`hover:bg-amber-200/60 transition-colors text-amber-950 ${
@@ -274,6 +306,94 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
           </tbody>
         </table>
       </div>
+
+      {/* Backups table for unranked properties */}
+      {backupProperties.length > 0 && (
+        <div className="overflow-x-auto mt-8">
+          <h3 className="text-xl font-semibold text-amber-100 mb-4">Backups</h3>
+          <table className="min-w-full bg-amber-50/85 rounded-lg overflow-hidden shadow-2xl backdrop-blur-sm">
+            <thead className="bg-gradient-to-r from-gray-700 to-gray-600 text-amber-50">
+              <tr>
+                <th className="px-4 py-3 text-left"></th>
+                <th
+                  className="px-4 py-3 text-left cursor-pointer hover:bg-gray-800/80 transition-colors select-none"
+                  onClick={() => handleBackupSort('address')}
+                >
+                  Address {getBackupSortIcon('address')}
+                </th>
+                <th
+                  className="px-4 py-3 text-left cursor-pointer hover:bg-gray-800/80 transition-colors select-none"
+                  onClick={() => handleBackupSort('price')}
+                >
+                  Rent {getBackupSortIcon('price')}
+                </th>
+                <th
+                  className="px-4 py-3 text-left cursor-pointer hover:bg-gray-800/80 transition-colors select-none"
+                  onClick={() => handleBackupSort('beds')}
+                >
+                  Beds {getBackupSortIcon('beds')}
+                </th>
+                <th
+                  className="px-4 py-3 text-left cursor-pointer hover:bg-gray-800/80 transition-colors select-none"
+                  onClick={() => handleBackupSort('baths')}
+                >
+                  Baths {getBackupSortIcon('baths')}
+                </th>
+                <th
+                  className="px-4 py-3 text-left cursor-pointer hover:bg-gray-800/80 transition-colors select-none"
+                  onClick={() => handleBackupSort('sqft')}
+                >
+                  Sqft {getBackupSortIcon('sqft')}
+                </th>
+                <th className="px-4 py-3 text-left">Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              {backupProperties.map((property, index) => (
+                <tr
+                  key={`backup-${property.address}-${index}`}
+                  className="hover:bg-amber-200/60 transition-colors text-amber-950"
+                >
+                  <td className="px-2 py-3 text-center">
+                    {property.image ? (
+                      <div className="inline-block">
+                        <Image
+                          src={property.image}
+                          alt={property.address}
+                          width={100}
+                          height={75}
+                          className="rounded object-cover cursor-pointer"
+                          onMouseEnter={() => handleImageMouseEnter(property.image)}
+                          onMouseLeave={handleImageMouseLeave}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-[100px] h-[75px] bg-amber-200 rounded flex items-center justify-center text-xs text-amber-700 mx-auto">
+                        No Image
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">{property.address}</td>
+                  <td className="px-4 py-3">{formatCurrency(property.price)}</td>
+                  <td className="px-4 py-3">{property.beds}</td>
+                  <td className="px-4 py-3">{property.baths}</td>
+                  <td className="px-4 py-3">{property.sqft?.toLocaleString()}</td>
+                  <td className="px-4 py-3">
+                    <a
+                      href={property.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-orange-700 hover:text-orange-900 underline font-semibold"
+                    >
+                      View
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Image preview overlay - centered on page */}
       {hoveredImage && (
