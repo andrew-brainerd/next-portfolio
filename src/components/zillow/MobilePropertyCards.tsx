@@ -34,15 +34,13 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
     loadRankings();
   }, [properties]);
 
-  // Sort by rank when logged in, otherwise show as-is
-  const sortedProperties = isLoggedIn
-    ? [...propertiesWithRanks].sort((a, b) => {
-        if (a.rank == null && b.rank == null) return 0;
-        if (a.rank == null) return 1;
-        if (b.rank == null) return -1;
-        return a.rank - b.rank;
-      })
-    : propertiesWithRanks;
+  // Always sort by rank
+  const sortedProperties = [...propertiesWithRanks].sort((a, b) => {
+    if (a.rank == null && b.rank == null) return 0;
+    if (a.rank == null) return 1;
+    if (b.rank == null) return -1;
+    return a.rank - b.rank;
+  });
 
   const handleRankEdit = (address: string, currentRank: number | null) => {
     setEditingRank(address);
@@ -82,52 +80,54 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
           key={`${property.address}-${index}`}
           className="bg-amber-50/85 rounded-lg p-4 hover:bg-amber-100/85 transition-colors shadow-lg backdrop-blur-sm border border-amber-200"
         >
-          {/* Rank badge for logged-in users */}
-          {isLoggedIn && (
-            <div className="flex justify-between items-start mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-orange-700">Rank:</span>
-                {editingRank === property.address ? (
-                  <div className="flex gap-1">
-                    <input
-                      type="number"
-                      min="1"
-                      value={rankInputValue}
-                      onChange={e => setRankInputValue(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          handleRankSave(property.address);
-                        } else if (e.key === 'Escape') {
-                          handleRankCancel();
-                        }
-                      }}
-                      className="w-16 px-2 py-1 border border-orange-300 rounded bg-white text-amber-950 text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      autoFocus
-                    />
-                    <button
-                      onClick={() => handleRankSave(property.address)}
-                      className="px-2 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800 select-none cursor-pointer"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={handleRankCancel}
-                      className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 select-none cursor-pointer"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ) : (
+          {/* Rank badge - always visible, editable only when logged in */}
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-orange-700">Rank:</span>
+              {isLoggedIn && editingRank === property.address ? (
+                <div className="flex gap-1">
+                  <input
+                    type="number"
+                    min="1"
+                    value={rankInputValue}
+                    onChange={e => setRankInputValue(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        handleRankSave(property.address);
+                      } else if (e.key === 'Escape') {
+                        handleRankCancel();
+                      }
+                    }}
+                    className="w-16 px-2 py-1 border border-orange-300 rounded bg-white text-amber-950 text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    autoFocus
+                  />
                   <button
-                    onClick={() => handleRankEdit(property.address, property.rank)}
-                    className="px-3 py-1 bg-orange-700 text-amber-50 rounded-full text-sm font-bold hover:bg-orange-800 transition-colors select-none cursor-pointer"
+                    onClick={() => handleRankSave(property.address)}
+                    className="px-2 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800 select-none cursor-pointer"
                   >
-                    {property.rank || '—'}
+                    ✓
                   </button>
-                )}
-              </div>
+                  <button
+                    onClick={handleRankCancel}
+                    className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 select-none cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : isLoggedIn ? (
+                <button
+                  onClick={() => handleRankEdit(property.address, property.rank)}
+                  className="px-3 py-1 bg-orange-700 text-amber-50 rounded-full text-sm font-bold hover:bg-orange-800 transition-colors select-none cursor-pointer"
+                >
+                  {property.rank || '—'}
+                </button>
+              ) : (
+                <span className="px-3 py-1 bg-orange-700 text-amber-50 rounded-full text-sm font-bold">
+                  {property.rank || '—'}
+                </span>
+              )}
             </div>
-          )}
+          </div>
 
           {property.image && (
             <Image

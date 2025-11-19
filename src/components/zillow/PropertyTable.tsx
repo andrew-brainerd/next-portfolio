@@ -19,7 +19,7 @@ interface PropertyWithRank extends ZillowProperty {
 }
 
 export default function PropertyTable({ properties, isLoggedIn }: PropertyTableProps) {
-  const [sortField, setSortField] = useState<SortField>(isLoggedIn ? 'rank' : 'updatedOn');
+  const [sortField, setSortField] = useState<SortField>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [propertiesWithRanks, setPropertiesWithRanks] = useState<PropertyWithRank[]>([]);
   const [editingRank, setEditingRank] = useState<string | null>(null);
@@ -147,14 +147,12 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
         <table className="min-w-full bg-amber-50/85 rounded-lg overflow-hidden shadow-2xl backdrop-blur-sm">
           <thead className="bg-gradient-to-r from-orange-900 to-amber-800 text-amber-50">
             <tr>
-              {isLoggedIn && (
-                <th
-                  className="px-2 py-3 text-center cursor-pointer hover:bg-orange-950/80 transition-colors select-none w-20"
-                  onClick={() => handleSort('rank')}
-                >
-                  Rank {getSortIcon('rank')}
-                </th>
-              )}
+              <th
+                className="px-2 py-3 text-center cursor-pointer hover:bg-orange-950/80 transition-colors select-none w-20"
+                onClick={() => handleSort('rank')}
+              >
+                Rank {getSortIcon('rank')}
+              </th>
               <th className="px-4 py-3 text-left"></th>
               <th
                 className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
@@ -202,43 +200,41 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
                   }
                 }}
               >
-                {isLoggedIn && (
-                  <td className="px-2 py-3 text-center" onClick={e => e.stopPropagation()}>
-                    {editingRank === property.address ? (
-                      <div className="flex gap-1 justify-center">
-                        <input
-                          type="number"
-                          min="1"
-                          value={rankInputValue}
-                          onChange={e => setRankInputValue(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') {
-                              handleRankSave(property.address);
-                            } else if (e.key === 'Escape') {
-                              handleRankCancel();
-                            }
-                          }}
-                          className="w-12 px-1 py-1 border border-orange-300 rounded bg-white text-amber-950 text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => handleRankSave(property.address)}
-                          className="px-1.5 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800 select-none cursor-pointer"
-                        >
-                          ✓
-                        </button>
-                        <button
-                          onClick={handleRankCancel}
-                          className="px-1.5 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 select-none cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="font-semibold">{property.rank || '-'}</span>
-                    )}
-                  </td>
-                )}
+                <td className="px-2 py-3 text-center" onClick={e => e.stopPropagation()}>
+                  {isLoggedIn && editingRank === property.address ? (
+                    <div className="flex gap-1 justify-center">
+                      <input
+                        type="number"
+                        min="1"
+                        value={rankInputValue}
+                        onChange={e => setRankInputValue(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            handleRankSave(property.address);
+                          } else if (e.key === 'Escape') {
+                            handleRankCancel();
+                          }
+                        }}
+                        className="w-12 px-1 py-1 border border-orange-300 rounded bg-white text-amber-950 text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => handleRankSave(property.address)}
+                        className="px-1.5 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800 select-none cursor-pointer"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={handleRankCancel}
+                        className="px-1.5 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 select-none cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="font-semibold">{property.rank || '-'}</span>
+                  )}
+                </td>
                 <td className="px-2 py-3 text-center">
                   {property.image ? (
                     <div className="inline-block">
