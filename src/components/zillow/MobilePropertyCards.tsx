@@ -1,38 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import type { ZillowProperty } from '@/types/zillow';
-import { getPropertyRank, setPropertyRank } from '@/api/propertyRankings';
+import { setPropertyRank } from '@/api/propertyRankings';
 
 interface MobilePropertyCardsProps {
   properties: ZillowProperty[];
   isLoggedIn: boolean;
 }
 
-interface PropertyWithRank extends ZillowProperty {
-  rank: number | null;
-}
-
 export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePropertyCardsProps) {
-  const [propertiesWithRanks, setPropertiesWithRanks] = useState<PropertyWithRank[]>([]);
+  const [propertiesWithRanks, setPropertiesWithRanks] = useState<ZillowProperty[]>(properties);
   const [editingRank, setEditingRank] = useState<string | null>(null);
   const [rankInputValue, setRankInputValue] = useState<string>('');
-
-  useEffect(() => {
-    // Load rankings from API for all properties
-    async function loadRankings() {
-      const propertiesWithRankData = await Promise.all(
-        properties.map(async property => {
-          const rank = await getPropertyRank(property.address);
-          return { ...property, rank };
-        })
-      );
-      setPropertiesWithRanks(propertiesWithRankData);
-    }
-
-    loadRankings();
-  }, [properties]);
 
   // Split into ranked and backup properties
   const rankedProperties = [...propertiesWithRanks]
@@ -72,7 +53,7 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
     setRankInputValue('');
   };
 
-  const renderPropertyCard = (property: PropertyWithRank, index: number, isBackup = false) => (
+  const renderPropertyCard = (property: ZillowProperty, index: number, isBackup = false) => (
     <div
       key={`${isBackup ? 'backup-' : ''}${property.address}-${index}`}
       className={`bg-amber-50/85 rounded-lg p-4 hover:bg-amber-100/85 transition-colors shadow-lg backdrop-blur-sm ${

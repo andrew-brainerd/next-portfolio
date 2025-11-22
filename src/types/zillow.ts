@@ -23,4 +23,5 @@ export interface ZillowProperty {
   filename: string;
   lotSize: string | null;
   description: string | null;
+  rank: number | null;
 }

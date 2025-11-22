@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import type { ZillowProperty } from '@/types/zillow';
-import { getPropertyRank, setPropertyRank } from '@/api/propertyRankings';
+import { setPropertyRank } from '@/api/propertyRankings';
 
-type SortField = keyof ZillowProperty | 'rank';
+type SortField = keyof ZillowProperty;
 type SortDirection = 'asc' | 'desc';
 
 interface PropertyTableProps {
@@ -13,35 +13,15 @@ interface PropertyTableProps {
   isLoggedIn: boolean;
 }
 
-interface PropertyWithRank extends ZillowProperty {
-  rank: number | null;
-  commuteTime?: number | null;
-}
-
 export default function PropertyTable({ properties, isLoggedIn }: PropertyTableProps) {
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [backupSortField, setBackupSortField] = useState<SortField>('price');
   const [backupSortDirection, setBackupSortDirection] = useState<SortDirection>('desc');
-  const [propertiesWithRanks, setPropertiesWithRanks] = useState<PropertyWithRank[]>([]);
+  const [propertiesWithRanks, setPropertiesWithRanks] = useState<ZillowProperty[]>(properties);
   const [editingRank, setEditingRank] = useState<string | null>(null);
   const [rankInputValue, setRankInputValue] = useState<string>('');
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Load rankings from API for all properties
-    async function loadRankings() {
-      const propertiesWithRankData = await Promise.all(
-        properties.map(async property => {
-          const rank = await getPropertyRank(property.address);
-          return { ...property, rank };
-        })
-      );
-      setPropertiesWithRanks(propertiesWithRankData);
-    }
-
-    loadRankings();
-  }, [properties]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -105,7 +85,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
     const backups = propertiesWithRanks.filter(p => p.rank == null);
 
     const createSortFn = (field: SortField, direction: SortDirection) => {
-      return (a: PropertyWithRank, b: PropertyWithRank) => {
+      return (a: ZillowProperty, b: ZillowProperty) => {
         // Special handling for rank field
         if (field === 'rank') {
           const aRank = a.rank;
@@ -118,8 +98,8 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
           return direction === 'asc' ? aRank - bRank : bRank - aRank;
         }
 
-        const aValue = a[field as keyof ZillowProperty];
-        const bValue = b[field as keyof ZillowProperty];
+        const aValue = a[field];
+        const bValue = b[field];
 
         // Handle null/undefined values
         if (aValue == null && bValue == null) return 0;
