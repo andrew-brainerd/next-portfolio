@@ -19,6 +19,8 @@ export default async function KeikenPage() {
 
   const experienceGroups = await getExperienceGroups(userId);
 
+  console.log('Experience groups', experienceGroups);
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
