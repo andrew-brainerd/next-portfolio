@@ -1,4 +1,9 @@
-import type { CreateExperienceGroupRequest, ExperienceGroup } from '@/types/keiken';
+import type {
+  CreateExperienceGroupRequest,
+  CreateExperienceRequest,
+  Experience,
+  ExperienceGroup
+} from '@/types/keiken';
 import { getRequest, postRequest } from '@/api/client';
 
 /**
@@ -17,4 +22,32 @@ export const getExperienceGroups = (userId: string): Promise<ExperienceGroup[] |
  */
 export const createExperienceGroup = (data: CreateExperienceGroupRequest): Promise<ExperienceGroup> => {
   return postRequest<CreateExperienceGroupRequest, ExperienceGroup>('/keiken', data);
+};
+
+/**
+ * Get a specific experience group by ID
+ * @param experienceGroupId - The experience group ID to fetch
+ * @returns Promise with the experience group or undefined
+ */
+export const getExperienceGroup = (experienceGroupId: string): Promise<ExperienceGroup | undefined> => {
+  return getRequest<ExperienceGroup>(`/keiken/${experienceGroupId}`);
+};
+
+/**
+ * Get all experiences for a specific experience group
+ * @param experienceGroupId - The experience group ID to fetch experiences for
+ * @returns Promise with array of experiences or undefined
+ */
+export const getExperiences = (experienceGroupId: string): Promise<Experience[] | undefined> => {
+  return getRequest<Experience[]>(`/keiken/${experienceGroupId}/experiences`);
+};
+
+/**
+ * Create a new experience in an experience group
+ * @param experienceGroupId - The experience group ID
+ * @param data - The experience data
+ * @returns Promise with the created experience
+ */
+export const createExperience = (experienceGroupId: string, data: CreateExperienceRequest): Promise<Experience> => {
+  return postRequest<CreateExperienceRequest, Experience>(`/keiken/${experienceGroupId}/experiences`, data);
 };

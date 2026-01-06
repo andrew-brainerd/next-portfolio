@@ -12,3 +12,25 @@ export interface CreateExperienceGroupRequest {
   description: string;
   createdBy: string;
 }
+
+export interface Experience {
+  experienceId: string;
+  experienceGroupId: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  notes: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateExperienceRequest {
+  title: string;
+  description?: string;
+  date?: string;
+  location?: string;
+  notes?: string;
+  createdBy: string;
+}
