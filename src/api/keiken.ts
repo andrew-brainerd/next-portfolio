@@ -2,9 +2,10 @@ import type {
   CreateExperienceGroupRequest,
   CreateExperienceRequest,
   Experience,
-  ExperienceGroup
+  ExperienceGroup,
+  UpdateExperienceGroupRequest
 } from '@/types/keiken';
-import { getRequest, postRequest } from '@/api/client';
+import { getRequest, patchRequest, postRequest } from '@/api/client';
 
 /**
  * Get all experience groups for a specific user
@@ -31,6 +32,19 @@ export const createExperienceGroup = (data: CreateExperienceGroupRequest): Promi
  */
 export const getExperienceGroup = (experienceGroupId: string): Promise<ExperienceGroup | undefined> => {
   return getRequest<ExperienceGroup>(`/keiken/${experienceGroupId}`);
+};
+
+/**
+ * Update an experience group
+ * @param experienceGroupId - The experience group ID to update
+ * @param data - The data to update
+ * @returns Promise with the updated experience group
+ */
+export const updateExperienceGroup = (
+  experienceGroupId: string,
+  data: UpdateExperienceGroupRequest
+): Promise<ExperienceGroup | void> => {
+  return patchRequest<UpdateExperienceGroupRequest, ExperienceGroup>(`/keiken/${experienceGroupId}`, data);
 };
 
 /**

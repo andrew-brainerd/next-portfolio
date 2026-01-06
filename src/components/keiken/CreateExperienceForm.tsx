@@ -3,19 +3,23 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createExperience } from '@/api/keiken';
+import RatingStars from './RatingStars';
 
 interface CreateExperienceFormProps {
   experienceGroupId: string;
   userId: string;
+  categories: string[];
 }
 
-export default function CreateExperienceForm({ experienceGroupId, userId }: CreateExperienceFormProps) {
+export default function CreateExperienceForm({ experienceGroupId, userId, categories }: CreateExperienceFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+  const [category, setCategory] = useState('');
+  const [rating, setRating] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -32,16 +36,13 @@ export default function CreateExperienceForm({ experienceGroupId, userId }: Crea
         date,
         location,
         notes,
+        category,
+        rating: rating ?? undefined,
         createdBy: userId
       });
 
       // Reset form
-      setTitle('');
-      setDescription('');
-      setDate('');
-      setLocation('');
-      setNotes('');
-      setIsOpen(false);
+      resetForm();
 
       // Refresh the page to show the new experience
       router.refresh();
@@ -60,6 +61,8 @@ export default function CreateExperienceForm({ experienceGroupId, userId }: Crea
     setDate('');
     setLocation('');
     setNotes('');
+    setCategory('');
+    setRating(null);
   };
 
   return (
@@ -90,6 +93,43 @@ export default function CreateExperienceForm({ experienceGroupId, userId }: Crea
                   className="w-full px-3 py-2 bg-brand-800 rounded border border-brand-600 focus:outline-none focus:border-brand-500"
                   required
                 />
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="category" className="block text-sm font-medium mb-2">
+                  Category
+                </label>
+                {categories.length > 0 ? (
+                  <select
+                    id="category"
+                    value={category}
+                    onChange={e => setCategory(e.target.value)}
+                    className="w-full px-3 py-2 pr-10 bg-brand-800 rounded border border-brand-600 focus:outline-none focus:border-brand-500 appearance-none bg-no-repeat bg-[length:16px_16px] bg-[position:right_12px_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239ca3af%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')]"
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map(cat => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="text-gray-400 text-sm italic">No categories configured. Add categories in settings.</p>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Rating</label>
+                <RatingStars rating={rating} onChange={setRating} />
+                {rating !== null && (
+                  <button
+                    type="button"
+                    onClick={() => setRating(null)}
+                    className="text-sm text-gray-400 hover:text-gray-300 mt-1"
+                  >
+                    Clear rating
+                  </button>
+                )}
               </div>
 
               <div className="mb-4">
