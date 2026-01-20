@@ -182,3 +182,36 @@ export interface GetPositionsResponse {
   event_positions: EventPosition[];
   cursor: string;
 }
+
+// Settlement types
+export type SettlementResult = 'yes' | 'no' | 'void';
+
+export interface Settlement {
+  ticker: string;
+  event_ticker: string;
+  market_result: SettlementResult;
+  yes_count: number;
+  yes_count_fp: string;
+  yes_total_cost: number;
+  no_count: number;
+  no_count_fp: string;
+  no_total_cost: number;
+  revenue: number;
+  settled_time: string;
+  fee_cost: string;
+  value: number;
+}
+
+export interface GetSettlementsParams {
+  cursor?: string;
+  limit?: number;
+  ticker?: string;
+  event_ticker?: string;
+  min_ts?: number;
+  max_ts?: number;
+}
+
+export interface GetSettlementsResponse {
+  settlements: Settlement[];
+  cursor: string;
+}

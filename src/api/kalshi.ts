@@ -15,7 +15,10 @@ import {
   GetPositionsParams,
   GetPositionsResponse,
   MarketPosition,
-  EventPosition
+  EventPosition,
+  GetSettlementsParams,
+  GetSettlementsResponse,
+  Settlement
 } from '@/types/kalshi';
 
 const generateSignature = (timestamp: string, method: string, path: string): string => {
@@ -300,4 +303,41 @@ export const getActivePositions = async (): Promise<{
   eventPositions: EventPosition[];
 }> => {
   return getPositions({ count_filter: 'position' });
+};
+
+export const getSettlements = async (params?: GetSettlementsParams): Promise<Settlement[]> => {
+  const path = '/trade-api/v2/portfolio/settlements';
+  const queryParams = new URLSearchParams();
+
+  if (params?.cursor) queryParams.set('cursor', params.cursor);
+  if (params?.limit) queryParams.set('limit', params.limit.toString());
+  if (params?.ticker) queryParams.set('ticker', params.ticker);
+  if (params?.event_ticker) queryParams.set('event_ticker', params.event_ticker);
+  if (params?.min_ts) queryParams.set('min_ts', params.min_ts.toString());
+  if (params?.max_ts) queryParams.set('max_ts', params.max_ts.toString());
+
+  const queryString = queryParams.toString();
+  const fullUrl = `${KALSHI_API_BASE}/portfolio/settlements${queryString ? `?${queryString}` : ''}`;
+
+  try {
+    const headers = getAuthHeaders('GET', path);
+    const response = await fetch(fullUrl, {
+      method: 'GET',
+      headers,
+      next: { revalidate: 60 }
+    });
+
+    if (!response.ok) {
+      console.error(`Kalshi API error: ${response.status} ${response.statusText}`);
+      const errorBody = await response.text();
+      console.error('Error body:', errorBody);
+      return [];
+    }
+
+    const data: GetSettlementsResponse = await response.json();
+    return data.settlements ?? [];
+  } catch (error) {
+    console.error('Failed to fetch Kalshi settlements:', error instanceof Error ? error.message : error);
+    return [];
+  }
 };

@@ -1,0 +1,314 @@
+'use client';
+
+import Link from 'next/link';
+import { useState, useEffect, useCallback } from 'react';
+
+import Loading from '@/components/Loading';
+import { MarketPosition, Settlement, KalshiMarket } from '@/types/kalshi';
+
+type TabType = 'positions' | 'settlements';
+
+interface PositionWithMarket extends MarketPosition {
+  market: KalshiMarket | null;
+}
+
+interface SettlementWithMarket extends Settlement {
+  market: KalshiMarket | null;
+}
+
+const formatDollars = (dollars: string | number): string => {
+  const num = typeof dollars === 'string' ? parseFloat(dollars) : dollars;
+  const isNegative = num < 0;
+  const formatted = `$${Math.abs(num).toFixed(2)}`;
+  return isNegative ? `-${formatted}` : formatted;
+};
+
+const formatDate = (dateString: string): string => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
+
+const PositionCard = ({ position }: { position: PositionWithMarket }) => {
+  const pnl = parseFloat(position.realized_pnl_dollars);
+  const pnlColor = pnl >= 0 ? 'text-green-400' : 'text-red-400';
+  const positionSide = position.position > 0 ? 'YES' : 'NO';
+  const positionColor = position.position > 0 ? 'bg-green-600' : 'bg-red-600';
+
+  return (
+    <div className="bg-brand-700 rounded-lg p-4 hover:bg-brand-600 transition-colors">
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex-1 pr-4">
+          <h3 className="font-semibold text-white">{position.market?.title ?? position.ticker}</h3>
+          {position.market?.subtitle && <p className="text-gray-400 text-sm mt-1">{position.market.subtitle}</p>}
+        </div>
+        <span className={`px-2 py-1 rounded text-xs font-semibold ${positionColor}`}>{positionSide}</span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 text-sm mt-4">
+        <div>
+          <span className="text-gray-400">Position: </span>
+          <span className="text-white">{Math.abs(position.position)} contracts</span>
+        </div>
+        <div>
+          <span className="text-gray-400">Exposure: </span>
+          <span className="text-white">{formatDollars(position.market_exposure_dollars)}</span>
+        </div>
+        <div>
+          <span className="text-gray-400">Total Traded: </span>
+          <span className="text-white">{formatDollars(position.total_traded_dollars)}</span>
+        </div>
+        <div>
+          <span className="text-gray-400">Realized P&L: </span>
+          <span className={pnlColor}>{formatDollars(position.realized_pnl_dollars)}</span>
+        </div>
+        {position.resting_orders_count > 0 && (
+          <div>
+            <span className="text-gray-400">Resting Orders: </span>
+            <span className="text-yellow-400">{position.resting_orders_count}</span>
+          </div>
+        )}
+        <div>
+          <span className="text-gray-400">Fees: </span>
+          <span className="text-gray-300">{formatDollars(position.fees_paid_dollars)}</span>
+        </div>
+      </div>
+
+      <div className="mt-3 text-xs text-gray-500 font-mono">{position.ticker}</div>
+    </div>
+  );
+};
+
+const SettlementCard = ({ settlement }: { settlement: SettlementWithMarket }) => {
+  const revenue = settlement.revenue / 100;
+  const revenueColor = revenue >= 0 ? 'text-green-400' : 'text-red-400';
+  const resultColor = settlement.market_result === 'yes' ? 'bg-green-600' : 'bg-red-600';
+  const yesCount = parseFloat(settlement.yes_count_fp);
+  const noCount = parseFloat(settlement.no_count_fp);
+
+  return (
+    <div className="bg-brand-700 rounded-lg p-4 hover:bg-brand-600 transition-colors">
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex-1 pr-4">
+          <h3 className="font-semibold text-white">{settlement.market?.title ?? settlement.ticker}</h3>
+          {settlement.market?.subtitle && <p className="text-gray-400 text-sm mt-1">{settlement.market.subtitle}</p>}
+        </div>
+        <span className={`px-2 py-1 rounded text-xs font-semibold ${resultColor}`}>
+          {settlement.market_result.toUpperCase()}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 text-sm mt-4">
+        {yesCount > 0 && (
+          <div>
+            <span className="text-gray-400">Yes Contracts: </span>
+            <span className="text-green-400">{yesCount}</span>
+          </div>
+        )}
+        {noCount > 0 && (
+          <div>
+            <span className="text-gray-400">No Contracts: </span>
+            <span className="text-red-400">{noCount}</span>
+          </div>
+        )}
+        <div>
+          <span className="text-gray-400">Revenue: </span>
+          <span className={revenueColor}>{formatDollars(revenue)}</span>
+        </div>
+        <div>
+          <span className="text-gray-400">Fees: </span>
+          <span className="text-gray-300">{formatDollars(settlement.fee_cost)}</span>
+        </div>
+        <div className="col-span-2">
+          <span className="text-gray-400">Settled: </span>
+          <span className="text-white">{formatDate(settlement.settled_time)}</span>
+        </div>
+      </div>
+
+      <div className="mt-3 text-xs text-gray-500 font-mono">{settlement.ticker}</div>
+    </div>
+  );
+};
+
+const PortfolioTabs = () => {
+  const [activeTab, setActiveTab] = useState<TabType>('positions');
+  const [positions, setPositions] = useState<PositionWithMarket[]>([]);
+  const [settlements, setSettlements] = useState<SettlementWithMarket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async (tab: TabType, signal: AbortSignal) => {
+    const endpoint = tab === 'positions' ? '/api/kalshi/positions' : '/api/kalshi/settlements';
+    const response = await fetch(endpoint, { signal });
+    if (!response.ok) throw new Error(`Failed to fetch ${tab}`);
+    return response.json();
+  }, []);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    let isMounted = true;
+
+    const doFetch = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await fetchData(activeTab, abortController.signal);
+        if (isMounted) {
+          if (activeTab === 'positions') {
+            setPositions(data.positions);
+          } else {
+            setSettlements(data.settlements);
+          }
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'An error occurred');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    doFetch();
+
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
+  }, [activeTab, fetchData]);
+
+  // Calculate totals for positions
+  const totalExposure = positions.reduce((sum, p) => sum + parseFloat(p.market_exposure_dollars), 0);
+  const totalPositionPnl = positions.reduce((sum, p) => sum + parseFloat(p.realized_pnl_dollars), 0);
+
+  // Calculate totals for settlements
+  const totalSettlementRevenue = settlements.reduce((sum, s) => sum + s.revenue / 100, 0);
+  const totalSettlementFees = settlements.reduce((sum, s) => sum + parseFloat(s.fee_cost), 0);
+
+  return (
+    <div>
+      <div className="flex border-b border-gray-700 mb-6">
+        <button
+          onClick={() => setActiveTab('positions')}
+          className={`px-6 py-3 font-medium transition-colors relative ${
+            activeTab === 'positions' ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+          }`}
+        >
+          Positions
+          {activeTab === 'positions' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />}
+        </button>
+        <button
+          onClick={() => setActiveTab('settlements')}
+          className={`px-6 py-3 font-medium transition-colors relative ${
+            activeTab === 'settlements' ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+          }`}
+        >
+          Settlements
+          {activeTab === 'settlements' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />}
+        </button>
+        <div className="flex-1 flex justify-end items-center pr-2">
+          <Link href="/kalshme/orders" className="text-blue-400 hover:text-blue-300 text-sm">
+            View Orders →
+          </Link>
+        </div>
+      </div>
+
+      {loading && (
+        <div className="flex justify-center py-12">
+          <Loading />
+        </div>
+      )}
+
+      {error && <div className="bg-red-900/50 border border-red-700 rounded-lg p-4 text-red-200">{error}</div>}
+
+      {!loading && !error && activeTab === 'positions' && (
+        <>
+          {positions.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 p-4 bg-brand-800 rounded-lg">
+              <div>
+                <p className="text-gray-400 text-sm">Total Exposure</p>
+                <p className="text-xl font-semibold text-white">${totalExposure.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Realized P&L</p>
+                <p className={`text-xl font-semibold ${totalPositionPnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {totalPositionPnl >= 0 ? '' : '-'}${Math.abs(totalPositionPnl).toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Positions</p>
+                <p className="text-xl font-semibold text-white">{positions.length}</p>
+              </div>
+            </div>
+          )}
+
+          {positions.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 mb-4">No active positions found.</p>
+              <Link href="/kalshme/lol" className="text-blue-400 hover:text-blue-300 underline">
+                Browse LoL Esports Markets
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {positions.map(position => (
+                <PositionCard key={position.ticker} position={position} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {!loading && !error && activeTab === 'settlements' && (
+        <>
+          {settlements.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 p-4 bg-brand-800 rounded-lg">
+              <div>
+                <p className="text-gray-400 text-sm">Total Revenue</p>
+                <p
+                  className={`text-xl font-semibold ${totalSettlementRevenue >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                >
+                  {totalSettlementRevenue >= 0 ? '' : '-'}${Math.abs(totalSettlementRevenue).toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Total Fees</p>
+                <p className="text-xl font-semibold text-gray-300">${totalSettlementFees.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Settlements</p>
+                <p className="text-xl font-semibold text-white">{settlements.length}</p>
+              </div>
+            </div>
+          )}
+
+          {settlements.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400">No settlements found.</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {settlements.map(settlement => (
+                <SettlementCard key={`${settlement.ticker}-${settlement.settled_time}`} settlement={settlement} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="mt-8 pt-6 border-t border-gray-700">
+        <Link href="/kalshme/lol" className="text-blue-400 hover:text-blue-300">
+          Browse LoL Esports Markets →
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+export default PortfolioTabs;
