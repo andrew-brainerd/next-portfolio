@@ -1,20 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
+import { getKalshiPositions, getKalshiSettlements } from '@/api/kalshi';
 import Loading from '@/components/Loading';
-import { MarketPosition, Settlement, KalshiMarket } from '@/types/kalshi';
+import { MarketPositionWithDetails, SettlementWithDetails } from '@/types/kalshi';
 
 type TabType = 'positions' | 'settlements';
-
-interface PositionWithMarket extends MarketPosition {
-  market: KalshiMarket | null;
-}
-
-interface SettlementWithMarket extends Settlement {
-  market: KalshiMarket | null;
-}
 
 const formatDollars = (dollars: string | number): string => {
   const num = typeof dollars === 'string' ? parseFloat(dollars) : dollars;
@@ -31,7 +24,7 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-const PositionCard = ({ position }: { position: PositionWithMarket }) => {
+const PositionCard = ({ position }: { position: MarketPositionWithDetails }) => {
   const pnl = parseFloat(position.realized_pnl_dollars);
   const pnlColor = pnl >= 0 ? 'text-green-400' : 'text-red-400';
   const positionSide = position.position > 0 ? 'YES' : 'NO';
@@ -81,7 +74,7 @@ const PositionCard = ({ position }: { position: PositionWithMarket }) => {
   );
 };
 
-const SettlementCard = ({ settlement }: { settlement: SettlementWithMarket }) => {
+const SettlementCard = ({ settlement }: { settlement: SettlementWithDetails }) => {
   const revenue = settlement.revenue / 100;
   const revenueColor = revenue >= 0 ? 'text-green-400' : 'text-red-400';
   const resultColor = settlement.market_result === 'yes' ? 'bg-green-600' : 'bg-red-600';
@@ -134,20 +127,12 @@ const SettlementCard = ({ settlement }: { settlement: SettlementWithMarket }) =>
 
 const PortfolioTabs = () => {
   const [activeTab, setActiveTab] = useState<TabType>('positions');
-  const [positions, setPositions] = useState<PositionWithMarket[]>([]);
-  const [settlements, setSettlements] = useState<SettlementWithMarket[]>([]);
+  const [positions, setPositions] = useState<MarketPositionWithDetails[]>([]);
+  const [settlements, setSettlements] = useState<SettlementWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async (tab: TabType, signal: AbortSignal) => {
-    const endpoint = tab === 'positions' ? '/api/kalshi/positions' : '/api/kalshi/settlements';
-    const response = await fetch(endpoint, { signal });
-    if (!response.ok) throw new Error(`Failed to fetch ${tab}`);
-    return response.json();
-  }, []);
-
   useEffect(() => {
-    const abortController = new AbortController();
     let isMounted = true;
 
     const doFetch = async () => {
@@ -155,16 +140,18 @@ const PortfolioTabs = () => {
       setError(null);
 
       try {
-        const data = await fetchData(activeTab, abortController.signal);
-        if (isMounted) {
-          if (activeTab === 'positions') {
-            setPositions(data.positions);
-          } else {
-            setSettlements(data.settlements);
+        if (activeTab === 'positions') {
+          const data = await getKalshiPositions();
+          if (isMounted) {
+            setPositions(data);
+          }
+        } else {
+          const data = await getKalshiSettlements();
+          if (isMounted) {
+            setSettlements(data);
           }
         }
       } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') return;
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'An error occurred');
         }
@@ -179,9 +166,8 @@ const PortfolioTabs = () => {
 
     return () => {
       isMounted = false;
-      abortController.abort();
     };
-  }, [activeTab, fetchData]);
+  }, [activeTab]);
 
   // Calculate totals for positions
   const totalExposure = positions.reduce((sum, p) => sum + parseFloat(p.market_exposure_dollars), 0);

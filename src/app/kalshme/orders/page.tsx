@@ -1,7 +1,4 @@
-import { cookies } from 'next/headers';
-
 import { getExecutedOrders } from '@/api/kalshi';
-import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
 import { KalshiOrder } from '@/types/kalshi';
 
 export const metadata = {
@@ -70,18 +67,6 @@ const OrdersTable = ({ orders }: { orders: KalshiOrder[] }) => {
 };
 
 export default async function OrdersPage() {
-  const cookieJar = await cookies();
-  const token = cookieJar.get(TOKEN_COOKIE)?.value;
-  const userId = cookieJar.get(USER_COOKIE)?.value;
-
-  if (!token || !userId) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-white text-xl">Please log in to view your Kalshi orders.</p>
-      </div>
-    );
-  }
-
   const orders = await getExecutedOrders();
 
   return (

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
+import { getLoLEsportsMarkets } from '@/api/kalshi';
 import Loading from '@/components/Loading';
 import { KalshiMarket, LoLLeague } from '@/types/kalshi';
 
@@ -65,24 +66,7 @@ const LoLEsportsTabs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMarkets = useCallback(async (league: LoLLeague, signal: AbortSignal) => {
-    try {
-      const response = await fetch(`/api/kalshi/lol-esports?league=${league}`, { signal });
-      if (!response.ok) {
-        throw new Error('Failed to fetch markets');
-      }
-      const data = await response.json();
-      return data.markets as KalshiMarket[];
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        return null;
-      }
-      throw err;
-    }
-  }, []);
-
   useEffect(() => {
-    const abortController = new AbortController();
     let isMounted = true;
 
     const doFetch = async () => {
@@ -90,8 +74,8 @@ const LoLEsportsTabs = () => {
       setError(null);
 
       try {
-        const result = await fetchMarkets(selectedLeague, abortController.signal);
-        if (isMounted && result !== null) {
+        const result = await getLoLEsportsMarkets(selectedLeague);
+        if (isMounted) {
           setMarkets(result);
         }
       } catch (err) {
@@ -110,9 +94,8 @@ const LoLEsportsTabs = () => {
 
     return () => {
       isMounted = false;
-      abortController.abort();
     };
-  }, [selectedLeague, fetchMarkets]);
+  }, [selectedLeague]);
 
   return (
     <div>

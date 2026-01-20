@@ -1,3 +1,9 @@
+// Kalshi API credentials stored in Firestore
+export interface KalshiCredentials {
+  apiKey: string;
+  privateKey: string;
+}
+
 export type OrderSide = 'yes' | 'no';
 export type OrderAction = 'buy' | 'sell';
 export type OrderType = 'limit' | 'market';
@@ -214,4 +220,14 @@ export interface GetSettlementsParams {
 export interface GetSettlementsResponse {
   settlements: Settlement[];
   cursor: string;
+}
+
+// Position with market details
+export interface MarketPositionWithDetails extends MarketPosition {
+  market: KalshiMarket | null;
+}
+
+// Settlement with market details
+export interface SettlementWithDetails extends Settlement {
+  market: KalshiMarket | null;
 }
