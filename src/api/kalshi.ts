@@ -11,7 +11,11 @@ import {
   GetEventsResponse,
   KalshiEvent,
   LoLLeague,
-  LoLEsportsMarketsResult
+  LoLEsportsMarketsResult,
+  GetPositionsParams,
+  GetPositionsResponse,
+  MarketPosition,
+  EventPosition
 } from '@/types/kalshi';
 
 const generateSignature = (timestamp: string, method: string, path: string): string => {
@@ -134,6 +138,31 @@ export const getMarkets = async (params?: GetMarketsParams): Promise<KalshiMarke
   return markets;
 };
 
+export const getMarket = async (ticker: string): Promise<KalshiMarket | null> => {
+  const path = `/trade-api/v2/markets/${ticker}`;
+  const fullUrl = `${KALSHI_API_BASE}/markets/${ticker}`;
+
+  try {
+    const headers = getAuthHeaders('GET', path);
+    const response = await fetch(fullUrl, {
+      method: 'GET',
+      headers,
+      next: { revalidate: 60 }
+    });
+
+    if (!response.ok) {
+      console.error(`Kalshi API error: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data = await response.json();
+    return data.market ?? null;
+  } catch (error) {
+    console.error('Failed to fetch Kalshi market:', error instanceof Error ? error.message : error);
+    return null;
+  }
+};
+
 export const getEvents = async (params?: GetEventsParams): Promise<KalshiEvent[]> => {
   const path = '/trade-api/v2/events';
   const queryParams = new URLSearchParams();
@@ -223,4 +252,52 @@ export const searchLoLEsportsMarketsByLeague = async (league: LoLLeague): Promis
   const results = await searchLoLEsportsMarkets();
   const leagueResult = results.find(r => r.league === league);
   return leagueResult?.markets ?? [];
+};
+
+export const getPositions = async (
+  params?: GetPositionsParams
+): Promise<{ marketPositions: MarketPosition[]; eventPositions: EventPosition[] }> => {
+  const path = '/trade-api/v2/portfolio/positions';
+  const queryParams = new URLSearchParams();
+
+  if (params?.cursor) queryParams.set('cursor', params.cursor);
+  if (params?.limit) queryParams.set('limit', params.limit.toString());
+  if (params?.count_filter) queryParams.set('count_filter', params.count_filter);
+  if (params?.ticker) queryParams.set('ticker', params.ticker);
+  if (params?.event_ticker) queryParams.set('event_ticker', params.event_ticker);
+
+  const queryString = queryParams.toString();
+  const fullUrl = `${KALSHI_API_BASE}/portfolio/positions${queryString ? `?${queryString}` : ''}`;
+
+  try {
+    const headers = getAuthHeaders('GET', path);
+    const response = await fetch(fullUrl, {
+      method: 'GET',
+      headers,
+      next: { revalidate: 60 }
+    });
+
+    if (!response.ok) {
+      console.error(`Kalshi API error: ${response.status} ${response.statusText}`);
+      const errorBody = await response.text();
+      console.error('Error body:', errorBody);
+      return { marketPositions: [], eventPositions: [] };
+    }
+
+    const data: GetPositionsResponse = await response.json();
+    return {
+      marketPositions: data.market_positions ?? [],
+      eventPositions: data.event_positions ?? []
+    };
+  } catch (error) {
+    console.error('Failed to fetch Kalshi positions:', error instanceof Error ? error.message : error);
+    return { marketPositions: [], eventPositions: [] };
+  }
+};
+
+export const getActivePositions = async (): Promise<{
+  marketPositions: MarketPosition[];
+  eventPositions: EventPosition[];
+}> => {
+  return getPositions({ count_filter: 'position' });
 };

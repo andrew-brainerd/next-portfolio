@@ -135,3 +135,50 @@ export interface LoLEsportsMarketsResult {
   league: LoLLeague;
   markets: KalshiMarket[];
 }
+
+// Position types
+export interface MarketPosition {
+  ticker: string;
+  total_traded: number;
+  total_traded_dollars: string;
+  position: number;
+  position_fp: string;
+  market_exposure: number;
+  market_exposure_dollars: string;
+  realized_pnl: number;
+  realized_pnl_dollars: string;
+  resting_orders_count: number;
+  fees_paid: number;
+  fees_paid_dollars: string;
+  last_updated_ts: string;
+}
+
+export interface EventPosition {
+  event_ticker: string;
+  total_cost: number;
+  total_cost_dollars: string;
+  total_cost_shares: number;
+  total_cost_shares_fp: string;
+  event_exposure: number;
+  event_exposure_dollars: string;
+  realized_pnl: number;
+  realized_pnl_dollars: string;
+  fees_paid: number;
+  fees_paid_dollars: string;
+}
+
+export type PositionCountFilter = 'position' | 'total_traded';
+
+export interface GetPositionsParams {
+  cursor?: string;
+  limit?: number;
+  count_filter?: PositionCountFilter;
+  ticker?: string;
+  event_ticker?: string;
+}
+
+export interface GetPositionsResponse {
+  market_positions: MarketPosition[];
+  event_positions: EventPosition[];
+  cursor: string;
+}
