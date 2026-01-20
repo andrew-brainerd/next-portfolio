@@ -48,3 +48,90 @@ export interface GetOrdersParams {
   limit?: number;
   cursor?: string;
 }
+
+// Market types
+export type MarketStatus = 'unopened' | 'open' | 'paused' | 'closed' | 'settled';
+
+export interface KalshiMarket {
+  ticker: string;
+  event_ticker: string;
+  market_type: string;
+  title: string;
+  subtitle: string;
+  status: MarketStatus;
+  yes_bid: number;
+  yes_ask: number;
+  no_bid: number;
+  no_ask: number;
+  last_price: number;
+  previous_yes_bid: number;
+  previous_yes_ask: number;
+  previous_price: number;
+  volume: number;
+  volume_24h: number;
+  open_interest: number;
+  result: string;
+  can_close_early: boolean;
+  expiration_time: string;
+  expected_expiration_time: string;
+  close_time: string;
+  open_time: string;
+  created_time: string;
+  last_price_time: string;
+  settlement_timer_seconds: number;
+  cap_strike: number;
+  floor_strike: number;
+  yes_sub_title: string;
+  no_sub_title: string;
+}
+
+export interface GetMarketsParams {
+  limit?: number;
+  cursor?: string;
+  event_ticker?: string;
+  series_ticker?: string;
+  tickers?: string;
+  status?: MarketStatus;
+  min_close_ts?: number;
+  max_close_ts?: number;
+}
+
+export interface GetMarketsResponse {
+  markets: KalshiMarket[];
+  cursor: string;
+}
+
+// Event types
+export type EventStatus = 'open' | 'closed' | 'settled';
+
+export interface KalshiEvent {
+  event_ticker: string;
+  series_ticker: string;
+  sub_title: string;
+  title: string;
+  mutually_exclusive: boolean;
+  category: string;
+  markets?: KalshiMarket[];
+  status?: EventStatus;
+}
+
+export interface GetEventsParams {
+  limit?: number;
+  cursor?: string;
+  status?: EventStatus;
+  series_ticker?: string;
+  with_nested_markets?: boolean;
+}
+
+export interface GetEventsResponse {
+  events: KalshiEvent[];
+  cursor: string;
+}
+
+// League of Legends leagues
+export type LoLLeague = 'LEC' | 'LCS' | 'LPL' | 'LCK';
+
+export interface LoLEsportsMarketsResult {
+  league: LoLLeague;
+  markets: KalshiMarket[];
+}
