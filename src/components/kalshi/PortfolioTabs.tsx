@@ -191,6 +191,29 @@ const PortfolioTabs = () => {
   const totalSettlementRevenue = settlements.reduce((sum, s) => sum + s.revenue / 100, 0);
   const totalSettlementFees = settlements.reduce((sum, s) => sum + parseFloat(s.fee_cost), 0);
 
+  // Calculate wins vs losses (compare revenue to total cost)
+  const settlementStats = settlements.reduce(
+    (acc, s) => {
+      const totalCost = (s.yes_total_cost + s.no_total_cost) / 100;
+      const revenue = s.revenue / 100;
+      const pnl = revenue - totalCost - parseFloat(s.fee_cost);
+
+      if (pnl > 0) {
+        acc.wins++;
+        acc.totalProfit += pnl;
+      } else if (pnl < 0) {
+        acc.losses++;
+        acc.totalLoss += Math.abs(pnl);
+      } else {
+        acc.breakeven++;
+      }
+      acc.netPnl += pnl;
+      return acc;
+    },
+    { wins: 0, losses: 0, breakeven: 0, totalProfit: 0, totalLoss: 0, netPnl: 0 }
+  );
+  const winRate = settlements.length > 0 ? (settlementStats.wins / settlements.length) * 100 : 0;
+
   return (
     <div>
       <div className="flex border-b border-gray-700 mb-6">
@@ -268,22 +291,30 @@ const PortfolioTabs = () => {
       {!loading && !error && activeTab === 'settlements' && (
         <>
           {settlements.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 p-4 bg-brand-800 rounded-lg">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 p-4 bg-brand-800 rounded-lg">
               <div>
-                <p className="text-gray-400 text-sm">Total Revenue</p>
+                <p className="text-gray-400 text-sm">Net P&L</p>
                 <p
-                  className={`text-xl font-semibold ${totalSettlementRevenue >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                  className={`text-xl font-semibold ${settlementStats.netPnl >= 0 ? 'text-green-400' : 'text-red-400'}`}
                 >
-                  {totalSettlementRevenue >= 0 ? '' : '-'}${Math.abs(totalSettlementRevenue).toFixed(2)}
+                  {settlementStats.netPnl >= 0 ? '' : '-'}${Math.abs(settlementStats.netPnl).toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Win Rate</p>
+                <p className="text-xl font-semibold text-white">{winRate.toFixed(1)}%</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Wins / Losses</p>
+                <p className="text-xl font-semibold">
+                  <span className="text-green-400">{settlementStats.wins}</span>
+                  <span className="text-gray-500"> / </span>
+                  <span className="text-red-400">{settlementStats.losses}</span>
                 </p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Total Fees</p>
                 <p className="text-xl font-semibold text-gray-300">${totalSettlementFees.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-sm">Settlements</p>
-                <p className="text-xl font-semibold text-white">{settlements.length}</p>
               </div>
             </div>
           )}
