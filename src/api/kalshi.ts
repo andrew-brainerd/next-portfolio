@@ -79,6 +79,6 @@ export const getOrders = async (params?: GetOrdersParams): Promise<KalshiOrder[]
   }
 };
 
-export const getActiveOrders = async (): Promise<KalshiOrder[]> => {
-  return getOrders({ status: 'resting' });
+export const getExecutedOrders = async (): Promise<KalshiOrder[]> => {
+  return getOrders({ status: 'executed' });
 };

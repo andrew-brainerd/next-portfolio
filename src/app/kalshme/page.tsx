@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 
-import { getActiveOrders } from '@/api/kalshi';
+import { getExecutedOrders } from '@/api/kalshi';
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
 import { KalshiOrder } from '@/types/kalshi';
 
@@ -82,7 +82,7 @@ export default async function KalshmePage() {
     );
   }
 
-  const orders = await getActiveOrders();
+  const orders = await getExecutedOrders();
 
   return (
     <div className="container mx-auto p-6">
