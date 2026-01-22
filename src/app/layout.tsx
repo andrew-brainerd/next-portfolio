@@ -66,7 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const isLoggedIn = !!token;
 
   return (
-    <html lang="en" className={`${roboto.variable} ${oswald.variable} ${pacifico.variable}`}>
+    <html lang="en" className={`${roboto.variable} ${oswald.variable} ${pacifico.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
