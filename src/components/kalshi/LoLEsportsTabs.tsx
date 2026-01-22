@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import { getLoLEsportsMarkets } from '@/api/kalshi';
 import Loading from '@/components/Loading';
@@ -20,7 +20,50 @@ const formatPrice = (cents: number): string => {
   return `${cents}¢`;
 };
 
-const MarketCard = ({ market }: { market: KalshiMarket }) => {
+interface MarketGroup {
+  eventTicker: string;
+  eventName: string;
+  markets: KalshiMarket[];
+}
+
+// Group markets by event_ticker
+const groupMarketsByEvent = (markets: KalshiMarket[]): MarketGroup[] => {
+  const groups = new Map<string, KalshiMarket[]>();
+
+  for (const market of markets) {
+    const existing = groups.get(market.event_ticker) || [];
+    existing.push(market);
+    groups.set(market.event_ticker, existing);
+  }
+
+  return Array.from(groups.entries()).map(([eventTicker, eventMarkets]) => {
+    // Try to extract event name from subtitle or derive from ticker
+    const firstMarket = eventMarkets[0];
+    const eventName = firstMarket.subtitle || extractEventName(eventTicker);
+
+    return {
+      eventTicker,
+      eventName,
+      markets: eventMarkets.sort((a, b) => a.title.localeCompare(b.title))
+    };
+  });
+};
+
+// Extract a readable event name from the ticker (e.g., "LOLLCK-26JAN21-T1GENG" -> "T1 vs GENG")
+const extractEventName = (ticker: string): string => {
+  // Try to find team matchup pattern at the end
+  const parts = ticker.split('-');
+  if (parts.length > 0) {
+    const lastPart = parts[parts.length - 1];
+    // Look for patterns like T1GENG, HLET1, etc.
+    if (lastPart.length >= 4 && /^[A-Z0-9]+$/.test(lastPart)) {
+      return lastPart;
+    }
+  }
+  return ticker;
+};
+
+const MarketRow = ({ market }: { market: KalshiMarket }) => {
   const kalshiUrl = `https://kalshi.com/events/${market.event_ticker}`;
 
   return (
@@ -28,43 +71,70 @@ const MarketCard = ({ market }: { market: KalshiMarket }) => {
       href={kalshiUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="block bg-brand-700 rounded-lg p-4 hover:bg-brand-600 transition-colors"
+      className="flex items-center justify-between p-3 hover:bg-brand-600/50 transition-colors rounded"
     >
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="font-semibold text-white flex-1 pr-4">{market.title}</h3>
-        <span
-          className={`px-2 py-1 rounded text-xs font-semibold ${
-            market.status === 'open' ? 'bg-green-600' : 'bg-gray-600'
-          }`}
-        >
-          {market.status.toUpperCase()}
-        </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-white truncate">{market.title}</div>
       </div>
-      {market.subtitle && <p className="text-gray-400 text-sm mb-3">{market.subtitle}</p>}
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <span className="text-gray-400">Yes: </span>
+      <div className="flex items-center gap-4 text-sm ml-4">
+        <div className="text-right">
+          <span className="text-gray-400 text-xs">Yes </span>
           <span className="text-green-400">{formatPrice(market.yes_bid)}</span>
-          <span className="text-gray-500"> / </span>
+          <span className="text-gray-600">/</span>
           <span className="text-green-300">{formatPrice(market.yes_ask)}</span>
         </div>
-        <div>
-          <span className="text-gray-400">No: </span>
+        <div className="text-right">
+          <span className="text-gray-400 text-xs">No </span>
           <span className="text-red-400">{formatPrice(market.no_bid)}</span>
-          <span className="text-gray-500"> / </span>
+          <span className="text-gray-600">/</span>
           <span className="text-red-300">{formatPrice(market.no_ask)}</span>
         </div>
-        <div>
-          <span className="text-gray-400">Volume: </span>
-          <span className="text-white">{market.volume.toLocaleString()}</span>
-        </div>
-        <div>
-          <span className="text-gray-400">Last: </span>
-          <span className="text-white">{formatPrice(market.last_price)}</span>
-        </div>
+        <div className="text-gray-400 text-xs w-16 text-right">Vol: {market.volume.toLocaleString()}</div>
       </div>
-      <div className="mt-3 text-xs text-gray-500 font-mono">{market.ticker}</div>
     </a>
+  );
+};
+
+const EventGroup = ({ group }: { group: MarketGroup }) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const kalshiUrl = `https://kalshi.com/events/${group.eventTicker}`;
+  const totalVolume = group.markets.reduce((sum, m) => sum + m.volume, 0);
+
+  return (
+    <div className="bg-brand-700 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full p-4 flex items-center justify-between hover:bg-brand-600/50 transition-colors cursor-pointer"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-gray-400 text-sm">{isExpanded ? '▼' : '▶'}</span>
+          <div className="text-left">
+            <h3 className="font-semibold text-white">{group.eventName}</h3>
+            <p className="text-gray-400 text-sm">
+              {group.markets.length} market{group.markets.length !== 1 ? 's' : ''} · Total volume:{' '}
+              {totalVolume.toLocaleString()}
+            </p>
+          </div>
+        </div>
+        <a
+          href={kalshiUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          className="text-brand-400 hover:text-brand-300 text-sm"
+        >
+          View on Kalshi →
+        </a>
+      </button>
+
+      {isExpanded && (
+        <div className="border-t border-brand-600">
+          {group.markets.map(market => (
+            <MarketRow key={market.ticker} market={market} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -73,6 +143,8 @@ const LoLEsportsTabs = () => {
   const [markets, setMarkets] = useState<KalshiMarket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const groupedMarkets = useMemo(() => groupMarketsByEvent(markets), [markets]);
 
   useEffect(() => {
     let isMounted = true;
@@ -107,12 +179,12 @@ const LoLEsportsTabs = () => {
 
   return (
     <div>
-      <div className="flex border-b border-gray-700 mb-6">
+      <div className="flex border-b border-gray-700 mb-6 overflow-x-auto">
         {LOL_LEAGUES.map(league => (
           <button
             key={league}
             onClick={() => setSelectedLeague(league)}
-            className={`px-6 py-3 font-medium transition-colors relative ${
+            className={`px-6 py-3 font-medium transition-colors relative whitespace-nowrap ${
               selectedLeague === league ? 'text-white' : 'text-gray-400 hover:text-gray-200'
             }`}
           >
@@ -122,8 +194,14 @@ const LoLEsportsTabs = () => {
         ))}
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg text-gray-300">{LEAGUE_NAMES[selectedLeague]}</h3>
+        {!loading && markets.length > 0 && (
+          <span className="text-sm text-gray-500">
+            {groupedMarkets.length} event{groupedMarkets.length !== 1 ? 's' : ''} · {markets.length} market
+            {markets.length !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
 
       {loading && (
@@ -138,10 +216,10 @@ const LoLEsportsTabs = () => {
         <p className="text-gray-400 py-8 text-center">No open markets found for {selectedLeague}.</p>
       )}
 
-      {!loading && !error && markets.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {markets.map(market => (
-            <MarketCard key={market.ticker} market={market} />
+      {!loading && !error && groupedMarkets.length > 0 && (
+        <div className="space-y-4">
+          {groupedMarkets.map(group => (
+            <EventGroup key={group.eventTicker} group={group} />
           ))}
         </div>
       )}

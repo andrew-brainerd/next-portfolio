@@ -75,7 +75,8 @@ export const SignIn = ({ redirectRoute, fromPath }: SignInProps) => {
       setAuthResponse(response);
 
       if (!response.isError) {
-        await router.push(redirectRoute);
+        // Use hard navigation to ensure server components re-render with new auth state
+        window.location.href = redirectRoute;
       } else {
         setIsLoading(false);
       }

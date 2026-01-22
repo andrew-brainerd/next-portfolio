@@ -27,9 +27,10 @@ const formatDate = (dateString: string): string => {
 const PositionCard = ({ position }: { position: MarketPositionWithDetails }) => {
   const positionSide = position.position > 0 ? 'YES' : 'NO';
   const positionColor = position.position > 0 ? 'bg-green-600' : 'bg-red-600';
+  const kalshiUrl = position.market?.event_ticker ? `https://kalshi.com/events/${position.market.event_ticker}` : null;
 
-  return (
-    <div className="bg-brand-700 rounded-lg p-4 hover:bg-brand-600 transition-colors">
+  const content = (
+    <>
       <div className="flex justify-between items-start mb-2">
         <div className="flex-1 pr-4">
           <h3 className="font-semibold text-white">{position.market?.title ?? position.ticker}</h3>
@@ -50,8 +51,23 @@ const PositionCard = ({ position }: { position: MarketPositionWithDetails }) => 
           </div>
         )}
       </div>
-    </div>
+    </>
   );
+
+  if (kalshiUrl) {
+    return (
+      <a
+        href={kalshiUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block bg-brand-700 rounded-lg p-4 hover:bg-brand-600 transition-colors"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return <div className="bg-brand-700 rounded-lg p-4">{content}</div>;
 };
 
 const SettlementCard = ({ settlement }: { settlement: SettlementWithDetails }) => {
@@ -60,9 +76,12 @@ const SettlementCard = ({ settlement }: { settlement: SettlementWithDetails }) =
   const resultColor = settlement.market_result === 'yes' ? 'bg-green-600' : 'bg-red-600';
   const yesCount = parseFloat(settlement.yes_count_fp);
   const noCount = parseFloat(settlement.no_count_fp);
+  const kalshiUrl = settlement.market?.event_ticker
+    ? `https://kalshi.com/events/${settlement.market.event_ticker}`
+    : null;
 
-  return (
-    <div className="bg-brand-700 rounded-lg p-4 hover:bg-brand-600 transition-colors">
+  const content = (
+    <>
       <div className="flex justify-between items-start mb-2">
         <div className="flex-1 pr-4">
           <h3 className="font-semibold text-white">{settlement.market?.title ?? settlement.ticker}</h3>
@@ -97,8 +116,23 @@ const SettlementCard = ({ settlement }: { settlement: SettlementWithDetails }) =
       </div>
 
       <div className="mt-3 text-xs text-gray-500 font-mono">{settlement.ticker}</div>
-    </div>
+    </>
   );
+
+  if (kalshiUrl) {
+    return (
+      <a
+        href={kalshiUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block bg-brand-700 rounded-lg p-4 hover:bg-brand-600 transition-colors"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return <div className="bg-brand-700 rounded-lg p-4">{content}</div>;
 };
 
 const PortfolioTabs = () => {
