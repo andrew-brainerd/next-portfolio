@@ -25,8 +25,6 @@ const formatDate = (dateString: string): string => {
 };
 
 const PositionCard = ({ position }: { position: MarketPositionWithDetails }) => {
-  const pnl = parseFloat(position.realized_pnl_dollars);
-  const pnlColor = pnl >= 0 ? 'text-green-400' : 'text-red-400';
   const positionSide = position.position > 0 ? 'YES' : 'NO';
   const positionColor = position.position > 0 ? 'bg-green-600' : 'bg-red-600';
 
@@ -40,32 +38,18 @@ const PositionCard = ({ position }: { position: MarketPositionWithDetails }) => 
         <span className={`px-2 py-1 rounded text-xs font-semibold ${positionColor}`}>{positionSide}</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 text-sm mt-4">
-        <div>
-          <span className="text-gray-400">Position: </span>
-          <span className="text-white">{Math.abs(position.position)} contracts</span>
-        </div>
-        <div>
-          <span className="text-gray-400">Exposure: </span>
-          <span className="text-white">{formatDollars(position.market_exposure_dollars)}</span>
-        </div>
-        <div>
-          <span className="text-gray-400">Total Traded: </span>
-          <span className="text-white">{formatDollars(position.total_traded_dollars)}</span>
-        </div>
-        <div>
-          <span className="text-gray-400">Realized P&L: </span>
-          <span className={pnlColor}>{formatDollars(position.realized_pnl_dollars)}</span>
+      <div className="mt-4">
+        <div className="mb-2">
+          <span className="text-gray-400 text-sm">Total Traded: </span>
+          <span className="text-white text-lg font-semibold">{formatDollars(position.total_traded_dollars)}</span>
         </div>
         {position.resting_orders_count > 0 && (
-          <div>
+          <div className="text-sm">
             <span className="text-gray-400">Resting Orders: </span>
             <span className="text-yellow-400">{position.resting_orders_count}</span>
           </div>
         )}
       </div>
-
-      <div className="mt-3 text-xs text-gray-500 font-mono">{position.ticker}</div>
     </div>
   );
 };
@@ -162,8 +146,7 @@ const PortfolioTabs = () => {
   }, [activeTab]);
 
   // Calculate totals for positions
-  const totalExposure = positions.reduce((sum, p) => sum + parseFloat(p.market_exposure_dollars), 0);
-  const totalPositionPnl = positions.reduce((sum, p) => sum + parseFloat(p.realized_pnl_dollars), 0);
+  const totalTraded = positions.reduce((sum, p) => sum + parseFloat(p.total_traded_dollars), 0);
 
   // Calculate wins vs losses (compare revenue to total cost)
   const settlementStats = settlements.reduce(
@@ -227,16 +210,10 @@ const PortfolioTabs = () => {
       {!loading && !error && activeTab === 'positions' && (
         <>
           {positions.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 p-4 bg-brand-800 rounded-lg">
+            <div className="grid grid-cols-2 gap-4 mb-8 p-4 bg-brand-800 rounded-lg">
               <div>
-                <p className="text-gray-400 text-sm">Total Exposure</p>
-                <p className="text-xl font-semibold text-white">${totalExposure.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-sm">Realized P&L</p>
-                <p className={`text-xl font-semibold ${totalPositionPnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {totalPositionPnl >= 0 ? '' : '-'}${Math.abs(totalPositionPnl).toFixed(2)}
-                </p>
+                <p className="text-gray-400 text-sm">Total Traded</p>
+                <p className="text-xl font-semibold text-white">${totalTraded.toFixed(2)}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Positions</p>
