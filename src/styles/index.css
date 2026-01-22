@@ -83,3 +83,36 @@
     }
   }
 }
+
+html[data-theme='sunset'] {
+  --color-brand-100: #fff7ed;
+  --color-brand-200: #ffedd5;
+  --color-brand-300: #fdba74;
+  --color-brand-400: #fb923c;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;
+  --color-brand-700: #c2410c;
+  --color-brand-800: #9a3412;
+}
+
+html[data-theme='forest'] {
+  --color-brand-100: #f0fdf4;
+  --color-brand-200: #dcfce7;
+  --color-brand-300: #86efac;
+  --color-brand-400: #4ade80;
+  --color-brand-500: #22c55e;
+  --color-brand-600: #16a34a;
+  --color-brand-700: #15803d;
+  --color-brand-800: #166534;
+}
+
+html[data-theme='lavender'] {
+  --color-brand-100: #faf5ff;
+  --color-brand-200: #f3e8ff;
+  --color-brand-300: #d8b4fe;
+  --color-brand-400: #c084fc;
+  --color-brand-500: #a855f7;
+  --color-brand-600: #9333ea;
+  --color-brand-700: #7e22ce;
+  --color-brand-800: #6b21a8;
+}

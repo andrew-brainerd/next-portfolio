@@ -3,8 +3,20 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
 import ConditionalNavigation from '@/components/ConditionalNavigation';
+import ThemeProvider from '@/providers/ThemeProvider';
 import { TOKEN_COOKIE } from '@/constants/authentication';
 import 'styles/index.css';
+
+const themeScript = `
+(function() {
+  try {
+    var theme = localStorage.getItem('theme');
+    if (theme && ['ocean', 'sunset', 'forest', 'lavender'].includes(theme)) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  } catch (e) {}
+})();
+`;
 
 const oswald = Oswald({ subsets: ['latin'], display: 'swap', variable: '--font-oswald' });
 const pacifico = Pacifico({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-pacifico' });
@@ -56,6 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${roboto.variable} ${oswald.variable} ${pacifico.variable}`}>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
@@ -66,8 +79,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           Skip to main content
         </a>
-        <ConditionalNavigation isLoggedIn={isLoggedIn} />
-        <div id="main-content">{children}</div>
+        <ThemeProvider>
+          <ConditionalNavigation isLoggedIn={isLoggedIn} />
+          <div id="main-content">{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   );

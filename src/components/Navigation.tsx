@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signOutUser } from '@/utils/firebase';
+import SettingsIcon from '@/components/icons/SettingsIcon';
 
 interface NavigationProps {
   isLoggedIn: boolean;
@@ -38,30 +39,43 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
             Home
           </Link>
 
-          {isLoggedIn ? (
-            <button
-              onClick={handleLogout}
-              className={
-                isZillowPage
-                  ? 'bg-amber-500 hover:bg-amber-400 px-4 py-2 rounded transition-colors text-amber-950 font-semibold select-none cursor-pointer'
-                  : 'bg-brand-600 hover:bg-brand-500 px-4 py-2 rounded transition-colors select-none cursor-pointer'
-              }
-              type="button"
-            >
-              Logout
-            </button>
-          ) : (
+          <div className="flex items-center gap-3">
             <Link
-              href={`/login?from=${encodeURIComponent(pathname)}`}
+              href="/settings"
+              aria-label="Settings"
               className={
                 isZillowPage
-                  ? 'bg-amber-500 hover:bg-amber-400 px-4 py-2 rounded transition-colors text-amber-950 font-semibold select-none cursor-pointer'
-                  : 'bg-brand-600 hover:bg-brand-500 px-4 py-2 rounded transition-colors select-none cursor-pointer'
+                  ? 'text-amber-50 hover:text-amber-200 transition-colors'
+                  : 'text-white hover:text-brand-300 transition-colors'
               }
             >
-              Login
+              <SettingsIcon className="w-5 h-5" />
             </Link>
-          )}
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className={
+                  isZillowPage
+                    ? 'bg-amber-500 hover:bg-amber-400 px-4 py-2 rounded transition-colors text-amber-950 font-semibold select-none cursor-pointer'
+                    : 'bg-brand-600 hover:bg-brand-500 px-4 py-2 rounded transition-colors select-none cursor-pointer'
+                }
+                type="button"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                href={`/login?from=${encodeURIComponent(pathname)}`}
+                className={
+                  isZillowPage
+                    ? 'bg-amber-500 hover:bg-amber-400 px-4 py-2 rounded transition-colors text-amber-950 font-semibold select-none cursor-pointer'
+                    : 'bg-brand-600 hover:bg-brand-500 px-4 py-2 rounded transition-colors select-none cursor-pointer'
+                }
+              >
+                Login
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </nav>
