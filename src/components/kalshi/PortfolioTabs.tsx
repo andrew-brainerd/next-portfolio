@@ -165,9 +165,6 @@ const PortfolioTabs = () => {
   const totalExposure = positions.reduce((sum, p) => sum + parseFloat(p.market_exposure_dollars), 0);
   const totalPositionPnl = positions.reduce((sum, p) => sum + parseFloat(p.realized_pnl_dollars), 0);
 
-  // Calculate totals for settlements
-  const totalSettlementRevenue = settlements.reduce((sum, s) => sum + s.revenue / 100, 0);
-
   // Calculate wins vs losses (compare revenue to total cost)
   const settlementStats = settlements.reduce(
     (acc, s) => {

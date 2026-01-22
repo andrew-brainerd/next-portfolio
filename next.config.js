@@ -9,9 +9,6 @@ const nextConfig = {
   // Automatically optimizes component rendering and reduces need for manual memoization
   reactCompiler: true,
 
-  // Enable Cache Components for explicit caching with "use cache" directive
-  cacheComponents: true,
-
   sassOptions: {
     includePaths: [path.join(__dirname, 'styles')]
   },
