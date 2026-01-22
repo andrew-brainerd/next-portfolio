@@ -63,10 +63,6 @@ const PositionCard = ({ position }: { position: MarketPositionWithDetails }) => 
             <span className="text-yellow-400">{position.resting_orders_count}</span>
           </div>
         )}
-        <div>
-          <span className="text-gray-400">Fees: </span>
-          <span className="text-gray-300">{formatDollars(position.fees_paid_dollars)}</span>
-        </div>
       </div>
 
       <div className="mt-3 text-xs text-gray-500 font-mono">{position.ticker}</div>
@@ -111,10 +107,6 @@ const SettlementCard = ({ settlement }: { settlement: SettlementWithDetails }) =
           <span className={revenueColor}>{formatDollars(revenue)}</span>
         </div>
         <div>
-          <span className="text-gray-400">Fees: </span>
-          <span className="text-gray-300">{formatDollars(settlement.fee_cost)}</span>
-        </div>
-        <div className="col-span-2">
           <span className="text-gray-400">Settled: </span>
           <span className="text-white">{formatDate(settlement.settled_time)}</span>
         </div>
@@ -175,7 +167,6 @@ const PortfolioTabs = () => {
 
   // Calculate totals for settlements
   const totalSettlementRevenue = settlements.reduce((sum, s) => sum + s.revenue / 100, 0);
-  const totalSettlementFees = settlements.reduce((sum, s) => sum + parseFloat(s.fee_cost), 0);
 
   // Calculate wins vs losses (compare revenue to total cost)
   const settlementStats = settlements.reduce(
@@ -277,7 +268,7 @@ const PortfolioTabs = () => {
       {!loading && !error && activeTab === 'settlements' && (
         <>
           {settlements.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 p-4 bg-brand-800 rounded-lg">
+            <div className="grid grid-cols-3 gap-4 mb-8 p-4 bg-brand-800 rounded-lg">
               <div>
                 <p className="text-gray-400 text-sm">Net P&L</p>
                 <p
@@ -297,10 +288,6 @@ const PortfolioTabs = () => {
                   <span className="text-gray-500"> / </span>
                   <span className="text-red-400">{settlementStats.losses}</span>
                 </p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-sm">Total Fees</p>
-                <p className="text-xl font-semibold text-gray-300">${totalSettlementFees.toFixed(2)}</p>
               </div>
             </div>
           )}
