@@ -6,13 +6,14 @@ import { getLoLEsportsMarkets } from '@/api/kalshi';
 import Loading from '@/components/Loading';
 import { KalshiMarket, LoLLeague } from '@/types/kalshi';
 
-const LOL_LEAGUES: LoLLeague[] = ['LEC', 'LCS', 'LPL', 'LCK'];
+const LOL_LEAGUES: LoLLeague[] = ['LEC', 'LCS', 'LPL', 'LCK', 'Other'];
 
 const LEAGUE_NAMES: Record<LoLLeague, string> = {
   LEC: 'LEC (Europe)',
   LCS: 'LCS (North America)',
   LPL: 'LPL (China)',
-  LCK: 'LCK (Korea)'
+  LCK: 'LCK (Korea)',
+  Other: 'Other LoL Markets'
 };
 
 const formatPrice = (cents: number): string => {
@@ -20,8 +21,15 @@ const formatPrice = (cents: number): string => {
 };
 
 const MarketCard = ({ market }: { market: KalshiMarket }) => {
+  const kalshiUrl = `https://kalshi.com/events/${market.event_ticker}`;
+
   return (
-    <div className="bg-brand-700 rounded-lg p-4 hover:bg-brand-600 transition-colors">
+    <a
+      href={kalshiUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block bg-brand-700 rounded-lg p-4 hover:bg-brand-600 transition-colors"
+    >
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-semibold text-white flex-1 pr-4">{market.title}</h3>
         <span
@@ -56,7 +64,7 @@ const MarketCard = ({ market }: { market: KalshiMarket }) => {
         </div>
       </div>
       <div className="mt-3 text-xs text-gray-500 font-mono">{market.ticker}</div>
-    </div>
+    </a>
   );
 };
 

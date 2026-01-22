@@ -135,7 +135,7 @@ export interface GetEventsResponse {
 }
 
 // League of Legends leagues
-export type LoLLeague = 'LEC' | 'LCS' | 'LPL' | 'LCK';
+export type LoLLeague = 'LEC' | 'LCS' | 'LPL' | 'LCK' | 'Other';
 
 export interface LoLEsportsMarketsResult {
   league: LoLLeague;
