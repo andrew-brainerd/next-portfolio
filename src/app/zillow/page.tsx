@@ -1,9 +1,15 @@
+import dynamic from 'next/dynamic';
 import { cookies } from 'next/headers';
 import { getZillowProperties } from '@/api/zillow';
-import PropertyViews from '@/components/zillow/PropertyViews';
 import MobilePropertyCards from '@/components/zillow/MobilePropertyCards';
+import Loading from '@/components/Loading';
 import type { Metadata } from 'next';
 import { TOKEN_COOKIE } from '@/constants/authentication';
+
+const PropertyViews = dynamic(() => import('@/components/zillow/PropertyViews'), {
+  loading: () => <Loading />,
+  ssr: false
+});
 
 export const metadata: Metadata = {
   title: 'Zillow Properties',

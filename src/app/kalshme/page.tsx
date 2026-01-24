@@ -1,6 +1,11 @@
+import dynamic from 'next/dynamic';
 import { cookies } from 'next/headers';
 
-import PortfolioTabs from '@/components/kalshi/PortfolioTabs';
+import Loading from '@/components/Loading';
+
+const PortfolioTabs = dynamic(() => import('@/components/kalshi/PortfolioTabs'), {
+  loading: () => <Loading />
+});
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
 
 export const metadata = {

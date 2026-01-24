@@ -1,4 +1,10 @@
-import { MangaDetails } from 'components/manga/MangaDetails';
+import dynamic from 'next/dynamic';
+
+import Loading from '@/components/Loading';
+
+const MangaDetails = dynamic(() => import('components/manga/MangaDetails').then(mod => mod.MangaDetails), {
+  loading: () => <Loading />
+});
 
 interface MangaPageProps {
   params: Promise<{
