@@ -47,9 +47,7 @@ export default function UsPage() {
       audioRef.current.volume = 0.5;
 
       try {
-        // Wait for audio to start playing
         await audioRef.current.play();
-        console.log('Audio started successfully');
       } catch (error) {
         console.error('Audio playback error:', error);
       }
