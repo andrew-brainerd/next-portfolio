@@ -266,7 +266,8 @@ const SettlementsContent = () => {
     },
     { wins: 0, losses: 0, breakeven: 0, totalProfit: 0, totalLoss: 0, netPnl: 0 }
   );
-  const winRate = settlements.length > 0 ? (settlementStats.wins / settlements.length) * 100 : 0;
+  const totalDecided = settlementStats.wins + settlementStats.losses;
+  const winRate = totalDecided > 0 ? (settlementStats.wins / totalDecided) * 100 : 0;
 
   if (loading) {
     return (
