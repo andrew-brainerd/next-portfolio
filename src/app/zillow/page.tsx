@@ -1,15 +1,9 @@
-import dynamic from 'next/dynamic';
 import { cookies } from 'next/headers';
 import { getZillowProperties } from '@/api/zillow';
 import MobilePropertyCards from '@/components/zillow/MobilePropertyCards';
-import Loading from '@/components/Loading';
+import PropertyViewsWrapper from '@/components/zillow/PropertyViewsWrapper';
 import type { Metadata } from 'next';
 import { TOKEN_COOKIE } from '@/constants/authentication';
-
-const PropertyViews = dynamic(() => import('@/components/zillow/PropertyViews'), {
-  loading: () => <Loading />,
-  ssr: false
-});
 
 export const metadata: Metadata = {
   title: 'Zillow Properties',
@@ -109,7 +103,7 @@ export default async function ZillowPage() {
         </div>
 
         <div className="hidden md:block">
-          <PropertyViews properties={properties} isLoggedIn={isLoggedIn} />
+          <PropertyViewsWrapper properties={properties} isLoggedIn={isLoggedIn} />
         </div>
 
         {/* Property Cards for Mobile View */}
