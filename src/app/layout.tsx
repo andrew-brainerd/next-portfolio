@@ -10,6 +10,7 @@ import 'styles/index.css';
 const themeScript = `
 (function() {
   try {
+    if (window.location.pathname === '/' || window.location.pathname === '/us') return;
     var theme = localStorage.getItem('theme');
     if (theme && ['ocean', 'sunset', 'forest', 'lavender'].includes(theme)) {
       document.documentElement.setAttribute('data-theme', theme);
