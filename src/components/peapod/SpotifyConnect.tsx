@@ -10,8 +10,11 @@ export default function SpotifyConnect() {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    loadLocalAuth();
-    setIsChecking(false);
+    const init = async () => {
+      await loadLocalAuth();
+      setIsChecking(false);
+    };
+    init();
   }, [loadLocalAuth]);
 
   const handleConnect = async () => {

@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import type { SpotifyAuth, NowPlaying, Pod, SpotifyProfile } from '@/types/peapod';
 
 const SPOTIFY_ACCESS_TOKEN = 'spotifyAccessToken';
-const SPOTIFY_REFRESH_TOKEN = 'spotifyRefreshToken';
 const SPOTIFY_EXPIRE_TIME = 'spotifyExpireTime';
 const REFRESH_THRESHOLD_MIN = 1;
 
@@ -23,31 +22,32 @@ export const formatTimer = (timer: unknown): string => {
 };
 
 // --- Spotify Auth Store ---
+// Access token is stored in localStorage (short-lived).
+// Refresh token is stored in a secure HTTP-only cookie by the backend — never touches JS.
 
 interface SpotifyAuthState {
   accessToken: string | null;
-  refreshToken: string | null;
   expireTime: string | null;
-  setAuth: (auth: SpotifyAuth) => void;
+  isRefreshing: boolean;
+  setAuth: (auth: { accessToken: string | null; expireTime?: string }) => void;
   signOut: () => void;
-  loadLocalAuth: () => void;
+  loadLocalAuth: () => Promise<void>;
+  refreshAuth: () => Promise<boolean>;
   hasAuth: () => boolean;
 }
 
 export const useSpotifyAuth = create<SpotifyAuthState>((set, get) => ({
   accessToken: null,
-  refreshToken: null,
   expireTime: null,
+  isRefreshing: false,
 
   setAuth: auth => {
-    set(state => ({
+    set({
       accessToken: auth.accessToken,
-      refreshToken: auth.refreshToken ?? state.refreshToken,
-      expireTime: auth.expireTime ?? state.expireTime
-    }));
+      expireTime: auth.expireTime ?? get().expireTime
+    });
     if (typeof window !== 'undefined') {
       if (auth.accessToken) localStorage.setItem(SPOTIFY_ACCESS_TOKEN, auth.accessToken);
-      if (auth.refreshToken) localStorage.setItem(SPOTIFY_REFRESH_TOKEN, auth.refreshToken);
       if (auth.expireTime) localStorage.setItem(SPOTIFY_EXPIRE_TIME, auth.expireTime);
     }
   },
@@ -55,29 +55,63 @@ export const useSpotifyAuth = create<SpotifyAuthState>((set, get) => ({
   signOut: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(SPOTIFY_ACCESS_TOKEN);
-      localStorage.removeItem(SPOTIFY_REFRESH_TOKEN);
       localStorage.removeItem(SPOTIFY_EXPIRE_TIME);
     }
-    set({ accessToken: null, refreshToken: null, expireTime: null });
+    set({ accessToken: null, expireTime: null });
   },
 
-  loadLocalAuth: () => {
-    if (typeof window !== 'undefined') {
-      const accessToken = localStorage.getItem(SPOTIFY_ACCESS_TOKEN);
-      const refreshToken = localStorage.getItem(SPOTIFY_REFRESH_TOKEN);
-      const expireTime = localStorage.getItem(SPOTIFY_EXPIRE_TIME);
+  refreshAuth: async () => {
+    if (get().isRefreshing) return false;
+    set({ isRefreshing: true });
 
-      if (accessToken) {
-        const isExpired = expireTime
-          ? (new Date(expireTime).getTime() - Date.now()) / 60000 < REFRESH_THRESHOLD_MIN
-          : true;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BRAINERD_API_URL}/spotify/refresh`, {
+        method: 'POST',
+        credentials: 'include'
+      });
 
-        if (!isExpired) {
-          set({ accessToken, refreshToken, expireTime });
-        }
-        // If expired, the component layer will handle refresh
+      if (!res.ok) {
+        set({ isRefreshing: false });
+        return false;
+      }
+
+      const data = await res.json();
+      const { access_token, expires_in } = data;
+
+      if (access_token) {
+        const expireTime = calculateExpireTime(expires_in);
+        get().setAuth({ accessToken: access_token, expireTime });
+        set({ isRefreshing: false });
+        return true;
+      }
+
+      set({ isRefreshing: false });
+      return false;
+    } catch {
+      set({ isRefreshing: false });
+      return false;
+    }
+  },
+
+  loadLocalAuth: async () => {
+    if (typeof window === 'undefined') return;
+
+    const accessToken = localStorage.getItem(SPOTIFY_ACCESS_TOKEN);
+    const expireTime = localStorage.getItem(SPOTIFY_EXPIRE_TIME);
+
+    if (accessToken) {
+      const isExpired = expireTime
+        ? (new Date(expireTime).getTime() - Date.now()) / 60000 < REFRESH_THRESHOLD_MIN
+        : true;
+
+      if (!isExpired) {
+        set({ accessToken, expireTime });
+        return;
       }
     }
+
+    // Access token missing or expired — try refreshing via the HTTP-only cookie
+    await get().refreshAuth();
   },
 
   hasAuth: () => !!get().accessToken

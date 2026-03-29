@@ -11,8 +11,11 @@ export default function PeapodPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    loadLocalAuth();
-    setReady(true);
+    const init = async () => {
+      await loadLocalAuth();
+      setReady(true);
+    };
+    init();
   }, [loadLocalAuth]);
 
   if (!ready) return null;

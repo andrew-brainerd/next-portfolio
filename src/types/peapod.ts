@@ -69,6 +69,5 @@ export interface ControlsOptions {
 
 export interface SpotifyAuth {
   accessToken: string | null;
-  refreshToken?: string | null;
   expireTime?: string;
 }

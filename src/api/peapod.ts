@@ -84,19 +84,7 @@ export const pushNowPlayingToClients = async (podId: string, nowPlaying: NowPlay
 
 export const getSpotifyAuthUrl = () => getRequest<{ authUrl: string }>('/spotify/auth');
 
-export const refreshSpotifyAuth = (accessToken: string | null, refreshToken: string | null) =>
-  postRequest<
-    { accessToken: string | null; refreshToken: string | null },
-    { response: { access_token: string; expires_in: number } }
-  >('/spotify/auth', { accessToken, refreshToken });
-
 export const getSpotifyConnection = () => getRequest<{ connected: boolean }>('/spotify/connection');
-
-export const saveSpotifyTokens = (accessToken: string, refreshToken: string, expireTime: string) =>
-  postRequest<{ accessToken: string; refreshToken: string; expireTime: string }, { message: string }>(
-    '/spotify/tokens',
-    { accessToken, refreshToken, expireTime }
-  );
 
 export const getSpotifyProfile = async (spotifyToken: string) => {
   const headers = await getSpotifyHeaders();

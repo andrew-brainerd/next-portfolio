@@ -14,8 +14,11 @@ export default function PodPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    loadLocalAuth();
-    setReady(true);
+    const init = async () => {
+      await loadLocalAuth();
+      setReady(true);
+    };
+    init();
   }, [loadLocalAuth]);
 
   if (!ready) return null;

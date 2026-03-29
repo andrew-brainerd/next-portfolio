@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSpotifyAuth, calculateExpireTime } from '@/hooks/usePeapod';
-import { saveSpotifyTokens } from '@/api/peapod';
 
 export default function SpotifyAuthCallback() {
   const router = useRouter();
@@ -12,16 +11,13 @@ export default function SpotifyAuthCallback() {
 
   useEffect(() => {
     const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
     const expiresIn = searchParams.get('expires_in');
 
-    if (accessToken && refreshToken && expiresIn) {
+    if (accessToken && expiresIn) {
       const expireTime = calculateExpireTime(expiresIn);
 
-      setAuth({ accessToken, refreshToken, expireTime });
-
-      // Save tokens server-side
-      saveSpotifyTokens(accessToken, refreshToken, expireTime);
+      // Store only the access token locally — refresh token is in an HTTP-only cookie
+      setAuth({ accessToken, expireTime });
 
       // Redirect to saved return URI or peapod home
       const returnUri = localStorage.getItem('spotifyReturnUri') || '/peapod';
