@@ -1,7 +1,7 @@
 import HomeLink from 'components/HomeLink';
 import GitHubIcon from 'components/icons/GitHubIcon';
 import LinkedinIcon from 'components/icons/LinkedinIcon';
-import MangaIcon from 'components/icons/MangaIcon';
+import PeapodIcon from 'components/icons/PeapodIcon';
 import MailIcon from 'components/icons/MailIcon';
 import SteamIcon from 'components/icons/SteamIcon';
 import KeikenIcon from 'components/icons/KeikenIcon';
@@ -64,7 +64,7 @@ export default function Home() {
               Play
             </h2>
             <p className="text-neutral-300 text-lg max-w-2xl mx-auto">
-              Explore my gaming stats, manga collection, and experience tracker
+              Explore my gaming stats, music pods, and experience tracker
             </p>
           </div>
           <nav
@@ -74,8 +74,8 @@ export default function Home() {
             <HomeLink name="Steam Gaming Stats" path="/steam" openNewTab={false}>
               <SteamIcon className="fill-white h-20 w-20 sm:h-24 sm:w-24" aria-hidden="true" />
             </HomeLink>
-            <HomeLink name="Manga Collection" path="/manga" openNewTab={false}>
-              <MangaIcon className="fill-white h-20 w-20 sm:h-24 sm:w-24" aria-hidden="true" />
+            <HomeLink name="Peapod" path="/peapod" openNewTab={false}>
+              <PeapodIcon className="fill-white h-20 w-20 sm:h-24 sm:w-24" aria-hidden="true" />
             </HomeLink>
             <HomeLink name="Experience Tracker" path="/keiken" openNewTab={false}>
               <KeikenIcon className="fill-white h-20 w-20 sm:h-24 sm:w-24" aria-hidden="true" />
