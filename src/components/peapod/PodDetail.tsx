@@ -54,15 +54,14 @@ export default function PodDetail({ podId }: PodDetailProps) {
     getSpotifyProfile(accessToken).then(setProfile);
   }, [accessToken]);
 
-  // Fetch pod on mount
-  if (!pod) {
-    fetchPod();
-  }
-
-  // Poll pod data periodically
+  // Fetch pod on mount + poll periodically
   useEffect(() => {
+    const timeout = setTimeout(fetchPod, 0);
     const interval = setInterval(fetchPod, 5000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [fetchPod]);
 
   // Auto-join pod as member
