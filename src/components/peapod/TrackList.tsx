@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSpotifyAuth } from '@/hooks/usePeapod';
-import { searchSpotify, addToPlayQueue } from '@/api/peapod';
+import { addToPlayQueue } from '@/api/peapod';
+import { searchSpotify } from '@/api/spotify-client';
 import type { SpotifyTrack } from '@/types/peapod';
 import Track from './Track';
 import Controls from './Controls';

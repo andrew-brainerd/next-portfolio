@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSpotifyAuth } from '@/hooks/usePeapod';
-import { getSpotifyAuthUrl } from '@/api/peapod';
+import { getSpotifyAuthUrl } from '@/api/spotify-client';
 
 export default function SpotifyConnect() {
   const hasAuth = useSpotifyAuth(s => s.hasAuth);

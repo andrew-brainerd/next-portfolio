@@ -7,15 +7,10 @@ import {
   addMemberToPod,
   addActiveMemberToPod,
   removeActiveMemberFromPod,
-  getSpotifyProfile,
-  getMyDevices,
-  getMyNowPlaying,
   addToPlayHistory,
-  pushNowPlayingToClients,
-  play,
-  pause,
-  transferPlayback
+  pushNowPlayingToClients
 } from '@/api/peapod';
+import { getSpotifyProfile, getMyDevices, getMyNowPlaying, play, pause, transferPlayback } from '@/api/spotify-client';
 import { getChannel } from '@/utils/pusher';
 import SongSelection from './SongSelection';
 import OwnerPlayer from './OwnerPlayer';

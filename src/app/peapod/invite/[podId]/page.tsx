@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSpotifyAuth } from '@/hooks/usePeapod';
-import { addMemberToPod, getSpotifyProfile } from '@/api/peapod';
+import { addMemberToPod } from '@/api/peapod';
+import { getSpotifyProfile } from '@/api/spotify-client';
 import { PEAPOD_ROUTE } from '@/constants/routes';
 import SpotifyConnect from '@/components/peapod/SpotifyConnect';
 import Loading from '@/components/Loading';
