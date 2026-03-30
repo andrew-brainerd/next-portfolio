@@ -54,9 +54,13 @@ export default function PodDetail({ podId }: PodDetailProps) {
     getSpotifyProfile(accessToken).then(setProfile);
   }, [accessToken]);
 
-  // Fetch pod on mount and periodically
-  useEffect(() => {
+  // Fetch pod on mount
+  if (!pod) {
     fetchPod();
+  }
+
+  // Poll pod data periodically
+  useEffect(() => {
     const interval = setInterval(fetchPod, 5000);
     return () => clearInterval(interval);
   }, [fetchPod]);
