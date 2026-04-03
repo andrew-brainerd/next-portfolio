@@ -6,6 +6,7 @@ import type { NowPlaying } from '@/types/peapod';
 
 interface TrackProgressProps {
   nowPlaying?: NowPlaying;
+  compact?: boolean;
 }
 
 type TimerState = { timerMs: number; trackId: number | undefined; syncedProgressMs: number };
@@ -28,7 +29,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
   }
 }
 
-export default function TrackProgress({ nowPlaying = {} }: TrackProgressProps) {
+export default function TrackProgress({ nowPlaying = {}, compact = false }: TrackProgressProps) {
   const progressMs = nowPlaying?.progress_ms || 0;
   const durationMs = nowPlaying?.item?.duration_ms || 0;
   const trackId = nowPlaying?.id;
@@ -55,6 +56,22 @@ export default function TrackProgress({ nowPlaying = {} }: TrackProgressProps) {
   }, [isPlaying, durationMs]);
 
   const percent = durationMs > 0 ? Math.min((state.timerMs / durationMs) * 100, 100) : 0;
+
+  if (compact) {
+    return (
+      <div className="flex items-center gap-2 mt-1">
+        <div className="h-1 flex-1 bg-neutral-600 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-brand-400 rounded-full transition-[width] duration-1000 ease-linear"
+            style={{ width: `${percent}%` }}
+          />
+        </div>
+        <div className="text-xs text-neutral-400 tabular-nums whitespace-nowrap">
+          {formatTimer(state.timerMs)} / {formatTimer(durationMs)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="my-2.5">

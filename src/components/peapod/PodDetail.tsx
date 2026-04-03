@@ -14,9 +14,8 @@ import {
 import { getSpotifyProfile, getMyDevices, getMyNowPlaying, play, pause, transferPlayback } from '@/api/spotify-client';
 import { getChannel } from '@/utils/pusher';
 import SongSelection from './SongSelection';
-import OwnerPlayer from './OwnerPlayer';
-import ClientPlayer from './ClientPlayer';
 import PodSidebar from './PodSidebar';
+import PlayerBar from './PlayerBar';
 import InviteModal from './InviteModal';
 import DevicesModal from './DevicesModal';
 import MembersDisplay from './MembersDisplay';
@@ -315,26 +314,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
           </div>
         </div>
         <SongSelection podId={podId} />
-        <div className="flex flex-1 min-h-0 mt-2.5 max-md:flex-col">
-          <div className="flex-1 min-w-0">
-            {isPodOwner ? (
-              <OwnerPlayer
-                isPlaying={isPlaying}
-                trackName={trackName}
-                nowPlaying={displayNowPlaying}
-                albumArt={albumArt}
-                onPlay={handlePlay}
-                onPause={handlePause}
-              />
-            ) : (
-              <ClientPlayer
-                isPlaying={isPlaying}
-                trackName={trackName}
-                nowPlaying={displayNowPlaying}
-                albumArt={albumArt}
-              />
-            )}
-          </div>
+        <div className="flex-1 min-h-0 mt-2.5 overflow-y-auto pb-24">
           <PodSidebar
             queue={pod.queue || []}
             history={pod.history || []}
@@ -343,6 +323,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
           />
         </div>
       </div>
+      <PlayerBar nowPlaying={displayNowPlaying} isPodOwner={isPodOwner} onPlay={handlePlay} onPause={handlePause} />
       <InviteModal isOpen={isInviteOpen} podId={podId} closeModal={() => setIsInviteOpen(false)} />
       <DevicesModal
         isOpen={isDevicesOpen}
