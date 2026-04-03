@@ -4,3 +4,9 @@ export interface FollowedManga {
   slug: string;
   thumb: string;
 }
+
+export interface ChapterDetails {
+  name: string;
+  link: string;
+  releaseDate: string;
+}

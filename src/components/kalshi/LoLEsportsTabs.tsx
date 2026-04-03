@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 
 import { getLoLEsportsMarkets } from '@/api/kalshi';
 import Loading from '@/components/Loading';
-import { KalshiMarket, LoLLeague } from '@/types/kalshi';
+import { KalshiMarket, LoLLeague, MarketGroup } from '@/types/kalshi';
 
 const LOL_LEAGUES: LoLLeague[] = ['LEC', 'LCS', 'LPL', 'LCK', 'Other'];
 
@@ -19,12 +19,6 @@ const LEAGUE_NAMES: Record<LoLLeague, string> = {
 const formatPrice = (cents: number): string => {
   return `${cents}¢`;
 };
-
-interface MarketGroup {
-  eventTicker: string;
-  eventName: string;
-  markets: KalshiMarket[];
-}
 
 // Group markets by event_ticker
 const groupMarketsByEvent = (markets: KalshiMarket[]): MarketGroup[] => {

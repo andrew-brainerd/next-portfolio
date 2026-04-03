@@ -7,16 +7,11 @@ import Image from 'next/image';
 import { followManga, getMangaCover } from 'api/manga';
 import { formatChapterName } from 'utils/manga';
 import Loading from 'components/Loading';
+import type { ChapterDetails } from '@/types/manga';
 
 interface MangaDetailsProps {
   page: string;
   slug: string;
-}
-
-interface ChapterDetails {
-  name: string;
-  link: string;
-  releaseDate: string;
 }
 
 export const MangaDetails = ({ page, slug }: MangaDetailsProps) => {

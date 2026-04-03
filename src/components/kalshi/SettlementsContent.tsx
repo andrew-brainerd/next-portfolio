@@ -6,7 +6,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceL
 
 import { getKalshiSettlements } from '@/api/kalshi';
 import Loading from '@/components/Loading';
-import { SettlementWithDetails } from '@/types/kalshi';
+import { ChartDataPoint, SettlementWithDetails } from '@/types/kalshi';
 
 const formatDollars = (dollars: string | number): string => {
   const num = typeof dollars === 'string' ? parseFloat(dollars) : dollars;
@@ -29,14 +29,6 @@ const formatChartDate = (dateString: string): string => {
     day: 'numeric'
   });
 };
-
-interface ChartDataPoint {
-  date: string;
-  dateLabel: string;
-  pnl: number;
-  cumulativePnl: number;
-  isWin: boolean;
-}
 
 const calculatePnl = (settlement: SettlementWithDetails): number => {
   const totalCost = (settlement.yes_total_cost + settlement.no_total_cost) / 100;

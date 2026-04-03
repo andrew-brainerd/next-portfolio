@@ -6,23 +6,6 @@ import type { NowPlaying } from '@/types/peapod';
 const SDK_URL = 'https://sdk.scdn.co/spotify-player.js';
 const PLAYER_NAME = 'Peapod Web Player';
 
-interface WebPlaybackTrack {
-  uri: string;
-  id: string | null;
-  name: string;
-  album: { uri: string; name: string; images: { url: string }[] };
-  artists: { uri: string; name: string }[];
-}
-
-interface WebPlaybackState {
-  paused: boolean;
-  position: number;
-  duration: number;
-  track_window: {
-    current_track: WebPlaybackTrack;
-  };
-}
-
 function mapToNowPlaying(state: WebPlaybackState): NowPlaying {
   const track = state.track_window.current_track;
   return {

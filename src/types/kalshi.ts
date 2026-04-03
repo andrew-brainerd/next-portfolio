@@ -231,3 +231,17 @@ export interface MarketPositionWithDetails extends MarketPosition {
 export interface SettlementWithDetails extends Settlement {
   market: KalshiMarket | null;
 }
+
+export interface MarketGroup {
+  eventTicker: string;
+  eventName: string;
+  markets: KalshiMarket[];
+}
+
+export interface ChartDataPoint {
+  date: string;
+  dateLabel: string;
+  pnl: number;
+  cumulativePnl: number;
+  isWin: boolean;
+}

@@ -18,6 +18,23 @@ interface SpotifyPlayerInstance {
   getCurrentState: () => Promise<unknown>;
 }
 
+interface WebPlaybackTrack {
+  uri: string;
+  id: string | null;
+  name: string;
+  album: { uri: string; name: string; images: { url: string }[] };
+  artists: { uri: string; name: string }[];
+}
+
+interface WebPlaybackState {
+  paused: boolean;
+  position: number;
+  duration: number;
+  track_window: {
+    current_track: WebPlaybackTrack;
+  };
+}
+
 interface Window {
   onSpotifyWebPlaybackSDKReady: () => void;
   Spotify: {
