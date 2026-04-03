@@ -9,7 +9,7 @@ interface HomeLinkProps {
 const HomeLink = ({ name, children, text, path, openNewTab = true }: HomeLinkProps) => {
   return (
     <a
-      className="group relative animate-fade items-center cursor-pointer flex flex-col justify-center p-8 transition-all duration-500 ease-out hover:scale-105 active:scale-95 rounded-3xl bg-gradient-to-br from-neutral-600/40 to-neutral-700/40 backdrop-blur-sm border border-neutral-500/20 shadow-lg hover:shadow-2xl hover:shadow-brand-500/20 hover:border-brand-400/40 overflow-hidden"
+      className="group relative animate-fade items-center cursor-pointer flex flex-col justify-center p-6 transition-all duration-500 ease-out hover:scale-105 active:scale-95 rounded-3xl bg-gradient-to-br from-neutral-600/40 to-neutral-700/40 backdrop-blur-sm border border-neutral-500/20 shadow-lg hover:shadow-2xl hover:shadow-brand-500/20 hover:border-brand-400/40 overflow-hidden"
       title={name}
       aria-label={name}
       href={path}
@@ -28,7 +28,7 @@ const HomeLink = ({ name, children, text, path, openNewTab = true }: HomeLinkPro
       </div>
 
       {/* Label */}
-      <span className="relative z-10 mt-4 text-sm font-medium text-neutral-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <span className="relative z-10 mt-3 text-sm font-medium text-neutral-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         {name}
       </span>
     </a>
