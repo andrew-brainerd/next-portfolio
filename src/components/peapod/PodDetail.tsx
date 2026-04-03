@@ -43,7 +43,14 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const prevTrackNameRef = useRef<string | undefined>(undefined);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  const { deviceId: browserDeviceId, isReady: isPlayerReady } = useSpotifyPlayer({ accessToken });
+  const handlePlayerStateChange = useCallback((data: NowPlaying) => {
+    setNowPlaying(data);
+  }, []);
+
+  const { deviceId: browserDeviceId, isReady: isPlayerReady } = useSpotifyPlayer({
+    accessToken,
+    onStateChange: handlePlayerStateChange
+  });
 
   const isPodOwner = !!pod?.owner && !!profile?.id && pod.owner.id === profile.id;
   const displayNowPlaying = isPodOwner ? nowPlaying : syncedNowPlaying || nowPlaying;
@@ -112,20 +119,14 @@ export default function PodDetail({ podId }: PodDetailProps) {
     };
   }, [podId, profile, fetchPod]);
 
-  // Poll now playing for owner
+  // Fetch initial now playing state for owner
   useEffect(() => {
     if (!isPodOwner || !accessToken) return;
-    const fetchNowPlaying = async () => {
-      try {
-        const data = await getMyNowPlaying();
+    getMyNowPlaying()
+      .then(data => {
         if (data) setNowPlaying(data);
-      } catch {
-        /* ignore */
-      }
-    };
-    fetchNowPlaying();
-    const interval = setInterval(fetchNowPlaying, 5000);
-    return () => clearInterval(interval);
+      })
+      .catch(() => {});
   }, [isPodOwner, accessToken]);
 
   // Fetch devices for owner
@@ -180,25 +181,12 @@ export default function PodDetail({ podId }: PodDetailProps) {
     };
   }, [podId, profile]);
 
-  const refreshNowPlaying = async () => {
-    try {
-      const data = await getMyNowPlaying();
-      if (data) setNowPlaying(data);
-    } catch {
-      /* ignore */
-    }
-  };
-
   const handlePlay = async () => {
     await play();
-    setNowPlaying(prev => ({ ...prev, is_playing: true }));
-    refreshNowPlaying();
   };
 
   const handlePause = async () => {
     await pause();
-    setNowPlaying(prev => ({ ...prev, is_playing: false }));
-    refreshNowPlaying();
   };
 
   const handleTransferPlayback = async (deviceId: string) => {
