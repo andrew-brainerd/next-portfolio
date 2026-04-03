@@ -2,18 +2,35 @@ import { Oswald, Pacifico, Roboto_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
+import { headers } from 'next/headers';
 import ConditionalNavigation from '@/components/ConditionalNavigation';
 import ThemeProvider from '@/providers/ThemeProvider';
 import { TOKEN_COOKIE } from '@/constants/authentication';
 import 'styles/index.css';
 
+const allThemes = ['ocean', 'sunset', 'forest', 'lavender'];
+
+async function getRandomTheme() {
+  // Use a request-unique value to seed the pick
+  const hdrs = await headers();
+  const requestId = hdrs.get('x-request-id') || hdrs.get('x-vercel-id') || String(Date.now());
+  // Simple hash to get a stable-per-request index
+  let hash = 0;
+  for (let i = 0; i < requestId.length; i++) {
+    hash = (hash * 31 + requestId.charCodeAt(i)) | 0;
+  }
+  return allThemes[Math.abs(hash) % allThemes.length];
+}
+
 const themeScript = `
 (function() {
   try {
-    if (window.location.pathname === '/' || window.location.pathname === '/us') return;
-    var theme = localStorage.getItem('theme');
-    if (theme && ['ocean', 'sunset', 'forest', 'lavender'].includes(theme)) {
-      document.documentElement.setAttribute('data-theme', theme);
+    var existing = sessionStorage.getItem('theme');
+    if (existing) {
+      document.documentElement.setAttribute('data-theme', existing);
+    } else {
+      var serverTheme = document.documentElement.getAttribute('data-theme');
+      if (serverTheme) sessionStorage.setItem('theme', serverTheme);
     }
   } catch (e) {}
 })();
@@ -65,9 +82,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const cookieJar = await cookies();
   const token = cookieJar.get(TOKEN_COOKIE)?.value;
   const isLoggedIn = !!token;
+  const randomTheme = await getRandomTheme();
 
   return (
-    <html lang="en" className={`${roboto.variable} ${oswald.variable} ${pacifico.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      data-theme={randomTheme}
+      className={`${roboto.variable} ${oswald.variable} ${pacifico.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -30,7 +30,6 @@ export default function ThemeCard({ theme }: ThemeCardProps) {
         <div className="w-6 h-6 rounded-full" style={{ backgroundColor: theme.tertiary }} />
       </div>
       <div className="text-sm font-medium text-center">{theme.label}</div>
-      {isActive && <div className="text-xs text-brand-400 mt-1 text-center">Active</div>}
     </button>
   );
 }

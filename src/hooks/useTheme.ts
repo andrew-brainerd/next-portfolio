@@ -37,17 +37,14 @@ export const useTheme = create<ThemeStore>(set => ({
   theme: 'ocean',
   setTheme: theme => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(THEME_STORAGE_KEY, theme);
-      // Only apply theme to DOM if not on excluded route
-      if (!isExcludedRoute()) {
-        document.documentElement.setAttribute('data-theme', theme);
-      }
+      sessionStorage.setItem(THEME_STORAGE_KEY, theme);
+      document.documentElement.setAttribute('data-theme', theme);
     }
     set({ theme });
   },
   initializeTheme: () => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY) as ThemeName | null;
+      const stored = sessionStorage.getItem(THEME_STORAGE_KEY) as ThemeName | null;
       const theme = stored && themes.some(t => t.name === stored) ? stored : 'ocean';
       // Only apply theme to DOM if not on excluded route
       if (!isExcludedRoute()) {

@@ -1,32 +1,18 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import { useTheme, themes } from 'hooks/useTheme';
-
-// Routes where theme should not be applied (use default styling)
-const EXCLUDED_ROUTES = ['/', '/us'];
+import { useTheme, themes, ThemeName } from 'hooks/useTheme';
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const { theme, initializeTheme } = useTheme();
-  const pathname = usePathname();
+  const { setTheme } = useTheme();
 
   useEffect(() => {
-    initializeTheme();
-  }, [initializeTheme]);
-
-  // Handle theme application when pathname changes
-  useEffect(() => {
-    const isExcluded = EXCLUDED_ROUTES.includes(pathname);
-
-    if (isExcluded) {
-      // Remove theme on excluded routes
-      document.documentElement.removeAttribute('data-theme');
-    } else if (themes.some(t => t.name === theme)) {
-      // Apply theme on non-excluded routes
-      document.documentElement.setAttribute('data-theme', theme);
+    // Sync Zustand store with whatever the server set on <html>
+    const serverTheme = document.documentElement.getAttribute('data-theme') as ThemeName | null;
+    if (serverTheme && themes.some(t => t.name === serverTheme)) {
+      setTheme(serverTheme);
     }
-  }, [pathname, theme]);
+  }, [setTheme]);
 
   return <>{children}</>;
 }
