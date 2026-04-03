@@ -26,6 +26,7 @@ export default function DevicesModal({ isOpen, devices, onTransferPlayback, onCl
         <div className="text-xl mb-4 text-center">Available Devices</div>
         {(devices || [])
           .filter(d => !d.is_restricted)
+          .sort((a, b) => (a.name === 'Peapod Web Player' ? -1 : b.name === 'Peapod Web Player' ? 1 : 0))
           .map(device => (
             <div
               key={device.id}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSpotifyAuth, usePodConnection, useNowPlayingSync } from '@/hooks/usePeapod';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import {
   getPod,
   updatePodName,
@@ -41,6 +42,8 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const [editName, setEditName] = useState('');
   const prevTrackNameRef = useRef<string | undefined>(undefined);
   const nameInputRef = useRef<HTMLInputElement>(null);
+
+  const { deviceId: browserDeviceId, isReady: isPlayerReady } = useSpotifyPlayer({ accessToken });
 
   const isPodOwner = !!pod?.owner && !!profile?.id && pod.owner.id === profile.id;
   const displayNowPlaying = isPodOwner ? nowPlaying : syncedNowPlaying || nowPlaying;
@@ -132,6 +135,19 @@ export default function PodDetail({ podId }: PodDetailProps) {
       if (data?.devices) setDevices(data.devices);
     });
   }, [isPodOwner, accessToken]);
+
+  // Auto-transfer playback to browser device when SDK is ready if no active device (owner only)
+  useEffect(() => {
+    if (!isPodOwner || !isPlayerReady || !browserDeviceId) return;
+    const hasActiveDevice = devices.some(d => d.is_active);
+    if (!hasActiveDevice) {
+      transferPlayback([browserDeviceId], false).then(() => {
+        getMyDevices().then(data => {
+          if (data?.devices) setDevices(data.devices);
+        });
+      });
+    }
+  }, [isPodOwner, isPlayerReady, browserDeviceId]);
 
   // Push now playing to clients when track changes (owner only)
   useEffect(() => {
