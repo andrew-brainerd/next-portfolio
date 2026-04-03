@@ -36,7 +36,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const [isSyncing, setIsSyncing] = useState(false);
   const prevTrackNameRef = useRef<string | undefined>(undefined);
 
-  const isPodOwner = !!pod?.createdBy && !!profile?.id && pod.createdBy.id === profile.id;
+  const isPodOwner = !!pod?.owner && !!profile?.id && pod.owner.id === profile.id;
   const displayNowPlaying = isPodOwner ? nowPlaying : syncedNowPlaying || nowPlaying;
   const isPlaying = displayNowPlaying?.is_playing;
   const trackName = displayNowPlaying?.item?.name;
@@ -212,7 +212,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 devices={devices}
                 members={pod.members || []}
                 activeMembers={pod.activeMembers || []}
-                podCreatorId={pod.createdBy?.id}
+                podCreatorId={pod.owner?.id}
                 currentUserId={profile?.id}
                 spotifyToken={accessToken || ''}
                 onPlay={handlePlay}

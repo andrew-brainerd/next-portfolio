@@ -52,7 +52,7 @@ export interface PodMember {
 export interface Pod {
   id: string;
   name?: string;
-  createdBy: { id: string };
+  owner: PodMember;
   members: PodMember[];
   activeMembers: string[];
   queue: SpotifyTrack[];

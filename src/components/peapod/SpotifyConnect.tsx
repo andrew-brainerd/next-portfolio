@@ -1,8 +1,10 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useSpotifyAuth } from '@/hooks/usePeapod';
 import { getSpotifyAuthUrl } from '@/api/spotify-client';
+import peapodLogo from '@/img/peapod-logo.png';
 
 export default function SpotifyConnect() {
   const hasAuth = useSpotifyAuth(s => s.hasAuth);
@@ -33,8 +35,8 @@ export default function SpotifyConnect() {
   if (hasAuth()) return null;
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 gap-6">
-      <h2 className="text-2xl font-bold">Connect Your Spotify Account</h2>
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-140px)] gap-6">
+      <Image src={peapodLogo} alt="Peapod" width={96} height={96} />
       <p className="text-neutral-400 text-center max-w-md">
         Peapod needs access to your Spotify account to play music and sync with your pod members.
       </p>
