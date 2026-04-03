@@ -1,42 +1,38 @@
-'use server';
-
+import spotifyApi from '@/api/spotify-api';
 import type { Pod, SpotifyProfile, SpotifyTrack, NowPlaying } from '@/types/peapod';
-import { getRequest, postRequest, patchRequest } from '@/api/client';
 
 // --- Pod API ---
 
-export const createPod = async (createdBy: SpotifyProfile) =>
-  postRequest<{ createdBy: SpotifyProfile }, Pod>('/peapod', { createdBy });
+export const createPod = (createdBy: SpotifyProfile) =>
+  spotifyApi.post<Pod>('/peapod', { createdBy }).then(r => r.data);
 
-export const getPods = async (userId?: string) =>
-  getRequest<{ items: Pod[] }>('/peapod', userId ? { userId } : undefined);
+export const getPods = (userId?: string) =>
+  spotifyApi.get<{ items: Pod[] }>('/peapod', { params: userId ? { userId } : undefined }).then(r => r.data);
 
-export const getPod = async (podId: string) => getRequest<Pod>(`/peapod/${podId}`);
+export const getPod = (podId: string) => spotifyApi.get<Pod>(`/peapod/${podId}`).then(r => r.data);
 
-export const addMemberToPod = async (podId: string, user: SpotifyProfile) =>
-  patchRequest<{ user: SpotifyProfile }, { message: string }>(`/peapod/${podId}/members`, { user });
+export const addMemberToPod = (podId: string, user: SpotifyProfile) =>
+  spotifyApi.patch<{ message: string }>(`/peapod/${podId}/members`, { user }).then(r => r.data);
 
-export const getInviteLink = async (podId: string) => getRequest<{ inviteLink: string }>(`/peapod/${podId}/invite`);
+export const getInviteLink = (podId: string) =>
+  spotifyApi.get<{ inviteLink: string }>(`/peapod/${podId}/invite`).then(r => r.data);
 
-export const sendInvitation = async (podId: string, messageType: string, to: string) =>
-  postRequest<{ messageType: string; to: string }, { message: string }>(`/peapod/${podId}/invite`, {
-    messageType,
-    to
-  });
+export const sendInvitation = (podId: string, messageType: string, to: string) =>
+  spotifyApi.post<{ message: string }>(`/peapod/${podId}/invite`, { messageType, to }).then(r => r.data);
 
-export const addToPlayQueue = async (podId: string, track: SpotifyTrack) =>
-  patchRequest<{ track: SpotifyTrack }, { message: string }>(`/peapod/${podId}/queue`, { track });
+export const addToPlayQueue = (podId: string, track: SpotifyTrack) =>
+  spotifyApi.patch<{ message: string }>(`/peapod/${podId}/queue`, { track }).then(r => r.data);
 
-export const addToPlayHistory = async (podId: string, track: SpotifyTrack) =>
-  patchRequest<{ track: SpotifyTrack }, { message: string }>(`/peapod/${podId}/history`, { track });
+export const addToPlayHistory = (podId: string, track: SpotifyTrack) =>
+  spotifyApi.patch<{ message: string }>(`/peapod/${podId}/history`, { track }).then(r => r.data);
 
-export const addActiveMemberToPod = async (podId: string, user: SpotifyProfile) =>
-  patchRequest<{ user: SpotifyProfile }, { message: string }>(`/peapod/${podId}/activeMembers`, { user });
+export const addActiveMemberToPod = (podId: string, user: SpotifyProfile) =>
+  spotifyApi.patch<{ message: string }>(`/peapod/${podId}/activeMembers`, { user }).then(r => r.data);
 
-export const removeActiveMemberFromPod = async (podId: string, userId: string) =>
-  postRequest<Record<string, never>, { message: string }>(`/peapod/${podId}/activeMembers/${userId}`);
+export const removeActiveMemberFromPod = (podId: string, userId: string) =>
+  spotifyApi.post<{ message: string }>(`/peapod/${podId}/activeMembers/${userId}`).then(r => r.data);
 
 // --- Sync API ---
 
-export const pushNowPlayingToClients = async (podId: string, nowPlaying: NowPlaying) =>
-  postRequest<{ nowPlaying: NowPlaying }, { message: string }>(`/sync?podId=${podId}`, { nowPlaying });
+export const pushNowPlayingToClients = (podId: string, nowPlaying: NowPlaying) =>
+  spotifyApi.post<{ message: string }>(`/sync`, { nowPlaying }, { params: { podId } }).then(r => r.data);

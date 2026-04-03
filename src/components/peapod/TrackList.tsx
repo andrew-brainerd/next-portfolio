@@ -23,7 +23,7 @@ export default function TrackList({ searchText = '', podId }: TrackListProps) {
     if (!searchText || !accessToken) return;
     setIsLoading(true);
     try {
-      const data = await searchSpotify(accessToken, searchText);
+      const data = await searchSpotify(searchText);
       setTracks(data?.tracks?.items || []);
     } catch {
       setTracks([]);

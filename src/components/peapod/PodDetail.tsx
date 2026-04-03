@@ -44,14 +44,15 @@ export default function PodDetail({ podId }: PodDetailProps) {
 
   // Fetch pod data
   const fetchPod = useCallback(async () => {
+    if (!accessToken) return;
     const data = await getPod(podId);
     if (data) setPod(data as Pod);
-  }, [podId]);
+  }, [accessToken, podId]);
 
   // Fetch profile
   useEffect(() => {
     if (!accessToken) return;
-    getSpotifyProfile(accessToken).then(setProfile);
+    getSpotifyProfile().then(setProfile);
   }, [accessToken]);
 
   // Fetch pod on mount + poll periodically
@@ -66,14 +67,14 @@ export default function PodDetail({ podId }: PodDetailProps) {
 
   // Auto-join pod as member
   useEffect(() => {
-    if (podId && profile) {
+    if (accessToken && podId && profile) {
       addMemberToPod(podId, profile);
     }
-  }, [podId, profile]);
+  }, [accessToken, podId, profile]);
 
   // Connect as owner or client
   useEffect(() => {
-    if (!pod || !profile) return;
+    if (!accessToken || !pod || !profile) return;
 
     if (isPodOwner && !isConnected) {
       setConnecting(podId);
@@ -90,7 +91,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
         setIsSyncing(true);
       });
     }
-  }, [pod, profile, isPodOwner, isConnected, isSyncing, podId]);
+  }, [accessToken, pod, profile, isPodOwner, isConnected, isSyncing, podId]);
 
   // Listen for member updates via Pusher
   useEffect(() => {
@@ -107,7 +108,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
     if (!isPodOwner || !accessToken) return;
     const fetchNowPlaying = async () => {
       try {
-        const data = await getMyNowPlaying(accessToken);
+        const data = await getMyNowPlaying();
         if (data) setNowPlaying(data);
       } catch {
         /* ignore */
@@ -121,17 +122,17 @@ export default function PodDetail({ podId }: PodDetailProps) {
   // Fetch devices for owner
   useEffect(() => {
     if (!isPodOwner || !accessToken) return;
-    getMyDevices(accessToken).then(data => {
+    getMyDevices().then(data => {
       if (data?.devices) setDevices(data.devices);
     });
   }, [isPodOwner, accessToken]);
 
   // Push now playing to clients when track changes (owner only)
   useEffect(() => {
-    if (isPodOwner && nowPlaying && Object.keys(nowPlaying).length > 0) {
+    if (accessToken && isPodOwner && nowPlaying && Object.keys(nowPlaying).length > 0) {
       pushNowPlayingToClients(podId, nowPlaying);
     }
-  }, [nowPlaying, isPodOwner, podId]);
+  }, [accessToken, nowPlaying, isPodOwner, podId]);
 
   // Track history on song change (owner only)
   useEffect(() => {
@@ -158,28 +159,26 @@ export default function PodDetail({ podId }: PodDetailProps) {
   }, [podId, profile]);
 
   const handlePlay = async () => {
-    if (accessToken) await play(accessToken);
+    await play();
   };
 
   const handlePause = async () => {
-    if (accessToken) await pause(accessToken);
+    await pause();
   };
 
   const handleTransferPlayback = async (deviceId: string) => {
-    if (accessToken) {
-      await transferPlayback(accessToken, [deviceId], true);
-      setTimeout(() => {
-        getMyDevices(accessToken).then(data => {
-          if (data?.devices) setDevices(data.devices);
-        });
-      }, 1500);
-    }
+    await transferPlayback([deviceId], true);
+    setTimeout(() => {
+      getMyDevices().then(data => {
+        if (data?.devices) setDevices(data.devices);
+      });
+    }, 1500);
   };
 
   const handleStartPlaying = async () => {
-    if (accessToken && pod?.queue) {
+    if (pod?.queue) {
       const uris = pod.queue.map(t => t.uri);
-      await play(accessToken, { uris });
+      await play({ uris });
     }
   };
 

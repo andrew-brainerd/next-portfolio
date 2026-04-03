@@ -32,7 +32,7 @@ export default function InvitePage() {
 
     const joinPod = async () => {
       try {
-        const profile: SpotifyProfile = await getSpotifyProfile(accessToken);
+        const profile: SpotifyProfile = await getSpotifyProfile();
         await addMemberToPod(podId, profile);
       } finally {
         router.push(`${PEAPOD_ROUTE}/${podId}`);

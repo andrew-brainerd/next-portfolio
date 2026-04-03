@@ -19,21 +19,21 @@ export default function PodList() {
 
   useEffect(() => {
     if (!accessToken) return;
-    getSpotifyProfile(accessToken).then(setProfile);
+    getSpotifyProfile().then(setProfile);
   }, [accessToken]);
 
   useEffect(() => {
-    if (!profile) return;
+    if (!accessToken || !profile) return;
     setIsLoading(true);
     getPods(profile.id)
       .then(data => {
         setPods((data as { items: Pod[] })?.items || []);
       })
       .finally(() => setIsLoading(false));
-  }, [profile]);
+  }, [accessToken, profile]);
 
   const handleCreatePod = async () => {
-    if (!profile || isCreating) return;
+    if (!accessToken || !profile || isCreating) return;
     setIsCreating(true);
     try {
       const newPod = await createPod(profile);
