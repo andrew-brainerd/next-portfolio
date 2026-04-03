@@ -54,11 +54,21 @@ export default function TrackProgress({ nowPlaying = {} }: TrackProgressProps) {
     return () => clearInterval(interval);
   }, [isPlaying, durationMs]);
 
+  const percent = durationMs > 0 ? Math.min((state.timerMs / durationMs) * 100, 100) : 0;
+
   return (
-    <div className="flex items-center gap-1 my-2.5 text-sm tabular-nums">
-      <span>{formatTimer(state.timerMs)}</span>
-      <span>/</span>
-      <span>{formatTimer(durationMs)}</span>
+    <div className="my-2.5">
+      <div className="h-1 w-full bg-neutral-600 rounded-full overflow-hidden mb-2">
+        <div
+          className="h-full bg-brand-400 rounded-full transition-[width] duration-1000 ease-linear"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      <div className="flex items-center gap-1 text-sm tabular-nums">
+        <span>{formatTimer(state.timerMs)}</span>
+        <span>/</span>
+        <span>{formatTimer(durationMs)}</span>
+      </div>
     </div>
   );
 }
