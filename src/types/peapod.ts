@@ -59,6 +59,20 @@ export interface Pod {
   history: SpotifyTrack[];
 }
 
+export interface PodTrack {
+  id: string;
+  name: string;
+  artist?: string;
+}
+
+export interface PodFavorite {
+  podId: string;
+  trackId: string;
+  track: PodTrack;
+  favoritedBy: string;
+  favoritedAt: string;
+}
+
 export type PodView = 'search' | 'nowPlaying' | 'queue' | 'history';
 
 export interface ControlsOptions {

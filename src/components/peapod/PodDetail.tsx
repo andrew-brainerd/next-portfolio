@@ -10,7 +10,10 @@ import {
   addActiveMemberToPod,
   removeActiveMemberFromPod,
   addToPlayHistory,
-  pushNowPlayingToClients
+  pushNowPlayingToClients,
+  getFavorites,
+  addFavorite,
+  removeFavorite
 } from '@/api/peapod';
 import {
   getSpotifyProfile,
@@ -27,6 +30,7 @@ import PodSidebar from './PodSidebar';
 import PlayerBar from './PlayerBar';
 import InviteModal from './InviteModal';
 import DevicesModal from './DevicesModal';
+import FavoritesModal from './FavoritesModal';
 import MembersDisplay from './MembersDisplay';
 import type { Pod, SpotifyProfile, SpotifyDevice, NowPlaying } from '@/types/peapod';
 
@@ -45,6 +49,8 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>({});
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isDevicesOpen, setIsDevicesOpen] = useState(false);
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [favoriteTrackIds, setFavoriteTrackIds] = useState<Set<string>>(new Set());
   const [isSyncing, setIsSyncing] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
@@ -137,6 +143,16 @@ export default function PodDetail({ podId }: PodDetailProps) {
       .catch(() => {});
   }, [isPodOwner, accessToken]);
 
+  // Fetch favorites for pod
+  useEffect(() => {
+    if (!accessToken) return;
+    getFavorites(podId)
+      .then(data => {
+        setFavoriteTrackIds(new Set((data?.items || []).map(f => f.trackId)));
+      })
+      .catch(() => {});
+  }, [accessToken, podId]);
+
   // Fetch devices for owner
   useEffect(() => {
     if (!isPodOwner || !accessToken) return;
@@ -188,6 +204,26 @@ export default function PodDetail({ podId }: PodDetailProps) {
       setDisconnected();
     };
   }, [podId, profile]);
+
+  const currentTrackUri = displayNowPlaying?.item?.uri;
+  const isCurrentFavorited = !!currentTrackUri && favoriteTrackIds.has(currentTrackUri);
+
+  const handleToggleFavorite = async () => {
+    const track = displayNowPlaying?.item;
+    if (!track || !profile) return;
+
+    if (isCurrentFavorited) {
+      await removeFavorite(podId, track.uri);
+      setFavoriteTrackIds(prev => {
+        const next = new Set(prev);
+        next.delete(track.uri);
+        return next;
+      });
+    } else {
+      await addFavorite(podId, track, profile.id);
+      setFavoriteTrackIds(prev => new Set(prev).add(track.uri));
+    }
+  };
 
   const handlePlay = async () => {
     await play();
@@ -315,6 +351,16 @@ export default function PodDetail({ podId }: PodDetailProps) {
               </button>
             )}
             <button
+              className="text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
+              onClick={() => setIsFavoritesOpen(true)}
+              type="button"
+              aria-label="Favorites"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </button>
+            <button
               className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer"
               onClick={() => setIsInviteOpen(true)}
               type="button"
@@ -342,11 +388,14 @@ export default function PodDetail({ podId }: PodDetailProps) {
       <PlayerBar
         nowPlaying={displayNowPlaying}
         isPodOwner={isPodOwner}
+        isFavorited={isCurrentFavorited}
         onPlay={handlePlay}
         onPause={handlePause}
         onNext={handleNext}
+        onToggleFavorite={handleToggleFavorite}
       />
       <InviteModal isOpen={isInviteOpen} podId={podId} closeModal={() => setIsInviteOpen(false)} />
+      <FavoritesModal isOpen={isFavoritesOpen} podId={podId} onClose={() => setIsFavoritesOpen(false)} />
       <DevicesModal
         isOpen={isDevicesOpen}
         devices={devices}
