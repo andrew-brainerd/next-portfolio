@@ -55,7 +55,16 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
             Home
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-5">
+            <Link href="/peapod" className={`${iconColor} text-sm transition-colors`}>
+              Peapod
+            </Link>
+            <Link href="/steam" className={`${iconColor} text-sm transition-colors`}>
+              Steam
+            </Link>
+            <Link href="/keiken" className={`${iconColor} text-sm transition-colors`}>
+              Keiken
+            </Link>
             {isLoggedIn ? (
               <div className="relative" ref={menuRef}>
                 <button
