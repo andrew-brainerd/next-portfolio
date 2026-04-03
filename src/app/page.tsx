@@ -8,7 +8,7 @@ import KeikenIcon from 'components/icons/KeikenIcon';
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen flex flex-col">
       {/* Hero Section */}
       <header className="relative bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40"></div>
@@ -37,7 +37,7 @@ export default function Home() {
             </p>
           </div>
           <nav
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto"
             aria-label="Work links"
           >
             <HomeLink name="GitHub Profile" path="https://github.com/andrew-brainerd">
@@ -54,7 +54,10 @@ export default function Home() {
       </section>
 
       {/* Play Section */}
-      <section className="py-8 px-6 bg-gradient-to-b from-transparent to-neutral-800/20" aria-labelledby="play-heading">
+      <section
+        className="py-8 px-6 flex-1 bg-gradient-to-b from-transparent to-neutral-800/20"
+        aria-labelledby="play-heading"
+      >
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-10 animate-fade-in-up">
             <h2 id="play-heading" className="text-brand-400 text-2xl sm:text-4xl font-bold mb-3">
@@ -65,7 +68,7 @@ export default function Home() {
             </p>
           </div>
           <nav
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto"
             aria-label="Gaming links"
           >
             <HomeLink name="Steam Gaming Stats" path="/steam" openNewTab={false}>
