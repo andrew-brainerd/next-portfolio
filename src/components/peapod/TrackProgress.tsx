@@ -53,9 +53,10 @@ export default function TrackProgress({ nowPlaying = {} }: TrackProgressProps) {
   }, [durationMs]);
 
   return (
-    <div className="flex flex-row my-2.5">
-      <div className="text-sm mx-1 my-0.5 text-center">{formatTimer(state.timerMs)}</div>/
-      <div className="text-sm mx-1 my-0.5 text-center">{formatTimer(durationMs)}</div>
+    <div className="flex items-center gap-1 my-2.5 text-sm tabular-nums">
+      <span>{formatTimer(state.timerMs)}</span>
+      <span>/</span>
+      <span>{formatTimer(durationMs)}</span>
     </div>
   );
 }
