@@ -18,5 +18,7 @@ export const play = (options?: { uris?: string[] }) => spotifyApi.put('/spotify/
 
 export const pause = () => spotifyApi.put('/spotify/pause').then(r => r.data);
 
+export const skipToNext = () => spotifyApi.post('/spotify/next').then(r => r.data);
+
 export const searchSpotify = (searchText: string) =>
   spotifyApi.post('/spotify/search', { searchText, types: ['track'] }).then(r => r.data);

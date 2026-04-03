@@ -12,7 +12,15 @@ import {
   addToPlayHistory,
   pushNowPlayingToClients
 } from '@/api/peapod';
-import { getSpotifyProfile, getMyDevices, getMyNowPlaying, play, pause, transferPlayback } from '@/api/spotify-client';
+import {
+  getSpotifyProfile,
+  getMyDevices,
+  getMyNowPlaying,
+  play,
+  pause,
+  skipToNext,
+  transferPlayback
+} from '@/api/spotify-client';
 import { getChannel } from '@/utils/pusher';
 import SongSelection from './SongSelection';
 import PodSidebar from './PodSidebar';
@@ -189,6 +197,10 @@ export default function PodDetail({ podId }: PodDetailProps) {
     await pause();
   };
 
+  const handleNext = async () => {
+    await skipToNext();
+  };
+
   const handleTransferPlayback = async (deviceId: string) => {
     await transferPlayback([deviceId], true);
     setTimeout(() => {
@@ -327,7 +339,13 @@ export default function PodDetail({ podId }: PodDetailProps) {
           />
         </div>
       </div>
-      <PlayerBar nowPlaying={displayNowPlaying} isPodOwner={isPodOwner} onPlay={handlePlay} onPause={handlePause} />
+      <PlayerBar
+        nowPlaying={displayNowPlaying}
+        isPodOwner={isPodOwner}
+        onPlay={handlePlay}
+        onPause={handlePause}
+        onNext={handleNext}
+      />
       <InviteModal isOpen={isInviteOpen} podId={podId} closeModal={() => setIsInviteOpen(false)} />
       <DevicesModal
         isOpen={isDevicesOpen}

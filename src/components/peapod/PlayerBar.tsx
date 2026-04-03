@@ -8,9 +8,10 @@ interface PlayerBarProps {
   isPodOwner: boolean;
   onPlay?: () => void;
   onPause?: () => void;
+  onNext?: () => void;
 }
 
-export default function PlayerBar({ nowPlaying, isPodOwner, onPlay, onPause }: PlayerBarProps) {
+export default function PlayerBar({ nowPlaying, isPodOwner, onPlay, onPause, onNext }: PlayerBarProps) {
   const isPlaying = nowPlaying?.is_playing;
   const trackName = nowPlaying?.item?.name;
   const artistName = nowPlaying?.item?.artists?.map(a => a.name).join(', ');
@@ -41,23 +42,36 @@ export default function PlayerBar({ nowPlaying, isPodOwner, onPlay, onPause }: P
 
         {/* Controls (owner only) */}
         {isPodOwner && (
-          <button
-            className="text-white hover:text-brand-400 transition-colors cursor-pointer flex-shrink-0"
-            onClick={isPlaying ? onPause : onPlay}
-            type="button"
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-          >
-            {isPlaying ? (
-              <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="6" y="4" width="4" height="16" rx="1" />
-                <rect x="14" y="4" width="4" height="16" rx="1" />
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              className="text-white hover:text-brand-400 transition-colors cursor-pointer"
+              onClick={isPlaying ? onPause : onPlay}
+              type="button"
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? (
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16" rx="1" />
+                  <rect x="14" y="4" width="4" height="16" rx="1" />
+                </svg>
+              ) : (
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5,3 19,12 5,21" />
+                </svg>
+              )}
+            </button>
+            <button
+              className="text-white hover:text-brand-400 transition-colors cursor-pointer"
+              onClick={onNext}
+              type="button"
+              aria-label="Next track"
+            >
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="4,4 15,12 4,20" />
+                <rect x="17" y="4" width="3" height="16" />
               </svg>
-            ) : (
-              <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5,3 19,12 5,21" />
-              </svg>
-            )}
-          </button>
+            </button>
+          </div>
         )}
       </div>
     </div>
