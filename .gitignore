@@ -40,3 +40,5 @@ next-env.d.ts
 .claude/settings.local.json
 
 admin.json
+
+certificates
