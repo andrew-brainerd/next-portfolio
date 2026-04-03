@@ -165,12 +165,25 @@ export default function PodDetail({ podId }: PodDetailProps) {
     };
   }, [podId, profile]);
 
+  const refreshNowPlaying = async () => {
+    try {
+      const data = await getMyNowPlaying();
+      if (data) setNowPlaying(data);
+    } catch {
+      /* ignore */
+    }
+  };
+
   const handlePlay = async () => {
     await play();
+    setNowPlaying(prev => ({ ...prev, is_playing: true }));
+    refreshNowPlaying();
   };
 
   const handlePause = async () => {
     await pause();
+    setNowPlaying(prev => ({ ...prev, is_playing: false }));
+    refreshNowPlaying();
   };
 
   const handleTransferPlayback = async (deviceId: string) => {

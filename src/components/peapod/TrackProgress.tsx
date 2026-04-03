@@ -32,6 +32,7 @@ export default function TrackProgress({ nowPlaying = {} }: TrackProgressProps) {
   const progressMs = nowPlaying?.progress_ms || 0;
   const durationMs = nowPlaying?.item?.duration_ms || 0;
   const trackId = nowPlaying?.id;
+  const isPlaying = nowPlaying?.is_playing ?? false;
 
   const [state, dispatch] = useReducer(timerReducer, {
     timerMs: progressMs,
@@ -44,13 +45,14 @@ export default function TrackProgress({ nowPlaying = {} }: TrackProgressProps) {
     dispatch({ type: 'sync', progressMs, trackId });
   }, [progressMs, trackId]);
 
-  // Tick every second
+  // Tick every second while playing
   useEffect(() => {
+    if (!isPlaying) return;
     const interval = setInterval(() => {
       dispatch({ type: 'tick', durationMs });
     }, 1000);
     return () => clearInterval(interval);
-  }, [durationMs]);
+  }, [isPlaying, durationMs]);
 
   return (
     <div className="flex items-center gap-1 my-2.5 text-sm tabular-nums">
