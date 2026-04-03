@@ -2,40 +2,18 @@
 
 import TrackProgress from './TrackProgress';
 import Controls from './Controls';
-import Devices from './Devices';
-import PodMembers from './PodMembers';
-import type { NowPlaying, SpotifyDevice, PodMember } from '@/types/peapod';
+import type { NowPlaying } from '@/types/peapod';
 
 interface OwnerPlayerProps {
   isPlaying?: boolean;
   trackName?: string;
   nowPlaying?: NowPlaying;
   albumArt?: string;
-  devices: SpotifyDevice[];
-  members: PodMember[];
-  activeMembers: string[];
-  podCreatorId?: string;
-  currentUserId?: string;
-  spotifyToken: string;
   onPlay: () => void;
   onPause: () => void;
-  onTransferPlayback: (deviceId: string) => void;
 }
 
-export default function OwnerPlayer({
-  isPlaying,
-  trackName,
-  nowPlaying,
-  albumArt,
-  devices,
-  members,
-  activeMembers,
-  podCreatorId,
-  currentUserId,
-  onPlay,
-  onPause,
-  onTransferPlayback
-}: OwnerPlayerProps) {
+export default function OwnerPlayer({ isPlaying, trackName, nowPlaying, albumArt, onPlay, onPause }: OwnerPlayerProps) {
   return (
     <div className="bg-neutral-800 rounded-xl text-base mx-auto my-4 max-w-3xl overflow-hidden w-[95%]">
       {isPlaying ? (
@@ -52,15 +30,6 @@ export default function OwnerPlayer({
           <Controls isPlaying={isPlaying} onPlay={onPlay} onPause={onPause} />
         </div>
       )}
-      <div className="flex justify-evenly">
-        <Devices devices={devices} onTransferPlayback={onTransferPlayback} />
-        <PodMembers
-          members={members}
-          activeMembers={activeMembers}
-          podCreatorId={podCreatorId}
-          currentUserId={currentUserId}
-        />
-      </div>
     </div>
   );
 }

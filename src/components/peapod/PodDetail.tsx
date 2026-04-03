@@ -18,6 +18,8 @@ import OwnerPlayer from './OwnerPlayer';
 import ClientPlayer from './ClientPlayer';
 import PodSidebar from './PodSidebar';
 import InviteModal from './InviteModal';
+import DevicesModal from './DevicesModal';
+import MembersDisplay from './MembersDisplay';
 import type { Pod, SpotifyProfile, SpotifyDevice, NowPlaying } from '@/types/peapod';
 
 interface PodDetailProps {
@@ -34,6 +36,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const [devices, setDevices] = useState<SpotifyDevice[]>([]);
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>({});
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [isDevicesOpen, setIsDevicesOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
@@ -262,14 +265,41 @@ export default function PodDetail({ podId }: PodDetailProps) {
               </div>
             )}
           </div>
-          <button
-            className="bg-transparent flex items-center gap-1.5 py-1.5 px-3 rounded transition-colors hover:text-brand-400 cursor-pointer border-none text-white"
-            onClick={() => setIsInviteOpen(true)}
-            type="button"
-          >
-            <span>👥</span>
-            <span className="text-sm">Invite</span>
-          </button>
+          <div className="flex items-center gap-4">
+            <MembersDisplay
+              members={pod.members || []}
+              activeMembers={pod.activeMembers || []}
+              podCreatorId={pod.owner?.id}
+              currentUserId={profile?.id}
+            />
+            {isPodOwner && (
+              <button
+                className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer"
+                onClick={() => setIsDevicesOpen(true)}
+                type="button"
+                aria-label="Devices"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              </button>
+            )}
+            <button
+              className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer"
+              onClick={() => setIsInviteOpen(true)}
+              type="button"
+              aria-label="Invite"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" y1="8" x2="19" y2="14" />
+                <line x1="22" y1="11" x2="16" y2="11" />
+              </svg>
+            </button>
+          </div>
         </div>
         <SongSelection podId={podId} />
         <div className="flex flex-1 min-h-0 mt-2.5 max-md:flex-col">
@@ -280,15 +310,8 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 trackName={trackName}
                 nowPlaying={displayNowPlaying}
                 albumArt={albumArt}
-                devices={devices}
-                members={pod.members || []}
-                activeMembers={pod.activeMembers || []}
-                podCreatorId={pod.owner?.id}
-                currentUserId={profile?.id}
-                spotifyToken={accessToken || ''}
                 onPlay={handlePlay}
                 onPause={handlePause}
-                onTransferPlayback={handleTransferPlayback}
               />
             ) : (
               <ClientPlayer
@@ -308,6 +331,12 @@ export default function PodDetail({ podId }: PodDetailProps) {
         </div>
       </div>
       <InviteModal isOpen={isInviteOpen} podId={podId} closeModal={() => setIsInviteOpen(false)} />
+      <DevicesModal
+        isOpen={isDevicesOpen}
+        devices={devices}
+        onTransferPlayback={handleTransferPlayback}
+        onClose={() => setIsDevicesOpen(false)}
+      />
     </>
   );
 }
