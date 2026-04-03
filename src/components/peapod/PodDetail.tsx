@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSpotifyAuth, usePodConnection, useNowPlayingSync } from '@/hooks/usePeapod';
 import {
   getPod,
+  updatePodName,
   addMemberToPod,
   addActiveMemberToPod,
   removeActiveMemberFromPod,
@@ -34,7 +35,10 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>({});
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
   const prevTrackNameRef = useRef<string | undefined>(undefined);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const isPodOwner = !!pod?.owner && !!profile?.id && pod.owner.id === profile.id;
   const displayNowPlaying = isPodOwner ? nowPlaying : syncedNowPlaying || nowPlaying;
@@ -175,6 +179,21 @@ export default function PodDetail({ podId }: PodDetailProps) {
     }, 1500);
   };
 
+  const handleEditName = () => {
+    setEditName(pod?.name || '');
+    setIsEditingName(true);
+    setTimeout(() => nameInputRef.current?.focus(), 0);
+  };
+
+  const handleSaveName = async () => {
+    const trimmed = editName.trim();
+    if (trimmed && pod) {
+      await updatePodName(podId, trimmed);
+      setPod({ ...pod, name: trimmed });
+    }
+    setIsEditingName(false);
+  };
+
   const handleStartPlaying = async () => {
     if (pod?.queue) {
       const uris = pod.queue.map(t => t.uri);
@@ -189,7 +208,60 @@ export default function PodDetail({ podId }: PodDetailProps) {
   return (
     <>
       <div className="flex flex-col h-[calc(100vh-140px)] mx-auto max-w-5xl min-w-[375px] px-5 w-full">
-        <div className="flex justify-end py-1">
+        <div className="flex justify-between items-center py-1">
+          <div className="flex items-center gap-2">
+            {isEditingName ? (
+              <>
+                <input
+                  ref={nameInputRef}
+                  className="bg-transparent border-b border-brand-400 text-2xl font-bold text-white outline-none px-1"
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleSaveName();
+                    if (e.key === 'Escape') setIsEditingName(false);
+                  }}
+                />
+                <button
+                  onClick={handleSaveName}
+                  className="text-green-400 hover:text-green-300 transition-colors cursor-pointer"
+                  type="button"
+                  aria-label="Save name"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setIsEditingName(false)}
+                  className="text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
+                  type="button"
+                  aria-label="Cancel editing"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </>
+            ) : (
+              <div className="group flex items-center gap-2">
+                <h1 className="text-2xl font-bold">{pod.name || 'Untitled Pod'}</h1>
+                {isPodOwner && (
+                  <button
+                    onClick={handleEditName}
+                    className="text-neutral-400 hover:text-brand-400 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                    type="button"
+                    aria-label="Edit pod name"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           <button
             className="bg-transparent flex items-center gap-1.5 py-1.5 px-3 rounded transition-colors hover:text-brand-400 cursor-pointer border-none text-white"
             onClick={() => setIsInviteOpen(true)}

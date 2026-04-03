@@ -41,7 +41,7 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
   const iconColor = isZillowPage ? 'text-amber-50 hover:text-amber-200' : 'text-white hover:text-brand-300';
 
   return (
-    <nav className={isZillowPage ? 'bg-gradient-to-r from-orange-900 to-amber-800' : 'bg-brand-700'}>
+    <nav className={`mb-4 ${isZillowPage ? 'bg-gradient-to-r from-orange-900 to-amber-800' : 'bg-brand-700'}`}>
       <div className="container mx-auto px-3 py-4">
         <div className="flex justify-between items-center">
           <Link
@@ -56,20 +56,20 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
           </Link>
 
           <div className="flex items-center gap-5">
-            <Link href="/peapod" className={`${iconColor} text-sm transition-colors`}>
+            <Link href="/peapod" className={`${iconColor} text-sm leading-none transition-colors`}>
               Peapod
             </Link>
-            <Link href="/steam" className={`${iconColor} text-sm transition-colors`}>
+            <Link href="/steam" className={`${iconColor} text-sm leading-none transition-colors`}>
               Steam
             </Link>
-            <Link href="/keiken" className={`${iconColor} text-sm transition-colors`}>
+            <Link href="/keiken" className={`${iconColor} text-sm leading-none transition-colors`}>
               Keiken
             </Link>
             {isLoggedIn ? (
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setMenuOpen(prev => !prev)}
-                  className={`${iconColor} transition-colors cursor-pointer`}
+                  className={`${iconColor} flex items-center transition-colors cursor-pointer`}
                   type="button"
                   aria-label="User menu"
                 >
