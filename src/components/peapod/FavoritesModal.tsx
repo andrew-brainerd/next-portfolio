@@ -3,16 +3,17 @@
 import { useState, useEffect } from 'react';
 import { getFavorites, removeFavorite } from '@/api/peapod';
 import Modal from './Modal';
-import { CloseIcon } from './Icons';
-import type { PodFavorite } from '@/types/peapod';
+import { CloseIcon, PlusIcon } from './Icons';
+import type { PodFavorite, SpotifyTrack } from '@/types/peapod';
 
 interface FavoritesModalProps {
   isOpen: boolean;
   podId: string;
   onClose: () => void;
+  onAddToQueue: (track: SpotifyTrack) => void;
 }
 
-export default function FavoritesModal({ isOpen, podId, onClose }: FavoritesModalProps) {
+export default function FavoritesModal({ isOpen, podId, onClose, onAddToQueue }: FavoritesModalProps) {
   const [favorites, setFavorites] = useState<PodFavorite[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,6 +33,11 @@ export default function FavoritesModal({ isOpen, podId, onClose }: FavoritesModa
     setFavorites(prev => prev.filter(f => f.trackId !== trackId));
   };
 
+  const handleQueueAll = () => {
+    favorites.forEach(fav => onAddToQueue(fav.track));
+    onClose();
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="bg-neutral-800 rounded-xl p-6 max-w-md w-[90%] max-h-[70vh] flex flex-col">
@@ -41,38 +47,58 @@ export default function FavoritesModal({ isOpen, podId, onClose }: FavoritesModa
         ) : favorites.length === 0 ? (
           <div className="text-neutral-400 text-center py-8">No favorites yet</div>
         ) : (
-          <div className="overflow-y-auto flex-1">
-            {favorites.map(fav => (
-              <div
-                key={fav.trackId}
-                className="flex items-center gap-3 py-2.5 border-b border-neutral-700 last:border-b-0"
-              >
-                {fav.track.album?.images?.[2]?.url && (
-                  <img
-                    className="w-10 h-10 rounded flex-shrink-0 object-cover"
-                    src={fav.track.album.images[2].url}
-                    alt=""
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{fav.track.name}</div>
-                  {fav.track.artists?.[0]?.name && (
-                    <div className="text-xs text-neutral-400 truncate">
-                      {fav.track.artists.map(a => a.name).join(', ')}
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={() => handleRemove(fav.trackId)}
-                  className="text-red-400 hover:text-red-300 transition-colors cursor-pointer flex-shrink-0"
-                  type="button"
-                  aria-label="Remove favorite"
+          <>
+            <button
+              onClick={handleQueueAll}
+              className="flex items-center justify-center gap-2 w-full bg-brand-600 hover:bg-brand-500 text-white text-sm py-2 rounded-md mb-3 cursor-pointer transition-colors"
+              type="button"
+            >
+              <PlusIcon size="w-4 h-4" />
+              Queue All Favorites
+            </button>
+            <div className="overflow-y-auto flex-1">
+              {favorites.map(fav => (
+                <div
+                  key={fav.trackId}
+                  className="group flex items-center gap-3 py-2.5 border-b border-neutral-700 last:border-b-0"
                 >
-                  <CloseIcon size="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
+                  {fav.track.album?.images?.[2]?.url && (
+                    <img
+                      className="w-10 h-10 rounded flex-shrink-0 object-cover"
+                      src={fav.track.album.images[2].url}
+                      alt=""
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{fav.track.name}</div>
+                    {fav.track.artists?.[0]?.name && (
+                      <div className="text-xs text-neutral-400 truncate">
+                        {fav.track.artists.map(a => a.name).join(', ')}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => onAddToQueue(fav.track)}
+                      className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer p-2 opacity-0 group-hover:opacity-100"
+                      type="button"
+                      aria-label="Add to queue"
+                    >
+                      <PlusIcon size="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleRemove(fav.trackId)}
+                      className="text-red-400 hover:text-red-300 transition-colors cursor-pointer flex-shrink-0 p-2 opacity-0 group-hover:opacity-100"
+                      type="button"
+                      aria-label="Remove favorite"
+                    >
+                      <CloseIcon size="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </Modal>

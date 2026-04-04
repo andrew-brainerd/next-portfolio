@@ -547,7 +547,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
         onSeek={handleSeek}
       />
       <InviteModal isOpen={isInviteOpen} podId={podId} closeModal={() => setIsInviteOpen(false)} />
-      <FavoritesModal isOpen={isFavoritesOpen} podId={podId} onClose={() => setIsFavoritesOpen(false)} />
+      <FavoritesModal isOpen={isFavoritesOpen} podId={podId} onClose={() => setIsFavoritesOpen(false)} onAddToQueue={handleAddToQueue} />
       <DevicesModal
         isOpen={isDevicesOpen}
         devices={devices}
