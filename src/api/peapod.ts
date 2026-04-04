@@ -26,6 +26,9 @@ export const sendInvitation = (podId: string, messageType: string, to: string) =
 export const addToPlayQueue = (podId: string, track: SpotifyTrack) =>
   spotifyApi.patch<{ message: string }>(`/peapod/${podId}/queue`, { track }).then(r => r.data);
 
+export const removeFromPlayQueue = (podId: string, track: SpotifyTrack) =>
+  spotifyApi.delete<{ message: string }>(`/peapod/${podId}/queue`, { data: { track } }).then(r => r.data);
+
 export const addToPlayHistory = (podId: string, track: SpotifyTrack) =>
   spotifyApi.patch<{ message: string }>(`/peapod/${podId}/history`, { track }).then(r => r.data);
 
@@ -44,7 +47,15 @@ export const addFavorite = (podId: string, track: SpotifyTrack, userId: string) 
   spotifyApi
     .post<{
       message: string;
-    }>(`/peapod/${podId}/favorites`, { track: { id: track.uri, name: track.name, artist: track.artists?.[0]?.name }, userId })
+    }>(`/peapod/${podId}/favorites`, {
+      track: {
+        id: track.uri,
+        name: track.name,
+        artist: track.artists?.[0]?.name,
+        albumArt: track.album?.images?.[2]?.url || track.album?.images?.[0]?.url
+      },
+      userId
+    })
     .then(r => r.data);
 
 export const removeFavorite = (podId: string, trackId: string) =>

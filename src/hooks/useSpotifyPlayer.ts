@@ -80,13 +80,23 @@ export function useSpotifyPlayer({ accessToken, autoConnect = true, onStateChang
     };
 
     // If SDK is already loaded, init immediately
+    // Otherwise wait for the callback, or poll in case we missed it
+    let poll: ReturnType<typeof setInterval> | null = null;
     if (window.Spotify) {
       initPlayer();
     } else {
       window.onSpotifyWebPlaybackSDKReady = initPlayer;
+      poll = setInterval(() => {
+        if (window.Spotify) {
+          clearInterval(poll!);
+          poll = null;
+          if (!playerRef.current) initPlayer();
+        }
+      }, 500);
     }
 
     return () => {
+      if (poll) clearInterval(poll);
       if (playerRef.current) {
         playerRef.current.disconnect();
         playerRef.current = null;

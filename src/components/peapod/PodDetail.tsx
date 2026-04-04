@@ -11,6 +11,7 @@ import {
   removeActiveMemberFromPod,
   addToPlayHistory,
   pushNowPlayingToClients,
+  removeFromPlayQueue,
   getFavorites,
   addFavorite,
   removeFavorite
@@ -34,7 +35,7 @@ import FavoritesModal from './FavoritesModal';
 import MembersDisplay from './MembersDisplay';
 import ArtistView from './ArtistView';
 import AlbumView from './AlbumView';
-import type { Pod, SpotifyProfile, SpotifyDevice, NowPlaying } from '@/types/peapod';
+import type { Pod, SpotifyProfile, SpotifyDevice, SpotifyTrack, NowPlaying } from '@/types/peapod';
 
 interface PodDetailProps {
   podId: string;
@@ -166,15 +167,19 @@ export default function PodDetail({ podId }: PodDetailProps) {
   }, [isPodOwner, accessToken]);
 
   // Auto-transfer playback to browser device when SDK is ready if no active device (owner only)
+  // Resume playback if it was playing before refresh
   useEffect(() => {
     if (!isPodOwner || !isPlayerReady || !browserDeviceId) return;
+    const wasPlaying = sessionStorage.getItem(`pod_${podId}_playing`) === 'true';
     const hasActiveDevice = devices.some(d => d.is_active);
     if (!hasActiveDevice) {
-      transferPlayback([browserDeviceId], false).then(() => {
+      transferPlayback([browserDeviceId], wasPlaying).then(() => {
         getMyDevices().then(data => {
           if (data?.devices) setDevices(data.devices);
         });
       });
+    } else if (wasPlaying) {
+      play();
     }
   }, [isPodOwner, isPlayerReady, browserDeviceId]);
 
@@ -182,6 +187,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
   useEffect(() => {
     if (accessToken && isPodOwner && nowPlaying && Object.keys(nowPlaying).length > 0) {
       pushNowPlayingToClients(podId, nowPlaying);
+      sessionStorage.setItem(`pod_${podId}_playing`, String(!!nowPlaying.is_playing));
     }
   }, [accessToken, nowPlaying, isPodOwner, podId]);
 
@@ -270,6 +276,10 @@ export default function PodDetail({ podId }: PodDetailProps) {
       const uris = pod.queue.map(t => t.uri);
       await play({ uris });
     }
+  };
+
+  const handleRemoveFromQueue = async (track: SpotifyTrack) => {
+    await removeFromPlayQueue(podId, track);
   };
 
   if (!pod) {
@@ -414,6 +424,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 history={pod.history || []}
                 isPodOwner={isPodOwner}
                 onStartPlaying={handleStartPlaying}
+                onRemoveFromQueue={handleRemoveFromQueue}
               />
             </div>
           </>

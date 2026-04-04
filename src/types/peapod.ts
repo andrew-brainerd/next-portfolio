@@ -67,6 +67,7 @@ export interface PodTrack {
   id: string;
   name: string;
   artist?: string;
+  albumArt?: string;
 }
 
 export interface PodFavorite {

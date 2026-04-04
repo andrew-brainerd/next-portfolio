@@ -46,6 +46,9 @@ export default function FavoritesModal({ isOpen, podId, onClose }: FavoritesModa
                 key={fav.trackId}
                 className="flex items-center gap-3 py-2.5 border-b border-neutral-700 last:border-b-0"
               >
+                {fav.track.albumArt && (
+                  <img className="w-10 h-10 rounded flex-shrink-0 object-cover" src={fav.track.albumArt} alt="" />
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium truncate">{fav.track.name}</div>
                   {fav.track.artist && <div className="text-xs text-neutral-400 truncate">{fav.track.artist}</div>}

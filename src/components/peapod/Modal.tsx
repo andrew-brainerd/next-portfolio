@@ -20,9 +20,13 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
 
   if (!isOpen) return null;
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="flex items-center justify-center w-full px-4" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={handleBackdropClick}>
+      <div className="flex items-center justify-center w-full px-4" onClick={handleBackdropClick}>
         {children}
       </div>
     </div>

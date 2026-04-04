@@ -12,9 +12,10 @@ interface PodSidebarProps {
   history: SpotifyTrack[];
   isPodOwner: boolean;
   onStartPlaying: () => void;
+  onRemoveFromQueue: (track: SpotifyTrack) => void;
 }
 
-export default function PodSidebar({ queue, history, isPodOwner, onStartPlaying }: PodSidebarProps) {
+export default function PodSidebar({ queue, history, isPodOwner, onStartPlaying, onRemoveFromQueue }: PodSidebarProps) {
   const [activeTab, setActiveTab] = useState<SidebarTab>('queue');
 
   return (
@@ -37,7 +38,12 @@ export default function PodSidebar({ queue, history, isPodOwner, onStartPlaying 
       </div>
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'queue' ? (
-          <PlayQueue queue={queue} isPodOwner={isPodOwner} onStartPlaying={onStartPlaying} />
+          <PlayQueue
+            queue={queue}
+            isPodOwner={isPodOwner}
+            onStartPlaying={onStartPlaying}
+            onRemove={onRemoveFromQueue}
+          />
         ) : (
           <PlayHistory history={history} />
         )}

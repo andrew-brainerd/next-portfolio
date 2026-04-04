@@ -41,21 +41,21 @@ export const SignIn = ({ redirectRoute, fromPath }: SignInProps) => {
   const getThemeClasses = () => {
     if (isZillowTheme) {
       return {
-        background: 'bg-brand-800',
-        title: 'text-brand-700',
+        background: 'bg-neutral-800',
+        title: 'text-neutral-300',
         titleText: 'Zillow Login'
       };
     }
     if (isMangaTheme) {
       return {
-        background: 'bg-brand-800',
-        title: 'text-brand-700',
+        background: 'bg-neutral-800',
+        title: 'text-neutral-300',
         titleText: 'Manga Login'
       };
     }
     return {
-      background: 'bg-brand-800',
-      title: 'text-brand-700',
+      background: 'bg-neutral-800',
+      title: 'text-neutral-300',
       titleText: 'Login'
     };
   };
@@ -90,7 +90,7 @@ export const SignIn = ({ redirectRoute, fromPath }: SignInProps) => {
   };
 
   return (
-    <div className={`flex flex-col items-center gap-y-6 ${theme.background} w-full h-screen`}>
+    <div className="flex flex-col items-center gap-y-6 w-full h-screen">
       <div className=" mt-[5%] input-box flex max-w-[572px] flex-col gap-y-2 rounded bg-white shadow p-8">
         <h1 className={`mb-7 overflow-visible text-2xl ${theme.title} text-center`}>{theme.titleText}</h1>
         <div className="mb-3">
