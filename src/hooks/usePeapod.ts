@@ -140,7 +140,7 @@ export const usePodConnection = create<PodConnectionState>(set => ({
 
 // --- Notification Store ---
 
-type NotifyIcon = 'queue' | 'favorite' | 'success' | 'error' | null;
+type NotifyIcon = 'queue' | 'favorite' | 'success' | 'error' | 'info' | null;
 
 interface NotifyState {
   hidden: boolean;

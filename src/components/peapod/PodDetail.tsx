@@ -316,7 +316,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const handleAddToQueue = async (track: SpotifyTrack) => {
     if (!pod) return;
     if (pod.queue.some(t => t.uri === track.uri)) {
-      displayNotification(`"${track.name}" is already in the queue`, { icon: 'error' });
+      displayNotification(`"${track.name}" is already in the queue`, { icon: 'info' });
       return;
     }
     setPod({ ...pod, queue: [...pod.queue, track] });
