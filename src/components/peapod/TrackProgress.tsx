@@ -7,12 +7,14 @@ import type { NowPlaying } from '@/types/peapod';
 interface TrackProgressProps {
   nowPlaying?: NowPlaying;
   compact?: boolean;
+  onSeek?: (positionMs: number) => void;
 }
 
 type TimerState = { timerMs: number; trackId: number | undefined; syncedProgressMs: number };
 type TimerAction =
   | { type: 'tick'; durationMs: number }
-  | { type: 'sync'; progressMs: number; trackId: number | undefined };
+  | { type: 'sync'; progressMs: number; trackId: number | undefined }
+  | { type: 'seek'; positionMs: number };
 
 function timerReducer(state: TimerState, action: TimerAction): TimerState {
   switch (action.type) {
@@ -26,10 +28,12 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
       }
       return state;
     }
+    case 'seek':
+      return { ...state, timerMs: action.positionMs, syncedProgressMs: action.positionMs };
   }
 }
 
-export default function TrackProgress({ nowPlaying = {}, compact = false }: TrackProgressProps) {
+export default function TrackProgress({ nowPlaying = {}, compact = false, onSeek }: TrackProgressProps) {
   const progressMs = nowPlaying?.progress_ms || 0;
   const durationMs = nowPlaying?.item?.duration_ms || 0;
   const trackId = nowPlaying?.id;
@@ -57,10 +61,22 @@ export default function TrackProgress({ nowPlaying = {}, compact = false }: Trac
 
   const percent = durationMs > 0 ? Math.min((state.timerMs / durationMs) * 100, 100) : 0;
 
+  const handleBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!onSeek || !durationMs) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickPercent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const positionMs = Math.round(clickPercent * durationMs);
+    dispatch({ type: 'seek', positionMs });
+    onSeek(positionMs);
+  };
+
   if (compact) {
     return (
       <div className="flex items-center gap-2 mt-1">
-        <div className="h-1 flex-1 bg-neutral-600 rounded-full overflow-hidden">
+        <div
+          className={`h-1 flex-1 bg-neutral-600 rounded-full overflow-hidden ${onSeek ? 'cursor-pointer' : ''}`}
+          onClick={handleBarClick}
+        >
           <div
             className="h-full bg-brand-400 rounded-full transition-[width] duration-1000 ease-linear"
             style={{ width: `${percent}%` }}
@@ -75,7 +91,10 @@ export default function TrackProgress({ nowPlaying = {}, compact = false }: Trac
 
   return (
     <div className="my-2.5">
-      <div className="h-1 w-full bg-neutral-600 rounded-full overflow-hidden mb-2">
+      <div
+        className={`h-1 w-full bg-neutral-600 rounded-full overflow-hidden mb-2 ${onSeek ? 'cursor-pointer' : ''}`}
+        onClick={handleBarClick}
+      >
         <div
           className="h-full bg-brand-400 rounded-full transition-[width] duration-1000 ease-linear"
           style={{ width: `${percent}%` }}

@@ -13,6 +13,7 @@ interface PlayerBarProps {
   onPause?: () => void;
   onNext?: () => void;
   onToggleFavorite?: () => void;
+  onSeek?: (positionMs: number) => void;
 }
 
 export default function PlayerBar({
@@ -22,7 +23,8 @@ export default function PlayerBar({
   onPlay,
   onPause,
   onNext,
-  onToggleFavorite
+  onToggleFavorite,
+  onSeek
 }: PlayerBarProps) {
   const isPlaying = nowPlaying?.is_playing;
   const trackName = nowPlaying?.item?.name;
@@ -57,7 +59,7 @@ export default function PlayerBar({
           >
             <div className="text-sm font-medium truncate">{trackName || 'No track playing'}</div>
             {artistName && <div className="text-xs text-neutral-400 truncate">{artistName}</div>}
-            {trackName && <TrackProgress nowPlaying={nowPlaying} compact />}
+            {trackName && <TrackProgress nowPlaying={nowPlaying} compact onSeek={isPodOwner ? onSeek : undefined} />}
           </motion.div>
         </AnimatePresence>
 

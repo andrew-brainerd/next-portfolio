@@ -39,6 +39,10 @@ src/
 
 ## Conventions
 
+### API
+
+- API file names should be in camelCase
+
 ### Types
 
 - All shared TypeScript interfaces belong in `src/types/` organized by domain (peapod.ts, kalshi.ts, manga.ts, etc.)
@@ -50,6 +54,7 @@ src/
 - Complex logic (data transformations, scoring algorithms, deduplication, formatting) belongs in `src/utils/` not inline in components
 - All utility functions must have unit tests (Vitest) in a co-located `.test.ts` file
 - Prefer pure functions that are easy to test
+- Util file names should be short and simple and camelCase
 
 ### Components
 
@@ -57,6 +62,7 @@ src/
 - Props interfaces are named `{ComponentName}Props`
 - SVG icons are inline — no icon library
 - Modals use the shared `Modal` component (`components/peapod/Modal.tsx`) which handles Escape to close and backdrop click
+- Component names should be in PascalCase
 
 ### Theming
 

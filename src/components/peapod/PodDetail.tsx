@@ -25,6 +25,7 @@ import {
   play,
   pause,
   skipToNext,
+  seek,
   transferPlayback
 } from '@/api/spotify-client';
 import { getChannel } from '@/utils/pusher';
@@ -73,6 +74,13 @@ export default function PodDetail({ podId }: PodDetailProps) {
       setNowPlaying(data);
       if (data.item?.uri) {
         updateCurrentlyPlaying(podId, data.item.uri);
+        // Remove track from queue when it starts playing
+        setPod(prev => {
+          if (!prev || !prev.queue.some(t => t.uri === data.item?.uri)) return prev;
+          const updatedQueue = prev.queue.filter(t => t.uri !== data.item?.uri);
+          removeFromPlayQueue(podId, data.item as SpotifyTrack);
+          return { ...prev, queue: updatedQueue };
+        });
       }
     },
     [podId]
@@ -260,13 +268,9 @@ export default function PodDetail({ podId }: PodDetailProps) {
   };
 
   const handlePlay = async () => {
+    await play();
     const trackUri = displayNowPlaying?.item?.uri;
-    if (trackUri) {
-      await play({ uris: [trackUri] });
-      updateCurrentlyPlaying(podId, trackUri);
-    } else {
-      await play();
-    }
+    if (trackUri) updateCurrentlyPlaying(podId, trackUri);
   };
 
   const handlePause = async () => {
@@ -275,6 +279,10 @@ export default function PodDetail({ podId }: PodDetailProps) {
 
   const handleNext = async () => {
     await skipToNext();
+  };
+
+  const handleSeek = async (positionMs: number) => {
+    await seek(positionMs);
   };
 
   const handleTransferPlayback = async (deviceId: string) => {
@@ -485,6 +493,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
         onPause={handlePause}
         onNext={handleNext}
         onToggleFavorite={handleToggleFavorite}
+        onSeek={handleSeek}
       />
       <InviteModal isOpen={isInviteOpen} podId={podId} closeModal={() => setIsInviteOpen(false)} />
       <FavoritesModal isOpen={isFavoritesOpen} podId={podId} onClose={() => setIsFavoritesOpen(false)} />
