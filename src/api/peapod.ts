@@ -57,6 +57,9 @@ export const removeFavorite = (podId: string, trackId: string) =>
 export const getSessions = (podId: string) =>
   spotifyApi.get<{ items: PodSession[] }>(`/peapod/${podId}/sessions`).then(r => r.data);
 
+export const getActiveSession = (podId: string) =>
+  spotifyApi.get<{ session: PodSession | null }>(`/peapod/${podId}/sessions/active`).then(r => r.data);
+
 export const startSession = (podId: string) =>
   spotifyApi.post<PodSession>(`/peapod/${podId}/sessions`).then(r => r.data);
 

@@ -17,6 +17,7 @@ import {
   getFavorites,
   addFavorite,
   removeFavorite,
+  getActiveSession,
   startSession,
   endSession,
   addTrackToSession
@@ -74,6 +75,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const lastPlayedUriRef = useRef<string | null>(null);
+  const sessionPlayedUrisRef = useRef<Set<string>>(new Set());
   const activeSessionIdRef = useRef<string | null>(null);
   useEffect(() => { activeSessionIdRef.current = activeSessionId; }, [activeSessionId]);
 
@@ -99,21 +101,24 @@ export default function PodDetail({ podId }: PodDetailProps) {
         });
 
         lastPlayedUriRef.current = currentUri;
+        if (activeSessionIdRef.current) {
+          sessionPlayedUrisRef.current.add(currentUri);
+        }
       }
 
-      // When playback stops (track ended), play next from queue or random favorite
+      // When playback stops (track ended), play next from queue or unplayed random favorite
       if (!data.is_playing && data.progress_ms === 0 && lastPlayedUriRef.current) {
         setPod(prev => {
           if (!prev) return prev;
           if (prev.queue.length > 0) {
             const nextTrack = prev.queue[0];
             play({ uris: [nextTrack.uri] });
-          } else {
-            // Play random favorite if queue is empty
+          } else if (activeSessionIdRef.current) {
             getFavorites(podId).then(favData => {
               const favs = favData?.items || [];
-              if (favs.length > 0) {
-                const randomFav = favs[Math.floor(Math.random() * favs.length)];
+              const unplayed = favs.filter(f => !sessionPlayedUrisRef.current.has(f.track.uri));
+              if (unplayed.length > 0) {
+                const randomFav = unplayed[Math.floor(Math.random() * unplayed.length)];
                 play({ uris: [randomFav.track.uri] });
               }
             });
@@ -214,6 +219,19 @@ export default function PodDetail({ podId }: PodDetailProps) {
     getFavorites(podId)
       .then(data => {
         setFavoriteTrackIds(new Set((data?.items || []).map(f => f.trackId)));
+      })
+      .catch(() => {});
+  }, [accessToken, podId]);
+
+  // Restore active session on mount
+  useEffect(() => {
+    if (!accessToken) return;
+    getActiveSession(podId)
+      .then(data => {
+        if (data?.session) {
+          setActiveSessionId(data.session.id);
+          sessionPlayedUrisRef.current = new Set(data.session.tracks.map(t => t.uri));
+        }
       })
       .catch(() => {});
   }, [accessToken, podId]);
@@ -355,6 +373,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
 
   const handleStartPlaying = async () => {
     if (!pod?.queue?.length) return;
+    sessionPlayedUrisRef.current = new Set();
     const session = await startSession(podId);
     setActiveSessionId(session.id);
     const uris = pod.queue.map(t => t.uri);
@@ -367,6 +386,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
       await endSession(podId, activeSessionId);
       setActiveSessionId(null);
     }
+    sessionPlayedUrisRef.current = new Set();
     await pause();
   };
 
