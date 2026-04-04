@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useSpotifyAuth } from '@/hooks/usePeapod';
 import SpotifyConnect from '@/components/peapod/SpotifyConnect';
 import PodDetail from '@/components/peapod/PodDetail';
+import PeapodLoader from '@/components/peapod/PeapodLoader';
 
 export default function PodPage() {
   const params = useParams();
@@ -21,7 +22,7 @@ export default function PodPage() {
     init();
   }, [loadLocalAuth]);
 
-  if (!ready) return null;
+  if (!ready) return <PeapodLoader text="Loading Pod..." />;
 
   if (!hasAuth()) {
     return <SpotifyConnect />;
