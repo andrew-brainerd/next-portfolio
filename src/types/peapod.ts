@@ -59,6 +59,7 @@ export interface Pod {
   owner: PodMember;
   members: PodMember[];
   activeMembers: string[];
+  currentlyPlaying?: string;
   queue: SpotifyTrack[];
   history: SpotifyTrack[];
 }

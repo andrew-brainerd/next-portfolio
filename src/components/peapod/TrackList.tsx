@@ -28,6 +28,7 @@ interface TrackListProps {
   onArtistSelect?: (artistId: string) => void;
   onAlbumSelect?: (albumId: string) => void;
   onAddToQueue?: (track: SpotifyTrack) => void;
+  onPlayTrack?: (track: SpotifyTrack) => void;
   onActionComplete?: () => void;
 }
 
@@ -38,6 +39,7 @@ export default function TrackList({
   onArtistSelect,
   onAlbumSelect,
   onAddToQueue,
+  onPlayTrack,
   onActionComplete
 }: TrackListProps) {
   const accessToken = useSpotifyAuth(s => s.accessToken);
@@ -116,7 +118,11 @@ export default function TrackList({
 
   const handlePlayNext = async () => {
     if (!selectedTrack) return;
-    await play({ uris: [selectedTrack.uri] });
+    if (onPlayTrack) {
+      onPlayTrack(selectedTrack);
+    } else {
+      await play({ uris: [selectedTrack.uri] });
+    }
     setSelectedTrack(null);
     onActionComplete?.();
   };

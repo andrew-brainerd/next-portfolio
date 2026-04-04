@@ -11,6 +11,9 @@ export const getPods = (userId?: string) =>
 
 export const getPod = (podId: string) => spotifyApi.get<Pod>(`/peapod/${podId}`).then(r => r.data);
 
+export const updateCurrentlyPlaying = (podId: string, trackUri: string | null) =>
+  spotifyApi.patch<{ message: string }>(`/peapod/${podId}/currentlyPlaying`, { trackUri }).then(r => r.data);
+
 export const updatePodName = (podId: string, name: string) =>
   spotifyApi.patch<{ message: string }>(`/peapod/${podId}/name`, { name }).then(r => r.data);
 

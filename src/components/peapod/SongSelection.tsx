@@ -11,6 +11,7 @@ interface SongSelectionProps {
   onArtistSelect?: (artistId: string) => void;
   onAlbumSelect?: (albumId: string) => void;
   onAddToQueue?: (track: SpotifyTrack) => void;
+  onPlayTrack?: (track: SpotifyTrack) => void;
 }
 
 export default function SongSelection({
@@ -18,7 +19,8 @@ export default function SongSelection({
   userId,
   onArtistSelect,
   onAlbumSelect,
-  onAddToQueue
+  onAddToQueue,
+  onPlayTrack
 }: SongSelectionProps) {
   const [searchText, setSearchText] = useState('');
   const [isResultsOpen, setIsResultsOpen] = useState(false);
@@ -52,6 +54,7 @@ export default function SongSelection({
             onArtistSelect={onArtistSelect}
             onAlbumSelect={onAlbumSelect}
             onAddToQueue={onAddToQueue}
+            onPlayTrack={onPlayTrack}
             onActionComplete={() => {
               setIsResultsOpen(false);
               setSearchText('');

@@ -5,6 +5,7 @@ import { useSpotifyAuth, usePodConnection, useNowPlayingSync } from '@/hooks/use
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import {
   getPod,
+  updateCurrentlyPlaying,
   updatePodName,
   addMemberToPod,
   addActiveMemberToPod,
@@ -64,9 +65,15 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const trackStartTimeRef = useRef<number>(0);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  const handlePlayerStateChange = useCallback((data: NowPlaying) => {
-    setNowPlaying(data);
-  }, []);
+  const handlePlayerStateChange = useCallback(
+    (data: NowPlaying) => {
+      setNowPlaying(data);
+      if (data.item?.uri) {
+        updateCurrentlyPlaying(podId, data.item.uri);
+      }
+    },
+    [podId]
+  );
 
   const { deviceId: browserDeviceId, isReady: isPlayerReady } = useSpotifyPlayer({
     accessToken,
@@ -170,18 +177,21 @@ export default function PodDetail({ podId }: PodDetailProps) {
   }, [isPodOwner, accessToken]);
 
   // Auto-transfer playback to browser device when SDK is ready if no active device (owner only)
-  // Resume playback if it was playing before refresh
+  // Resume playback if it was playing before refresh and the track is from this pod
   useEffect(() => {
     if (!isPodOwner || !isPlayerReady || !browserDeviceId) return;
     const wasPlaying = sessionStorage.getItem(`pod_${podId}_playing`) === 'true';
+    const spotifyTrackUri = nowPlaying?.item?.uri;
+    const isPodTrack = !!pod?.currentlyPlaying && spotifyTrackUri === pod.currentlyPlaying;
+    const shouldResume = wasPlaying && isPodTrack;
     const hasActiveDevice = devices.some(d => d.is_active);
     if (!hasActiveDevice) {
-      transferPlayback([browserDeviceId], wasPlaying).then(() => {
+      transferPlayback([browserDeviceId], shouldResume).then(() => {
         getMyDevices().then(data => {
           if (data?.devices) setDevices(data.devices);
         });
       });
-    } else if (wasPlaying) {
+    } else if (shouldResume) {
       play();
     }
   }, [isPodOwner, isPlayerReady, browserDeviceId]);
@@ -243,7 +253,13 @@ export default function PodDetail({ podId }: PodDetailProps) {
   };
 
   const handlePlay = async () => {
-    await play();
+    const trackUri = displayNowPlaying?.item?.uri;
+    if (trackUri) {
+      await play({ uris: [trackUri] });
+      updateCurrentlyPlaying(podId, trackUri);
+    } else {
+      await play();
+    }
   };
 
   const handlePause = async () => {
@@ -278,10 +294,16 @@ export default function PodDetail({ podId }: PodDetailProps) {
     setIsEditingName(false);
   };
 
+  const handlePlayTrack = async (track: SpotifyTrack) => {
+    await play({ uris: [track.uri] });
+    updateCurrentlyPlaying(podId, track.uri);
+  };
+
   const handleStartPlaying = async () => {
     if (pod?.queue) {
       const uris = pod.queue.map(t => t.uri);
       await play({ uris });
+      if (uris[0]) updateCurrentlyPlaying(podId, uris[0]);
     }
   };
 
@@ -435,6 +457,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
               onArtistSelect={artistId => setBrowseView({ type: 'artist', id: artistId })}
               onAlbumSelect={albumId => setBrowseView({ type: 'album', id: albumId })}
               onAddToQueue={handleAddToQueue}
+              onPlayTrack={handlePlayTrack}
             />
             <div className="flex-1 min-h-0 mt-2.5 overflow-y-auto pb-24">
               <PodSidebar
