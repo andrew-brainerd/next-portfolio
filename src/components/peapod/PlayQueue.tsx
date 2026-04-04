@@ -5,6 +5,7 @@ import type { SpotifyTrack } from '@/types/peapod';
 import { getAlbumArtUrl } from '@/utils/peapod';
 import Track from './Track';
 import { CloseIcon, HeartIcon } from './Icons';
+import PeapodLoader from './PeapodLoader';
 
 interface PlayQueueProps {
   queue: SpotifyTrack[];
@@ -14,6 +15,10 @@ interface PlayQueueProps {
 }
 
 export default function PlayQueue({ queue, favoriteTrackIds, onRemove, onToggleFavorite }: PlayQueueProps) {
+  if (queue.length === 0) {
+    return <PeapodLoader text="Queue is empty — search for songs to add" />;
+  }
+
   return (
     <div className="m-5 overflow-y-auto">
       <AnimatePresence initial={false}>
