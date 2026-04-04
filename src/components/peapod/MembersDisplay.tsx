@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Modal from './Modal';
 import type { PodMember } from '@/types/peapod';
 
 interface MembersDisplayProps {
@@ -58,33 +59,28 @@ export default function MembersDisplay({
         )}
       </button>
 
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div className="bg-neutral-800 rounded-xl p-6 max-w-sm w-[90%]" onClick={e => e.stopPropagation()}>
-            <div className="text-xl mb-4 text-center">Pod Members</div>
-            {members.map(member => {
-              const isActive = activeMembers.includes(member.id);
-              const isCurrentUser = member.id === currentUserId;
-              const isCreator = member.id === podCreatorId;
-              const displayName = member.display_name || member.name || member.id;
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="bg-neutral-800 rounded-xl p-6 max-w-sm w-[90%]">
+          <div className="text-xl mb-4 text-center">Pod Members</div>
+          {members.map(member => {
+            const isActive = activeMembers.includes(member.id);
+            const isCurrentUser = member.id === currentUserId;
+            const isCreator = member.id === podCreatorId;
+            const displayName = member.display_name || member.name || member.id;
 
-              return (
-                <div key={member.id} className="flex items-center gap-3 py-2">
-                  <MemberIcon name={displayName} isActive={isActive} />
-                  <div className="flex-1">
-                    <span className={isActive || isCurrentUser ? 'text-brand-400' : ''}>{displayName}</span>
-                    {isCreator && <span className="text-xs text-neutral-400 ml-1">(Creator)</span>}
-                  </div>
-                  {isActive && <span className="text-xs text-brand-400">Active</span>}
+            return (
+              <div key={member.id} className="flex items-center gap-3 py-2">
+                <MemberIcon name={displayName} isActive={isActive} />
+                <div className="flex-1">
+                  <span className={isActive || isCurrentUser ? 'text-brand-400' : ''}>{displayName}</span>
+                  {isCreator && <span className="text-xs text-neutral-400 ml-1">(Creator)</span>}
                 </div>
-              );
-            })}
-          </div>
+                {isActive && <span className="text-xs text-brand-400">Active</span>}
+              </div>
+            );
+          })}
         </div>
-      )}
+      </Modal>
     </>
   );
 }

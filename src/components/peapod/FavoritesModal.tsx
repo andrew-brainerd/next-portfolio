@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getFavorites, removeFavorite } from '@/api/peapod';
+import Modal from './Modal';
 import type { PodFavorite } from '@/types/peapod';
 
 interface FavoritesModalProps {
@@ -30,14 +31,9 @@ export default function FavoritesModal({ isOpen, podId, onClose }: FavoritesModa
     setFavorites(prev => prev.filter(f => f.trackId !== trackId));
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
-      <div
-        className="bg-neutral-800 rounded-xl p-6 max-w-md w-[90%] max-h-[70vh] flex flex-col"
-        onClick={e => e.stopPropagation()}
-      >
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="bg-neutral-800 rounded-xl p-6 max-w-md w-[90%] max-h-[70vh] flex flex-col">
         <div className="text-xl mb-4 text-center">Favorites</div>
         {isLoading ? (
           <div className="text-neutral-400 text-center py-8">Loading...</div>
@@ -70,6 +66,6 @@ export default function FavoritesModal({ isOpen, podId, onClose }: FavoritesModa
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

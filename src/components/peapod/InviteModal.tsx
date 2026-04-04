@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { sendInvitation, getInviteLink } from '@/api/peapod';
+import Modal from './Modal';
 
 type InviteTab = 'link' | 'sms' | 'email';
 
@@ -29,8 +30,6 @@ export default function InviteModal({ isOpen, podId, closeModal }: InviteModalPr
   if (isOpen && !inviteLink) {
     fetchLink();
   }
-
-  if (!isOpen) return null;
 
   const handleSmsInvite = async () => {
     if (!phoneNumber) return;
@@ -61,8 +60,8 @@ export default function InviteModal({ isOpen, podId, closeModal }: InviteModalPr
     }`;
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={closeModal}>
-      <div className="bg-neutral-800 rounded-xl p-6 max-w-md w-[90%]" onClick={e => e.stopPropagation()}>
+    <Modal isOpen={isOpen} onClose={closeModal}>
+      <div className="bg-neutral-800 rounded-xl p-6 max-w-md w-[90%]">
         <div className="text-xl mb-5 text-center select-none">
           Invite to <span className="text-brand-400">Pod</span>
         </div>
@@ -146,6 +145,6 @@ export default function InviteModal({ isOpen, podId, closeModal }: InviteModalPr
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

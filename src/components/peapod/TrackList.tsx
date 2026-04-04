@@ -7,6 +7,7 @@ import { searchSpotify } from '@/api/spotify-client';
 import type { SpotifyTrack } from '@/types/peapod';
 import Track from './Track';
 import Controls from './Controls';
+import Modal from './Modal';
 
 interface TrackListProps {
   searchText?: string;
@@ -62,25 +63,20 @@ export default function TrackList({ searchText = '', podId }: TrackListProps) {
           ))}
         </div>
       )}
-      {selectedTrack && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
-          onClick={() => setSelectedTrack(null)}
-        >
-          <div className="bg-neutral-800 rounded-xl p-6 max-w-md w-[90%]" onClick={e => e.stopPropagation()}>
-            <div className="text-brand-400 text-xl mx-auto mb-5 overflow-hidden text-center text-ellipsis whitespace-nowrap">
-              {selectedTrack.name}
-            </div>
-            <Controls
-              className="!flex !justify-center"
-              isPlaying={false}
-              selectedTrack={selectedTrack}
-              options={{ canQueue: true, canPlay: false, canPause: false }}
-              onAddToQueue={handleAddToQueue}
-            />
+      <Modal isOpen={!!selectedTrack} onClose={() => setSelectedTrack(null)}>
+        <div className="bg-neutral-800 rounded-xl p-6 max-w-md w-[90%]">
+          <div className="text-brand-400 text-xl mx-auto mb-5 overflow-hidden text-center text-ellipsis whitespace-nowrap">
+            {selectedTrack?.name}
           </div>
+          <Controls
+            className="!flex !justify-center"
+            isPlaying={false}
+            selectedTrack={selectedTrack}
+            options={{ canQueue: true, canPlay: false, canPause: false }}
+            onAddToQueue={handleAddToQueue}
+          />
         </div>
-      )}
+      </Modal>
     </div>
   );
 }
