@@ -10,24 +10,37 @@ interface PlayQueueProps {
   queue: SpotifyTrack[];
   isPodOwner: boolean;
   favoriteTrackIds: Set<string>;
+  isSessionActive: boolean;
   onStartPlaying: () => void;
+  onStopSession: () => void;
   onRemove: (track: SpotifyTrack) => void;
   onToggleFavorite: (track: SpotifyTrack) => void;
 }
 
-export default function PlayQueue({ queue, isPodOwner, favoriteTrackIds, onStartPlaying, onRemove, onToggleFavorite }: PlayQueueProps) {
+export default function PlayQueue({ queue, isPodOwner, favoriteTrackIds, isSessionActive, onStartPlaying, onStopSession, onRemove, onToggleFavorite }: PlayQueueProps) {
   return (
     <div className="m-5 overflow-y-auto">
       {isPodOwner && (
-        <motion.button
-          className="bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded transition-colors ml-2.5 mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={onStartPlaying}
-          disabled={!queue.length}
-          type="button"
-          whileTap={{ scale: 0.95 }}
-        >
-          Launch Pod
-        </motion.button>
+        isSessionActive ? (
+          <motion.button
+            className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors ml-2.5 mb-4 cursor-pointer"
+            onClick={onStopSession}
+            type="button"
+            whileTap={{ scale: 0.95 }}
+          >
+            Stop Pod
+          </motion.button>
+        ) : (
+          <motion.button
+            className="bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded transition-colors ml-2.5 mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={onStartPlaying}
+            disabled={!queue.length}
+            type="button"
+            whileTap={{ scale: 0.95 }}
+          >
+            Launch Pod
+          </motion.button>
+        )
       )}
       <div>
         <AnimatePresence initial={false}>

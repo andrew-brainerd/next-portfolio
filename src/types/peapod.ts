@@ -72,6 +72,14 @@ export interface PodFavorite {
   favoritedAt: string;
 }
 
+export interface PodSession {
+  id: string;
+  podId: string;
+  startedAt: string;
+  endedAt?: string;
+  tracks: SpotifyTrack[];
+}
+
 export interface SearchArtist {
   id: string;
   name: string;

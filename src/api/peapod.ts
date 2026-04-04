@@ -1,5 +1,5 @@
 import spotifyApi from '@/api/spotifyApi';
-import type { Pod, PodFavorite, SpotifyProfile, SpotifyTrack, NowPlaying } from '@/types/peapod';
+import type { Pod, PodFavorite, PodSession, SpotifyProfile, SpotifyTrack, NowPlaying } from '@/types/peapod';
 
 // --- Pod API ---
 
@@ -51,6 +51,20 @@ export const addFavorite = (podId: string, track: SpotifyTrack, userId: string) 
 
 export const removeFavorite = (podId: string, trackId: string) =>
   spotifyApi.delete<{ message: string }>(`/peapod/${podId}/favorites/${encodeURIComponent(trackId)}`).then(r => r.data);
+
+// --- Sessions API ---
+
+export const getSessions = (podId: string) =>
+  spotifyApi.get<{ items: PodSession[] }>(`/peapod/${podId}/sessions`).then(r => r.data);
+
+export const startSession = (podId: string) =>
+  spotifyApi.post<PodSession>(`/peapod/${podId}/sessions`).then(r => r.data);
+
+export const endSession = (podId: string, sessionId: string) =>
+  spotifyApi.patch<{ message: string }>(`/peapod/${podId}/sessions/${sessionId}/end`).then(r => r.data);
+
+export const addTrackToSession = (podId: string, sessionId: string, track: SpotifyTrack) =>
+  spotifyApi.patch<{ message: string }>(`/peapod/${podId}/sessions/${sessionId}/track`, { track }).then(r => r.data);
 
 // --- Sync API ---
 

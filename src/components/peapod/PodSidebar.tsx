@@ -3,62 +3,70 @@
 import { useState } from 'react';
 import PlayQueue from './PlayQueue';
 import PlayHistory from './PlayHistory';
+import SessionHistory from './SessionHistory';
 import type { SpotifyTrack } from '@/types/peapod';
 
-type SidebarTab = 'queue' | 'history';
+type SidebarTab = 'queue' | 'history' | 'sessions';
 
 interface PodSidebarProps {
+  podId: string;
   queue: SpotifyTrack[];
   history: SpotifyTrack[];
   isPodOwner: boolean;
   favoriteTrackIds: Set<string>;
+  isSessionActive: boolean;
   onStartPlaying: () => void;
+  onStopSession: () => void;
   onRemoveFromQueue: (track: SpotifyTrack) => void;
   onAddToQueue: (track: SpotifyTrack) => void;
   onToggleFavorite: (track: SpotifyTrack) => void;
 }
 
 export default function PodSidebar({
+  podId,
   queue,
   history,
   isPodOwner,
   favoriteTrackIds,
+  isSessionActive,
   onStartPlaying,
+  onStopSession,
   onRemoveFromQueue,
   onAddToQueue,
   onToggleFavorite
 }: PodSidebarProps) {
   const [activeTab, setActiveTab] = useState<SidebarTab>('queue');
 
+  const tabClass = (tab: SidebarTab) =>
+    `bg-transparent border-none text-neutral-400 cursor-pointer flex-1 text-sm p-2.5 transition-colors duration-200 hover:text-white ${activeTab === tab ? 'border-b-2 border-b-brand-400 text-white' : ''}`;
+
   return (
     <div className="flex flex-col w-full">
       <div className="flex border-b border-neutral-700">
-        <button
-          className={`bg-transparent border-none text-neutral-400 cursor-pointer flex-1 text-sm p-2.5 transition-colors duration-200 hover:text-white ${activeTab === 'queue' ? 'border-b-2 border-b-brand-400 text-white' : ''}`}
-          onClick={() => setActiveTab('queue')}
-          type="button"
-        >
+        <button className={tabClass('queue')} onClick={() => setActiveTab('queue')} type="button">
           Queue
         </button>
-        <button
-          className={`bg-transparent border-none text-neutral-400 cursor-pointer flex-1 text-sm p-2.5 transition-colors duration-200 hover:text-white ${activeTab === 'history' ? 'border-b-2 border-b-brand-400 text-white' : ''}`}
-          onClick={() => setActiveTab('history')}
-          type="button"
-        >
+        <button className={tabClass('history')} onClick={() => setActiveTab('history')} type="button">
           History
+        </button>
+        <button className={tabClass('sessions')} onClick={() => setActiveTab('sessions')} type="button">
+          Sessions
         </button>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'queue' ? (
+        {activeTab === 'queue' && (
           <PlayQueue
             queue={queue}
             isPodOwner={isPodOwner}
             favoriteTrackIds={favoriteTrackIds}
+            isSessionActive={isSessionActive}
             onStartPlaying={onStartPlaying}
+            onStopSession={onStopSession}
             onRemove={onRemoveFromQueue}
             onToggleFavorite={onToggleFavorite}
           />
-        ) : (
+        )}
+        {activeTab === 'history' && (
           <PlayHistory
             history={history}
             favoriteTrackIds={favoriteTrackIds}
@@ -66,6 +74,7 @@ export default function PodSidebar({
             onToggleFavorite={onToggleFavorite}
           />
         )}
+        {activeTab === 'sessions' && <SessionHistory podId={podId} />}
       </div>
     </div>
   );

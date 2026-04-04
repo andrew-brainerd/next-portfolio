@@ -16,7 +16,10 @@ import {
   removeFromPlayQueue,
   getFavorites,
   addFavorite,
-  removeFavorite
+  removeFavorite,
+  startSession,
+  endSession,
+  addTrackToSession
 } from '@/api/peapod';
 import {
   getSpotifyProfile,
@@ -60,6 +63,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const [isDevicesOpen, setIsDevicesOpen] = useState(false);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [favoriteTrackIds, setFavoriteTrackIds] = useState<Set<string>>(new Set());
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [browseView, setBrowseView] = useState<{ type: 'artist' | 'album'; id: string } | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -70,6 +74,8 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const lastPlayedUriRef = useRef<string | null>(null);
+  const activeSessionIdRef = useRef<string | null>(null);
+  useEffect(() => { activeSessionIdRef.current = activeSessionId; }, [activeSessionId]);
 
   const handlePlayerStateChange = useCallback(
     (data: NowPlaying) => {
@@ -78,6 +84,11 @@ export default function PodDetail({ podId }: PodDetailProps) {
 
       if (currentUri) {
         updateCurrentlyPlaying(podId, currentUri);
+
+        // Record track to active session when a new track starts
+        if (currentUri !== lastPlayedUriRef.current && activeSessionIdRef.current && data.item) {
+          addTrackToSession(podId, activeSessionIdRef.current, data.item as SpotifyTrack);
+        }
 
         // Remove track from queue when it starts playing
         setPod(prev => {
@@ -90,12 +101,23 @@ export default function PodDetail({ podId }: PodDetailProps) {
         lastPlayedUriRef.current = currentUri;
       }
 
-      // When playback stops (paused, not user-initiated), play next from queue
+      // When playback stops (track ended), play next from queue or random favorite
       if (!data.is_playing && data.progress_ms === 0 && lastPlayedUriRef.current) {
         setPod(prev => {
-          if (!prev || prev.queue.length === 0) return prev;
-          const nextTrack = prev.queue[0];
-          play({ uris: [nextTrack.uri] });
+          if (!prev) return prev;
+          if (prev.queue.length > 0) {
+            const nextTrack = prev.queue[0];
+            play({ uris: [nextTrack.uri] });
+          } else {
+            // Play random favorite if queue is empty
+            getFavorites(podId).then(favData => {
+              const favs = favData?.items || [];
+              if (favs.length > 0) {
+                const randomFav = favs[Math.floor(Math.random() * favs.length)];
+                play({ uris: [randomFav.track.uri] });
+              }
+            });
+          }
           return prev;
         });
       }
@@ -332,11 +354,20 @@ export default function PodDetail({ podId }: PodDetailProps) {
   };
 
   const handleStartPlaying = async () => {
-    if (pod?.queue) {
-      const uris = pod.queue.map(t => t.uri);
-      await play({ uris });
-      if (uris[0]) updateCurrentlyPlaying(podId, uris[0]);
+    if (!pod?.queue?.length) return;
+    const session = await startSession(podId);
+    setActiveSessionId(session.id);
+    const uris = pod.queue.map(t => t.uri);
+    await play({ uris });
+    if (uris[0]) updateCurrentlyPlaying(podId, uris[0]);
+  };
+
+  const handleStopSession = async () => {
+    if (activeSessionId) {
+      await endSession(podId, activeSessionId);
+      setActiveSessionId(null);
     }
+    await pause();
   };
 
   const handleAddToQueue = async (track: SpotifyTrack) => {
@@ -489,11 +520,14 @@ export default function PodDetail({ podId }: PodDetailProps) {
             />
             <div className="flex-1 min-h-0 mt-2.5 overflow-y-auto pb-24">
               <PodSidebar
+                podId={podId}
                 queue={pod.queue || []}
                 history={pod.history || []}
                 isPodOwner={isPodOwner}
                 favoriteTrackIds={favoriteTrackIds}
+                isSessionActive={!!activeSessionId}
                 onStartPlaying={handleStartPlaying}
+                onStopSession={handleStopSession}
                 onRemoveFromQueue={handleRemoveFromQueue}
                 onAddToQueue={handleAddToQueue}
                 onToggleFavorite={handleToggleFavoriteTrack}
