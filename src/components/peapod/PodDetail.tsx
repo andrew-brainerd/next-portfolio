@@ -375,7 +375,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
             </button>
           </div>
         </div>
-        <SongSelection podId={podId} />
+        <SongSelection podId={podId} userId={profile?.id} />
         <div className="flex-1 min-h-0 mt-2.5 overflow-y-auto pb-24">
           <PodSidebar
             queue={pod.queue || []}

@@ -6,9 +6,10 @@ import TrackList from './TrackList';
 
 interface SongSelectionProps {
   podId: string;
+  userId?: string;
 }
 
-export default function SongSelection({ podId }: SongSelectionProps) {
+export default function SongSelection({ podId, userId }: SongSelectionProps) {
   const [searchText, setSearchText] = useState('');
   const [isResultsOpen, setIsResultsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,7 +35,15 @@ export default function SongSelection({ podId }: SongSelectionProps) {
       />
       {isResultsOpen && searchText && (
         <div className="bg-neutral-900 border border-neutral-600 rounded-md left-0 max-h-96 overflow-y-auto absolute right-0 top-full z-10">
-          <TrackList searchText={searchText} podId={podId} />
+          <TrackList
+            searchText={searchText}
+            podId={podId}
+            userId={userId}
+            onActionComplete={() => {
+              setIsResultsOpen(false);
+              setSearchText('');
+            }}
+          />
         </div>
       )}
     </div>
