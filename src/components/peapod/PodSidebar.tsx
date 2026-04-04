@@ -11,11 +11,23 @@ interface PodSidebarProps {
   queue: SpotifyTrack[];
   history: SpotifyTrack[];
   isPodOwner: boolean;
+  favoriteTrackIds: Set<string>;
   onStartPlaying: () => void;
   onRemoveFromQueue: (track: SpotifyTrack) => void;
+  onAddToQueue: (track: SpotifyTrack) => void;
+  onToggleFavorite: (track: SpotifyTrack) => void;
 }
 
-export default function PodSidebar({ queue, history, isPodOwner, onStartPlaying, onRemoveFromQueue }: PodSidebarProps) {
+export default function PodSidebar({
+  queue,
+  history,
+  isPodOwner,
+  favoriteTrackIds,
+  onStartPlaying,
+  onRemoveFromQueue,
+  onAddToQueue,
+  onToggleFavorite
+}: PodSidebarProps) {
   const [activeTab, setActiveTab] = useState<SidebarTab>('queue');
 
   return (
@@ -45,7 +57,12 @@ export default function PodSidebar({ queue, history, isPodOwner, onStartPlaying,
             onRemove={onRemoveFromQueue}
           />
         ) : (
-          <PlayHistory history={history} />
+          <PlayHistory
+            history={history}
+            favoriteTrackIds={favoriteTrackIds}
+            onAddToQueue={onAddToQueue}
+            onToggleFavorite={onToggleFavorite}
+          />
         )}
       </div>
     </div>

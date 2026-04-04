@@ -235,11 +235,10 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const currentTrackUri = displayNowPlaying?.item?.uri;
   const isCurrentFavorited = !!currentTrackUri && favoriteTrackIds.has(currentTrackUri);
 
-  const handleToggleFavorite = async () => {
-    const track = displayNowPlaying?.item;
-    if (!track || !profile) return;
+  const handleToggleFavoriteTrack = async (track: SpotifyTrack) => {
+    if (!profile) return;
 
-    if (isCurrentFavorited) {
+    if (favoriteTrackIds.has(track.uri)) {
       await removeFavorite(podId, track.uri);
       setFavoriteTrackIds(prev => {
         const next = new Set(prev);
@@ -250,6 +249,11 @@ export default function PodDetail({ podId }: PodDetailProps) {
       await addFavorite(podId, track, profile.id);
       setFavoriteTrackIds(prev => new Set(prev).add(track.uri));
     }
+  };
+
+  const handleToggleFavorite = () => {
+    const track = displayNowPlaying?.item;
+    if (track) handleToggleFavoriteTrack(track);
   };
 
   const handlePlay = async () => {
@@ -464,8 +468,11 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 queue={pod.queue || []}
                 history={pod.history || []}
                 isPodOwner={isPodOwner}
+                favoriteTrackIds={favoriteTrackIds}
                 onStartPlaying={handleStartPlaying}
                 onRemoveFromQueue={handleRemoveFromQueue}
+                onAddToQueue={handleAddToQueue}
+                onToggleFavorite={handleToggleFavoriteTrack}
               />
             </div>
           </>
