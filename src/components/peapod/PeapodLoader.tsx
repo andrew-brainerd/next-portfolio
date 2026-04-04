@@ -42,13 +42,9 @@ export default function PeapodLoader({ text = 'Loading...' }: { text?: string })
           style={{ transformOrigin: '240px 330px' }}
         />
       </motion.svg>
-      <motion.p
-        className="text-neutral-400 text-sm"
-        animate={{ opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-      >
+      <p className="text-neutral-400 text-sm">
         {text}
-      </motion.p>
+      </p>
     </div>
   );
 }
