@@ -7,9 +7,11 @@ import TrackList from './TrackList';
 interface SongSelectionProps {
   podId: string;
   userId?: string;
+  onArtistSelect?: (artistId: string) => void;
+  onAlbumSelect?: (albumId: string) => void;
 }
 
-export default function SongSelection({ podId, userId }: SongSelectionProps) {
+export default function SongSelection({ podId, userId, onArtistSelect, onAlbumSelect }: SongSelectionProps) {
   const [searchText, setSearchText] = useState('');
   const [isResultsOpen, setIsResultsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,8 @@ export default function SongSelection({ podId, userId }: SongSelectionProps) {
             searchText={searchText}
             podId={podId}
             userId={userId}
+            onArtistSelect={onArtistSelect}
+            onAlbumSelect={onAlbumSelect}
             onActionComplete={() => {
               setIsResultsOpen(false);
               setSearchText('');

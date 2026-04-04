@@ -12,10 +12,19 @@ interface TrackListProps {
   searchText?: string;
   podId: string;
   userId?: string;
+  onArtistSelect?: (artistId: string) => void;
+  onAlbumSelect?: (albumId: string) => void;
   onActionComplete?: () => void;
 }
 
-export default function TrackList({ searchText = '', podId, userId, onActionComplete }: TrackListProps) {
+export default function TrackList({
+  searchText = '',
+  podId,
+  userId,
+  onArtistSelect,
+  onAlbumSelect,
+  onActionComplete
+}: TrackListProps) {
   const accessToken = useSpotifyAuth(s => s.accessToken);
   const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,18 +70,18 @@ export default function TrackList({ searchText = '', podId, userId, onActionComp
   };
 
   const handleGoToArtist = () => {
-    const artistUri = selectedTrack?.artists?.[0]?.name;
-    if (artistUri) {
-      window.open(`https://open.spotify.com/search/${encodeURIComponent(artistUri)}`, '_blank');
+    const artistId = selectedTrack?.artists?.[0]?.id;
+    if (artistId && onArtistSelect) {
+      onArtistSelect(artistId);
     }
     setSelectedTrack(null);
     onActionComplete?.();
   };
 
   const handleGoToAlbum = () => {
-    const albumUri = selectedTrack?.album?.name;
-    if (albumUri) {
-      window.open(`https://open.spotify.com/search/${encodeURIComponent(albumUri)}`, '_blank');
+    const albumId = selectedTrack?.album?.id;
+    if (albumId && onAlbumSelect) {
+      onAlbumSelect(albumId);
     }
     setSelectedTrack(null);
     onActionComplete?.();

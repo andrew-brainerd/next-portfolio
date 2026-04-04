@@ -32,6 +32,8 @@ import InviteModal from './InviteModal';
 import DevicesModal from './DevicesModal';
 import FavoritesModal from './FavoritesModal';
 import MembersDisplay from './MembersDisplay';
+import ArtistView from './ArtistView';
+import AlbumView from './AlbumView';
 import type { Pod, SpotifyProfile, SpotifyDevice, NowPlaying } from '@/types/peapod';
 
 interface PodDetailProps {
@@ -52,6 +54,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [favoriteTrackIds, setFavoriteTrackIds] = useState<Set<string>>(new Set());
   const [isSyncing, setIsSyncing] = useState(false);
+  const [browseView, setBrowseView] = useState<{ type: 'artist' | 'album'; id: string } | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
   const prevTrackNameRef = useRef<string | undefined>(undefined);
@@ -375,15 +378,43 @@ export default function PodDetail({ podId }: PodDetailProps) {
             </button>
           </div>
         </div>
-        <SongSelection podId={podId} userId={profile?.id} />
-        <div className="flex-1 min-h-0 mt-2.5 overflow-y-auto pb-24">
-          <PodSidebar
-            queue={pod.queue || []}
-            history={pod.history || []}
-            isPodOwner={isPodOwner}
-            onStartPlaying={handleStartPlaying}
-          />
-        </div>
+        {browseView ? (
+          <div className="flex-1 min-h-0 mt-2.5 overflow-y-auto pb-24">
+            {browseView.type === 'artist' ? (
+              <ArtistView
+                artistId={browseView.id}
+                podId={podId}
+                userId={profile?.id}
+                onBack={() => setBrowseView(null)}
+                onAlbumSelect={albumId => setBrowseView({ type: 'album', id: albumId })}
+              />
+            ) : (
+              <AlbumView
+                albumId={browseView.id}
+                podId={podId}
+                userId={profile?.id}
+                onBack={() => setBrowseView(null)}
+              />
+            )}
+          </div>
+        ) : (
+          <>
+            <SongSelection
+              podId={podId}
+              userId={profile?.id}
+              onArtistSelect={artistId => setBrowseView({ type: 'artist', id: artistId })}
+              onAlbumSelect={albumId => setBrowseView({ type: 'album', id: albumId })}
+            />
+            <div className="flex-1 min-h-0 mt-2.5 overflow-y-auto pb-24">
+              <PodSidebar
+                queue={pod.queue || []}
+                history={pod.history || []}
+                isPodOwner={isPodOwner}
+                onStartPlaying={handleStartPlaying}
+              />
+            </div>
+          </>
+        )}
       </div>
       <PlayerBar
         nowPlaying={displayNowPlaying}
