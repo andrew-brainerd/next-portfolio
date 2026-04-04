@@ -4,16 +4,18 @@ import { AnimatePresence, motion } from 'motion/react';
 import type { SpotifyTrack } from '@/types/peapod';
 import { getAlbumArtUrl } from '@/utils/peapod';
 import Track from './Track';
-import { CloseIcon } from './icons';
+import { CloseIcon, HeartIcon } from './icons';
 
 interface PlayQueueProps {
   queue: SpotifyTrack[];
   isPodOwner: boolean;
+  favoriteTrackIds: Set<string>;
   onStartPlaying: () => void;
   onRemove: (track: SpotifyTrack) => void;
+  onToggleFavorite: (track: SpotifyTrack) => void;
 }
 
-export default function PlayQueue({ queue, isPodOwner, onStartPlaying, onRemove }: PlayQueueProps) {
+export default function PlayQueue({ queue, isPodOwner, favoriteTrackIds, onStartPlaying, onRemove, onToggleFavorite }: PlayQueueProps) {
   return (
     <div className="m-5 overflow-y-auto">
       {isPodOwner && (
@@ -42,14 +44,24 @@ export default function PlayQueue({ queue, isPodOwner, onStartPlaying, onRemove 
               <div className="flex-1 min-w-0 p-4">
                 <Track name={track.name} artists={track.artists} albumArt={getAlbumArtUrl(track)} />
               </div>
-              <button
-                onClick={() => onRemove(track)}
-                className="text-neutral-500 hover:text-red-400 transition-colors cursor-pointer opacity-0 group-hover:opacity-100 pr-4"
-                type="button"
-                aria-label="Remove from queue"
-              >
-                <CloseIcon size="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pr-4">
+                <button
+                  onClick={() => onToggleFavorite(track)}
+                  className={`transition-colors cursor-pointer p-2 ${favoriteTrackIds.has(track.uri) ? 'text-red-500' : 'text-neutral-400 hover:text-red-400'}`}
+                  type="button"
+                  aria-label={favoriteTrackIds.has(track.uri) ? 'Favorited' : 'Add to favorites'}
+                >
+                  <HeartIcon fill={favoriteTrackIds.has(track.uri) ? 'currentColor' : 'none'} />
+                </button>
+                <button
+                  onClick={() => onRemove(track)}
+                  className="text-neutral-500 hover:text-red-400 transition-colors cursor-pointer p-2"
+                  type="button"
+                  aria-label="Remove from queue"
+                >
+                  <CloseIcon size="w-5 h-5" />
+                </button>
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>

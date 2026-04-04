@@ -53,8 +53,10 @@ export default function PodSidebar({
           <PlayQueue
             queue={queue}
             isPodOwner={isPodOwner}
+            favoriteTrackIds={favoriteTrackIds}
             onStartPlaying={onStartPlaying}
             onRemove={onRemoveFromQueue}
+            onToggleFavorite={onToggleFavorite}
           />
         ) : (
           <PlayHistory
