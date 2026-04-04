@@ -325,7 +325,11 @@ export default function PodDetail({ podId }: PodDetailProps) {
   };
 
   const handlePlay = async () => {
-    await play();
+    if (browserDeviceId) {
+      await transferPlayback([browserDeviceId], true);
+    } else {
+      await play();
+    }
     const trackUri = displayNowPlaying?.item?.uri;
     if (trackUri) updateCurrentlyPlaying(podId, trackUri);
   };
@@ -367,6 +371,9 @@ export default function PodDetail({ podId }: PodDetailProps) {
   };
 
   const handlePlayTrack = async (track: SpotifyTrack) => {
+    if (browserDeviceId) {
+      await transferPlayback([browserDeviceId], false);
+    }
     await play({ uris: [track.uri] });
     updateCurrentlyPlaying(podId, track.uri);
   };
@@ -376,6 +383,10 @@ export default function PodDetail({ podId }: PodDetailProps) {
     sessionPlayedUrisRef.current = new Set();
     const session = await startSession(podId);
     setActiveSessionId(session.id);
+    // Ensure browser device is active before playing
+    if (browserDeviceId) {
+      await transferPlayback([browserDeviceId], false);
+    }
     const uris = pod.queue.map(t => t.uri);
     await play({ uris });
     if (uris[0]) updateCurrentlyPlaying(podId, uris[0]);

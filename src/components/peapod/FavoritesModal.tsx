@@ -34,8 +34,10 @@ export default function FavoritesModal({ isOpen, podId, onClose, onAddToQueue }:
   };
 
   const handleQueueAll = () => {
-    favorites.forEach(fav => onAddToQueue(fav.track));
     onClose();
+    setTimeout(() => {
+      favorites.forEach(fav => onAddToQueue(fav.track));
+    }, 200);
   };
 
   return (
