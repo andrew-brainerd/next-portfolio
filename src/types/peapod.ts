@@ -64,17 +64,10 @@ export interface Pod {
   history: SpotifyTrack[];
 }
 
-export interface PodTrack {
-  id: string;
-  name: string;
-  artist?: string;
-  albumArt?: string;
-}
-
 export interface PodFavorite {
   podId: string;
   trackId: string;
-  track: PodTrack;
+  track: SpotifyTrack;
   favoritedBy: string;
   favoritedAt: string;
 }

@@ -47,19 +47,7 @@ export const getFavorites = (podId: string) =>
   spotifyApi.get<{ items: PodFavorite[] }>(`/peapod/${podId}/favorites`).then(r => r.data);
 
 export const addFavorite = (podId: string, track: SpotifyTrack, userId: string) =>
-  spotifyApi
-    .post<{
-      message: string;
-    }>(`/peapod/${podId}/favorites`, {
-      track: {
-        id: track.uri,
-        name: track.name,
-        artist: track.artists?.[0]?.name,
-        albumArt: track.album?.images?.[2]?.url || track.album?.images?.[0]?.url
-      },
-      userId
-    })
-    .then(r => r.data);
+  spotifyApi.post<{ message: string }>(`/peapod/${podId}/favorites`, { track, userId }).then(r => r.data);
 
 export const removeFavorite = (podId: string, trackId: string) =>
   spotifyApi.delete<{ message: string }>(`/peapod/${podId}/favorites/${encodeURIComponent(trackId)}`).then(r => r.data);
