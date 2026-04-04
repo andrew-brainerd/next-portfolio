@@ -60,6 +60,8 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
   const prevTrackNameRef = useRef<string | undefined>(undefined);
+  const prevTrackItemRef = useRef<SpotifyTrack | undefined>(undefined);
+  const trackStartTimeRef = useRef<number>(0);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const handlePlayerStateChange = useCallback((data: NowPlaying) => {
@@ -192,18 +194,22 @@ export default function PodDetail({ podId }: PodDetailProps) {
     }
   }, [accessToken, nowPlaying, isPodOwner, podId]);
 
-  // Track history on song change (owner only)
+  // Track history on song change (owner only), skip if played less than 30s
   useEffect(() => {
     if (
       prevTrackNameRef.current !== undefined &&
       prevTrackNameRef.current !== trackName &&
       isPodOwner &&
-      trackName &&
-      displayNowPlaying?.item
+      prevTrackItemRef.current
     ) {
-      addToPlayHistory(podId, displayNowPlaying.item);
+      const listenedMs = Date.now() - trackStartTimeRef.current;
+      if (listenedMs >= 30000) {
+        addToPlayHistory(podId, prevTrackItemRef.current);
+      }
     }
     prevTrackNameRef.current = trackName;
+    prevTrackItemRef.current = displayNowPlaying?.item;
+    trackStartTimeRef.current = Date.now();
   }, [trackName, isPodOwner, podId]);
 
   // Cleanup on unmount
