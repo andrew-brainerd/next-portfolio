@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import type { SpotifyTrack } from '@/types/peapod';
 import { deduplicateHistory, getAlbumArtUrl } from '@/utils/peapod';
 import Track from './Track';
-import { HeartIcon, PlusIcon } from './icons';
+import { HeartIcon, PlusIcon } from './Icons';
 
 interface PlayHistoryProps {
   history: SpotifyTrack[];

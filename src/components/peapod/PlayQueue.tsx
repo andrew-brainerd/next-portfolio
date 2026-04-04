@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import type { SpotifyTrack } from '@/types/peapod';
 import { getAlbumArtUrl } from '@/utils/peapod';
 import Track from './Track';
-import { CloseIcon, HeartIcon } from './icons';
+import { CloseIcon, HeartIcon } from './Icons';
 
 interface PlayQueueProps {
   queue: SpotifyTrack[];

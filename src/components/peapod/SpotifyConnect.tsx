@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useSpotifyAuth } from '@/hooks/usePeapod';
-import { getSpotifyAuthUrl } from '@/api/spotify-client';
+import { getSpotifyAuthUrl } from '@/api/spotifyClient';
 import peapodLogo from '@/img/peapod-logo.png';
 
 export default function SpotifyConnect() {

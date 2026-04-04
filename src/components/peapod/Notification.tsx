@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 import { usePeapodNotify } from '@/hooks/usePeapod';
-import { HeartIcon, PlusIcon, CheckIcon, CloseIcon, InfoIcon } from './icons';
+import { HeartIcon, PlusIcon, CheckIcon, CloseIcon, InfoIcon } from './Icons';
 
 const iconMap = {
   queue: <PlusIcon size="w-5 h-5" />,

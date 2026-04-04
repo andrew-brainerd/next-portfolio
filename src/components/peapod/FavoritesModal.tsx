@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getFavorites, removeFavorite } from '@/api/peapod';
 import Modal from './Modal';
-import { CloseIcon } from './icons';
+import { CloseIcon } from './Icons';
 import type { PodFavorite } from '@/types/peapod';
 
 interface FavoritesModalProps {

@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSpotifyAuth } from '@/hooks/usePeapod';
 import { addToPlayQueue, addFavorite } from '@/api/peapod';
-import { searchSpotify, play } from '@/api/spotify-client';
+import { searchSpotify, play } from '@/api/spotifyClient';
 import type { SpotifyTrack, SearchResult } from '@/types/peapod';
 import { getAlbumArtUrl, formatArtistNames, buildSearchResults } from '@/utils/peapod';
 import Track from './Track';
 import Modal from './Modal';
-import { HeartIcon, PlayIcon, PersonIcon, DiscIcon } from './icons';
+import { HeartIcon, PlayIcon, PersonIcon, DiscIcon } from './Icons';
 
 interface TrackListProps {
   searchText?: string;

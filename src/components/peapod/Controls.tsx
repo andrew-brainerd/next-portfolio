@@ -1,7 +1,7 @@
 'use client';
 
 import type { SpotifyTrack, ControlsOptions } from '@/types/peapod';
-import { PlayIcon, PauseIcon, PlusIcon } from './icons';
+import { PlayIcon, PauseIcon, PlusIcon } from './Icons';
 
 interface ControlsProps {
   className?: string;

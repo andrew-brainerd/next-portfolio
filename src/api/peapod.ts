@@ -1,4 +1,4 @@
-import spotifyApi from '@/api/spotify-api';
+import spotifyApi from '@/api/spotifyApi';
 import type { Pod, PodFavorite, SpotifyProfile, SpotifyTrack, NowPlaying } from '@/types/peapod';
 
 // --- Pod API ---

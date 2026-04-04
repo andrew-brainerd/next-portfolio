@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAlbumDetails } from '@/api/spotify-client';
+import { getAlbumDetails } from '@/api/spotifyClient';
 import { addToPlayQueue, addFavorite } from '@/api/peapod';
 import type { SpotifyTrack } from '@/types/peapod';
 import Track from './Track';
-import { BackIcon, PlusIcon, HeartIcon } from './icons';
+import { BackIcon, PlusIcon, HeartIcon } from './Icons';
 
 interface AlbumData {
   album: { id: string; name: string; artists: { name: string }[]; images: { url: string }[]; release_date: string };

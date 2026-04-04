@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 import TrackProgress from './TrackProgress';
-import { HeartIcon, PlayIcon, PauseIcon, NextIcon } from './icons';
+import { HeartIcon, PlayIcon, PauseIcon, NextIcon } from './Icons';
 import type { NowPlaying } from '@/types/peapod';
 
 interface PlayerBarProps {

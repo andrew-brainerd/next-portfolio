@@ -27,7 +27,7 @@ import {
   skipToNext,
   seek,
   transferPlayback
-} from '@/api/spotify-client';
+} from '@/api/spotifyClient';
 import { getChannel } from '@/utils/pusher';
 import SongSelection from './SongSelection';
 import PodSidebar from './PodSidebar';
@@ -39,7 +39,7 @@ import MembersDisplay from './MembersDisplay';
 import PeapodLoader from './PeapodLoader';
 import ArtistView from './ArtistView';
 import AlbumView from './AlbumView';
-import { CheckIcon, CloseIcon, PencilIcon, HeartIcon } from './icons';
+import { CheckIcon, CloseIcon, PencilIcon, HeartIcon } from './Icons';
 import type { Pod, SpotifyProfile, SpotifyDevice, SpotifyTrack, NowPlaying } from '@/types/peapod';
 
 interface PodDetailProps {
