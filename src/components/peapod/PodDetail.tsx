@@ -44,7 +44,7 @@ import MembersDisplay from './MembersDisplay';
 import PeapodLoader from './PeapodLoader';
 import ArtistView from './ArtistView';
 import AlbumView from './AlbumView';
-import { CheckIcon, CloseIcon, PencilIcon, HeartIcon } from './Icons';
+import { CheckIcon, CloseIcon, PencilIcon, HeartIcon, PlayIcon } from './Icons';
 import type { Pod, SpotifyProfile, SpotifyDevice, SpotifyTrack, NowPlaying } from '@/types/peapod';
 
 interface PodDetailProps {
@@ -494,6 +494,32 @@ export default function PodDetail({ podId }: PodDetailProps) {
               currentUserId={profile?.id}
             />
             {isPodOwner && (
+              activeSessionId ? (
+                <button
+                  className="text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                  onClick={handleStopSession}
+                  type="button"
+                  aria-label="Stop Pod"
+                  title="Stop Pod"
+                >
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                  </svg>
+                </button>
+              ) : (
+                <button
+                  className={`transition-colors cursor-pointer ${pod.queue.length ? 'text-brand-400 hover:text-brand-300' : 'text-neutral-600 cursor-not-allowed'}`}
+                  onClick={handleStartPlaying}
+                  disabled={!pod.queue.length}
+                  type="button"
+                  aria-label="Launch Pod"
+                  title="Launch Pod"
+                >
+                  <PlayIcon />
+                </button>
+              )
+            )}
+            {isPodOwner && (
               <button
                 className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer"
                 onClick={() => setIsDevicesOpen(true)}
@@ -568,11 +594,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 podId={podId}
                 queue={pod.queue || []}
                 history={pod.history || []}
-                isPodOwner={isPodOwner}
                 favoriteTrackIds={favoriteTrackIds}
-                isSessionActive={!!activeSessionId}
-                onStartPlaying={handleStartPlaying}
-                onStopSession={handleStopSession}
                 onRemoveFromQueue={handleRemoveFromQueue}
                 onAddToQueue={handleAddToQueue}
                 onToggleFavorite={handleToggleFavoriteTrack}
