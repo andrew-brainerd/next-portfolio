@@ -21,7 +21,7 @@ export const pause = () => spotifyApi.put('/spotify/pause').then(r => r.data);
 export const skipToNext = () => spotifyApi.post('/spotify/next').then(r => r.data);
 
 export const searchSpotify = (searchText: string) =>
-  spotifyApi.post('/spotify/search', { searchText, types: ['track'] }).then(r => r.data);
+  spotifyApi.post('/spotify/search', { searchText, types: ['track', 'artist', 'album'] }).then(r => r.data);
 
 export const getArtistDetails = (artistId: string) => spotifyApi.get(`/spotify/artist/${artistId}`).then(r => r.data);
 

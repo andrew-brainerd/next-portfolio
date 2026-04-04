@@ -8,6 +8,19 @@ import type { SpotifyTrack } from '@/types/peapod';
 import Track from './Track';
 import Modal from './Modal';
 
+interface SearchArtist {
+  id: string;
+  name: string;
+  images: { url: string }[];
+}
+
+interface SearchAlbum {
+  id: string;
+  name: string;
+  artists: { name: string }[];
+  images: { url: string }[];
+}
+
 interface TrackListProps {
   searchText?: string;
   podId: string;
@@ -27,6 +40,8 @@ export default function TrackList({
 }: TrackListProps) {
   const accessToken = useSpotifyAuth(s => s.accessToken);
   const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
+  const [artists, setArtists] = useState<SearchArtist[]>([]);
+  const [albums, setAlbums] = useState<SearchAlbum[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
 
@@ -36,8 +51,12 @@ export default function TrackList({
     try {
       const data = await searchSpotify(searchText);
       setTracks(data?.tracks?.items || []);
+      setArtists(data?.artists?.items?.slice(0, 3) || []);
+      setAlbums(data?.albums?.items?.slice(0, 3) || []);
     } catch {
       setTracks([]);
+      setArtists([]);
+      setAlbums([]);
     } finally {
       setIsLoading(false);
     }
@@ -88,8 +107,12 @@ export default function TrackList({
   };
 
   if (isLoading || !accessToken) {
-    return <div className="text-sm py-4 text-center text-neutral-400">Loading Tracks...</div>;
+    return <div className="text-sm py-4 text-center text-neutral-400">Loading...</div>;
   }
+
+  const hasResults = tracks.length > 0 || artists.length > 0 || albums.length > 0;
+
+  if (!hasResults) return null;
 
   const actions = [
     {
@@ -148,8 +171,73 @@ export default function TrackList({
 
   return (
     <div className="w-full">
+      {/* Artists */}
+      {artists.length > 0 && (
+        <div className="py-1">
+          <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider px-3 py-2">Artists</div>
+          {artists.map(artist => (
+            <button
+              key={artist.id}
+              onClick={() => {
+                onArtistSelect?.(artist.id);
+                onActionComplete?.();
+              }}
+              className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-neutral-700 transition-colors cursor-pointer"
+              type="button"
+            >
+              {artist.images?.[2]?.url ? (
+                <img className="w-10 h-10 rounded-full flex-shrink-0 object-cover" src={artist.images[2].url} alt="" />
+              ) : (
+                <div className="w-10 h-10 rounded-full flex-shrink-0 bg-neutral-700 flex items-center justify-center text-neutral-500">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+              )}
+              <div className="text-sm font-medium">{artist.name}</div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Albums */}
+      {albums.length > 0 && (
+        <div className="py-1">
+          <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider px-3 py-2">Albums</div>
+          {albums.map(album => (
+            <button
+              key={album.id}
+              onClick={() => {
+                onAlbumSelect?.(album.id);
+                onActionComplete?.();
+              }}
+              className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-neutral-700 transition-colors cursor-pointer"
+              type="button"
+            >
+              {album.images?.[2]?.url ? (
+                <img className="w-10 h-10 rounded flex-shrink-0 object-cover" src={album.images[2].url} alt="" />
+              ) : (
+                <div className="w-10 h-10 rounded flex-shrink-0 bg-neutral-700 flex items-center justify-center text-neutral-500">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </div>
+              )}
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate">{album.name}</div>
+                <div className="text-xs text-neutral-400 truncate">{album.artists?.map(a => a.name).join(', ')}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Tracks */}
       {tracks.length > 0 && (
         <div className="py-1">
+          <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider px-3 py-2">Tracks</div>
           {[...new Map(tracks.map(t => [t.name, t])).values()].map((track, i) => (
             <Track
               key={i}
@@ -162,6 +250,7 @@ export default function TrackList({
           ))}
         </div>
       )}
+
       <Modal isOpen={!!selectedTrack} onClose={() => setSelectedTrack(null)}>
         <div className="bg-neutral-800 rounded-xl overflow-hidden max-w-sm w-[90%]">
           {selectedTrack && (
