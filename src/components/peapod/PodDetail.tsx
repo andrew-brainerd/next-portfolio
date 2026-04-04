@@ -69,17 +69,34 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const trackStartTimeRef = useRef<number>(0);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
+  const lastPlayedUriRef = useRef<string | null>(null);
+
   const handlePlayerStateChange = useCallback(
     (data: NowPlaying) => {
       setNowPlaying(data);
-      if (data.item?.uri) {
-        updateCurrentlyPlaying(podId, data.item.uri);
+      const currentUri = data.item?.uri;
+
+      if (currentUri) {
+        updateCurrentlyPlaying(podId, currentUri);
+
         // Remove track from queue when it starts playing
         setPod(prev => {
-          if (!prev || !prev.queue.some(t => t.uri === data.item?.uri)) return prev;
-          const updatedQueue = prev.queue.filter(t => t.uri !== data.item?.uri);
+          if (!prev || !prev.queue.some(t => t.uri === currentUri)) return prev;
+          const updatedQueue = prev.queue.filter(t => t.uri !== currentUri);
           removeFromPlayQueue(podId, data.item as SpotifyTrack);
           return { ...prev, queue: updatedQueue };
+        });
+
+        lastPlayedUriRef.current = currentUri;
+      }
+
+      // When playback stops (paused, not user-initiated), play next from queue
+      if (!data.is_playing && data.progress_ms === 0 && lastPlayedUriRef.current) {
+        setPod(prev => {
+          if (!prev || prev.queue.length === 0) return prev;
+          const nextTrack = prev.queue[0];
+          play({ uris: [nextTrack.uri] });
+          return prev;
         });
       }
     },
