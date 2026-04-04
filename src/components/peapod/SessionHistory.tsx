@@ -6,9 +6,13 @@ import { getSessions } from '@/api/peapod';
 import { getAlbumArtUrl, formatArtistNames } from '@/utils/peapod';
 import type { PodSession, SpotifyTrack } from '@/types/peapod';
 import Track from './Track';
+import { PlusIcon, HeartIcon } from './Icons';
 
 interface SessionHistoryProps {
   podId: string;
+  favoriteTrackIds: Set<string>;
+  onAddToQueue: (track: SpotifyTrack) => void;
+  onToggleFavorite: (track: SpotifyTrack) => void;
 }
 
 function formatDate(iso: string): string {
@@ -28,7 +32,7 @@ function formatDuration(start: string, end?: string): string {
   return `${hrs}h ${mins % 60}m`;
 }
 
-export default function SessionHistory({ podId }: SessionHistoryProps) {
+export default function SessionHistory({ podId, favoriteTrackIds, onAddToQueue, onToggleFavorite }: SessionHistoryProps) {
   const [sessionList, setSessionList] = useState<PodSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -93,12 +97,31 @@ export default function SessionHistory({ podId }: SessionHistoryProps) {
                 <div className="text-neutral-500 text-xs text-center py-3">No tracks played</div>
               ) : (
                 session.tracks.map((track: SpotifyTrack, j: number) => (
-                  <Track
-                    key={`${track.uri}-${j}`}
-                    name={track.name}
-                    artists={track.artists}
-                    albumArt={getAlbumArtUrl(track)}
-                  />
+                  <div key={`${track.uri}-${j}`} className="group flex items-center">
+                    <div className="flex-1 min-w-0">
+                      <Track name={track.name} artists={track.artists} albumArt={getAlbumArtUrl(track)} />
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pr-2">
+                      <button
+                        onClick={() => onAddToQueue(track)}
+                        className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer p-2"
+                        type="button"
+                        aria-label="Add to queue"
+                        title="Add to Queue"
+                      >
+                        <PlusIcon size="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => onToggleFavorite(track)}
+                        className={`transition-colors cursor-pointer p-2 ${favoriteTrackIds.has(track.uri) ? 'text-red-500' : 'text-neutral-400 hover:text-red-400'}`}
+                        type="button"
+                        aria-label={favoriteTrackIds.has(track.uri) ? 'Favorited' : 'Add to favorites'}
+                        title={favoriteTrackIds.has(track.uri) ? 'Favorited' : 'Add to Favorites'}
+                      >
+                        <HeartIcon size="w-5 h-5" fill={favoriteTrackIds.has(track.uri) ? 'currentColor' : 'none'} />
+                      </button>
+                    </div>
+                  </div>
                 ))
               )}
             </div>

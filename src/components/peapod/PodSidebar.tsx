@@ -62,7 +62,14 @@ export default function PodSidebar({
             onToggleFavorite={onToggleFavorite}
           />
         )}
-        {activeTab === 'sessions' && <SessionHistory podId={podId} />}
+        {activeTab === 'sessions' && (
+          <SessionHistory
+            podId={podId}
+            favoriteTrackIds={favoriteTrackIds}
+            onAddToQueue={onAddToQueue}
+            onToggleFavorite={onToggleFavorite}
+          />
+        )}
       </div>
     </div>
   );
