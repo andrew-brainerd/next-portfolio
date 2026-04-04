@@ -88,15 +88,16 @@ export default function PodDetail({ podId }: PodDetailProps) {
     getSpotifyProfile().then(setProfile);
   }, [accessToken]);
 
-  // Fetch pod on mount + poll periodically
+  // Fetch pod on mount + listen for updates via Pusher
   useEffect(() => {
     const timeout = setTimeout(fetchPod, 0);
-    const interval = setInterval(fetchPod, 5000);
+    const channel = getChannel(podId);
+    channel.bind('podUpdated', fetchPod);
     return () => {
       clearTimeout(timeout);
-      clearInterval(interval);
+      channel.unbind('podUpdated');
     };
-  }, [fetchPod]);
+  }, [fetchPod, podId]);
 
   // Auto-join pod as member
   useEffect(() => {
@@ -385,6 +386,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 artistId={browseView.id}
                 podId={podId}
                 userId={profile?.id}
+                favoriteTrackIds={favoriteTrackIds}
                 onBack={() => setBrowseView(null)}
                 onAlbumSelect={albumId => setBrowseView({ type: 'album', id: albumId })}
               />
@@ -393,6 +395,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 albumId={browseView.id}
                 podId={podId}
                 userId={profile?.id}
+                favoriteTrackIds={favoriteTrackIds}
                 onBack={() => setBrowseView(null)}
               />
             )}

@@ -16,19 +16,30 @@ interface ArtistViewProps {
   artistId: string;
   podId: string;
   userId?: string;
+  favoriteTrackIds: Set<string>;
   onBack: () => void;
   onAlbumSelect: (albumId: string) => void;
 }
 
-export default function ArtistView({ artistId, podId, userId, onBack, onAlbumSelect }: ArtistViewProps) {
+export default function ArtistView({
+  artistId,
+  podId,
+  userId,
+  favoriteTrackIds,
+  onBack,
+  onAlbumSelect
+}: ArtistViewProps) {
   const [data, setData] = useState<ArtistData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    getArtistDetails(artistId)
-      .then(setData)
-      .finally(() => setIsLoading(false));
+    const timeout = setTimeout(() => {
+      setIsLoading(true);
+      getArtistDetails(artistId)
+        .then(setData)
+        .finally(() => setIsLoading(false));
+    }, 0);
+    return () => clearTimeout(timeout);
   }, [artistId]);
 
   if (isLoading) {
@@ -95,19 +106,25 @@ export default function ArtistView({ artistId, podId, userId, onBack, onAlbumSel
                   aria-label="Add to queue"
                   title="Add to Queue"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                 </button>
                 <button
                   onClick={() => handleAddToFavorites(track)}
-                  className="text-neutral-400 hover:text-red-400 transition-colors cursor-pointer p-1"
+                  className={`transition-colors cursor-pointer p-1 ${favoriteTrackIds.has(track.uri) ? 'text-red-500' : 'text-neutral-400 hover:text-red-400'}`}
                   type="button"
-                  aria-label="Add to favorites"
-                  title="Add to Favorites"
+                  aria-label={favoriteTrackIds.has(track.uri) ? 'Favorited' : 'Add to favorites'}
+                  title={favoriteTrackIds.has(track.uri) ? 'Favorited' : 'Add to Favorites'}
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill={favoriteTrackIds.has(track.uri) ? 'currentColor' : 'none'}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                   </svg>
                 </button>

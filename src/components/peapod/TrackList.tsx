@@ -39,24 +39,51 @@ export default function TrackList({
   onActionComplete
 }: TrackListProps) {
   const accessToken = useSpotifyAuth(s => s.accessToken);
-  const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
-  const [artists, setArtists] = useState<SearchArtist[]>([]);
-  const [albums, setAlbums] = useState<SearchAlbum[]>([]);
+  type SearchResult =
+    | { type: 'artist'; data: SearchArtist; score: number }
+    | { type: 'album'; data: SearchAlbum; score: number }
+    | { type: 'track'; data: SpotifyTrack; score: number };
+
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
+
+  const scoreMatch = (name: string, query: string, index: number): number => {
+    const lower = name.toLowerCase();
+    const q = query.toLowerCase();
+    if (lower === q) return 100 - index;
+    if (lower.startsWith(q)) return 80 - index;
+    if (lower.includes(q)) return 60 - index;
+    return 40 - index;
+  };
 
   const doSearch = useCallback(async () => {
     if (!searchText || !accessToken) return;
     setIsLoading(true);
     try {
       const data = await searchSpotify(searchText);
-      setTracks(data?.tracks?.items || []);
-      setArtists(data?.artists?.items?.slice(0, 3) || []);
-      setAlbums(data?.albums?.items?.slice(0, 3) || []);
+      const artists: SearchResult[] = (data?.artists?.items || []).slice(0, 5).map((a: SearchArtist, i: number) => ({
+        type: 'artist' as const,
+        data: a,
+        score: scoreMatch(a.name, searchText, i)
+      }));
+      const albums: SearchResult[] = (data?.albums?.items || []).slice(0, 5).map((a: SearchAlbum, i: number) => ({
+        type: 'album' as const,
+        data: a,
+        score: scoreMatch(a.name, searchText, i)
+      }));
+      const tracks: SearchResult[] = (
+        [...new Map((data?.tracks?.items || []).map((t: SpotifyTrack) => [t.name, t])).values()] as SpotifyTrack[]
+      )
+        .slice(0, 10)
+        .map((t: SpotifyTrack, i: number) => ({
+          type: 'track' as const,
+          data: t,
+          score: scoreMatch(t.name, searchText, i)
+        }));
+      setResults([...artists, ...albums, ...tracks].sort((a, b) => b.score - a.score));
     } catch {
-      setTracks([]);
-      setArtists([]);
-      setAlbums([]);
+      setResults([]);
     } finally {
       setIsLoading(false);
     }
@@ -110,9 +137,7 @@ export default function TrackList({
     return <div className="text-sm py-4 text-center text-neutral-400">Loading...</div>;
   }
 
-  const hasResults = tracks.length > 0 || artists.length > 0 || albums.length > 0;
-
-  if (!hasResults) return null;
+  if (results.length === 0) return null;
 
   const actions = [
     {
@@ -170,14 +195,13 @@ export default function TrackList({
   ];
 
   return (
-    <div className="w-full">
-      {/* Artists */}
-      {artists.length > 0 && (
-        <div className="py-1">
-          <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider px-3 py-2">Artists</div>
-          {artists.map(artist => (
+    <div className="w-full py-1">
+      {results.map((result, i) => {
+        if (result.type === 'artist') {
+          const artist = result.data;
+          return (
             <button
-              key={artist.id}
+              key={`artist-${artist.id}`}
               onClick={() => {
                 onArtistSelect?.(artist.id);
                 onActionComplete?.();
@@ -195,19 +219,19 @@ export default function TrackList({
                   </svg>
                 </div>
               )}
-              <div className="text-sm font-medium">{artist.name}</div>
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate">{artist.name}</div>
+                <div className="text-xs text-neutral-500">Artist</div>
+              </div>
             </button>
-          ))}
-        </div>
-      )}
+          );
+        }
 
-      {/* Albums */}
-      {albums.length > 0 && (
-        <div className="py-1">
-          <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider px-3 py-2">Albums</div>
-          {albums.map(album => (
+        if (result.type === 'album') {
+          const album = result.data;
+          return (
             <button
-              key={album.id}
+              key={`album-${album.id}`}
               onClick={() => {
                 onAlbumSelect?.(album.id);
                 onActionComplete?.();
@@ -227,29 +251,26 @@ export default function TrackList({
               )}
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">{album.name}</div>
-                <div className="text-xs text-neutral-400 truncate">{album.artists?.map(a => a.name).join(', ')}</div>
+                <div className="text-xs text-neutral-400 truncate">
+                  {album.artists?.map(a => a.name).join(', ')} <span className="text-neutral-500">· Album</span>
+                </div>
               </div>
             </button>
-          ))}
-        </div>
-      )}
+          );
+        }
 
-      {/* Tracks */}
-      {tracks.length > 0 && (
-        <div className="py-1">
-          <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider px-3 py-2">Tracks</div>
-          {[...new Map(tracks.map(t => [t.name, t])).values()].map((track, i) => (
-            <Track
-              key={i}
-              onClick={() => setSelectedTrack(track)}
-              name={track.name}
-              artists={track.artists}
-              albumArt={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url}
-              className={selectedTrack?.uri === track.uri ? '!bg-neutral-600' : ''}
-            />
-          ))}
-        </div>
-      )}
+        const track = result.data;
+        return (
+          <Track
+            key={`track-${track.uri || i}`}
+            onClick={() => setSelectedTrack(track)}
+            name={track.name}
+            artists={track.artists}
+            albumArt={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url}
+            className={selectedTrack?.uri === track.uri ? '!bg-neutral-600' : ''}
+          />
+        );
+      })}
 
       <Modal isOpen={!!selectedTrack} onClose={() => setSelectedTrack(null)}>
         <div className="bg-neutral-800 rounded-xl overflow-hidden max-w-sm w-[90%]">
