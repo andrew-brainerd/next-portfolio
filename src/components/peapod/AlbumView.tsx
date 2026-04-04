@@ -17,9 +17,10 @@ interface AlbumViewProps {
   userId?: string;
   favoriteTrackIds: Set<string>;
   onBack: () => void;
+  onAddToQueue?: (track: SpotifyTrack) => void;
 }
 
-export default function AlbumView({ albumId, podId, userId, favoriteTrackIds, onBack }: AlbumViewProps) {
+export default function AlbumView({ albumId, podId, userId, favoriteTrackIds, onBack, onAddToQueue }: AlbumViewProps) {
   const [data, setData] = useState<AlbumData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,7 +48,11 @@ export default function AlbumView({ albumId, podId, userId, favoriteTrackIds, on
   const year = album.release_date?.split('-')[0];
 
   const handleAddToQueue = async (track: SpotifyTrack) => {
-    await addToPlayQueue(podId, track);
+    if (onAddToQueue) {
+      onAddToQueue(track);
+    } else {
+      await addToPlayQueue(podId, track);
+    }
   };
 
   const handleAddToFavorites = async (track: SpotifyTrack) => {

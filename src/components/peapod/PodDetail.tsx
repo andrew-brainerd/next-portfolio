@@ -11,6 +11,7 @@ import {
   removeActiveMemberFromPod,
   addToPlayHistory,
   pushNowPlayingToClients,
+  addToPlayQueue,
   removeFromPlayQueue,
   getFavorites,
   addFavorite,
@@ -278,7 +279,15 @@ export default function PodDetail({ podId }: PodDetailProps) {
     }
   };
 
+  const handleAddToQueue = async (track: SpotifyTrack) => {
+    if (!pod) return;
+    setPod({ ...pod, queue: [...pod.queue, track] });
+    await addToPlayQueue(podId, track);
+  };
+
   const handleRemoveFromQueue = async (track: SpotifyTrack) => {
+    if (!pod) return;
+    setPod({ ...pod, queue: pod.queue.filter(t => t.uri !== track.uri) });
     await removeFromPlayQueue(podId, track);
   };
 
@@ -399,6 +408,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 favoriteTrackIds={favoriteTrackIds}
                 onBack={() => setBrowseView(null)}
                 onAlbumSelect={albumId => setBrowseView({ type: 'album', id: albumId })}
+                onAddToQueue={handleAddToQueue}
               />
             ) : (
               <AlbumView
@@ -407,6 +417,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 userId={profile?.id}
                 favoriteTrackIds={favoriteTrackIds}
                 onBack={() => setBrowseView(null)}
+                onAddToQueue={handleAddToQueue}
               />
             )}
           </div>
@@ -417,6 +428,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
               userId={profile?.id}
               onArtistSelect={artistId => setBrowseView({ type: 'artist', id: artistId })}
               onAlbumSelect={albumId => setBrowseView({ type: 'album', id: albumId })}
+              onAddToQueue={handleAddToQueue}
             />
             <div className="flex-1 min-h-0 mt-2.5 overflow-y-auto pb-24">
               <PodSidebar

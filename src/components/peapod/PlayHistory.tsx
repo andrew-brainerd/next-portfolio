@@ -17,6 +17,7 @@ export default function PlayHistory({ history }: PlayHistoryProps) {
             className="bg-neutral-800 rounded-md mx-auto my-2.5 p-4"
             name={track.name}
             artists={track.artists}
+            albumArt={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url}
           />
         ))}
       </div>

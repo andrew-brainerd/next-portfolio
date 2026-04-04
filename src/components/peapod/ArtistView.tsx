@@ -19,6 +19,7 @@ interface ArtistViewProps {
   favoriteTrackIds: Set<string>;
   onBack: () => void;
   onAlbumSelect: (albumId: string) => void;
+  onAddToQueue?: (track: SpotifyTrack) => void;
 }
 
 export default function ArtistView({
@@ -27,7 +28,8 @@ export default function ArtistView({
   userId,
   favoriteTrackIds,
   onBack,
-  onAlbumSelect
+  onAlbumSelect,
+  onAddToQueue
 }: ArtistViewProps) {
   const [data, setData] = useState<ArtistData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +56,11 @@ export default function ArtistView({
   const artistImage = artist.images?.[1]?.url || artist.images?.[0]?.url;
 
   const handleAddToQueue = async (track: SpotifyTrack) => {
-    await addToPlayQueue(podId, track);
+    if (onAddToQueue) {
+      onAddToQueue(track);
+    } else {
+      await addToPlayQueue(podId, track);
+    }
   };
 
   const handleAddToFavorites = async (track: SpotifyTrack) => {

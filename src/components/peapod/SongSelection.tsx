@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import type { SpotifyTrack } from '@/types/peapod';
 import SearchBar from './SearchBar';
 import TrackList from './TrackList';
 
@@ -9,9 +10,16 @@ interface SongSelectionProps {
   userId?: string;
   onArtistSelect?: (artistId: string) => void;
   onAlbumSelect?: (albumId: string) => void;
+  onAddToQueue?: (track: SpotifyTrack) => void;
 }
 
-export default function SongSelection({ podId, userId, onArtistSelect, onAlbumSelect }: SongSelectionProps) {
+export default function SongSelection({
+  podId,
+  userId,
+  onArtistSelect,
+  onAlbumSelect,
+  onAddToQueue
+}: SongSelectionProps) {
   const [searchText, setSearchText] = useState('');
   const [isResultsOpen, setIsResultsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,6 +51,7 @@ export default function SongSelection({ podId, userId, onArtistSelect, onAlbumSe
             userId={userId}
             onArtistSelect={onArtistSelect}
             onAlbumSelect={onAlbumSelect}
+            onAddToQueue={onAddToQueue}
             onActionComplete={() => {
               setIsResultsOpen(false);
               setSearchText('');
