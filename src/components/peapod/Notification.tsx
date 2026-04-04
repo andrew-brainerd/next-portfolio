@@ -1,16 +1,35 @@
 'use client';
 
+import { AnimatePresence, motion } from 'motion/react';
 import { usePeapodNotify } from '@/hooks/usePeapod';
+import { HeartIcon, PlusIcon, CheckIcon, CloseIcon } from './icons';
+
+const iconMap = {
+  queue: <PlusIcon size="w-5 h-5" />,
+  favorite: <HeartIcon size="w-5 h-5" fill="currentColor" />,
+  success: <CheckIcon size="w-5 h-5" />,
+  error: <CloseIcon size="w-5 h-5" />
+};
 
 export default function PeapodNotification() {
   const hidden = usePeapodNotify(s => s.hidden);
   const message = usePeapodNotify(s => s.message);
-
-  if (hidden) return null;
+  const icon = usePeapodNotify(s => s.icon);
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 bg-brand-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up">
-      {message}
-    </div>
+    <AnimatePresence>
+      {!hidden && (
+        <motion.div
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-brand-600 text-white px-5 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.2 }}
+        >
+          {icon && iconMap[icon]}
+          {message}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

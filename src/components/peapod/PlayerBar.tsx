@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'motion/react';
 import TrackProgress from './TrackProgress';
 import { HeartIcon, PlayIcon, PauseIcon, NextIcon } from './icons';
 import type { NowPlaying } from '@/types/peapod';
@@ -45,11 +46,20 @@ export default function PlayerBar({
         </div>
 
         {/* Track info */}
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium truncate">{trackName || 'No track playing'}</div>
-          {artistName && <div className="text-xs text-neutral-400 truncate">{artistName}</div>}
-          {trackName && <TrackProgress nowPlaying={nowPlaying} compact />}
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={trackName || 'empty'}
+            className="flex-1 min-w-0"
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="text-sm font-medium truncate">{trackName || 'No track playing'}</div>
+            {artistName && <div className="text-xs text-neutral-400 truncate">{artistName}</div>}
+            {trackName && <TrackProgress nowPlaying={nowPlaying} compact />}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Favorite */}
         {trackName && (

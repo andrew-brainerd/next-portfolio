@@ -36,10 +36,10 @@ export default function PodList() {
     setIsCreating(true);
     try {
       const newPod = await createPod(profile);
-      displayNotification('Pod created!');
+      displayNotification('Pod created!', { icon: 'success' });
       router.push(`${PEAPOD_ROUTE}/${(newPod as Pod).id}`);
     } catch {
-      displayNotification('Failed to create pod');
+      displayNotification('Failed to create pod', { icon: 'error' });
     } finally {
       setIsCreating(false);
     }

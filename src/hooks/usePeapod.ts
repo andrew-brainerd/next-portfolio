@@ -140,20 +140,24 @@ export const usePodConnection = create<PodConnectionState>(set => ({
 
 // --- Notification Store ---
 
+type NotifyIcon = 'queue' | 'favorite' | 'success' | 'error' | null;
+
 interface NotifyState {
   hidden: boolean;
   message: string;
-  displayNotification: (message: string, time?: number) => void;
+  icon: NotifyIcon;
+  displayNotification: (message: string, options?: { time?: number; icon?: NotifyIcon }) => void;
   closeNotification: () => void;
 }
 
 export const usePeapodNotify = create<NotifyState>(set => ({
   hidden: true,
   message: '',
+  icon: null,
 
-  displayNotification: (message, time) => {
-    const openTime = time || 3000;
-    set({ hidden: false, message });
+  displayNotification: (message, options) => {
+    const openTime = options?.time || 3000;
+    set({ hidden: false, message, icon: options?.icon || null });
     setTimeout(() => set({ hidden: true }), openTime);
   },
 

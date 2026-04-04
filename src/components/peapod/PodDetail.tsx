@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSpotifyAuth, usePodConnection, useNowPlayingSync } from '@/hooks/usePeapod';
+import { useSpotifyAuth, usePodConnection, useNowPlayingSync, usePeapodNotify } from '@/hooks/usePeapod';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import {
   getPod,
@@ -46,6 +46,7 @@ interface PodDetailProps {
 
 export default function PodDetail({ podId }: PodDetailProps) {
   const accessToken = useSpotifyAuth(s => s.accessToken);
+  const displayNotification = usePeapodNotify(s => s.displayNotification);
   const { isConnected, setConnecting, setConnected, setDisconnected } = usePodConnection();
   const { nowPlaying: syncedNowPlaying, setNowPlaying: setSyncedNowPlaying } = useNowPlayingSync();
 
@@ -314,7 +315,12 @@ export default function PodDetail({ podId }: PodDetailProps) {
 
   const handleAddToQueue = async (track: SpotifyTrack) => {
     if (!pod) return;
+    if (pod.queue.some(t => t.uri === track.uri)) {
+      displayNotification(`"${track.name}" is already in the queue`, { icon: 'error' });
+      return;
+    }
     setPod({ ...pod, queue: [...pod.queue, track] });
+    displayNotification(`Added "${track.name}" to queue`, { icon: 'queue' });
     await addToPlayQueue(podId, track);
   };
 

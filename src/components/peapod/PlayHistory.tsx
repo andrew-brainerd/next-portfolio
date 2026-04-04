@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'motion/react';
 import type { SpotifyTrack } from '@/types/peapod';
 import { deduplicateHistory, getAlbumArtUrl } from '@/utils/peapod';
 import Track from './Track';
@@ -17,7 +18,13 @@ export default function PlayHistory({ history, favoriteTrackIds, onAddToQueue, o
     <div className="m-5 overflow-y-auto">
       <div>
         {deduplicateHistory(history).map((track: SpotifyTrack, i: number) => (
-          <div key={i} className="group flex items-center bg-neutral-800 rounded-md mx-auto my-2.5">
+          <motion.div
+            key={track.uri}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.2, delay: i * 0.03 }}
+            className="group flex items-center bg-neutral-800 rounded-md mx-auto my-2.5"
+          >
             <div className="flex-1 min-w-0 p-4">
               <Track name={track.name} artists={track.artists} albumArt={getAlbumArtUrl(track)} />
             </div>
@@ -41,7 +48,7 @@ export default function PlayHistory({ history, favoriteTrackIds, onAddToQueue, o
                 <HeartIcon fill={favoriteTrackIds.has(track.uri) ? 'currentColor' : 'none'} />
               </button>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
