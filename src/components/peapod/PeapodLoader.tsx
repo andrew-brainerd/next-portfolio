@@ -14,17 +14,7 @@ export default function PeapodLoader({ text = 'Loading...' }: { text?: string })
         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
       >
         {/* Circle outline */}
-        <motion.circle
-          cx="256"
-          cy="256"
-          r="232"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="24"
-          strokeDasharray="1460"
-          animate={{ strokeDashoffset: [1460, 0] }}
-          transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        <circle cx="256" cy="256" r="232" fill="none" stroke="currentColor" strokeWidth="24" />
         {/* Left eye */}
         <motion.circle
           cx="172"
