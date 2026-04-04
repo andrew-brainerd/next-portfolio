@@ -79,6 +79,24 @@ export interface PodFavorite {
   favoritedAt: string;
 }
 
+export interface SearchArtist {
+  id: string;
+  name: string;
+  images: { url: string }[];
+}
+
+export interface SearchAlbum {
+  id: string;
+  name: string;
+  artists: { name: string }[];
+  images: { url: string }[];
+}
+
+export type SearchResult =
+  | { type: 'artist'; data: SearchArtist; score: number }
+  | { type: 'album'; data: SearchAlbum; score: number }
+  | { type: 'track'; data: SpotifyTrack; score: number };
+
 export type PodView = 'search' | 'nowPlaying' | 'queue' | 'history';
 
 export interface ControlsOptions {

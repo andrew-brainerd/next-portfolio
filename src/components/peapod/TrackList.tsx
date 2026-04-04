@@ -4,22 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSpotifyAuth } from '@/hooks/usePeapod';
 import { addToPlayQueue, addFavorite } from '@/api/peapod';
 import { searchSpotify, play } from '@/api/spotify-client';
-import type { SpotifyTrack } from '@/types/peapod';
+import type { SpotifyTrack, SearchResult } from '@/types/peapod';
+import { getAlbumArtUrl, formatArtistNames, buildSearchResults } from '@/utils/peapod';
 import Track from './Track';
 import Modal from './Modal';
-
-interface SearchArtist {
-  id: string;
-  name: string;
-  images: { url: string }[];
-}
-
-interface SearchAlbum {
-  id: string;
-  name: string;
-  artists: { name: string }[];
-  images: { url: string }[];
-}
 
 interface TrackListProps {
   searchText?: string;
@@ -43,49 +31,16 @@ export default function TrackList({
   onActionComplete
 }: TrackListProps) {
   const accessToken = useSpotifyAuth(s => s.accessToken);
-  type SearchResult =
-    | { type: 'artist'; data: SearchArtist; score: number }
-    | { type: 'album'; data: SearchAlbum; score: number }
-    | { type: 'track'; data: SpotifyTrack; score: number };
-
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
-
-  const scoreMatch = (name: string, query: string, index: number): number => {
-    const lower = name.toLowerCase();
-    const q = query.toLowerCase();
-    if (lower === q) return 100 - index;
-    if (lower.startsWith(q)) return 80 - index;
-    if (lower.includes(q)) return 60 - index;
-    return 40 - index;
-  };
 
   const doSearch = useCallback(async () => {
     if (!searchText || !accessToken) return;
     setIsLoading(true);
     try {
       const data = await searchSpotify(searchText);
-      const artists: SearchResult[] = (data?.artists?.items || []).slice(0, 5).map((a: SearchArtist, i: number) => ({
-        type: 'artist' as const,
-        data: a,
-        score: scoreMatch(a.name, searchText, i)
-      }));
-      const albums: SearchResult[] = (data?.albums?.items || []).slice(0, 5).map((a: SearchAlbum, i: number) => ({
-        type: 'album' as const,
-        data: a,
-        score: scoreMatch(a.name, searchText, i)
-      }));
-      const tracks: SearchResult[] = (
-        [...new Map((data?.tracks?.items || []).map((t: SpotifyTrack) => [t.name, t])).values()] as SpotifyTrack[]
-      )
-        .slice(0, 10)
-        .map((t: SpotifyTrack, i: number) => ({
-          type: 'track' as const,
-          data: t,
-          score: scoreMatch(t.name, searchText, i)
-        }));
-      setResults([...artists, ...albums, ...tracks].sort((a, b) => b.score - a.score));
+      setResults(buildSearchResults(data, searchText));
     } catch {
       setResults([]);
     } finally {
@@ -264,7 +219,7 @@ export default function TrackList({
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">{album.name}</div>
                 <div className="text-xs text-neutral-400 truncate">
-                  {album.artists?.map(a => a.name).join(', ')} <span className="text-neutral-500">· Album</span>
+                  {formatArtistNames(album.artists)} <span className="text-neutral-500">· Album</span>
                 </div>
               </div>
             </button>
@@ -278,7 +233,7 @@ export default function TrackList({
             onClick={() => setSelectedTrack(track)}
             name={track.name}
             artists={track.artists}
-            albumArt={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url}
+            albumArt={getAlbumArtUrl(track)}
             className={selectedTrack?.uri === track.uri ? '!bg-neutral-600' : ''}
           />
         );
@@ -298,9 +253,7 @@ export default function TrackList({
                 )}
                 <div className="min-w-0">
                   <div className="text-sm font-medium truncate">{selectedTrack.name}</div>
-                  <div className="text-xs text-neutral-400 truncate">
-                    {selectedTrack.artists?.map(a => a.name).join(', ')}
-                  </div>
+                  <div className="text-xs text-neutral-400 truncate">{formatArtistNames(selectedTrack.artists)}</div>
                 </div>
               </div>
               <div className="py-1">

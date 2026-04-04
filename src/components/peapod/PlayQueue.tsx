@@ -1,6 +1,7 @@
 'use client';
 
 import type { SpotifyTrack } from '@/types/peapod';
+import { getAlbumArtUrl } from '@/utils/peapod';
 import Track from './Track';
 
 interface PlayQueueProps {
@@ -27,11 +28,7 @@ export default function PlayQueue({ queue, isPodOwner, onStartPlaying, onRemove 
         {[...queue].map((track: SpotifyTrack, i: number) => (
           <div key={i} className="group flex items-center bg-neutral-800 rounded-md mx-auto my-2.5">
             <div className="flex-1 min-w-0 p-4">
-              <Track
-                name={track.name}
-                artists={track.artists}
-                albumArt={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url}
-              />
+              <Track name={track.name} artists={track.artists} albumArt={getAlbumArtUrl(track)} />
             </div>
             <button
               onClick={() => onRemove(track)}
