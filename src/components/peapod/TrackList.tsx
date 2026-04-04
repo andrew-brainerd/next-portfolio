@@ -49,16 +49,17 @@ export default function TrackList({ searchText = '', podId }: TrackListProps) {
   }
 
   return (
-    <div className="mx-auto my-4 max-w-2xl overflow-y-auto w-[95%]">
+    <div className="w-full">
       {tracks.length > 0 && (
-        <div className="m-2.5 overflow-y-auto">
+        <div className="py-1">
           {[...new Map(tracks.map(t => [t.name, t])).values()].map((track, i) => (
             <Track
               key={i}
               onClick={() => setSelectedTrack(track)}
               name={track.name}
               artists={track.artists}
-              className={selectedTrack?.uri === track.uri ? 'bg-neutral-700 rounded-md px-3' : ''}
+              albumArt={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url}
+              className={selectedTrack?.uri === track.uri ? '!bg-neutral-600' : ''}
             />
           ))}
         </div>
