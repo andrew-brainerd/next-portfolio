@@ -29,6 +29,9 @@ export const sendInvitation = (podId: string, messageType: string, to: string) =
 export const addToPlayQueue = (podId: string, track: SpotifyTrack) =>
   spotifyApi.patch<{ message: string }>(`/peapod/${podId}/queue`, { track }).then(r => r.data);
 
+export const bulkAddToPlayQueue = (podId: string, tracks: SpotifyTrack[]) =>
+  spotifyApi.post<{ message: string; added: number }>(`/peapod/${podId}/queue/bulk`, { tracks }).then(r => r.data);
+
 export const removeFromPlayQueue = (podId: string, track: SpotifyTrack) =>
   spotifyApi.delete<{ message: string }>(`/peapod/${podId}/queue`, { data: { track } }).then(r => r.data);
 

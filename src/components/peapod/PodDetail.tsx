@@ -13,6 +13,7 @@ import {
   addToPlayHistory,
   pushNowPlayingToClients,
   addToPlayQueue,
+  bulkAddToPlayQueue,
   removeFromPlayQueue,
   getFavorites,
   addFavorite,
@@ -412,6 +413,19 @@ export default function PodDetail({ podId }: PodDetailProps) {
     await addToPlayQueue(podId, track);
   };
 
+  const handleBulkAddToQueue = async (tracks: SpotifyTrack[]) => {
+    if (!pod) return;
+    const existingUris = new Set(pod.queue.map(t => t.uri));
+    const newTracks = tracks.filter(t => !existingUris.has(t.uri));
+    if (newTracks.length === 0) {
+      displayNotification('All tracks are already in the queue', { icon: 'info' });
+      return;
+    }
+    setPod({ ...pod, queue: [...pod.queue, ...newTracks] });
+    displayNotification(`Added ${newTracks.length} tracks to queue`, { icon: 'queue' });
+    await bulkAddToPlayQueue(podId, newTracks);
+  };
+
   const handleRemoveFromQueue = async (track: SpotifyTrack) => {
     if (!pod) return;
     setPod({ ...pod, queue: pod.queue.filter(t => t.uri !== track.uri) });
@@ -578,7 +592,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
         onSeek={handleSeek}
       />
       <InviteModal isOpen={isInviteOpen} podId={podId} closeModal={() => setIsInviteOpen(false)} />
-      <FavoritesModal isOpen={isFavoritesOpen} podId={podId} onClose={() => setIsFavoritesOpen(false)} onAddToQueue={handleAddToQueue} />
+      <FavoritesModal isOpen={isFavoritesOpen} podId={podId} onClose={() => setIsFavoritesOpen(false)} onAddToQueue={handleAddToQueue} onBulkAddToQueue={handleBulkAddToQueue} />
       <DevicesModal
         isOpen={isDevicesOpen}
         devices={devices}
