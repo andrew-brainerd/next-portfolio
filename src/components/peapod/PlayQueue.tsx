@@ -3,6 +3,7 @@
 import type { SpotifyTrack } from '@/types/peapod';
 import { getAlbumArtUrl } from '@/utils/peapod';
 import Track from './Track';
+import { CloseIcon } from './icons';
 
 interface PlayQueueProps {
   queue: SpotifyTrack[];
@@ -36,10 +37,7 @@ export default function PlayQueue({ queue, isPodOwner, onStartPlaying, onRemove 
               type="button"
               aria-label="Remove from queue"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <CloseIcon size="w-5 h-5" />
             </button>
           </div>
         ))}

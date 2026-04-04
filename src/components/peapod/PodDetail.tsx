@@ -37,6 +37,7 @@ import FavoritesModal from './FavoritesModal';
 import MembersDisplay from './MembersDisplay';
 import ArtistView from './ArtistView';
 import AlbumView from './AlbumView';
+import { CheckIcon, CloseIcon, PencilIcon, HeartIcon } from './icons';
 import type { Pod, SpotifyProfile, SpotifyDevice, SpotifyTrack, NowPlaying } from '@/types/peapod';
 
 interface PodDetailProps {
@@ -350,9 +351,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                   type="button"
                   aria-label="Save name"
                 >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <CheckIcon size="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setIsEditingName(false)}
@@ -360,10 +359,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                   type="button"
                   aria-label="Cancel editing"
                 >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
+                  <CloseIcon size="w-5 h-5" />
                 </button>
               </>
             ) : (
@@ -376,9 +372,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                     type="button"
                     aria-label="Edit pod name"
                   >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                    </svg>
+                    <PencilIcon size="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -411,9 +405,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
               type="button"
               aria-label="Favorites"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
+              <HeartIcon />
             </button>
             <button
               className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer"

@@ -8,6 +8,7 @@ import type { SpotifyTrack, SearchResult } from '@/types/peapod';
 import { getAlbumArtUrl, formatArtistNames, buildSearchResults } from '@/utils/peapod';
 import Track from './Track';
 import Modal from './Modal';
+import { HeartIcon, PlayIcon, PersonIcon, DiscIcon } from './icons';
 
 interface TrackListProps {
   searchText?: string;
@@ -124,40 +125,22 @@ export default function TrackList({
     {
       label: 'Add to Favorites',
       onClick: handleAddToFavorites,
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-        </svg>
-      )
+      icon: <HeartIcon size="w-5 h-5" />
     },
     {
       label: 'Play Now',
       onClick: handlePlayNext,
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-          <polygon points="5,3 19,12 5,21" />
-        </svg>
-      )
+      icon: <PlayIcon size="w-5 h-5" />
     },
     {
       label: 'Go to Artist',
       onClick: handleGoToArtist,
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-      )
+      icon: <PersonIcon size="w-5 h-5" />
     },
     {
       label: 'Go to Album',
       onClick: handleGoToAlbum,
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-      )
+      icon: <DiscIcon size="w-5 h-5" />
     }
   ];
 
@@ -180,10 +163,7 @@ export default function TrackList({
                 <img className="w-10 h-10 rounded-full flex-shrink-0 object-cover" src={artist.images[2].url} alt="" />
               ) : (
                 <div className="w-10 h-10 rounded-full flex-shrink-0 bg-neutral-700 flex items-center justify-center text-neutral-500">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
+                  <PersonIcon size="w-5 h-5" />
                 </div>
               )}
               <div className="min-w-0">
@@ -210,10 +190,7 @@ export default function TrackList({
                 <img className="w-10 h-10 rounded flex-shrink-0 object-cover" src={album.images[2].url} alt="" />
               ) : (
                 <div className="w-10 h-10 rounded flex-shrink-0 bg-neutral-700 flex items-center justify-center text-neutral-500">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
+                  <DiscIcon size="w-5 h-5" />
                 </div>
               )}
               <div className="min-w-0">
