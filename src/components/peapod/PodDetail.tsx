@@ -35,6 +35,7 @@ import InviteModal from './InviteModal';
 import DevicesModal from './DevicesModal';
 import FavoritesModal from './FavoritesModal';
 import MembersDisplay from './MembersDisplay';
+import PeapodLoader from './PeapodLoader';
 import ArtistView from './ArtistView';
 import AlbumView from './AlbumView';
 import { CheckIcon, CloseIcon, PencilIcon, HeartIcon } from './icons';
@@ -331,7 +332,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
   };
 
   if (!pod) {
-    return <div className="text-2xl mt-8 text-center">Loading Pod...</div>;
+    return <PeapodLoader text="Loading Pod..." />;
   }
 
   return (
