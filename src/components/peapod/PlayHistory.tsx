@@ -11,7 +11,7 @@ export default function PlayHistory({ history }: PlayHistoryProps) {
   return (
     <div className="m-5 overflow-y-auto">
       <div>
-        {[...history].reverse().map((track: SpotifyTrack, i: number) => (
+        {[...new Map([...history].reverse().map(t => [t.uri, t])).values()].map((track: SpotifyTrack, i: number) => (
           <Track
             key={i}
             className="bg-neutral-800 rounded-md mx-auto my-2.5 p-4"
