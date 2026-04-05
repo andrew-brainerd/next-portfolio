@@ -222,15 +222,15 @@ export default function PodDetail({ podId }: PodDetailProps) {
     };
   }, [podId, profile, fetchPod]);
 
-  // Fetch initial now playing state for owner
+  // Fetch now playing state on mount and when SDK reconnects
   useEffect(() => {
-    if (!isPodOwner || !accessToken) return;
+    if (!accessToken) return;
     getMyNowPlaying()
       .then(data => {
         if (data) setNowPlaying(data);
       })
       .catch(() => {});
-  }, [isPodOwner, accessToken]);
+  }, [accessToken, isPlayerReady]);
 
   // Fetch favorites for pod
   useEffect(() => {
