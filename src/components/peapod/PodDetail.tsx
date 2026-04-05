@@ -326,10 +326,15 @@ export default function PodDetail({ podId }: PodDetailProps) {
   };
 
   const handlePlay = async () => {
-    if (browserDeviceId) {
-      await transferPlayback([browserDeviceId], true);
-    } else {
-      await play();
+    try {
+      if (browserDeviceId) {
+        await transferPlayback([browserDeviceId], true);
+      } else {
+        await play();
+      }
+    } catch {
+      // Transfer fails if nothing is playing — try direct play
+      await play().catch(() => {});
     }
     const trackUri = displayNowPlaying?.item?.uri;
     if (trackUri) updateCurrentlyPlaying(podId, trackUri);
@@ -380,17 +385,26 @@ export default function PodDetail({ podId }: PodDetailProps) {
   };
 
   const handleStartPlaying = async () => {
-    if (!pod?.queue?.length) return;
     sessionPlayedUrisRef.current = new Set();
     const session = await startSession(podId);
     setActiveSessionId(session.id);
     // Ensure browser device is active before playing
     if (browserDeviceId) {
-      await transferPlayback([browserDeviceId], false);
+      await transferPlayback([browserDeviceId], false).catch(() => {});
     }
-    const uris = pod.queue.map(t => t.uri);
-    await play({ uris });
-    if (uris[0]) updateCurrentlyPlaying(podId, uris[0]);
+    const uris = pod?.queue?.map(t => t.uri) || [];
+    if (uris.length > 0) {
+      await play({ uris });
+      if (uris[0]) updateCurrentlyPlaying(podId, uris[0]);
+    } else {
+      // Queue empty — play random favorite
+      const favData = await getFavorites(podId);
+      const favs = favData?.items || [];
+      if (favs.length > 0) {
+        const randomFav = favs[Math.floor(Math.random() * favs.length)];
+        await play({ uris: [randomFav.track.uri] });
+      }
+    }
   };
 
   const handleStopSession = async () => {
@@ -439,7 +453,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
   return (
     <>
       <div className="flex flex-col h-[calc(100vh-140px)] mx-auto max-w-5xl min-w-[375px] px-5 w-full">
-        <div className="flex justify-between items-center py-1">
+        <div className="flex justify-between items-center py-1 mb-4">
           <div className="flex items-center gap-2">
             {isEditingName ? (
               <>
@@ -495,28 +509,27 @@ export default function PodDetail({ podId }: PodDetailProps) {
             />
             {isPodOwner && (
               activeSessionId ? (
-                <button
+                <div
                   className="text-red-400 hover:text-red-300 transition-colors cursor-pointer"
                   onClick={handleStopSession}
-                  type="button"
-                  aria-label="Stop Pod"
+                  role="button"
                   title="Stop Pod"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                     <rect x="4" y="4" width="16" height="16" rx="2" />
                   </svg>
-                </button>
+                </div>
               ) : (
-                <button
-                  className={`transition-colors cursor-pointer ${pod.queue.length ? 'text-brand-400 hover:text-brand-300' : 'text-neutral-600 cursor-not-allowed'}`}
+                <div
+                  className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer"
                   onClick={handleStartPlaying}
-                  disabled={!pod.queue.length}
-                  type="button"
-                  aria-label="Launch Pod"
+                  role="button"
                   title="Launch Pod"
                 >
-                  <PlayIcon />
-                </button>
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+                    <polygon points="5,3 19,12 5,21" />
+                  </svg>
+                </div>
               )
             )}
             {isPodOwner && (

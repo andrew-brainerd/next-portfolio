@@ -42,7 +42,7 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
   const iconColor = isZillowPage ? 'text-amber-50 hover:text-amber-200' : 'text-white hover:text-brand-300';
 
   return (
-    <nav className={`mb-4 ${isZillowPage ? 'bg-gradient-to-r from-orange-900 to-amber-800' : 'bg-brand-700'}`}>
+    <nav className={`mb-6 ${isZillowPage ? 'bg-gradient-to-r from-orange-900 to-amber-800' : 'bg-brand-700'}`}>
       <div className="container mx-auto px-3 py-4">
         <div className="flex justify-between items-center">
           <Link
