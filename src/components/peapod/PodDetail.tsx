@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { AnimatePresence } from 'motion/react';
 import { useSpotifyAuth, usePodConnection, useNowPlayingSync, usePeapodNotify } from '@/hooks/usePeapod';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import {
@@ -40,6 +41,7 @@ import PlayerBar from './PlayerBar';
 import InviteModal from './InviteModal';
 import DevicesModal from './DevicesModal';
 import FavoritesModal from './FavoritesModal';
+import FullscreenPlayer from './FullscreenPlayer';
 import MembersDisplay from './MembersDisplay';
 import PeapodLoader from './PeapodLoader';
 import ArtistView from './ArtistView';
@@ -68,6 +70,9 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [browseView, setBrowseView] = useState<{ type: 'artist' | 'album'; id: string } | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const fullscreenAutoRef = useRef(false);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
   const prevTrackNameRef = useRef<string | undefined>(undefined);
@@ -301,8 +306,38 @@ export default function PodDetail({ podId }: PodDetailProps) {
     };
   }, [podId, profile]);
 
+  // Auto-fullscreen after 15s idle while playing
+  useEffect(() => {
+    const dismissIfAuto = () => {
+      if (isFullscreen && fullscreenAutoRef.current) {
+        setIsFullscreen(false);
+        fullscreenAutoRef.current = false;
+      }
+    };
+
+    const resetIdle = () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      dismissIfAuto();
+      if (!isPlaying) return;
+      idleTimerRef.current = setTimeout(() => {
+        fullscreenAutoRef.current = true;
+        setIsFullscreen(true);
+      }, 15000);
+    };
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+    events.forEach(e => document.addEventListener(e, resetIdle));
+    if (!isFullscreen) resetIdle();
+
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      events.forEach(e => document.removeEventListener(e, resetIdle));
+    };
+  }, [isPlaying, isFullscreen]);
+
   const currentTrackUri = displayNowPlaying?.item?.uri;
   const isCurrentFavorited = !!currentTrackUri && favoriteTrackIds.has(currentTrackUri);
+  const nextInQueue = pod?.queue?.[0];
 
   const handleToggleFavoriteTrack = async (track: SpotifyTrack) => {
     if (!profile) return;
@@ -625,6 +660,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
         onNext={handleNext}
         onToggleFavorite={handleToggleFavorite}
         onSeek={handleSeek}
+        onFullscreen={() => { fullscreenAutoRef.current = false; setIsFullscreen(true); }}
       />
       <InviteModal isOpen={isInviteOpen} podId={podId} closeModal={() => setIsInviteOpen(false)} />
       <FavoritesModal isOpen={isFavoritesOpen} podId={podId} onClose={() => setIsFavoritesOpen(false)} onAddToQueue={handleAddToQueue} onBulkAddToQueue={handleBulkAddToQueue} />
@@ -634,6 +670,22 @@ export default function PodDetail({ podId }: PodDetailProps) {
         onTransferPlayback={handleTransferPlayback}
         onClose={() => setIsDevicesOpen(false)}
       />
+      <AnimatePresence>
+        {isFullscreen && (
+          <FullscreenPlayer
+            nowPlaying={displayNowPlaying}
+            nextInQueue={nextInQueue}
+            isPodOwner={isPodOwner}
+            isFavorited={isCurrentFavorited}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            onNext={handleNext}
+            onSeek={handleSeek}
+            onToggleFavorite={handleToggleFavorite}
+            onClose={() => setIsFullscreen(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

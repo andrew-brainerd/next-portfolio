@@ -14,6 +14,7 @@ interface PlayerBarProps {
   onNext?: () => void;
   onToggleFavorite?: () => void;
   onSeek?: (positionMs: number) => void;
+  onFullscreen?: () => void;
 }
 
 export default function PlayerBar({
@@ -24,7 +25,8 @@ export default function PlayerBar({
   onPause,
   onNext,
   onToggleFavorite,
-  onSeek
+  onSeek,
+  onFullscreen
 }: PlayerBarProps) {
   const isPlaying = nowPlaying?.is_playing;
   const trackName = nowPlaying?.item?.name;
@@ -95,6 +97,23 @@ export default function PlayerBar({
               <NextIcon />
             </button>
           </div>
+        )}
+
+        {/* Fullscreen toggle */}
+        {trackName && (
+          <button
+            className="text-neutral-400 hover:text-white transition-colors cursor-pointer flex-shrink-0"
+            onClick={onFullscreen}
+            type="button"
+            aria-label="Fullscreen player"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="15 3 21 3 21 9" />
+              <polyline points="9 21 3 21 3 15" />
+              <line x1="21" y1="3" x2="14" y2="10" />
+              <line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+          </button>
         )}
       </div>
     </div>
