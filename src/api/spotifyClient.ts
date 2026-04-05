@@ -20,8 +20,7 @@ export const pause = () => spotifyApi.put('/spotify/pause').then(r => r.data);
 
 export const skipToNext = () => spotifyApi.post('/spotify/next').then(r => r.data);
 
-export const seek = (positionMs: number) =>
-  spotifyApi.put('/spotify/seek', { positionMs }).then(r => r.data);
+export const seek = (positionMs: number) => spotifyApi.put('/spotify/seek', { positionMs }).then(r => r.data);
 
 export const searchSpotify = (searchText: string) =>
   spotifyApi.post('/spotify/search', { searchText, types: ['track', 'artist', 'album'] }).then(r => r.data);

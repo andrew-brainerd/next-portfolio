@@ -56,7 +56,10 @@ export default function FullscreenPlayer({
         />
       )}
 
-      <div className="relative z-10 flex flex-col items-center gap-6 max-w-lg w-full px-8" onClick={e => e.stopPropagation()}>
+      <div
+        className="relative z-10 flex flex-col items-center gap-6 max-w-lg w-full px-8"
+        onClick={e => e.stopPropagation()}
+      >
         {/* Album art */}
         <motion.div
           className="w-72 h-72 sm:w-80 sm:h-80 rounded-2xl overflow-hidden shadow-2xl"

@@ -85,7 +85,9 @@ export default function PodDetail({ podId }: PodDetailProps) {
   const playNextDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPlayingNextRef = useRef(false);
   const activeSessionIdRef = useRef<string | null>(null);
-  useEffect(() => { activeSessionIdRef.current = activeSessionId; }, [activeSessionId]);
+  useEffect(() => {
+    activeSessionIdRef.current = activeSessionId;
+  }, [activeSessionId]);
 
   const handlePlayerStateChange = useCallback(
     (data: NowPlaying) => {
@@ -121,17 +123,24 @@ export default function PodDetail({ podId }: PodDetailProps) {
         playNextDebounceRef.current = setTimeout(() => {
           isPlayingNextRef.current = true;
           setPod(prev => {
-            if (!prev) { isPlayingNextRef.current = false; return prev; }
+            if (!prev) {
+              isPlayingNextRef.current = false;
+              return prev;
+            }
             if (prev.queue.length > 0) {
               const nextTrack = prev.queue[0];
-              play({ uris: [nextTrack.uri] }).finally(() => { isPlayingNextRef.current = false; });
+              play({ uris: [nextTrack.uri] }).finally(() => {
+                isPlayingNextRef.current = false;
+              });
             } else if (activeSessionIdRef.current) {
               getFavorites(podId).then(favData => {
                 const favs = favData?.items || [];
                 const unplayed = favs.filter(f => !sessionPlayedUrisRef.current.has(f.track.uri));
                 if (unplayed.length > 0) {
                   const randomFav = unplayed[Math.floor(Math.random() * unplayed.length)];
-                  play({ uris: [randomFav.track.uri] }).finally(() => { isPlayingNextRef.current = false; });
+                  play({ uris: [randomFav.track.uri] }).finally(() => {
+                    isPlayingNextRef.current = false;
+                  });
                 } else {
                   isPlayingNextRef.current = false;
                 }
@@ -263,25 +272,33 @@ export default function PodDetail({ podId }: PodDetailProps) {
     });
   }, [isPodOwner, accessToken]);
 
-  // Auto-transfer playback to browser device when SDK is ready if no active device (owner only)
-  // Resume playback if it was playing before refresh and the track is from this pod
+  // Transfer playback to browser device when SDK is ready
   useEffect(() => {
-    if (!isPodOwner || !isPlayerReady || !browserDeviceId) return;
-    const wasPlaying = sessionStorage.getItem(`pod_${podId}_playing`) === 'true';
-    const spotifyTrackUri = nowPlaying?.item?.uri;
-    const isPodTrack = !!pod?.currentlyPlaying && spotifyTrackUri === pod.currentlyPlaying;
-    const shouldResume = wasPlaying && isPodTrack;
+    if (!isPlayerReady || !browserDeviceId) return;
     const hasActiveDevice = devices.some(d => d.is_active);
     if (!hasActiveDevice) {
-      transferPlayback([browserDeviceId], shouldResume).then(() => {
-        getMyDevices().then(data => {
-          if (data?.devices) setDevices(data.devices);
+      transferPlayback([browserDeviceId], false)
+        .catch(() => {})
+        .then(() => {
+          getMyDevices().then(data => {
+            if (data?.devices) setDevices(data.devices);
+          });
         });
-      });
-    } else if (shouldResume) {
-      play();
     }
-  }, [isPodOwner, isPlayerReady, browserDeviceId]);
+  }, [isPlayerReady, browserDeviceId]);
+
+  // Resume playback if it was playing before refresh
+  const hasAttemptedResumeRef = useRef(false);
+  useEffect(() => {
+    if (hasAttemptedResumeRef.current) return;
+    if (!isPodOwner || !isPlayerReady || !browserDeviceId || !nowPlaying?.item?.uri || !pod?.currentlyPlaying) return;
+    const wasPlaying = sessionStorage.getItem(`pod_${podId}_playing`) === 'true';
+    if (!wasPlaying) return;
+    if (nowPlaying.item.uri !== pod.currentlyPlaying) return;
+    if (nowPlaying.is_playing) return;
+    hasAttemptedResumeRef.current = true;
+    play().catch(() => {});
+  }, [isPodOwner, isPlayerReady, browserDeviceId, nowPlaying, pod?.currentlyPlaying]);
 
   // Push now playing to clients when track changes (owner only)
   useEffect(() => {
@@ -555,8 +572,8 @@ export default function PodDetail({ podId }: PodDetailProps) {
               podCreatorId={pod.owner?.id}
               currentUserId={profile?.id}
             />
-            {isPodOwner && (
-              activeSessionId ? (
+            {isPodOwner &&
+              (activeSessionId ? (
                 <div
                   className="text-red-400 hover:text-red-300 transition-colors cursor-pointer"
                   onClick={handleStopSession}
@@ -574,12 +591,18 @@ export default function PodDetail({ podId }: PodDetailProps) {
                   role="button"
                   title="Launch Pod"
                 >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+                  <svg
+                    className="w-6 h-6"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  >
                     <polygon points="5,3 19,12 5,21" />
                   </svg>
                 </div>
-              )
-            )}
+              ))}
             {isPodOwner && (
               <button
                 className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer"
@@ -673,10 +696,19 @@ export default function PodDetail({ podId }: PodDetailProps) {
         onNext={handleNext}
         onToggleFavorite={handleToggleFavorite}
         onSeek={handleSeek}
-        onFullscreen={() => { fullscreenAutoRef.current = false; setIsFullscreen(true); }}
+        onFullscreen={() => {
+          fullscreenAutoRef.current = false;
+          setIsFullscreen(true);
+        }}
       />
       <InviteModal isOpen={isInviteOpen} podId={podId} closeModal={() => setIsInviteOpen(false)} />
-      <FavoritesModal isOpen={isFavoritesOpen} podId={podId} onClose={() => setIsFavoritesOpen(false)} onAddToQueue={handleAddToQueue} onBulkAddToQueue={handleBulkAddToQueue} />
+      <FavoritesModal
+        isOpen={isFavoritesOpen}
+        podId={podId}
+        onClose={() => setIsFavoritesOpen(false)}
+        onAddToQueue={handleAddToQueue}
+        onBulkAddToQueue={handleBulkAddToQueue}
+      />
       <DevicesModal
         isOpen={isDevicesOpen}
         devices={devices}

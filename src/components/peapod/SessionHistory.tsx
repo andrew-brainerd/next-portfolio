@@ -32,7 +32,12 @@ function formatDuration(start: string, end?: string): string {
   return `${hrs}h ${mins % 60}m`;
 }
 
-export default function SessionHistory({ podId, favoriteTrackIds, onAddToQueue, onToggleFavorite }: SessionHistoryProps) {
+export default function SessionHistory({
+  podId,
+  favoriteTrackIds,
+  onAddToQueue,
+  onToggleFavorite
+}: SessionHistoryProps) {
   const [sessionList, setSessionList] = useState<PodSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);

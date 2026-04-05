@@ -14,7 +14,13 @@ interface FavoritesModalProps {
   onBulkAddToQueue: (tracks: SpotifyTrack[]) => void;
 }
 
-export default function FavoritesModal({ isOpen, podId, onClose, onAddToQueue, onBulkAddToQueue }: FavoritesModalProps) {
+export default function FavoritesModal({
+  isOpen,
+  podId,
+  onClose,
+  onAddToQueue,
+  onBulkAddToQueue
+}: FavoritesModalProps) {
   const [favorites, setFavorites] = useState<PodFavorite[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
