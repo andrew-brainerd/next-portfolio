@@ -82,6 +82,8 @@ export default function PodDetail({ podId }: PodDetailProps) {
 
   const lastPlayedUriRef = useRef<string | null>(null);
   const sessionPlayedUrisRef = useRef<Set<string>>(new Set());
+  const playNextDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isPlayingNextRef = useRef(false);
   const activeSessionIdRef = useRef<string | null>(null);
   useEffect(() => { activeSessionIdRef.current = activeSessionId; }, [activeSessionId]);
 
@@ -112,25 +114,36 @@ export default function PodDetail({ podId }: PodDetailProps) {
         }
       }
 
-      // When playback stops (track ended), play next from queue or unplayed random favorite
-      if (!data.is_playing && data.progress_ms === 0 && lastPlayedUriRef.current) {
-        setPod(prev => {
-          if (!prev) return prev;
-          if (prev.queue.length > 0) {
-            const nextTrack = prev.queue[0];
-            play({ uris: [nextTrack.uri] });
-          } else if (activeSessionIdRef.current) {
-            getFavorites(podId).then(favData => {
-              const favs = favData?.items || [];
-              const unplayed = favs.filter(f => !sessionPlayedUrisRef.current.has(f.track.uri));
-              if (unplayed.length > 0) {
-                const randomFav = unplayed[Math.floor(Math.random() * unplayed.length)];
-                play({ uris: [randomFav.track.uri] });
-              }
-            });
-          }
-          return prev;
-        });
+      // When playback stops (track ended), debounce before playing next
+      if (playNextDebounceRef.current) clearTimeout(playNextDebounceRef.current);
+
+      if (!data.is_playing && data.progress_ms === 0 && lastPlayedUriRef.current && !isPlayingNextRef.current) {
+        playNextDebounceRef.current = setTimeout(() => {
+          isPlayingNextRef.current = true;
+          setPod(prev => {
+            if (!prev) { isPlayingNextRef.current = false; return prev; }
+            if (prev.queue.length > 0) {
+              const nextTrack = prev.queue[0];
+              play({ uris: [nextTrack.uri] }).finally(() => { isPlayingNextRef.current = false; });
+            } else if (activeSessionIdRef.current) {
+              getFavorites(podId).then(favData => {
+                const favs = favData?.items || [];
+                const unplayed = favs.filter(f => !sessionPlayedUrisRef.current.has(f.track.uri));
+                if (unplayed.length > 0) {
+                  const randomFav = unplayed[Math.floor(Math.random() * unplayed.length)];
+                  play({ uris: [randomFav.track.uri] }).finally(() => { isPlayingNextRef.current = false; });
+                } else {
+                  isPlayingNextRef.current = false;
+                }
+              });
+            } else {
+              isPlayingNextRef.current = false;
+            }
+            return prev;
+          });
+        }, 500);
+      } else if (data.is_playing) {
+        isPlayingNextRef.current = false;
       }
     },
     [podId]
