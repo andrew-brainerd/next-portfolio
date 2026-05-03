@@ -5,3 +5,4 @@ export const MANGA_ROUTE = '/manga';
 export const KEIKEN_ROUTE = '/keiken';
 export const KALSHME_ROUTE = '/kalshme';
 export const PEAPOD_ROUTE = '/peapod';
+export const ROLL_WITH_ME_ROUTE = '/roll-with-me';
