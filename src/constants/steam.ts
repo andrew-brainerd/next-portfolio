@@ -67,5 +67,7 @@ export const COMPLETED_GAMES: string[] = [
   '1462040', // FINAL FANTASY VII REMAKE INTERGRADE
   '3017860', // DOOM The Dark Ages
   '3240220', // Grand Theft Auto V Enhanced
-  '397540' // Borderlands 3
+  '397540', // Borderlands 3
+  '1903340', // Clair Obscur Expedition 33
+  '220440' // DmC Devil May Cry
 ];
