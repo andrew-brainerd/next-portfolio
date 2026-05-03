@@ -15,10 +15,6 @@ interface InviteSendResponse {
   message: string;
 }
 
-interface DeleteResponse {
-  message: string;
-}
-
 export async function listGames(): Promise<RollWithMeGame[]> {
   const response = await getRequest<ListResponse>('/roll-with-me/games');
   return response?.items ?? [];
@@ -58,5 +54,3 @@ export async function sendInvitation(
     { messageType, to }
   );
 }
-
-export type { DeleteResponse };
