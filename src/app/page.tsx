@@ -4,7 +4,7 @@ import LinkedinIcon from 'components/icons/LinkedinIcon';
 import PeapodIcon from 'components/icons/PeapodIcon';
 import MailIcon from 'components/icons/MailIcon';
 import SteamIcon from 'components/icons/SteamIcon';
-import KeikenIcon from 'components/icons/KeikenIcon';
+import RollWithMeIcon from 'components/icons/RollWithMeIcon';
 
 export default function Home() {
   return (
@@ -77,8 +77,8 @@ export default function Home() {
             <HomeLink name="Peapod" path="/peapod" openNewTab={false}>
               <PeapodIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
             </HomeLink>
-            <HomeLink name="Experience Tracker" path="/keiken" openNewTab={false}>
-              <KeikenIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
+            <HomeLink name="Roll With Me" path="/roll-with-me" openNewTab={false}>
+              <RollWithMeIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
             </HomeLink>
           </nav>
         </div>

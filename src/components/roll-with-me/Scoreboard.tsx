@@ -1,7 +1,30 @@
 'use client';
 
+import { motion } from 'motion/react';
 import { NUMBER_SLOTS, SPECIAL_SLOTS, getNumberTotal, getLeftTotal, getTotal } from '@/utils/rollWithMeScoring';
 import type { RollWithMePlayer, Scoreboard as ScoreboardType, Slot } from '@/types/rollWithMe';
+
+interface ScoreCellProps {
+  score: number;
+  isOpen: boolean;
+  showDash?: boolean;
+}
+
+const ScoreCell = ({ score, isOpen, showDash }: ScoreCellProps) => {
+  if (showDash) return <span className="w-10 text-right text-neutral-700">–</span>;
+  if (isOpen) return <span className="w-10 text-right text-neutral-500" />;
+  return (
+    <motion.span
+      key={score}
+      initial={{ scale: 0.6, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+      className="w-10 text-right text-white inline-block"
+    >
+      {score}
+    </motion.span>
+  );
+};
 
 const SLOT_LABELS: Record<Slot, string> = {
   ones: 'Ones',
@@ -63,12 +86,8 @@ export const Scoreboard = ({
         ].join(' ')}
       >
         <span className="text-neutral-200">{SLOT_LABELS[slot]}</span>
-        <span className={`w-10 text-right ${isP1Open ? 'text-neutral-500' : 'text-white'}`}>
-          {isP1Open ? '' : p1}
-        </span>
-        <span className={`w-10 text-right ${player2 ? (isP2Open ? 'text-neutral-500' : 'text-white') : 'text-neutral-700'}`}>
-          {player2 ? (isP2Open ? '' : p2) : '–'}
-        </span>
+        <ScoreCell score={p1} isOpen={isP1Open} />
+        <ScoreCell score={p2} isOpen={isP2Open} showDash={!player2} />
         <span className="w-10 text-right text-brand-400 text-xs">
           {hasRolled && isActiveOpen ? availableScore : ''}
         </span>

@@ -8,20 +8,78 @@ import { ROLL_WITH_ME_ROUTE } from '@/constants/routes';
 import { isMyTurn, getOpponent } from '@/hooks/useRollWithMeStore';
 import { getTotal } from '@/utils/rollWithMeScoring';
 import type { GameType, RollWithMeGame } from '@/types/rollWithMe';
+import { StatusPill, type StatusVariant } from './StatusPill';
+import { SoloIcon } from './icons/SoloIcon';
+import { VersusIcon } from './icons/VersusIcon';
+import { DiceEmptyIcon } from './icons/DiceEmptyIcon';
+import { TrashIcon } from './icons/TrashIcon';
 
-const statusLabel = (game: RollWithMeGame, uid: string | undefined): string => {
-  if (game.isGameOver) return 'Game Over';
-  if (game.type === 'versus' && !game.player2) return 'Waiting for player 2';
-  if (isMyTurn(game, uid)) return 'Your turn';
-  return "Opponent's turn";
+interface GameStatus {
+  variant: StatusVariant;
+  label: string;
+}
+
+const gameStatus = (game: RollWithMeGame, uid: string | undefined): GameStatus => {
+  if (game.isGameOver) return { variant: 'game-over', label: 'Game Over' };
+  if (game.type === 'versus' && !game.player2) return { variant: 'waiting', label: 'Waiting' };
+  if (isMyTurn(game, uid)) return { variant: 'your-turn', label: 'Your turn' };
+  return { variant: 'their-turn', label: "Their turn" };
 };
 
 const subtitle = (game: RollWithMeGame, uid: string | undefined): string => {
   if (game.type === 'solo') return 'Solo';
   const opponent = getOpponent(game, uid);
   if (!opponent) return 'Versus';
-  return `Versus ${opponent.name}`;
+  return `vs. ${opponent.name}`;
 };
+
+const EmptyState = () => (
+  <div className="bg-neutral-900/60 border border-dashed border-neutral-700 rounded-xl p-10 text-center">
+    <div className="flex justify-center mb-4 opacity-70">
+      <DiceEmptyIcon className="w-16 h-16" />
+    </div>
+    <p className="text-neutral-300 font-medium">No games yet</p>
+    <p className="text-neutral-500 text-sm mt-1">Start one above to roll your first dice.</p>
+  </div>
+);
+
+const SkeletonRow = () => (
+  <li className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-4 flex items-center gap-4 animate-pulse">
+    <div className="w-10 h-10 bg-neutral-800 rounded-md" />
+    <div className="flex-1 space-y-2">
+      <div className="h-4 w-32 bg-neutral-800 rounded" />
+      <div className="h-3 w-20 bg-neutral-800 rounded" />
+    </div>
+    <div className="h-6 w-20 bg-neutral-800 rounded-full" />
+  </li>
+);
+
+interface NewGameCardProps {
+  type: GameType;
+  title: string;
+  subtitle: string;
+  illustration: React.ReactNode;
+  disabled: boolean;
+  onClick: () => void;
+}
+
+const NewGameCard = ({ type, title, subtitle, illustration, disabled, onClick }: NewGameCardProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    aria-label={`New ${type} game`}
+    className="group flex-1 bg-neutral-800/80 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed border border-neutral-700 hover:border-brand-400 rounded-xl p-4 sm:p-5 text-left cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg"
+  >
+    <div className="flex items-center gap-3">
+      <div className="flex-shrink-0">{illustration}</div>
+      <div className="min-w-0">
+        <div className="text-white font-semibold">{title}</div>
+        <div className="text-neutral-400 text-xs sm:text-sm">{subtitle}</div>
+      </div>
+    </div>
+  </button>
+);
 
 export const Menu = () => {
   const router = useRouter();
@@ -73,65 +131,80 @@ export const Menu = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-6">Roll With Me</h1>
+    <div className="container mx-auto p-4 sm:p-6 max-w-3xl">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-1">Roll With Me</h1>
+      <p className="text-neutral-400 text-sm mb-6">A dice game for one or two.</p>
 
-      <div className="flex gap-3 mb-8">
-        <button
-          type="button"
+      <div className="flex flex-col sm:flex-row gap-3 mb-8">
+        <NewGameCard
+          type="solo"
+          title="Solo"
+          subtitle="Practice on your own"
+          illustration={<SoloIcon className="w-12 h-12" />}
+          disabled={isCreating}
           onClick={() => handleCreate('solo')}
+        />
+        <NewGameCard
+          type="versus"
+          title="Versus"
+          subtitle="Invite a friend to play"
+          illustration={<VersusIcon className="w-14 h-12" />}
           disabled={isCreating}
-          className="bg-brand-500 hover:bg-brand-400 disabled:opacity-50 text-white px-5 py-2.5 rounded-md cursor-pointer"
-        >
-          New Solo Game
-        </button>
-        <button
-          type="button"
           onClick={() => handleCreate('versus')}
-          disabled={isCreating}
-          className="bg-neutral-700 hover:bg-neutral-600 disabled:opacity-50 text-white px-5 py-2.5 rounded-md cursor-pointer"
-        >
-          New VS Game
-        </button>
+        />
       </div>
 
-      {error && <div className="mb-4 text-red-400 text-sm">{error}</div>}
+      {error && (
+        <div className="mb-4 text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-md px-3 py-2">
+          {error}
+        </div>
+      )}
 
-      <h2 className="text-xl font-semibold mb-3">Your games</h2>
+      <h2 className="text-lg font-semibold mb-3 text-neutral-200">Your games</h2>
       {isLoading ? (
-        <div className="text-neutral-400">Loading…</div>
+        <ul className="flex flex-col gap-2">
+          <SkeletonRow />
+          <SkeletonRow />
+          <SkeletonRow />
+        </ul>
       ) : games.length === 0 ? (
-        <div className="text-neutral-400">No games yet — start one above.</div>
+        <EmptyState />
       ) : (
         <ul className="flex flex-col gap-2">
           {games.map(game => {
-            const myScore = game.player1.uid === user.uid ? getTotal(game.player1.scores)
-              : game.player2?.uid === user.uid ? getTotal(game.player2.scores)
+            const myScore = game.player1.uid === user.uid
+              ? getTotal(game.player1.scores)
+              : game.player2?.uid === user.uid
+              ? getTotal(game.player2.scores)
               : 0;
             const isCreator = game.player1.uid === user.uid;
+            const status = gameStatus(game, user.uid);
             return (
               <li
                 key={game.id}
-                className="bg-neutral-800 border border-neutral-700 rounded-md p-4 flex items-center justify-between hover:border-brand-400 transition-colors"
+                className="group relative bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700 hover:border-brand-400 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-md overflow-hidden"
               >
                 <button
                   type="button"
                   onClick={() => router.push(`${ROLL_WITH_ME_ROUTE}/${game.id}`)}
-                  className="text-left flex-1 cursor-pointer"
+                  className="w-full text-left p-4 pr-12 cursor-pointer flex items-center gap-4"
                 >
-                  <div className="text-white font-medium">{subtitle(game, user.uid)}</div>
-                  <div className="text-sm text-neutral-400">
-                    {statusLabel(game, user.uid)} · Score: {myScore}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-white font-medium truncate">{subtitle(game, user.uid)}</span>
+                      <StatusPill variant={status.variant}>{status.label}</StatusPill>
+                    </div>
+                    <div className="text-sm text-neutral-400">Score: {myScore}</div>
                   </div>
                 </button>
                 {isCreator && (
                   <button
                     type="button"
                     onClick={() => handleDelete(game.id)}
-                    className="ml-4 text-neutral-500 hover:text-red-400 text-sm cursor-pointer"
+                    className="absolute top-1/2 -translate-y-1/2 right-3 p-2 rounded-md text-neutral-500 hover:text-red-400 hover:bg-red-500/10 cursor-pointer opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
                     aria-label="Delete game"
                   >
-                    Delete
+                    <TrashIcon className="w-4 h-4" />
                   </button>
                 )}
               </li>

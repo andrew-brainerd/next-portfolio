@@ -63,8 +63,8 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
             <Link href="/steam" className={`${iconColor} text-sm leading-none transition-colors`}>
               Steam
             </Link>
-            <Link href="/keiken" className={`${iconColor} text-sm leading-none transition-colors`}>
-              Keiken
+            <Link href="/roll-with-me" className={`${iconColor} text-sm leading-none transition-colors`}>
+              Roll With Me
             </Link>
             {isLoggedIn ? (
               <div className="relative" ref={menuRef}>
