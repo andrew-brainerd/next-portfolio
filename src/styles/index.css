@@ -1,5 +1,15 @@
 @import 'tailwindcss';
 
+body {
+  background-image: radial-gradient(
+    ellipse 1400px 700px at 50% 0%,
+    color-mix(in srgb, var(--color-hero-via) 40%, transparent),
+    transparent 65%
+  );
+  background-position: top center;
+  background-repeat: no-repeat;
+}
+
 @layer utilities {
   .sr-only {
     position: absolute;

@@ -5,6 +5,7 @@ import {
   getAuth,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signOut,
   updatePassword,
   updateProfile,
   type User
@@ -80,8 +81,9 @@ export const signInUser = (email: string, password: string): Promise<AuthRespons
     });
 };
 
-export const signOutUser = (): Promise<Response> => {
-  return fetch('/api/auth', { method: 'DELETE' });
+export const signOutUser = async (): Promise<void> => {
+  await fetch('/api/auth', { method: 'DELETE' });
+  await signOut(firebaseAuth);
 };
 
 export const updateUser = async (user: User, updates: UserUpdates): Promise<void> => {

@@ -142,12 +142,15 @@ export const SignIn = ({ redirectRoute, fromPath }: SignInProps) => {
           </Button>
         </div>
         <Button
-          color="info"
           variant="contained"
           onClick={handleSignIn}
           disabled={isLoading}
           data-testid="signInButton"
-          sx={{ width: INPUT_WIDTH }}
+          sx={{
+            width: INPUT_WIDTH,
+            backgroundColor: 'var(--color-brand-600)',
+            '&:hover': { backgroundColor: 'var(--color-brand-700)' }
+          }}
         >
           Log In
         </Button>

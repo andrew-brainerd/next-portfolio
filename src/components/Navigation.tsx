@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signOutUser } from '@/utils/firebase';
 import SettingsIcon from '@/components/icons/SettingsIcon';
@@ -13,7 +12,6 @@ interface NavigationProps {
 }
 
 export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
-  const router = useRouter();
   const isZillowPage = pathname === '/zillow';
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -32,8 +30,7 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
     setMenuOpen(false);
     try {
       await signOutUser();
-      router.push('/');
-      router.refresh();
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -42,7 +39,7 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
   const iconColor = isZillowPage ? 'text-amber-50 hover:text-amber-200' : 'text-white hover:text-brand-300';
 
   return (
-    <nav className={`mb-6 ${isZillowPage ? 'bg-gradient-to-r from-orange-900 to-amber-800' : 'bg-brand-700'}`}>
+    <nav className={isZillowPage ? 'bg-gradient-to-r from-orange-900 to-amber-800' : 'bg-[var(--color-brand-300)]/10'}>
       <div className="container mx-auto px-3 py-4">
         <div className="flex justify-between items-center">
           <Link
