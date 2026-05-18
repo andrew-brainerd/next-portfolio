@@ -10,7 +10,6 @@ const HomeLink = ({ name, children, text, path, openNewTab = true }: HomeLinkPro
   return (
     <a
       className="group relative animate-fade items-center cursor-pointer flex flex-col justify-center p-6 h-36 transition-all duration-500 ease-out hover:scale-105 active:scale-95 rounded-3xl bg-gradient-to-br from-neutral-600/40 to-neutral-700/40 backdrop-blur-sm border border-neutral-500/20 shadow-lg hover:shadow-2xl hover:shadow-brand-500/20 hover:border-brand-400/40 overflow-hidden"
-      title={name}
       aria-label={name}
       href={path}
       target={openNewTab ? '_blank' : '_self'}
