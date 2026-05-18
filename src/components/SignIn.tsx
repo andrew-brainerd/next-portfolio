@@ -35,17 +35,9 @@ export const SignIn = ({ redirectRoute, fromPath }: SignInProps) => {
   const router = useRouter();
 
   // Determine theme based on fromPath
-  const isZillowTheme = fromPath === '/zillow';
   const isMangaTheme = fromPath.startsWith('/manga');
 
   const getThemeClasses = () => {
-    if (isZillowTheme) {
-      return {
-        background: 'bg-neutral-800',
-        title: 'text-neutral-300',
-        titleText: 'Zillow Login'
-      };
-    }
     if (isMangaTheme) {
       return {
         background: 'bg-neutral-800',

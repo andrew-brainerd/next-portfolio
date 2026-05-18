@@ -56,14 +56,14 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
   const renderPropertyCard = (property: ZillowProperty, index: number, isBackup = false) => (
     <div
       key={`${isBackup ? 'backup-' : ''}${property.address}-${index}`}
-      className={`bg-amber-50/85 rounded-lg p-4 hover:bg-amber-100/85 transition-colors shadow-lg backdrop-blur-sm ${
-        isBackup ? 'border border-gray-400' : 'border border-amber-200'
+      className={`bg-[var(--color-brand-100)]/85 rounded-lg p-4 hover:bg-[var(--color-brand-200)]/85 transition-colors shadow-lg backdrop-blur-sm ${
+        isBackup ? 'border border-gray-400' : 'border border-[var(--color-brand-200)]'
       }`}
     >
       {/* Rank badge - always visible, editable only when logged in */}
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-orange-700">Rank:</span>
+          <span className="text-sm font-semibold text-[var(--color-brand-700)]">Rank:</span>
           {isLoggedIn && editingRank === property.address ? (
             <div className="flex gap-1">
               <input
@@ -78,18 +78,18 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
                     handleRankCancel();
                   }
                 }}
-                className="w-16 px-2 py-1 border border-orange-300 rounded bg-white text-amber-950 text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-16 px-2 py-1 border border-[var(--color-brand-300)] rounded bg-white text-neutral-700 text-center focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)]"
                 autoFocus
               />
               <button
                 onClick={() => handleRankSave(property.address)}
-                className="px-2 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800 select-none cursor-pointer"
+                className="px-2 py-1 bg-[var(--color-brand-600)] text-white rounded text-xs hover:bg-[var(--color-brand-700)] select-none cursor-pointer"
               >
                 ✓
               </button>
               <button
                 onClick={handleRankCancel}
-                className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 select-none cursor-pointer"
+                className="px-2 py-1 bg-neutral-500 text-white rounded text-xs hover:bg-neutral-600 select-none cursor-pointer"
               >
                 ✕
               </button>
@@ -98,14 +98,14 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
             <button
               onClick={() => handleRankEdit(property.address, property.rank)}
               className={`px-3 py-1 ${
-                isBackup ? 'bg-gray-600 hover:bg-gray-700' : 'bg-orange-700 hover:bg-orange-800'
-              } text-amber-50 rounded-full text-sm font-bold transition-colors select-none cursor-pointer`}
+                isBackup ? 'bg-gray-600 hover:bg-gray-700' : 'bg-[var(--color-brand-600)] hover:bg-[var(--color-brand-700)]'
+              } text-white rounded-full text-sm font-bold transition-colors select-none cursor-pointer`}
             >
               {property.rank || '—'}
             </button>
           ) : (
             <span
-              className={`px-3 py-1 ${isBackup ? 'bg-gray-600' : 'bg-orange-700'} text-amber-50 rounded-full text-sm font-bold`}
+              className={`px-3 py-1 ${isBackup ? 'bg-gray-600' : 'bg-[var(--color-brand-600)]'} text-white rounded-full text-sm font-bold`}
             >
               {property.rank || '—'}
             </span>
@@ -119,32 +119,32 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
           alt={property.address}
           width={800}
           height={400}
-          className="w-full h-48 object-cover rounded-lg mb-4 border-2 border-amber-300"
+          className="w-full h-48 object-cover rounded-lg mb-4 border-2 border-[var(--color-brand-300)]"
         />
       )}
-      <h2 className="text-xl font-semibold mb-2 text-orange-900">{property.address}</h2>
+      <h2 className="text-xl font-semibold mb-2 text-[var(--color-brand-800)]">{property.address}</h2>
       <div className="grid grid-cols-2 gap-2 text-sm mb-3">
         <div>
-          <span className="text-orange-700">Rent:</span>{' '}
-          <span className="font-semibold text-amber-950">{property.price}</span>
+          <span className="text-[var(--color-brand-700)]">Rent:</span>{' '}
+          <span className="font-semibold text-neutral-700">{property.price}</span>
         </div>
         <div>
-          <span className="text-orange-700">Sqft:</span>{' '}
-          <span className="text-amber-950">{property.sqft?.toLocaleString()}</span>
+          <span className="text-[var(--color-brand-700)]">Sqft:</span>{' '}
+          <span className="text-neutral-700">{property.sqft?.toLocaleString()}</span>
         </div>
         <div>
-          <span className="text-orange-700">Beds:</span> <span className="text-amber-950">{property.beds}</span>
+          <span className="text-[var(--color-brand-700)]">Beds:</span> <span className="text-neutral-700">{property.beds}</span>
         </div>
         <div>
-          <span className="text-orange-700">Baths:</span> <span className="text-amber-950">{property.baths}</span>
+          <span className="text-[var(--color-brand-700)]">Baths:</span> <span className="text-neutral-700">{property.baths}</span>
         </div>
       </div>
       {property.amenities && property.amenities.length > 0 && (
         <div className="mb-3">
-          <span className="text-orange-700 text-sm">Amenities:</span>
+          <span className="text-[var(--color-brand-700)] text-sm">Amenities:</span>
           <div className="flex flex-wrap gap-1 mt-1">
             {property.amenities.map((amenity, i) => (
-              <span key={i} className="text-xs bg-orange-800 text-amber-50 px-2 py-1 rounded">
+              <span key={i} className="text-xs bg-[var(--color-brand-700)] text-white px-2 py-1 rounded">
                 {amenity}
               </span>
             ))}
@@ -156,7 +156,7 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
           href={property.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-orange-700 hover:text-orange-900 underline text-sm font-semibold"
+          className="text-[var(--color-brand-700)] hover:text-[var(--color-brand-800)] underline text-sm font-semibold"
         >
           View Listing
         </a>
@@ -172,7 +172,7 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
       {/* Backup properties */}
       {backupProperties.length > 0 && (
         <div className="mt-8">
-          <h3 className="text-xl font-semibold text-amber-100 mb-4">Backups</h3>
+          <h3 className="text-xl font-semibold text-white mb-4">Backups</h3>
           <div className="grid gap-4">
             {backupProperties.map((property, index) => renderPropertyCard(property, index, true))}
           </div>

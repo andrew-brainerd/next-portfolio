@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
 body {
+  min-height: 100vh;
   background-image: radial-gradient(
     ellipse 1400px 700px at 50% 0%,
     color-mix(in srgb, var(--color-hero-via) 40%, transparent),

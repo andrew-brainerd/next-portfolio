@@ -12,7 +12,6 @@ interface NavigationProps {
 }
 
 export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
-  const isZillowPage = pathname === '/zillow';
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -36,20 +35,13 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
     }
   };
 
-  const iconColor = isZillowPage ? 'text-amber-50 hover:text-amber-200' : 'text-white hover:text-brand-300';
+  const iconColor = 'text-white hover:text-brand-300';
 
   return (
-    <nav className={isZillowPage ? 'bg-gradient-to-r from-orange-900 to-amber-800' : 'bg-[var(--color-brand-300)]/10'}>
+    <nav className="bg-[var(--color-brand-300)]/10">
       <div className="container mx-auto px-3 py-4">
         <div className="flex justify-between items-center">
-          <Link
-            href="/"
-            className={
-              isZillowPage
-                ? 'text-xl font-bold hover:text-amber-200 transition-colors text-amber-50'
-                : 'text-xl font-bold hover:text-brand-300 transition-colors'
-            }
-          >
+          <Link href="/" className="text-xl font-bold hover:text-brand-300 transition-colors">
             Home
           </Link>
 

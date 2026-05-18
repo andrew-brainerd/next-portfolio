@@ -128,23 +128,23 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
-      return <span className="text-amber-300 ml-1">↕</span>;
+      return <span className="text-[var(--color-brand-300)] ml-1">↕</span>;
     }
     return sortDirection === 'asc' ? (
-      <span className="ml-1 text-amber-100">↑</span>
+      <span className="ml-1 text-[var(--color-brand-200)]">↑</span>
     ) : (
-      <span className="ml-1 text-amber-100">↓</span>
+      <span className="ml-1 text-[var(--color-brand-200)]">↓</span>
     );
   };
 
   const getBackupSortIcon = (field: SortField) => {
     if (backupSortField !== field) {
-      return <span className="text-gray-400 ml-1">↕</span>;
+      return <span className="text-neutral-400 ml-1">↕</span>;
     }
     return backupSortDirection === 'asc' ? (
-      <span className="ml-1 text-amber-100">↑</span>
+      <span className="ml-1 text-[var(--color-brand-200)]">↑</span>
     ) : (
-      <span className="ml-1 text-amber-100">↓</span>
+      <span className="ml-1 text-[var(--color-brand-200)]">↓</span>
     );
   };
 
@@ -156,42 +156,42 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
   return (
     <>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-amber-50/85 rounded-lg overflow-hidden shadow-2xl backdrop-blur-sm">
-          <thead className="bg-gradient-to-r from-orange-900 to-amber-800 text-amber-50">
+        <table className="min-w-full bg-[var(--color-brand-100)]/85 rounded-lg overflow-hidden shadow-2xl backdrop-blur-sm">
+          <thead className="bg-[var(--color-brand-700)] text-white">
             <tr>
               <th
-                className="px-2 py-3 text-center cursor-pointer hover:bg-orange-950/80 transition-colors select-none w-20"
+                className="px-2 py-3 text-center cursor-pointer hover:bg-[var(--color-brand-800)]/80 transition-colors select-none w-20"
                 onClick={() => handleSort('rank')}
               >
                 Rank {getSortIcon('rank')}
               </th>
               <th className="px-4 py-3 text-left"></th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-[var(--color-brand-800)]/80 transition-colors select-none"
                 onClick={() => handleSort('address')}
               >
                 Address {getSortIcon('address')}
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-[var(--color-brand-800)]/80 transition-colors select-none"
                 onClick={() => handleSort('price')}
               >
                 Rent {getSortIcon('price')}
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-[var(--color-brand-800)]/80 transition-colors select-none"
                 onClick={() => handleSort('beds')}
               >
                 Beds {getSortIcon('beds')}
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-[var(--color-brand-800)]/80 transition-colors select-none"
                 onClick={() => handleSort('baths')}
               >
                 Baths {getSortIcon('baths')}
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-orange-950/80 transition-colors select-none"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-[var(--color-brand-800)]/80 transition-colors select-none"
                 onClick={() => handleSort('sqft')}
               >
                 Sqft {getSortIcon('sqft')}
@@ -203,7 +203,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
             {rankedProperties.map((property, index) => (
               <tr
                 key={`${property.address}-${index}`}
-                className={`hover:bg-amber-200/60 transition-colors text-amber-950 ${
+                className={`hover:bg-[var(--color-brand-200)]/60 transition-colors text-neutral-700 ${
                   isLoggedIn && editingRank !== property.address ? 'cursor-pointer' : ''
                 }`}
                 onClick={() => {
@@ -227,18 +227,18 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
                             handleRankCancel();
                           }
                         }}
-                        className="w-12 px-1 py-1 border border-orange-300 rounded bg-white text-amber-950 text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-12 px-1 py-1 border border-[var(--color-brand-300)] rounded bg-white text-neutral-700 text-center focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)]"
                         autoFocus
                       />
                       <button
                         onClick={() => handleRankSave(property.address)}
-                        className="px-1.5 py-1 bg-orange-700 text-amber-50 rounded text-xs hover:bg-orange-800 select-none cursor-pointer"
+                        className="px-1.5 py-1 bg-[var(--color-brand-600)] text-white rounded text-xs hover:bg-[var(--color-brand-700)] select-none cursor-pointer"
                       >
                         ✓
                       </button>
                       <button
                         onClick={handleRankCancel}
-                        className="px-1.5 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 select-none cursor-pointer"
+                        className="px-1.5 py-1 bg-neutral-500 text-white rounded text-xs hover:bg-neutral-600 select-none cursor-pointer"
                       >
                         ✕
                       </button>
@@ -261,7 +261,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
                       />
                     </div>
                   ) : (
-                    <div className="w-[100px] h-[75px] bg-amber-200 rounded flex items-center justify-center text-xs text-amber-700 mx-auto">
+                    <div className="w-[100px] h-[75px] bg-[var(--color-brand-200)] rounded flex items-center justify-center text-xs text-[var(--color-brand-700)] mx-auto">
                       No Image
                     </div>
                   )}
@@ -276,7 +276,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
                     href={property.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-orange-700 hover:text-orange-900 underline font-semibold"
+                    className="text-[var(--color-brand-700)] hover:text-[var(--color-brand-800)] underline font-semibold"
                   >
                     View
                   </a>
@@ -290,9 +290,9 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
       {/* Backups table for unranked properties */}
       {backupProperties.length > 0 && (
         <div className="overflow-x-auto mt-8">
-          <h3 className="text-xl font-semibold text-amber-100 mb-4">Backups</h3>
-          <table className="min-w-full bg-amber-50/85 rounded-lg overflow-hidden shadow-2xl backdrop-blur-sm">
-            <thead className="bg-gradient-to-r from-gray-700 to-gray-600 text-amber-50">
+          <h3 className="text-xl font-semibold text-white mb-4">Backups</h3>
+          <table className="min-w-full bg-[var(--color-brand-100)]/85 rounded-lg overflow-hidden shadow-2xl backdrop-blur-sm">
+            <thead className="bg-gradient-to-r from-gray-700 to-gray-600 text-white">
               <tr>
                 <th className="px-4 py-3 text-left"></th>
                 <th
@@ -332,7 +332,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
               {backupProperties.map((property, index) => (
                 <tr
                   key={`backup-${property.address}-${index}`}
-                  className="hover:bg-amber-200/60 transition-colors text-amber-950"
+                  className="hover:bg-[var(--color-brand-200)]/60 transition-colors text-neutral-700"
                 >
                   <td className="px-2 py-3 text-center">
                     {property.image ? (
@@ -348,7 +348,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
                         />
                       </div>
                     ) : (
-                      <div className="w-[100px] h-[75px] bg-amber-200 rounded flex items-center justify-center text-xs text-amber-700 mx-auto">
+                      <div className="w-[100px] h-[75px] bg-[var(--color-brand-200)] rounded flex items-center justify-center text-xs text-[var(--color-brand-700)] mx-auto">
                         No Image
                       </div>
                     )}
@@ -363,7 +363,7 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
                       href={property.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-orange-700 hover:text-orange-900 underline font-semibold"
+                      className="text-[var(--color-brand-700)] hover:text-[var(--color-brand-800)] underline font-semibold"
                     >
                       View
                     </a>

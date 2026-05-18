@@ -91,24 +91,24 @@ export default function PropertyMap({ properties }: PropertyMapProps) {
     const style = document.createElement('style');
     style.textContent = `
       .leaflet-popup-content-wrapper {
-        background-color: rgba(255, 251, 235, 0.95);
-        border: 2px solid #fcd34d;
+        background-color: color-mix(in srgb, var(--color-brand-100) 95%, transparent);
+        border: 2px solid var(--color-brand-300);
         border-radius: 0.5rem;
         box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
       }
       .leaflet-popup-tip {
-        background-color: rgba(255, 251, 235, 0.95);
-        border: 2px solid #fcd34d;
+        background-color: color-mix(in srgb, var(--color-brand-100) 95%, transparent);
+        border: 2px solid var(--color-brand-300);
         border-top: none;
         border-right: none;
       }
       .leaflet-popup-close-button {
-        color: #c2410c !important;
+        color: var(--color-brand-700) !important;
         font-size: 24px !important;
         font-weight: bold !important;
       }
       .leaflet-popup-close-button:hover {
-        color: #7c2d12 !important;
+        color: var(--color-brand-800) !important;
       }
     `;
     document.head.appendChild(style);
@@ -126,10 +126,10 @@ export default function PropertyMap({ properties }: PropertyMapProps) {
 
   if (!mounted || loading) {
     return (
-      <div className="w-full h-[600px] bg-amber-50/85 rounded-lg flex items-center justify-center border-2 border-amber-300">
+      <div className="w-full h-[600px] bg-[var(--color-brand-100)]/85 rounded-lg flex items-center justify-center border-2 border-[var(--color-brand-300)]">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-900 mb-4"></div>
-          <p className="text-orange-900 font-semibold">Loading property locations...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-brand-800)] mb-4"></div>
+          <p className="text-[var(--color-brand-800)] font-semibold">Loading property locations...</p>
         </div>
       </div>
     );
@@ -159,7 +159,7 @@ export default function PropertyMap({ properties }: PropertyMapProps) {
 
   return (
     <div className="relative">
-      <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-2xl border-2 border-amber-300">
+      <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-2xl border-2 border-[var(--color-brand-300)]">
         <MapContainer center={center} zoom={11} style={{ height: '100%', width: '100%' }} className="z-0">
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -170,21 +170,21 @@ export default function PropertyMap({ properties }: PropertyMapProps) {
             <Marker key={`${property.address}-${index}`} position={[property.lat, property.lng]} icon={customIcon}>
               <Popup className="custom-popup">
                 <div className="p-2 min-w-[250px]">
-                  <h3 className="font-bold text-orange-900 mb-2">{property.address}</h3>
+                  <h3 className="font-bold text-[var(--color-brand-800)] mb-2">{property.address}</h3>
                   <div className="space-y-1 text-sm">
                     <div>
-                      <span className="text-orange-700 font-semibold">Rent:</span>{' '}
-                      <span className="text-amber-950">{property.price}</span>
+                      <span className="text-[var(--color-brand-700)] font-semibold">Rent:</span>{' '}
+                      <span className="text-neutral-700">{property.price}</span>
                     </div>
                     <div>
-                      <span className="text-orange-700 font-semibold">Beds:</span>{' '}
-                      <span className="text-amber-950">{property.beds}</span> |
-                      <span className="text-orange-700 font-semibold ml-2">Baths:</span>{' '}
-                      <span className="text-amber-950">{property.baths}</span>
+                      <span className="text-[var(--color-brand-700)] font-semibold">Beds:</span>{' '}
+                      <span className="text-neutral-700">{property.beds}</span> |
+                      <span className="text-[var(--color-brand-700)] font-semibold ml-2">Baths:</span>{' '}
+                      <span className="text-neutral-700">{property.baths}</span>
                     </div>
                     <div>
-                      <span className="text-orange-700 font-semibold">Sqft:</span>{' '}
-                      <span className="text-amber-950">{property.sqft?.toLocaleString()}</span>
+                      <span className="text-[var(--color-brand-700)] font-semibold">Sqft:</span>{' '}
+                      <span className="text-neutral-700">{property.sqft?.toLocaleString()}</span>
                     </div>
                   </div>
                   {property.image && (
@@ -193,14 +193,14 @@ export default function PropertyMap({ properties }: PropertyMapProps) {
                       alt={property.address}
                       width={250}
                       height={128}
-                      className="w-full h-32 object-cover rounded mt-2 border border-amber-300"
+                      className="w-full h-32 object-cover rounded mt-2 border border-[var(--color-brand-300)]"
                     />
                   )}
                   <a
                     href={property.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block mt-2 text-center bg-orange-700 hover:bg-orange-800 text-amber-50 px-3 py-1.5 rounded text-sm font-semibold transition-colors"
+                    className="block mt-2 text-center bg-[var(--color-brand-600)] hover:bg-[var(--color-brand-700)] text-white px-3 py-1.5 rounded text-sm font-semibold transition-colors"
                   >
                     View Listing
                   </a>

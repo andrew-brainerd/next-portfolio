@@ -46,8 +46,8 @@ export default function PropertyViews({ properties, isLoggedIn }: PropertyViewsP
           onClick={() => setViewMode('table')}
           className={`px-6 py-2 rounded-lg font-semibold transition-all ${
             viewMode === 'table'
-              ? 'bg-gradient-to-r from-orange-900 to-amber-800 text-amber-50 shadow-lg'
-              : 'bg-amber-50/85 text-orange-900 hover:bg-amber-100/85 border border-amber-300'
+              ? 'bg-[var(--color-brand-700)] text-white shadow-lg'
+              : 'bg-[var(--color-brand-100)]/85 text-[var(--color-brand-800)] hover:bg-[var(--color-brand-200)]/85 border border-[var(--color-brand-300)]'
           }`}
         >
           Table View
@@ -56,8 +56,8 @@ export default function PropertyViews({ properties, isLoggedIn }: PropertyViewsP
           onClick={() => setViewMode('map')}
           className={`px-6 py-2 rounded-lg font-semibold transition-all ${
             viewMode === 'map'
-              ? 'bg-gradient-to-r from-orange-900 to-amber-800 text-amber-50 shadow-lg'
-              : 'bg-amber-50/85 text-orange-900 hover:bg-amber-100/85 border border-amber-300'
+              ? 'bg-[var(--color-brand-700)] text-white shadow-lg'
+              : 'bg-[var(--color-brand-100)]/85 text-[var(--color-brand-800)] hover:bg-[var(--color-brand-200)]/85 border border-[var(--color-brand-300)]'
           }`}
         >
           Map View
