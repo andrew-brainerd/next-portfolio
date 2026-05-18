@@ -1,11 +1,4 @@
-import HomeLink from 'components/HomeLink';
-import GitHubIcon from 'components/icons/GitHubIcon';
-import LinkedinIcon from 'components/icons/LinkedinIcon';
-import PeapodIcon from 'components/icons/PeapodIcon';
-import MailIcon from 'components/icons/MailIcon';
-import SteamIcon from 'components/icons/SteamIcon';
-import RollWithMeIcon from 'components/icons/RollWithMeIcon';
-import CondensateIcon from 'components/icons/CondensateIcon';
+import HomeTabs from 'components/HomeTabs';
 
 export default function Home() {
   return (
@@ -25,86 +18,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Work Section */}
-      <section className="py-8 px-6" aria-labelledby="work-heading">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-10 animate-fade-in-up">
-            <h2 id="work-heading" className="text-brand-400 text-2xl sm:text-4xl font-bold mb-3">
-              Work
-            </h2>
-            <p className="text-neutral-300 text-base max-w-2xl mx-auto">
-              Connect with me professionally and explore my work
-            </p>
-          </div>
-          <nav
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto"
-            aria-label="Work links"
-          >
-            <HomeLink name="GitHub Profile" path="https://github.com/andrew-brainerd">
-              <GitHubIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
-            </HomeLink>
-            <HomeLink name="LinkedIn Profile" path="https://www.linkedin.com/in/andrewbrainerd3">
-              <LinkedinIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
-            </HomeLink>
-            <HomeLink name="Send Email" path="mailto:andrew@brainerd.dev">
-              <MailIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
-            </HomeLink>
-          </nav>
-        </div>
-      </section>
-
-      {/* Apps Section */}
-      <section className="py-8 px-6" aria-labelledby="apps-heading">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-10 animate-fade-in-up">
-            <h2 id="apps-heading" className="text-brand-400 text-2xl sm:text-4xl font-bold mb-3">
-              Apps
-            </h2>
-            <p className="text-neutral-300 text-base max-w-2xl mx-auto">
-              Native desktop apps I&apos;ve built for macOS and Windows
-            </p>
-          </div>
-          <nav
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto"
-            aria-label="App links"
-          >
-            <HomeLink name="Condensate" path="/apps/condensate" openNewTab={false}>
-              <CondensateIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
-            </HomeLink>
-          </nav>
-        </div>
-      </section>
-
-      {/* Play Section */}
-      <section
-        className="py-8 px-6 flex-1 bg-gradient-to-b from-transparent to-neutral-800/20"
-        aria-labelledby="play-heading"
-      >
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-10 animate-fade-in-up">
-            <h2 id="play-heading" className="text-brand-400 text-2xl sm:text-4xl font-bold mb-3">
-              Play
-            </h2>
-            <p className="text-neutral-300 text-base max-w-2xl mx-auto">
-              Explore my gaming stats, music pods, and experience tracker
-            </p>
-          </div>
-          <nav
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto"
-            aria-label="Gaming links"
-          >
-            <HomeLink name="Steam Gaming Stats" path="/steam" openNewTab={false}>
-              <SteamIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
-            </HomeLink>
-            <HomeLink name="Peapod" path="/peapod" openNewTab={false}>
-              <PeapodIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
-            </HomeLink>
-            <HomeLink name="Roll With Me" path="/roll-with-me" openNewTab={false}>
-              <RollWithMeIcon className="fill-white h-14 w-14 sm:h-18 sm:w-18" aria-hidden="true" />
-            </HomeLink>
-          </nav>
-        </div>
-      </section>
+      <HomeTabs />
     </main>
   );
 }
