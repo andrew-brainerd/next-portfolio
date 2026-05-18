@@ -116,6 +116,7 @@ export default function HomeTabs() {
                 aria-controls={`panel-${tab.id}`}
                 tabIndex={selected ? 0 : -1}
                 onClick={() => setActive(tab.id)}
+                onMouseEnter={() => setActive(tab.id)}
                 className={`cursor-pointer px-5 py-3 text-lg font-bold transition-colors duration-200 -mb-px border-b-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 rounded-t ${
                   selected
                     ? 'border-brand-400 text-brand-400'
