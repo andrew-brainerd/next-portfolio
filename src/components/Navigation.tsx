@@ -46,6 +46,9 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
           </Link>
 
           <div className="flex items-center gap-5">
+            <Link href="/apps" className={`${iconColor} text-sm leading-none transition-colors`}>
+              Apps
+            </Link>
             <Link href="/peapod" className={`${iconColor} text-sm leading-none transition-colors`}>
               Peapod
             </Link>
