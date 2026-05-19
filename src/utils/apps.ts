@@ -2,8 +2,9 @@ import dayjs from 'dayjs';
 import { APPS_S3_BASE } from '@/constants/apps';
 import type { AppPlatform, ReleaseDownload, ReleaseManifest } from '@/types/apps';
 
-/** URL of an app's release manifest in the S3 bucket. */
-export const releaseManifestUrl = (slug: string): string => `${APPS_S3_BASE}/${slug}/latest.json`;
+/** URL of an app's stable (newest-stable) release manifest in the S3 bucket. */
+export const releaseManifestUrl = (slug: string): string =>
+  `${APPS_S3_BASE}/apps/${slug}/latest.json`;
 
 const PLATFORMS: AppPlatform[] = ['macos', 'windows'];
 

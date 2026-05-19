@@ -10,7 +10,7 @@ import {
 describe('releaseManifestUrl', () => {
   it('builds the S3 manifest URL from a slug', () => {
     expect(releaseManifestUrl('condensate')).toBe(
-      'https://brainerd.s3.us-east-1.amazonaws.com/condensate/latest.json'
+      'https://brainerd.s3.us-east-1.amazonaws.com/apps/condensate/latest.json'
     );
   });
 });

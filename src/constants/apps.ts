@@ -3,9 +3,11 @@ import type { NativeApp } from '@/types/apps';
 
 /**
  * Public S3 bucket that hosts native-app installers and each app's
- * `latest.json` release manifest. Layout per app:
- *   `${APPS_S3_BASE}/<slug>/latest.json`         ← release manifest
- *   `${APPS_S3_BASE}/<slug>/<installer files>`   ← referenced by the manifest
+ * `latest.json` release manifest. Written by the app's release CI (for
+ * Condensate, `.github/workflows/release.yml`, spec §16.4). Layout per app:
+ *   `${APPS_S3_BASE}/apps/<slug>/latest.json`             ← stable manifest (newest stable)
+ *   `${APPS_S3_BASE}/apps/<slug>/<version>/latest.json`   ← versioned copy
+ *   `${APPS_S3_BASE}/apps/<slug>/<version>/<installers>`  ← files the manifest links to
  */
 export const APPS_S3_BASE = 'https://brainerd.s3.us-east-1.amazonaws.com';
 
