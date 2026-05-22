@@ -1,12 +1,15 @@
 import { Oswald, Pacifico, Roboto_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 import { headers } from 'next/headers';
 import ConditionalNavigation from '@/components/ConditionalNavigation';
 import ThemeProvider from '@/providers/ThemeProvider';
 import { TOKEN_COOKIE } from '@/constants/authentication';
 import 'styles/index.css';
+
+const gaMeasurementId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID;
 
 const allThemes = ['ocean', 'sunset', 'forest', 'lavender'];
 
@@ -108,6 +111,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div id="main-content">{children}</div>
         </ThemeProvider>
       </body>
+      {gaMeasurementId && <GoogleAnalytics gaId={gaMeasurementId} />}
     </html>
   );
 }
