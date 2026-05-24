@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { sendInvitation, getInviteLink } from '@/api/peapod';
-import Modal from './Modal';
+import { Modal } from './Modal';
 
 type InviteTab = 'link' | 'sms' | 'email';
 
@@ -12,7 +12,7 @@ interface InviteModalProps {
   closeModal: () => void;
 }
 
-export default function InviteModal({ isOpen, podId, closeModal }: InviteModalProps) {
+export const InviteModal = ({ isOpen, podId, closeModal }: InviteModalProps) => {
   const [activeTab, setActiveTab] = useState<InviteTab>('link');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
@@ -147,4 +147,4 @@ export default function InviteModal({ isOpen, podId, closeModal }: InviteModalPr
       </div>
     </Modal>
   );
-}
+};

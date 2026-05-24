@@ -6,7 +6,7 @@ import { useSpotifyAuth } from '@/hooks/usePeapod';
 import { getSpotifyAuthUrl } from '@/api/spotifyClient';
 import peapodLogo from '@/img/peapod-logo.png';
 
-export default function SpotifyConnect() {
+export const SpotifyConnect = () => {
   const hasAuth = useSpotifyAuth(s => s.hasAuth);
   const loadLocalAuth = useSpotifyAuth(s => s.loadLocalAuth);
   const [isChecking, setIsChecking] = useState(true);
@@ -49,4 +49,4 @@ export default function SpotifyConnect() {
       </button>
     </div>
   );
-}
+};

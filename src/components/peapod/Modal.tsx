@@ -9,7 +9,7 @@ interface ModalProps {
   children: React.ReactNode;
 }
 
-export default function Modal({ isOpen, onClose, children }: ModalProps) {
+export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,4 +48,4 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
       )}
     </AnimatePresence>
   );
-}
+};

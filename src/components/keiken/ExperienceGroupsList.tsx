@@ -5,7 +5,7 @@ interface ExperienceGroupsListProps {
   userId: string;
 }
 
-export default async function ExperienceGroupsList({ userId }: ExperienceGroupsListProps) {
+export const ExperienceGroupsList = async ({ userId }: ExperienceGroupsListProps) => {
   const experienceGroups = await getExperienceGroups(userId);
 
   if (!experienceGroups || experienceGroups.length === 0) {
@@ -30,4 +30,4 @@ export default async function ExperienceGroupsList({ userId }: ExperienceGroupsL
       ))}
     </div>
   );
-}
+};

@@ -13,7 +13,7 @@ interface ControlsProps {
   onAddToQueue?: () => void;
 }
 
-export default function Controls({
+export const Controls = ({
   className,
   isPlaying,
   options,
@@ -21,7 +21,7 @@ export default function Controls({
   onPlay,
   onPause,
   onAddToQueue
-}: ControlsProps) {
+}: ControlsProps) => {
   const { canPlay = true, canPause = true, canQueue } = options || {};
 
   return (
@@ -60,4 +60,4 @@ export default function Controls({
       )}
     </div>
   );
-}
+};

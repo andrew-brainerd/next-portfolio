@@ -32,7 +32,7 @@ interface PropertyMapProps {
   properties: ZillowProperty[];
 }
 
-export default function PropertyMap({ properties }: PropertyMapProps) {
+export const PropertyMap = ({ properties }: PropertyMapProps) => {
   const [mounted, setMounted] = useState(false);
   const [propertiesWithCoords, setPropertiesWithCoords] = useState<PropertyWithCoords[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,4 +212,4 @@ export default function PropertyMap({ properties }: PropertyMapProps) {
       </div>
     </div>
   );
-}
+};

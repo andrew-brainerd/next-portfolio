@@ -8,7 +8,7 @@ import { getSpotifyProfile } from '@/api/spotifyClient';
 import type { Pod, SpotifyProfile } from '@/types/peapod';
 import { PEAPOD_ROUTE } from '@/constants/routes';
 
-export default function PodList() {
+export const PodList = () => {
   const router = useRouter();
   const accessToken = useSpotifyAuth(s => s.accessToken);
   const displayNotification = usePeapodNotify(s => s.displayNotification);
@@ -79,4 +79,4 @@ export default function PodList() {
       </div>
     </div>
   );
-}
+};

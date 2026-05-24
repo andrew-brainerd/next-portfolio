@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import type { SpotifyTrack } from '@/types/peapod';
 import { deduplicateHistory, getAlbumArtUrl } from '@/utils/peapod';
-import Track from './Track';
+import { Track } from './Track';
 import { HeartIcon, PlusIcon } from './Icons';
 
 interface PlayHistoryProps {
@@ -13,7 +13,7 @@ interface PlayHistoryProps {
   onToggleFavorite: (track: SpotifyTrack) => void;
 }
 
-export default function PlayHistory({ history, favoriteTrackIds, onAddToQueue, onToggleFavorite }: PlayHistoryProps) {
+export const PlayHistory = ({ history, favoriteTrackIds, onAddToQueue, onToggleFavorite }: PlayHistoryProps) => {
   return (
     <div className="m-5 overflow-y-auto">
       <div>
@@ -53,4 +53,4 @@ export default function PlayHistory({ history, favoriteTrackIds, onAddToQueue, o
       </div>
     </div>
   );
-}
+};

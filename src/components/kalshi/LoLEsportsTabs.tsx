@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 
 import { getLoLEsportsMarkets } from '@/api/kalshi';
-import Loading from '@/components/Loading';
+import { Loading } from '@/components/Loading';
 import { KalshiMarket, LoLLeague, MarketGroup } from '@/types/kalshi';
 
 const LOL_LEAGUES: LoLLeague[] = ['LEC', 'LCS', 'LPL', 'LCK', 'Other'];
@@ -132,7 +132,7 @@ const EventGroup = ({ group }: { group: MarketGroup }) => {
   );
 };
 
-const LoLEsportsTabs = () => {
+export const LoLEsportsTabs = () => {
   const [selectedLeague, setSelectedLeague] = useState<LoLLeague>('LCK');
   const [markets, setMarkets] = useState<KalshiMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -220,5 +220,3 @@ const LoLEsportsTabs = () => {
     </div>
   );
 };
-
-export default LoLEsportsTabs;

@@ -2,7 +2,7 @@
 
 import type { SpotifyDevice } from '@/types/peapod';
 import { sortDevicesWithPeapodFirst } from '@/utils/peapod';
-import Modal from './Modal';
+import { Modal } from './Modal';
 
 interface DevicesModalProps {
   isOpen: boolean;
@@ -19,7 +19,7 @@ const deviceIcons: Record<string, string> = {
   Tablet: '📱'
 };
 
-export default function DevicesModal({ isOpen, devices, onTransferPlayback, onClose }: DevicesModalProps) {
+export const DevicesModal = ({ isOpen, devices, onTransferPlayback, onClose }: DevicesModalProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="bg-neutral-800 rounded-xl p-6 max-w-sm w-[90%]">
@@ -48,4 +48,4 @@ export default function DevicesModal({ isOpen, devices, onTransferPlayback, onCl
       </div>
     </Modal>
   );
-}
+};

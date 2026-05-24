@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import CondensateIcon from '@/components/icons/CondensateIcon';
-import AppsIcon from '@/components/icons/AppsIcon';
-import DownloadButtons from '@/components/apps/DownloadButtons';
+import { CondensateIcon } from '@/components/icons/CondensateIcon';
+import { AppsIcon } from '@/components/icons/AppsIcon';
+import { DownloadButtons } from '@/components/apps/DownloadButtons';
 import type { NativeApp, ReleaseManifest } from '@/types/apps';
 
 interface AppCardProps {
@@ -29,7 +29,7 @@ function AppMark({ slug }: { slug: string }) {
   );
 }
 
-export default function AppCard({ app, manifest }: AppCardProps) {
+export const AppCard = ({ app, manifest }: AppCardProps) => {
   return (
     <article className="animate-fade-in-up flex flex-col gap-5 rounded-3xl border border-neutral-500/20 bg-gradient-to-br from-neutral-600/30 to-neutral-700/30 p-6 shadow-lg backdrop-blur-sm sm:p-8">
       <div className="flex items-start gap-4">
@@ -76,4 +76,4 @@ export default function AppCard({ app, manifest }: AppCardProps) {
       </Link>
     </article>
   );
-}
+};

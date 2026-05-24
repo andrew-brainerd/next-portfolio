@@ -1,4 +1,4 @@
-import PeapodNotification from '@/components/peapod/Notification';
+import { PeapodNotification } from '@/components/peapod/Notification';
 
 export const metadata = {
   title: 'Peapod'

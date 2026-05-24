@@ -2,7 +2,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Modal from '@/components/peapod/Modal';
+import { Modal } from '@/components/peapod/Modal';
 import type { AppScreenshot } from '@/types/apps';
 
 interface ScreenshotGalleryProps {
@@ -23,7 +23,7 @@ function Placeholder({ caption }: { caption: string }) {
   );
 }
 
-export default function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
+export const ScreenshotGallery = ({ screenshots }: ScreenshotGalleryProps) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [failed, setFailed] = useState<Record<string, boolean>>({});
 
@@ -136,4 +136,4 @@ export default function ScreenshotGallery({ screenshots }: ScreenshotGalleryProp
       </Modal>
     </>
   );
-}
+};

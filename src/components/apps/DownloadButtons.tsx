@@ -1,5 +1,5 @@
-import AppleIcon from '@/components/icons/AppleIcon';
-import WindowsIcon from '@/components/icons/WindowsIcon';
+import { AppleIcon } from '@/components/icons/AppleIcon';
+import { WindowsIcon } from '@/components/icons/WindowsIcon';
 import { downloadFor, formatBytes } from '@/utils/apps';
 import type { AppPlatform, ReleaseManifest } from '@/types/apps';
 
@@ -16,12 +16,12 @@ const PLATFORM_ICON: Record<AppPlatform, typeof AppleIcon> = {
   windows: WindowsIcon
 };
 
-export default function DownloadButtons({
+export const DownloadButtons = ({
   manifest,
   platforms,
   appName,
   compact = false
-}: DownloadButtonsProps) {
+}: DownloadButtonsProps) => {
   if (!manifest) {
     return (
       <p
@@ -62,4 +62,4 @@ export default function DownloadButtons({
       })}
     </div>
   );
-}
+};

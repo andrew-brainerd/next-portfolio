@@ -15,6 +15,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const PeapodIcon = memo(SvgIcon);
-
-export default PeapodIcon;
+export const PeapodIcon = memo(SvgIcon);

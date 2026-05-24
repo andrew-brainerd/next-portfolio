@@ -8,6 +8,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const SettingsIcon = memo(SvgIcon);
-
-export default SettingsIcon;
+export const SettingsIcon = memo(SvgIcon);

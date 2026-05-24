@@ -8,6 +8,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const GitHubIcon = memo(SvgIcon);
-
-export default GitHubIcon;
+export const GitHubIcon = memo(SvgIcon);

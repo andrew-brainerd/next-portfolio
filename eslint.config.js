@@ -16,6 +16,13 @@ const config = [
       'space-before-function-paren': 'off',
       'multiline-ternary': 'off'
     }
+  },
+  // Forbid default exports in components (use `export const Name = ...`)
+  {
+    files: ['src/components/**/*.{ts,tsx}'],
+    rules: {
+      'import/no-default-export': 'error'
+    }
   }
 ];
 

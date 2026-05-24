@@ -16,7 +16,7 @@ import type { AuthResponse } from 'types/firebase';
 import { signInUser } from 'utils/firebase';
 import { FORGOT_PASSWORD_ROUTE } from 'constants/routes';
 import { useAppLoading } from 'hooks/useAppLoading';
-import Separator from 'components/Separator';
+import { Separator } from 'components/Separator';
 
 const LOGO_SIZE = 125;
 const INPUT_WIDTH = 300;

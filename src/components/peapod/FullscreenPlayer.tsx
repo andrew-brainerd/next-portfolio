@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import TrackProgress from './TrackProgress';
+import { TrackProgress } from './TrackProgress';
 import { PlayIcon, PauseIcon, NextIcon, HeartIcon } from './Icons';
 import { formatArtistNames, getAlbumArtUrl } from '@/utils/peapod';
 import type { NowPlaying, SpotifyTrack } from '@/types/peapod';
@@ -19,7 +19,7 @@ interface FullscreenPlayerProps {
   onClose: () => void;
 }
 
-export default function FullscreenPlayer({
+export const FullscreenPlayer = ({
   nowPlaying,
   nextInQueue,
   isPodOwner,
@@ -30,7 +30,7 @@ export default function FullscreenPlayer({
   onSeek,
   onToggleFavorite,
   onClose
-}: FullscreenPlayerProps) {
+}: FullscreenPlayerProps) => {
   const isPlaying = nowPlaying?.is_playing;
   const track = nowPlaying?.item;
   const trackName = track?.name;
@@ -68,7 +68,7 @@ export default function FullscreenPlayer({
           transition={{ duration: 0.3, delay: 0.1 }}
         >
           {albumArt ? (
-            <img className="w-full h-full object-cover" src={albumArt} alt="" />
+            <img className="w-full h-full object-cover" src={albumArt} alt="" width={320} height={320} />
           ) : (
             <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-600">
               <svg className="w-24 h-24" viewBox="0 0 24 24" fill="currentColor">
@@ -134,7 +134,7 @@ export default function FullscreenPlayer({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            {nextArt && <img className="w-8 h-8 rounded object-cover" src={nextArt} alt="" />}
+            {nextArt && <img className="w-8 h-8 rounded object-cover" src={nextArt} alt="" width={32} height={32} />}
             <div className="min-w-0">
               <div className="text-xs text-neutral-400">Up next</div>
               <div className="text-sm text-white truncate">{nextInQueue.name}</div>
@@ -147,4 +147,4 @@ export default function FullscreenPlayer({
       <div className="absolute bottom-6 text-neutral-600 text-xs">Click anywhere to dismiss</div>
     </motion.div>
   );
-}
+};

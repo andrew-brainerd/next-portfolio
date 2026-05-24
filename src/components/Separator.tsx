@@ -5,7 +5,7 @@ interface SeparatorProps {
   text?: string;
 }
 
-export default function Separator({ className, text }: SeparatorProps) {
+export const Separator = ({ className, text }: SeparatorProps) => {
   return (
     <div className={clsx('relative mx-auto my-4 w-11/12 border-t-2 border-tailboard-brand-700', className)}>
       {text && (
@@ -15,4 +15,4 @@ export default function Separator({ className, text }: SeparatorProps) {
       )}
     </div>
   );
-}
+};

@@ -1,8 +1,8 @@
 import dynamic from 'next/dynamic';
 
-import Loading from '@/components/Loading';
+import { Loading } from '@/components/Loading';
 
-const PositionsContent = dynamic(() => import('@/components/kalshi/PositionsContent'), {
+const PositionsContent = dynamic(() => import('@/components/kalshi/PositionsContent').then(m => m.PositionsContent), {
   loading: () => <Loading />
 });
 

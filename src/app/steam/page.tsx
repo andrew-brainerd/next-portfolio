@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import { MY_STEAM_ID } from 'constants/steam';
 import { getPlayerSummary } from 'api/steam';
-import SteamGamesList from 'components/steam/SteamGamesList';
-import Loading from '@/components/Loading';
+import { SteamGamesList } from 'components/steam/SteamGamesList';
+import { Loading } from '@/components/Loading';
 import type { Metadata } from 'next';
 
 interface SteamProps {

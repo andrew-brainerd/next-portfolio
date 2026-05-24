@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 import { getKalshiSettlements } from '@/api/kalshi';
-import Loading from '@/components/Loading';
+import { Loading } from '@/components/Loading';
 import { ChartDataPoint, SettlementWithDetails } from '@/types/kalshi';
 
 const formatDollars = (dollars: string | number): string => {
@@ -203,7 +203,7 @@ const SettlementCard = ({ settlement }: { settlement: SettlementWithDetails }) =
   return <div className="bg-brand-700 rounded-lg p-4">{content}</div>;
 };
 
-const SettlementsContent = () => {
+export const SettlementsContent = () => {
   const [settlements, setSettlements] = useState<SettlementWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -321,5 +321,3 @@ const SettlementsContent = () => {
     </>
   );
 };
-
-export default SettlementsContent;

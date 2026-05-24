@@ -1,13 +1,13 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import Navigation from '@/components/Navigation';
+import { Navigation } from '@/components/Navigation';
 
 interface ConditionalNavigationProps {
   isLoggedIn: boolean;
 }
 
-export default function ConditionalNavigation({ isLoggedIn }: ConditionalNavigationProps) {
+export const ConditionalNavigation = ({ isLoggedIn }: ConditionalNavigationProps) => {
   const pathname = usePathname();
   const isHomePage = pathname === '/';
   const isUsPage = pathname === '/us';
@@ -17,4 +17,4 @@ export default function ConditionalNavigation({ isLoggedIn }: ConditionalNavigat
   }
 
   return <Navigation isLoggedIn={isLoggedIn} pathname={pathname} />;
-}
+};

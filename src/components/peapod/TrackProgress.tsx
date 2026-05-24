@@ -33,7 +33,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
   }
 }
 
-export default function TrackProgress({ nowPlaying = {}, compact = false, onSeek }: TrackProgressProps) {
+export const TrackProgress = ({ nowPlaying = {}, compact = false, onSeek }: TrackProgressProps) => {
   const progressMs = nowPlaying?.progress_ms || 0;
   const durationMs = nowPlaying?.item?.duration_ms || 0;
   const trackId = nowPlaying?.id;
@@ -107,4 +107,4 @@ export default function TrackProgress({ nowPlaying = {}, compact = false, onSeek
       </div>
     </div>
   );
-}
+};

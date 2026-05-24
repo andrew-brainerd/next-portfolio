@@ -1,342 +1,52 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
-import { useSpotifyAuth, usePodConnection, useNowPlayingSync, usePeapodNotify } from '@/hooks/usePeapod';
-import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
-import {
-  getPod,
-  updateCurrentlyPlaying,
-  updatePodName,
-  addMemberToPod,
-  addActiveMemberToPod,
-  removeActiveMemberFromPod,
-  addToPlayHistory,
-  pushNowPlayingToClients,
-  addToPlayQueue,
-  bulkAddToPlayQueue,
-  removeFromPlayQueue,
-  getFavorites,
-  addFavorite,
-  removeFavorite,
-  getActiveSession,
-  startSession,
-  endSession,
-  addTrackToSession
-} from '@/api/peapod';
-import {
-  getSpotifyProfile,
-  getMyDevices,
-  getMyNowPlaying,
-  play,
-  pause,
-  skipToNext,
-  seek,
-  transferPlayback
-} from '@/api/spotifyClient';
-import { getChannel } from '@/utils/pusher';
-import SongSelection from './SongSelection';
-import PodSidebar from './PodSidebar';
-import PlayerBar from './PlayerBar';
-import InviteModal from './InviteModal';
-import DevicesModal from './DevicesModal';
-import FavoritesModal from './FavoritesModal';
-import FullscreenPlayer from './FullscreenPlayer';
-import MembersDisplay from './MembersDisplay';
-import PeapodLoader from './PeapodLoader';
-import ArtistView from './ArtistView';
-import AlbumView from './AlbumView';
-import { CheckIcon, CloseIcon, PencilIcon, HeartIcon, PlayIcon } from './Icons';
-import type { Pod, SpotifyProfile, SpotifyDevice, SpotifyTrack, NowPlaying } from '@/types/peapod';
+import { usePodSession } from '@/hooks/usePodSession';
+import { SongSelection } from './SongSelection';
+import { PodSidebar } from './PodSidebar';
+import { PlayerBar } from './PlayerBar';
+import { InviteModal } from './InviteModal';
+import { DevicesModal } from './DevicesModal';
+import { FavoritesModal } from './FavoritesModal';
+import { FullscreenPlayer } from './FullscreenPlayer';
+import { MembersDisplay } from './MembersDisplay';
+import { PeapodLoader } from './PeapodLoader';
+import { ArtistView } from './ArtistView';
+import { AlbumView } from './AlbumView';
+import { CheckIcon, CloseIcon, PencilIcon, HeartIcon } from './Icons';
 
 interface PodDetailProps {
   podId: string;
 }
 
-export default function PodDetail({ podId }: PodDetailProps) {
-  const accessToken = useSpotifyAuth(s => s.accessToken);
-  const displayNotification = usePeapodNotify(s => s.displayNotification);
-  const { isConnected, setConnecting, setConnected, setDisconnected } = usePodConnection();
-  const { nowPlaying: syncedNowPlaying, setNowPlaying: setSyncedNowPlaying } = useNowPlayingSync();
+export const PodDetail = ({ podId }: PodDetailProps) => {
+  const session = usePodSession(podId);
+  const {
+    pod,
+    profile,
+    devices,
+    displayNowPlaying,
+    favoriteTrackIds,
+    activeSessionId,
+    isPodOwner,
+    isPlaying,
+    isCurrentFavorited,
+    nextInQueue
+  } = session;
 
-  const [pod, setPod] = useState<Pod | null>(null);
-  const [profile, setProfile] = useState<SpotifyProfile | null>(null);
-  const [devices, setDevices] = useState<SpotifyDevice[]>([]);
-  const [nowPlaying, setNowPlaying] = useState<NowPlaying>({});
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isDevicesOpen, setIsDevicesOpen] = useState(false);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
-  const [favoriteTrackIds, setFavoriteTrackIds] = useState<Set<string>>(new Set());
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [browseView, setBrowseView] = useState<{ type: 'artist' | 'album'; id: string } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const fullscreenAutoRef = useRef(false);
-  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
-  const prevTrackNameRef = useRef<string | undefined>(undefined);
-  const prevTrackItemRef = useRef<SpotifyTrack | undefined>(undefined);
-  const trackStartTimeRef = useRef<number>(0);
+
+  const fullscreenAutoRef = useRef(false);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  const lastPlayedUriRef = useRef<string | null>(null);
-  const sessionPlayedUrisRef = useRef<Set<string>>(new Set());
-  const playNextDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isPlayingNextRef = useRef(false);
-  const activeSessionIdRef = useRef<string | null>(null);
-  useEffect(() => {
-    activeSessionIdRef.current = activeSessionId;
-  }, [activeSessionId]);
-
-  const handlePlayerStateChange = useCallback(
-    (data: NowPlaying) => {
-      setNowPlaying(data);
-      const currentUri = data.item?.uri;
-
-      if (currentUri) {
-        updateCurrentlyPlaying(podId, currentUri);
-
-        // Record track to active session when a new track starts
-        if (currentUri !== lastPlayedUriRef.current && activeSessionIdRef.current && data.item) {
-          addTrackToSession(podId, activeSessionIdRef.current, data.item as SpotifyTrack);
-        }
-
-        // Remove track from queue when it starts playing
-        setPod(prev => {
-          if (!prev || !prev.queue.some(t => t.uri === currentUri)) return prev;
-          const updatedQueue = prev.queue.filter(t => t.uri !== currentUri);
-          removeFromPlayQueue(podId, data.item as SpotifyTrack);
-          return { ...prev, queue: updatedQueue };
-        });
-
-        lastPlayedUriRef.current = currentUri;
-        if (activeSessionIdRef.current) {
-          sessionPlayedUrisRef.current.add(currentUri);
-        }
-      }
-
-      // When playback stops (track ended), debounce before playing next
-      if (playNextDebounceRef.current) clearTimeout(playNextDebounceRef.current);
-
-      if (!data.is_playing && data.progress_ms === 0 && lastPlayedUriRef.current && !isPlayingNextRef.current) {
-        playNextDebounceRef.current = setTimeout(() => {
-          isPlayingNextRef.current = true;
-          setPod(prev => {
-            if (!prev) {
-              isPlayingNextRef.current = false;
-              return prev;
-            }
-            if (prev.queue.length > 0) {
-              const nextTrack = prev.queue[0];
-              play({ uris: [nextTrack.uri] }).finally(() => {
-                isPlayingNextRef.current = false;
-              });
-            } else if (activeSessionIdRef.current) {
-              getFavorites(podId).then(favData => {
-                const favs = favData?.items || [];
-                const unplayed = favs.filter(f => !sessionPlayedUrisRef.current.has(f.track.uri));
-                if (unplayed.length > 0) {
-                  const randomFav = unplayed[Math.floor(Math.random() * unplayed.length)];
-                  play({ uris: [randomFav.track.uri] }).finally(() => {
-                    isPlayingNextRef.current = false;
-                  });
-                } else {
-                  isPlayingNextRef.current = false;
-                }
-              });
-            } else {
-              isPlayingNextRef.current = false;
-            }
-            return prev;
-          });
-        }, 500);
-      } else if (data.is_playing) {
-        isPlayingNextRef.current = false;
-      }
-    },
-    [podId]
-  );
-
-  const { deviceId: browserDeviceId, isReady: isPlayerReady } = useSpotifyPlayer({
-    accessToken,
-    onStateChange: handlePlayerStateChange
-  });
-
-  const isPodOwner = !!pod?.owner && !!profile?.id && pod.owner.id === profile.id;
-  const displayNowPlaying = isPodOwner ? nowPlaying : syncedNowPlaying || nowPlaying;
-  const isPlaying = displayNowPlaying?.is_playing;
-  const trackName = displayNowPlaying?.item?.name;
-  const albumArt = displayNowPlaying?.item?.album?.images?.[1]?.url;
-
-  // Fetch pod data
-  const fetchPod = useCallback(async () => {
-    if (!accessToken) return;
-    const data = await getPod(podId);
-    if (data) setPod(data as Pod);
-  }, [accessToken, podId]);
-
-  // Fetch profile
-  useEffect(() => {
-    if (!accessToken) return;
-    getSpotifyProfile().then(setProfile);
-  }, [accessToken]);
-
-  // Fetch pod on mount + listen for updates via Pusher
-  useEffect(() => {
-    const timeout = setTimeout(fetchPod, 0);
-    const channel = getChannel(podId);
-    channel.bind('podUpdated', fetchPod);
-    return () => {
-      clearTimeout(timeout);
-      channel.unbind('podUpdated');
-    };
-  }, [fetchPod, podId]);
-
-  // Auto-join pod as member
-  useEffect(() => {
-    if (accessToken && podId && profile) {
-      addMemberToPod(podId, profile);
-    }
-  }, [accessToken, podId, profile]);
-
-  // Connect as owner or client
-  useEffect(() => {
-    if (!accessToken || !pod || !profile) return;
-
-    if (isPodOwner && !isConnected) {
-      setConnecting(podId);
-      addActiveMemberToPod(podId, profile).then(() => setConnected());
-    } else if (!isPodOwner && !isSyncing) {
-      setConnecting(podId);
-      addActiveMemberToPod(podId, profile).then(() => {
-        setConnected();
-        // Subscribe to Pusher for client sync
-        const channel = getChannel(podId);
-        channel.bind('nowPlaying', (data: NowPlaying) => {
-          setSyncedNowPlaying(data);
-        });
-        setIsSyncing(true);
-      });
-    }
-  }, [accessToken, pod, profile, isPodOwner, isConnected, isSyncing, podId]);
-
-  // Listen for member updates via Pusher
-  useEffect(() => {
-    if (!podId || !profile) return;
-    const channel = getChannel(podId);
-    channel.bind('memberAdded', () => fetchPod());
-    return () => {
-      channel.unbind('memberAdded');
-    };
-  }, [podId, profile, fetchPod]);
-
-  // Fetch now playing state on mount and when SDK reconnects
-  useEffect(() => {
-    if (!accessToken) return;
-    getMyNowPlaying()
-      .then(data => {
-        if (data) setNowPlaying(data);
-      })
-      .catch(() => {});
-  }, [accessToken, isPlayerReady]);
-
-  // Fetch favorites for pod
-  useEffect(() => {
-    if (!accessToken) return;
-    getFavorites(podId)
-      .then(data => {
-        setFavoriteTrackIds(new Set((data?.items || []).map(f => f.trackId)));
-      })
-      .catch(() => {});
-  }, [accessToken, podId]);
-
-  // Restore active session on mount
-  useEffect(() => {
-    if (!accessToken) return;
-    getActiveSession(podId)
-      .then(data => {
-        if (data?.session) {
-          setActiveSessionId(data.session.id);
-          sessionPlayedUrisRef.current = new Set(data.session.tracks.map(t => t.uri));
-        }
-      })
-      .catch(() => {});
-  }, [accessToken, podId]);
-
-  // Fetch devices for owner
-  useEffect(() => {
-    if (!isPodOwner || !accessToken) return;
-    getMyDevices().then(data => {
-      if (data?.devices) setDevices(data.devices);
-    });
-  }, [isPodOwner, accessToken]);
-
-  // Transfer playback to browser device when SDK is ready
-  useEffect(() => {
-    if (!isPlayerReady || !browserDeviceId) return;
-    const hasActiveDevice = devices.some(d => d.is_active);
-    if (!hasActiveDevice) {
-      transferPlayback([browserDeviceId], false)
-        .catch(() => {})
-        .then(() => {
-          getMyDevices().then(data => {
-            if (data?.devices) setDevices(data.devices);
-          });
-        });
-    }
-  }, [isPlayerReady, browserDeviceId]);
-
-  // Resume playback if it was playing before refresh
-  const hasAttemptedResumeRef = useRef(false);
-  useEffect(() => {
-    if (hasAttemptedResumeRef.current) return;
-    if (!isPodOwner || !isPlayerReady || !browserDeviceId || !nowPlaying?.item?.uri || !pod?.currentlyPlaying) return;
-    const wasPlaying = sessionStorage.getItem(`pod_${podId}_playing`) === 'true';
-    if (!wasPlaying) return;
-    if (nowPlaying.item.uri !== pod.currentlyPlaying) return;
-    if (nowPlaying.is_playing) return;
-    hasAttemptedResumeRef.current = true;
-    play().catch(() => {});
-  }, [isPodOwner, isPlayerReady, browserDeviceId, nowPlaying, pod?.currentlyPlaying]);
-
-  // Push now playing to clients when track changes (owner only)
-  useEffect(() => {
-    if (accessToken && isPodOwner && nowPlaying && Object.keys(nowPlaying).length > 0) {
-      pushNowPlayingToClients(podId, nowPlaying);
-      sessionStorage.setItem(`pod_${podId}_playing`, String(!!nowPlaying.is_playing));
-    }
-  }, [accessToken, nowPlaying, isPodOwner, podId]);
-
-  // Track history on song change (owner only), skip if played less than 30s
-  useEffect(() => {
-    if (
-      prevTrackNameRef.current !== undefined &&
-      prevTrackNameRef.current !== trackName &&
-      isPodOwner &&
-      prevTrackItemRef.current
-    ) {
-      const listenedMs = Date.now() - trackStartTimeRef.current;
-      if (listenedMs >= 30000) {
-        addToPlayHistory(podId, prevTrackItemRef.current);
-      }
-    }
-    prevTrackNameRef.current = trackName;
-    prevTrackItemRef.current = displayNowPlaying?.item;
-    trackStartTimeRef.current = Date.now();
-  }, [trackName, isPodOwner, podId]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (profile) {
-        removeActiveMemberFromPod(podId, profile.id);
-      }
-      setDisconnected();
-    };
-  }, [podId, profile]);
-
-  // Auto-fullscreen after 15s idle while playing
   useEffect(() => {
     const dismissIfAuto = () => {
       if (isFullscreen && fullscreenAutoRef.current) {
@@ -365,67 +75,6 @@ export default function PodDetail({ podId }: PodDetailProps) {
     };
   }, [isPlaying, isFullscreen]);
 
-  const currentTrackUri = displayNowPlaying?.item?.uri;
-  const isCurrentFavorited = !!currentTrackUri && favoriteTrackIds.has(currentTrackUri);
-  const nextInQueue = pod?.queue?.[0];
-
-  const handleToggleFavoriteTrack = async (track: SpotifyTrack) => {
-    if (!profile) return;
-
-    if (favoriteTrackIds.has(track.uri)) {
-      await removeFavorite(podId, track.uri);
-      setFavoriteTrackIds(prev => {
-        const next = new Set(prev);
-        next.delete(track.uri);
-        return next;
-      });
-    } else {
-      await addFavorite(podId, track, profile.id);
-      setFavoriteTrackIds(prev => new Set(prev).add(track.uri));
-    }
-  };
-
-  const handleToggleFavorite = () => {
-    const track = displayNowPlaying?.item;
-    if (track) handleToggleFavoriteTrack(track);
-  };
-
-  const handlePlay = async () => {
-    try {
-      if (browserDeviceId) {
-        await transferPlayback([browserDeviceId], true);
-      } else {
-        await play();
-      }
-    } catch {
-      // Transfer fails if nothing is playing — try direct play
-      await play().catch(() => {});
-    }
-    const trackUri = displayNowPlaying?.item?.uri;
-    if (trackUri) updateCurrentlyPlaying(podId, trackUri);
-  };
-
-  const handlePause = async () => {
-    await pause();
-  };
-
-  const handleNext = async () => {
-    await skipToNext();
-  };
-
-  const handleSeek = async (positionMs: number) => {
-    await seek(positionMs);
-  };
-
-  const handleTransferPlayback = async (deviceId: string) => {
-    await transferPlayback([deviceId], true);
-    setTimeout(() => {
-      getMyDevices().then(data => {
-        if (data?.devices) setDevices(data.devices);
-      });
-    }, 1500);
-  };
-
   const handleEditName = () => {
     setEditName(pod?.name || '');
     setIsEditingName(true);
@@ -434,81 +83,10 @@ export default function PodDetail({ podId }: PodDetailProps) {
 
   const handleSaveName = async () => {
     const trimmed = editName.trim();
-    if (trimmed && pod) {
-      await updatePodName(podId, trimmed);
-      setPod({ ...pod, name: trimmed });
+    if (trimmed) {
+      await session.updatePodName(trimmed);
     }
     setIsEditingName(false);
-  };
-
-  const handlePlayTrack = async (track: SpotifyTrack) => {
-    if (browserDeviceId) {
-      await transferPlayback([browserDeviceId], false);
-    }
-    await play({ uris: [track.uri] });
-    updateCurrentlyPlaying(podId, track.uri);
-  };
-
-  const handleStartPlaying = async () => {
-    sessionPlayedUrisRef.current = new Set();
-    const session = await startSession(podId);
-    setActiveSessionId(session.id);
-    // Ensure browser device is active before playing
-    if (browserDeviceId) {
-      await transferPlayback([browserDeviceId], false).catch(() => {});
-    }
-    const uris = pod?.queue?.map(t => t.uri) || [];
-    if (uris.length > 0) {
-      await play({ uris });
-      if (uris[0]) updateCurrentlyPlaying(podId, uris[0]);
-    } else {
-      // Queue empty — play random favorite
-      const favData = await getFavorites(podId);
-      const favs = favData?.items || [];
-      if (favs.length > 0) {
-        const randomFav = favs[Math.floor(Math.random() * favs.length)];
-        await play({ uris: [randomFav.track.uri] });
-      }
-    }
-  };
-
-  const handleStopSession = async () => {
-    if (activeSessionId) {
-      await endSession(podId, activeSessionId);
-      setActiveSessionId(null);
-    }
-    sessionPlayedUrisRef.current = new Set();
-    await pause();
-  };
-
-  const handleAddToQueue = async (track: SpotifyTrack) => {
-    if (!pod) return;
-    if (pod.queue.some(t => t.uri === track.uri)) {
-      displayNotification(`"${track.name}" is already in the queue`, { icon: 'info' });
-      return;
-    }
-    setPod({ ...pod, queue: [...pod.queue, track] });
-    displayNotification(`Added "${track.name}" to queue`, { icon: 'queue' });
-    await addToPlayQueue(podId, track);
-  };
-
-  const handleBulkAddToQueue = async (tracks: SpotifyTrack[]) => {
-    if (!pod) return;
-    const existingUris = new Set(pod.queue.map(t => t.uri));
-    const newTracks = tracks.filter(t => !existingUris.has(t.uri));
-    if (newTracks.length === 0) {
-      displayNotification('All tracks are already in the queue', { icon: 'info' });
-      return;
-    }
-    setPod({ ...pod, queue: [...pod.queue, ...newTracks] });
-    displayNotification(`Added ${newTracks.length} tracks to queue`, { icon: 'queue' });
-    await bulkAddToPlayQueue(podId, newTracks);
-  };
-
-  const handleRemoveFromQueue = async (track: SpotifyTrack) => {
-    if (!pod) return;
-    setPod({ ...pod, queue: pod.queue.filter(t => t.uri !== track.uri) });
-    await removeFromPlayQueue(podId, track);
   };
 
   if (!pod) {
@@ -576,7 +154,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
               (activeSessionId ? (
                 <div
                   className="text-red-400 hover:text-red-300 transition-colors cursor-pointer"
-                  onClick={handleStopSession}
+                  onClick={session.stopSession}
                   role="button"
                   title="Stop Pod"
                 >
@@ -587,7 +165,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
               ) : (
                 <div
                   className="text-neutral-400 hover:text-brand-400 transition-colors cursor-pointer"
-                  onClick={handleStartPlaying}
+                  onClick={session.startSession}
                   role="button"
                   title="Launch Pod"
                 >
@@ -650,7 +228,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 favoriteTrackIds={favoriteTrackIds}
                 onBack={() => setBrowseView(null)}
                 onAlbumSelect={albumId => setBrowseView({ type: 'album', id: albumId })}
-                onAddToQueue={handleAddToQueue}
+                onAddToQueue={session.addToQueue}
               />
             ) : (
               <AlbumView
@@ -659,7 +237,7 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 userId={profile?.id}
                 favoriteTrackIds={favoriteTrackIds}
                 onBack={() => setBrowseView(null)}
-                onAddToQueue={handleAddToQueue}
+                onAddToQueue={session.addToQueue}
               />
             )}
           </div>
@@ -670,8 +248,8 @@ export default function PodDetail({ podId }: PodDetailProps) {
               userId={profile?.id}
               onArtistSelect={artistId => setBrowseView({ type: 'artist', id: artistId })}
               onAlbumSelect={albumId => setBrowseView({ type: 'album', id: albumId })}
-              onAddToQueue={handleAddToQueue}
-              onPlayTrack={handlePlayTrack}
+              onAddToQueue={session.addToQueue}
+              onPlayTrack={session.playTrack}
             />
             <div className="flex-1 min-h-0 mt-2.5 overflow-y-auto pb-24">
               <PodSidebar
@@ -679,9 +257,9 @@ export default function PodDetail({ podId }: PodDetailProps) {
                 queue={pod.queue || []}
                 history={pod.history || []}
                 favoriteTrackIds={favoriteTrackIds}
-                onRemoveFromQueue={handleRemoveFromQueue}
-                onAddToQueue={handleAddToQueue}
-                onToggleFavorite={handleToggleFavoriteTrack}
+                onRemoveFromQueue={session.removeFromQueue}
+                onAddToQueue={session.addToQueue}
+                onToggleFavorite={session.toggleFavoriteTrack}
               />
             </div>
           </>
@@ -691,11 +269,11 @@ export default function PodDetail({ podId }: PodDetailProps) {
         nowPlaying={displayNowPlaying}
         isPodOwner={isPodOwner}
         isFavorited={isCurrentFavorited}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onNext={handleNext}
-        onToggleFavorite={handleToggleFavorite}
-        onSeek={handleSeek}
+        onPlay={session.play}
+        onPause={session.pause}
+        onNext={session.next}
+        onToggleFavorite={session.toggleFavorite}
+        onSeek={session.seek}
         onFullscreen={() => {
           fullscreenAutoRef.current = false;
           setIsFullscreen(true);
@@ -706,13 +284,13 @@ export default function PodDetail({ podId }: PodDetailProps) {
         isOpen={isFavoritesOpen}
         podId={podId}
         onClose={() => setIsFavoritesOpen(false)}
-        onAddToQueue={handleAddToQueue}
-        onBulkAddToQueue={handleBulkAddToQueue}
+        onAddToQueue={session.addToQueue}
+        onBulkAddToQueue={session.bulkAddToQueue}
       />
       <DevicesModal
         isOpen={isDevicesOpen}
         devices={devices}
-        onTransferPlayback={handleTransferPlayback}
+        onTransferPlayback={session.transferPlayback}
         onClose={() => setIsDevicesOpen(false)}
       />
       <AnimatePresence>
@@ -722,15 +300,15 @@ export default function PodDetail({ podId }: PodDetailProps) {
             nextInQueue={nextInQueue}
             isPodOwner={isPodOwner}
             isFavorited={isCurrentFavorited}
-            onPlay={handlePlay}
-            onPause={handlePause}
-            onNext={handleNext}
-            onSeek={handleSeek}
-            onToggleFavorite={handleToggleFavorite}
+            onPlay={session.play}
+            onPause={session.pause}
+            onNext={session.next}
+            onSeek={session.seek}
+            onToggleFavorite={session.toggleFavorite}
             onClose={() => setIsFullscreen(false)}
           />
         )}
       </AnimatePresence>
     </>
   );
-}
+};

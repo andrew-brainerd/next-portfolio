@@ -2,9 +2,9 @@ import { Suspense } from 'react';
 import { cookies } from 'next/headers';
 
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
-import CreateExperienceGroupForm from '@/components/keiken/CreateExperienceGroupForm';
-import ExperienceGroupsList from '@/components/keiken/ExperienceGroupsList';
-import Loading from '@/components/Loading';
+import { CreateExperienceGroupForm } from '@/components/keiken/CreateExperienceGroupForm';
+import { ExperienceGroupsList } from '@/components/keiken/ExperienceGroupsList';
+import { Loading } from '@/components/Loading';
 
 function ExperienceGroupsLoading() {
   return (

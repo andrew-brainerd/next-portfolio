@@ -1,7 +1,7 @@
 'use client';
 
-import TrackProgress from './TrackProgress';
-import Controls from './Controls';
+import { TrackProgress } from './TrackProgress';
+import { Controls } from './Controls';
 import type { NowPlaying } from '@/types/peapod';
 
 interface OwnerPlayerProps {
@@ -13,7 +13,7 @@ interface OwnerPlayerProps {
   onPause: () => void;
 }
 
-export default function OwnerPlayer({ isPlaying, trackName, nowPlaying, albumArt, onPlay, onPause }: OwnerPlayerProps) {
+export const OwnerPlayer = ({ isPlaying, trackName, nowPlaying, albumArt, onPlay, onPause }: OwnerPlayerProps) => {
   return (
     <div className="bg-neutral-800 rounded-xl text-base mx-auto my-4 max-w-3xl overflow-hidden w-[95%]">
       {trackName ? (
@@ -23,7 +23,7 @@ export default function OwnerPlayer({ isPlaying, trackName, nowPlaying, albumArt
             <TrackProgress nowPlaying={nowPlaying} />
           </div>
           <Controls className="!bg-transparent" isPlaying={isPlaying} onPlay={onPlay} onPause={onPause} />
-          <div className="flex-1">{albumArt && <img className="w-24" src={albumArt} alt="Album Art" />}</div>
+          <div className="flex-1">{albumArt && <img className="w-24" src={albumArt} alt="Album Art" width={96} height={96} />}</div>
         </div>
       ) : (
         <div className="flex items-center border-b-4 border-brand-500 h-36 justify-center">
@@ -32,4 +32,4 @@ export default function OwnerPlayer({ isPlaying, trackName, nowPlaying, albumArt
       )}
     </div>
   );
-}
+};

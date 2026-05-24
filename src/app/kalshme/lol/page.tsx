@@ -1,4 +1,4 @@
-import LoLEsportsTabs from '@/components/kalshi/LoLEsportsTabs';
+import { LoLEsportsTabs } from '@/components/kalshi/LoLEsportsTabs';
 
 export const metadata = {
   title: 'Kalshme - LoL Esports Markets',

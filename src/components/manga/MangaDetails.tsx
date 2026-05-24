@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 import { followManga, getMangaCover } from 'api/manga';
 import { formatChapterName } from 'utils/manga';
-import Loading from 'components/Loading';
+import { Loading } from 'components/Loading';
 import type { ChapterDetails } from '@/types/manga';
 
 interface MangaDetailsProps {

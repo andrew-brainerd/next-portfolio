@@ -8,7 +8,7 @@ interface CreateExperienceGroupFormProps {
   userId: string;
 }
 
-export default function CreateExperienceGroupForm({ userId }: CreateExperienceGroupFormProps) {
+export const CreateExperienceGroupForm = ({ userId }: CreateExperienceGroupFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -119,4 +119,4 @@ export default function CreateExperienceGroupForm({ userId }: CreateExperienceGr
       )}
     </>
   );
-}
+};

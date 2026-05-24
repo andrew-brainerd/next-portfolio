@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 
 import { getKalshiPositions } from '@/api/kalshi';
-import Loading from '@/components/Loading';
+import { Loading } from '@/components/Loading';
 import { MarketPositionWithDetails } from '@/types/kalshi';
 
 const formatDollars = (dollars: string | number): string => {
@@ -95,7 +95,7 @@ const PositionCard = ({ position }: { position: MarketPositionWithDetails }) => 
   return <div className="bg-brand-700 rounded-lg p-4">{content}</div>;
 };
 
-const PositionsContent = () => {
+export const PositionsContent = () => {
   const [positions, setPositions] = useState<MarketPositionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -209,5 +209,3 @@ const PositionsContent = () => {
     </>
   );
 };
-
-export default PositionsContent;

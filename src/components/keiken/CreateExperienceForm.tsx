@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createExperience } from '@/api/keiken';
-import RatingStars from './RatingStars';
+import { RatingStars } from './RatingStars';
 
 interface CreateExperienceFormProps {
   experienceGroupId: string;
@@ -11,7 +11,7 @@ interface CreateExperienceFormProps {
   categories: string[];
 }
 
-export default function CreateExperienceForm({ experienceGroupId, userId, categories }: CreateExperienceFormProps) {
+export const CreateExperienceForm = ({ experienceGroupId, userId, categories }: CreateExperienceFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -212,4 +212,4 @@ export default function CreateExperienceForm({ experienceGroupId, userId, catego
       )}
     </>
   );
-}
+};

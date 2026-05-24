@@ -3,9 +3,9 @@ import Link from 'next/link';
 
 import { getExperienceGroup, getExperiences } from '@/api/keiken';
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
-import CreateExperienceForm from '@/components/keiken/CreateExperienceForm';
-import ExperienceGroupSettings from '@/components/keiken/ExperienceGroupSettings';
-import RatingStars from '@/components/keiken/RatingStars';
+import { CreateExperienceForm } from '@/components/keiken/CreateExperienceForm';
+import { ExperienceGroupSettings } from '@/components/keiken/ExperienceGroupSettings';
+import { RatingStars } from '@/components/keiken/RatingStars';
 
 interface ExperienceGroupPageProps {
   params: Promise<{

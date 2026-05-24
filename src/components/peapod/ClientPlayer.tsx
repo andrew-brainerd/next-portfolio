@@ -1,7 +1,7 @@
 'use client';
 
-import TrackProgress from './TrackProgress';
-import Loading from '@/components/Loading';
+import { TrackProgress } from './TrackProgress';
+import { Loading } from '@/components/Loading';
 import type { NowPlaying } from '@/types/peapod';
 
 interface ClientPlayerProps {
@@ -11,7 +11,7 @@ interface ClientPlayerProps {
   albumArt?: string;
 }
 
-export default function ClientPlayer({ isPlaying, trackName, nowPlaying, albumArt }: ClientPlayerProps) {
+export const ClientPlayer = ({ isPlaying, trackName, nowPlaying, albumArt }: ClientPlayerProps) => {
   return (
     <div className="bg-neutral-800 rounded-xl text-base mx-auto my-4 max-w-3xl overflow-hidden w-[95%]">
       {isPlaying ? (
@@ -20,7 +20,7 @@ export default function ClientPlayer({ isPlaying, trackName, nowPlaying, albumAr
             <div className="text-3xl mb-6">{trackName}</div>
             <TrackProgress nowPlaying={nowPlaying} />
           </div>
-          <div className="flex-1">{albumArt && <img className="w-24" src={albumArt} alt="Album Art" />}</div>
+          <div className="flex-1">{albumArt && <img className="w-24" src={albumArt} alt="Album Art" width={96} height={96} />}</div>
         </div>
       ) : (
         <div className="flex items-center text-5xl h-36 justify-center">
@@ -29,4 +29,4 @@ export default function ClientPlayer({ isPlaying, trackName, nowPlaying, albumAr
       )}
     </div>
   );
-}
+};

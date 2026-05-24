@@ -8,7 +8,7 @@ interface SlideshowProps {
   interval?: number;
 }
 
-export default function Slideshow({ images, interval = 5000 }: SlideshowProps) {
+export const Slideshow = ({ images, interval = 5000 }: SlideshowProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -69,4 +69,4 @@ export default function Slideshow({ images, interval = 5000 }: SlideshowProps) {
       </div>
     </div>
   );
-}
+};

@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
-import PortfolioNav from '@/components/kalshi/PortfolioNav';
+import { PortfolioNav } from '@/components/kalshi/PortfolioNav';
 
 export default async function KalshmeLayout({ children }: { children: React.ReactNode }) {
   const cookieJar = await cookies();

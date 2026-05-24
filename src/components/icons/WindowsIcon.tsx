@@ -8,6 +8,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const WindowsIcon = memo(SvgIcon);
-
-export default WindowsIcon;
+export const WindowsIcon = memo(SvgIcon);

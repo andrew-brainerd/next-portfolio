@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getReleaseManifest } from '@/api/apps';
-import AppCard from '@/components/apps/AppCard';
+import { AppCard } from '@/components/apps/AppCard';
 import { NATIVE_APPS } from '@/constants/apps';
 
 export const metadata: Metadata = {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { fetchS3Images } from 'utils/s3';
-import Slideshow from 'components/Slideshow';
+import { Slideshow } from 'components/Slideshow';
 
 export default function UsPage() {
   const [images, setImages] = useState<string[]>([]);

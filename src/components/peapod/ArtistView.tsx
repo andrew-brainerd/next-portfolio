@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { getArtistDetails } from '@/api/spotifyClient';
 import { addToPlayQueue, addFavorite } from '@/api/peapod';
 import type { SpotifyTrack, SpotifyAlbum } from '@/types/peapod';
-import Track from './Track';
+import { Track } from './Track';
 import { BackIcon, PlusIcon, HeartIcon } from './Icons';
 
 interface ArtistData {
@@ -23,7 +23,7 @@ interface ArtistViewProps {
   onAddToQueue?: (track: SpotifyTrack) => void;
 }
 
-export default function ArtistView({
+export const ArtistView = ({
   artistId,
   podId,
   userId,
@@ -31,7 +31,7 @@ export default function ArtistView({
   onBack,
   onAlbumSelect,
   onAddToQueue
-}: ArtistViewProps) {
+}: ArtistViewProps) => {
   const [data, setData] = useState<ArtistData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -81,7 +81,7 @@ export default function ArtistView({
         >
           <BackIcon size="w-5 h-5" />
         </button>
-        {artistImage && <img className="w-12 h-12 rounded-full object-cover" src={artistImage} alt="" />}
+        {artistImage && <img className="w-12 h-12 rounded-full object-cover" src={artistImage} alt="" width={48} height={48} />}
         <div>
           <div className="text-lg font-bold">{artist.name}</div>
           {artist.genres?.length > 0 && (
@@ -141,7 +141,7 @@ export default function ArtistView({
                 type="button"
               >
                 {album.images?.[1]?.url && (
-                  <img className="w-full aspect-square rounded object-cover mb-2" src={album.images[1].url} alt="" />
+                  <img className="w-full aspect-square rounded object-cover mb-2" src={album.images[1].url} alt="" width={300} height={300} />
                 )}
                 <div className="text-xs font-medium truncate">{album.name}</div>
               </button>
@@ -151,4 +151,4 @@ export default function ArtistView({
       )}
     </div>
   );
-}
+};

@@ -6,7 +6,7 @@ interface ThemeCardProps {
   theme: ThemeConfig;
 }
 
-export default function ThemeCard({ theme }: ThemeCardProps) {
+export const ThemeCard = ({ theme }: ThemeCardProps) => {
   const { theme: currentTheme, setTheme } = useTheme();
   const isActive = currentTheme === theme.name;
 
@@ -32,4 +32,4 @@ export default function ThemeCard({ theme }: ThemeCardProps) {
       <div className="text-sm font-medium text-center">{theme.label}</div>
     </button>
   );
-}
+};

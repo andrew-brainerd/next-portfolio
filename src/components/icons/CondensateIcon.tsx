@@ -27,6 +27,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const CondensateIcon = memo(SvgIcon);
-
-export default CondensateIcon;
+export const CondensateIcon = memo(SvgIcon);

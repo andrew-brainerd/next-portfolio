@@ -1,6 +1,6 @@
 import { COMPLETED_GAMES, MINIMUM_PLAYTIME } from 'constants/steam';
 import { getOwnedGames, getPlayerSummary, getRecentGames } from 'api/steam';
-import Game from 'components/steam/Game';
+import { Game } from 'components/steam/Game';
 import { HowLongToBeatService } from 'howlongtobeat';
 
 interface SteamGamesListProps {
@@ -12,7 +12,7 @@ interface SteamGamesListProps {
 const HIDDEN_GAMES = [1454400];
 const MAX_TTB_REQUESTS = 20;
 
-export default async function SteamGamesList({ steamId, count, shouldFetchTTB }: SteamGamesListProps) {
+export const SteamGamesList = async ({ steamId, count, shouldFetchTTB }: SteamGamesListProps) => {
   const [{ personaname }, steamGames, recentGames] = await Promise.all([
     getPlayerSummary(steamId),
     getOwnedGames(steamId),
@@ -83,4 +83,4 @@ export default async function SteamGamesList({ steamId, count, shouldFetchTTB }:
       </section>
     </>
   );
-}
+};

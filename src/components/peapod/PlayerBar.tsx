@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
-import TrackProgress from './TrackProgress';
+import { TrackProgress } from './TrackProgress';
 import { HeartIcon, PlayIcon, PauseIcon, NextIcon } from './Icons';
 import type { NowPlaying } from '@/types/peapod';
 
@@ -17,7 +17,7 @@ interface PlayerBarProps {
   onFullscreen?: () => void;
 }
 
-export default function PlayerBar({
+export const PlayerBar = ({
   nowPlaying,
   isPodOwner,
   isFavorited,
@@ -27,7 +27,7 @@ export default function PlayerBar({
   onToggleFavorite,
   onSeek,
   onFullscreen
-}: PlayerBarProps) {
+}: PlayerBarProps) => {
   const isPlaying = nowPlaying?.is_playing;
   const trackName = nowPlaying?.item?.name;
   const artistName = nowPlaying?.item?.artists?.map(a => a.name).join(', ');
@@ -39,7 +39,7 @@ export default function PlayerBar({
         {/* Album art */}
         <div className="w-12 h-12 rounded bg-neutral-700 flex-shrink-0 overflow-hidden">
           {albumArt ? (
-            <img className="w-full h-full object-cover" src={albumArt} alt="Album Art" />
+            <img className="w-full h-full object-cover" src={albumArt} alt="Album Art" width={48} height={48} />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-neutral-500">
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -118,4 +118,4 @@ export default function PlayerBar({
       </div>
     </div>
   );
-}
+};

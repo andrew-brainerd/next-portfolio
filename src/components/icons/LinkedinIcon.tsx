@@ -8,6 +8,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const LinkedinIcon = memo(SvgIcon);
-
-export default LinkedinIcon;
+export const LinkedinIcon = memo(SvgIcon);

@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { SpotifyTrack } from '@/types/peapod';
-import SearchBar from './SearchBar';
-import TrackList from './TrackList';
+import { SearchBar } from './SearchBar';
+import { TrackList } from './TrackList';
 
 interface SongSelectionProps {
   podId: string;
@@ -15,14 +15,14 @@ interface SongSelectionProps {
   onPlayTrack?: (track: SpotifyTrack) => void;
 }
 
-export default function SongSelection({
+export const SongSelection = ({
   podId,
   userId,
   onArtistSelect,
   onAlbumSelect,
   onAddToQueue,
   onPlayTrack
-}: SongSelectionProps) {
+}: SongSelectionProps) => {
   const [searchText, setSearchText] = useState('');
   const [isResultsOpen, setIsResultsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,4 +73,4 @@ export default function SongSelection({
       </AnimatePresence>
     </div>
   );
-}
+};

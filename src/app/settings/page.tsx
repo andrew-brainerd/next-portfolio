@@ -1,7 +1,7 @@
 'use client';
 
 import { themes } from 'hooks/useTheme';
-import ThemeCard from 'components/settings/ThemeCard';
+import { ThemeCard } from 'components/settings/ThemeCard';
 
 export default function SettingsPage() {
   return (

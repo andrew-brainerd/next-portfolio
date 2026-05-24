@@ -8,6 +8,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const AppleIcon = memo(SvgIcon);
-
-export default AppleIcon;
+export const AppleIcon = memo(SvgIcon);

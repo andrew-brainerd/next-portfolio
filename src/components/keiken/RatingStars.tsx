@@ -7,7 +7,7 @@ interface RatingStarsProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export default function RatingStars({ rating, onChange, readonly = false, size = 'md' }: RatingStarsProps) {
+export const RatingStars = ({ rating, onChange, readonly = false, size = 'md' }: RatingStarsProps) => {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
@@ -90,4 +90,4 @@ export default function RatingStars({ rating, onChange, readonly = false, size =
       {rating !== null && <span className="ml-2 text-sm text-gray-400">({rating})</span>}
     </div>
   );
-}
+};

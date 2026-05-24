@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import PlayQueue from './PlayQueue';
-import PlayHistory from './PlayHistory';
-import SessionHistory from './SessionHistory';
+import { PlayQueue } from './PlayQueue';
+import { PlayHistory } from './PlayHistory';
+import { SessionHistory } from './SessionHistory';
 import type { SpotifyTrack } from '@/types/peapod';
 
 type SidebarTab = 'queue' | 'history' | 'sessions';
@@ -18,7 +18,7 @@ interface PodSidebarProps {
   onToggleFavorite: (track: SpotifyTrack) => void;
 }
 
-export default function PodSidebar({
+export const PodSidebar = ({
   podId,
   queue,
   history,
@@ -26,7 +26,7 @@ export default function PodSidebar({
   onRemoveFromQueue,
   onAddToQueue,
   onToggleFavorite
-}: PodSidebarProps) {
+}: PodSidebarProps) => {
   const [activeTab, setActiveTab] = useState<SidebarTab>('queue');
 
   const tabClass = (tab: SidebarTab) =>
@@ -73,4 +73,4 @@ export default function PodSidebar({
       </div>
     </div>
   );
-}
+};

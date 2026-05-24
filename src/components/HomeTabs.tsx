@@ -1,14 +1,14 @@
 'use client';
 
 import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import HomeLink from 'components/HomeLink';
-import GitHubIcon from 'components/icons/GitHubIcon';
-import LinkedinIcon from 'components/icons/LinkedinIcon';
-import PeapodIcon from 'components/icons/PeapodIcon';
-import MailIcon from 'components/icons/MailIcon';
-import SteamIcon from 'components/icons/SteamIcon';
-import RollWithMeIcon from 'components/icons/RollWithMeIcon';
-import CondensateIcon from 'components/icons/CondensateIcon';
+import { HomeLink } from 'components/HomeLink';
+import { GitHubIcon } from 'components/icons/GitHubIcon';
+import { LinkedinIcon } from 'components/icons/LinkedinIcon';
+import { PeapodIcon } from 'components/icons/PeapodIcon';
+import { MailIcon } from 'components/icons/MailIcon';
+import { SteamIcon } from 'components/icons/SteamIcon';
+import { RollWithMeIcon } from 'components/icons/RollWithMeIcon';
+import { CondensateIcon } from 'components/icons/CondensateIcon';
 
 const TABS = [
   { id: 'work', label: 'Work', description: 'Connect with me professionally and explore my work' },
@@ -64,7 +64,7 @@ function linksFor(id: TabId): ReactNode {
   );
 }
 
-export default function HomeTabs() {
+export const HomeTabs = () => {
   const [active, setActive] = useState<TabId>('work');
   const tabRefs = useRef<Partial<Record<TabId, HTMLButtonElement | null>>>({});
 
@@ -152,4 +152,4 @@ export default function HomeTabs() {
       </div>
     </section>
   );
-}
+};

@@ -17,7 +17,7 @@ const bgMap: Record<string, string> = {
   error: 'bg-red-600'
 };
 
-export default function PeapodNotification() {
+export const PeapodNotification = () => {
   const hidden = usePeapodNotify(s => s.hidden);
   const message = usePeapodNotify(s => s.message);
   const icon = usePeapodNotify(s => s.icon);
@@ -40,4 +40,4 @@ export default function PeapodNotification() {
       )}
     </AnimatePresence>
   );
-}
+};

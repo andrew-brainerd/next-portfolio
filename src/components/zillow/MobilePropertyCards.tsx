@@ -10,7 +10,7 @@ interface MobilePropertyCardsProps {
   isLoggedIn: boolean;
 }
 
-export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePropertyCardsProps) {
+export const MobilePropertyCards = ({ properties, isLoggedIn }: MobilePropertyCardsProps) => {
   const [propertiesWithRanks, setPropertiesWithRanks] = useState<ZillowProperty[]>(properties);
   const [editingRank, setEditingRank] = useState<string | null>(null);
   const [rankInputValue, setRankInputValue] = useState<string>('');
@@ -180,4 +180,4 @@ export default function MobilePropertyCards({ properties, isLoggedIn }: MobilePr
       )}
     </div>
   );
-}
+};

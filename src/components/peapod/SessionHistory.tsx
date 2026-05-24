@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { getSessions } from '@/api/peapod';
 import { getAlbumArtUrl, formatArtistNames } from '@/utils/peapod';
 import type { PodSession, SpotifyTrack } from '@/types/peapod';
-import Track from './Track';
+import { Track } from './Track';
 import { PlusIcon, HeartIcon } from './Icons';
 
 interface SessionHistoryProps {
@@ -32,12 +32,12 @@ function formatDuration(start: string, end?: string): string {
   return `${hrs}h ${mins % 60}m`;
 }
 
-export default function SessionHistory({
+export const SessionHistory = ({
   podId,
   favoriteTrackIds,
   onAddToQueue,
   onToggleFavorite
-}: SessionHistoryProps) {
+}: SessionHistoryProps) => {
   const [sessionList, setSessionList] = useState<PodSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -135,4 +135,4 @@ export default function SessionHistory({
       ))}
     </div>
   );
-}
+};

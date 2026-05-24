@@ -6,8 +6,8 @@ import { addToPlayQueue, addFavorite } from '@/api/peapod';
 import { searchSpotify, play } from '@/api/spotifyClient';
 import type { SpotifyTrack, SearchResult } from '@/types/peapod';
 import { getAlbumArtUrl, formatArtistNames, buildSearchResults } from '@/utils/peapod';
-import Track from './Track';
-import Modal from './Modal';
+import { Track } from './Track';
+import { Modal } from './Modal';
 import { HeartIcon, PlayIcon, PersonIcon, DiscIcon } from './Icons';
 
 interface TrackListProps {
@@ -21,7 +21,7 @@ interface TrackListProps {
   onActionComplete?: () => void;
 }
 
-export default function TrackList({
+export const TrackList = ({
   searchText = '',
   podId,
   userId,
@@ -30,7 +30,7 @@ export default function TrackList({
   onAddToQueue,
   onPlayTrack,
   onActionComplete
-}: TrackListProps) {
+}: TrackListProps) => {
   const accessToken = useSpotifyAuth(s => s.accessToken);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -160,7 +160,7 @@ export default function TrackList({
               type="button"
             >
               {artist.images?.[2]?.url ? (
-                <img className="w-10 h-10 rounded-full flex-shrink-0 object-cover" src={artist.images[2].url} alt="" />
+                <img className="w-10 h-10 rounded-full flex-shrink-0 object-cover" src={artist.images[2].url} alt="" width={40} height={40} />
               ) : (
                 <div className="w-10 h-10 rounded-full flex-shrink-0 bg-neutral-700 flex items-center justify-center text-neutral-500">
                   <PersonIcon size="w-5 h-5" />
@@ -187,7 +187,7 @@ export default function TrackList({
               type="button"
             >
               {album.images?.[2]?.url ? (
-                <img className="w-10 h-10 rounded flex-shrink-0 object-cover" src={album.images[2].url} alt="" />
+                <img className="w-10 h-10 rounded flex-shrink-0 object-cover" src={album.images[2].url} alt="" width={40} height={40} />
               ) : (
                 <div className="w-10 h-10 rounded flex-shrink-0 bg-neutral-700 flex items-center justify-center text-neutral-500">
                   <DiscIcon size="w-5 h-5" />
@@ -252,4 +252,4 @@ export default function TrackList({
       </Modal>
     </div>
   );
-}
+};

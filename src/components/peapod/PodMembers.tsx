@@ -9,7 +9,7 @@ interface PodMembersProps {
   currentUserId?: string;
 }
 
-export default function PodMembers({ members, activeMembers, podCreatorId, currentUserId }: PodMembersProps) {
+export const PodMembers = ({ members, activeMembers, podCreatorId, currentUserId }: PodMembersProps) => {
   return (
     <div className="m-6">
       <div className="text-lg pb-1 relative underline">Pod Members</div>
@@ -30,4 +30,4 @@ export default function PodMembers({ members, activeMembers, podCreatorId, curre
       })}
     </div>
   );
-}
+};

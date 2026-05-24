@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import PropertyTable from './PropertyTable';
-import PropertyMap from './PropertyMap';
+import { PropertyTable } from './PropertyTable';
+import { PropertyMap } from './PropertyMap';
 import type { ZillowProperty } from '@/types/zillow';
 
 interface PropertyViewsProps {
@@ -13,7 +13,7 @@ interface PropertyViewsProps {
 
 type ViewMode = 'table' | 'map';
 
-export default function PropertyViews({ properties, isLoggedIn }: PropertyViewsProps) {
+export const PropertyViews = ({ properties, isLoggedIn }: PropertyViewsProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const viewParam = searchParams.get('view');
@@ -71,4 +71,4 @@ export default function PropertyViews({ properties, isLoggedIn }: PropertyViewsP
       )}
     </>
   );
-}
+};

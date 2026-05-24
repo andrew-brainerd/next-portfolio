@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Modal from './Modal';
+import { Modal } from './Modal';
 import type { PodMember } from '@/types/peapod';
 
 interface MembersDisplayProps {
@@ -26,13 +26,13 @@ function MemberIcon({ name, isActive }: { name: string; isActive: boolean }) {
   );
 }
 
-export default function MembersDisplay({
+export const MembersDisplay = ({
   members,
   activeMembers,
   podCreatorId,
   currentUserId,
   maxVisible = 5
-}: MembersDisplayProps) {
+}: MembersDisplayProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const visible = members.slice(0, maxVisible);
   const overflow = members.length - maxVisible;
@@ -83,4 +83,4 @@ export default function MembersDisplay({
       </Modal>
     </>
   );
-}
+};

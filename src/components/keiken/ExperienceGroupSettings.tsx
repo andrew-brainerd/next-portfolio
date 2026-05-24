@@ -9,7 +9,7 @@ interface ExperienceGroupSettingsProps {
   categories: string[];
 }
 
-export default function ExperienceGroupSettings({ experienceGroupId, categories }: ExperienceGroupSettingsProps) {
+export const ExperienceGroupSettings = ({ experienceGroupId, categories }: ExperienceGroupSettingsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [categoryList, setCategoryList] = useState<string[]>(categories);
   const [newCategory, setNewCategory] = useState('');
@@ -167,4 +167,4 @@ export default function ExperienceGroupSettings({ experienceGroupId, categories 
       )}
     </>
   );
-}
+};

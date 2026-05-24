@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { GoogleAnalytics } from '@next/third-parties/google';
 
 import { headers } from 'next/headers';
-import ConditionalNavigation from '@/components/ConditionalNavigation';
+import { ConditionalNavigation } from '@/components/ConditionalNavigation';
 import ThemeProvider from '@/providers/ThemeProvider';
 import { TOKEN_COOKIE } from '@/constants/authentication';
 import 'styles/index.css';

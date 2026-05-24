@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getReleaseManifest } from '@/api/apps';
-import CondensateIcon from '@/components/icons/CondensateIcon';
-import DownloadButtons from '@/components/apps/DownloadButtons';
-import ScreenshotGallery from '@/components/apps/ScreenshotGallery';
+import { CondensateIcon } from '@/components/icons/CondensateIcon';
+import { DownloadButtons } from '@/components/apps/DownloadButtons';
+import { ScreenshotGallery } from '@/components/apps/ScreenshotGallery';
 import { CONDENSATE } from '@/constants/apps';
 import { APPS_ROUTE } from '@/constants/routes';
 import { formatReleaseDate } from '@/utils/apps';

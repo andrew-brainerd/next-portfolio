@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { getZillowProperties } from '@/api/zillow';
-import MobilePropertyCards from '@/components/zillow/MobilePropertyCards';
-import PropertyViewsWrapper from '@/components/zillow/PropertyViewsWrapper';
+import { MobilePropertyCards } from '@/components/zillow/MobilePropertyCards';
+import { PropertyViewsWrapper } from '@/components/zillow/PropertyViewsWrapper';
 import type { Metadata } from 'next';
 import { TOKEN_COOKIE } from '@/constants/authentication';
 

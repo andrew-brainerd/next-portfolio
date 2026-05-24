@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { getAlbumDetails } from '@/api/spotifyClient';
 import { addToPlayQueue, addFavorite } from '@/api/peapod';
 import type { SpotifyTrack } from '@/types/peapod';
-import Track from './Track';
+import { Track } from './Track';
 import { BackIcon, PlusIcon, HeartIcon } from './Icons';
 
 interface AlbumData {
@@ -21,7 +21,7 @@ interface AlbumViewProps {
   onAddToQueue?: (track: SpotifyTrack) => void;
 }
 
-export default function AlbumView({ albumId, podId, userId, favoriteTrackIds, onBack, onAddToQueue }: AlbumViewProps) {
+export const AlbumView = ({ albumId, podId, userId, favoriteTrackIds, onBack, onAddToQueue }: AlbumViewProps) => {
   const [data, setData] = useState<AlbumData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -73,7 +73,7 @@ export default function AlbumView({ albumId, podId, userId, favoriteTrackIds, on
         >
           <BackIcon size="w-5 h-5" />
         </button>
-        {albumImage && <img className="w-14 h-14 rounded object-cover" src={albumImage} alt="" />}
+        {albumImage && <img className="w-14 h-14 rounded object-cover" src={albumImage} alt="" width={56} height={56} />}
         <div className="min-w-0">
           <div className="text-lg font-bold truncate">{album.name}</div>
           <div className="text-xs text-neutral-400 truncate">
@@ -114,4 +114,4 @@ export default function AlbumView({ albumId, podId, userId, favoriteTrackIds, on
       ))}
     </div>
   );
-}
+};

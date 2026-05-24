@@ -13,6 +13,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const RollWithMeIcon = memo(SvgIcon);
-
-export default RollWithMeIcon;
+export const RollWithMeIcon = memo(SvgIcon);

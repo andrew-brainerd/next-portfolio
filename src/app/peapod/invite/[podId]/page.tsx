@@ -6,8 +6,8 @@ import { useSpotifyAuth } from '@/hooks/usePeapod';
 import { addMemberToPod } from '@/api/peapod';
 import { getSpotifyProfile } from '@/api/spotifyClient';
 import { PEAPOD_ROUTE } from '@/constants/routes';
-import SpotifyConnect from '@/components/peapod/SpotifyConnect';
-import Loading from '@/components/Loading';
+import { SpotifyConnect } from '@/components/peapod/SpotifyConnect';
+import { Loading } from '@/components/Loading';
 import type { SpotifyProfile } from '@/types/peapod';
 
 export default function InvitePage() {

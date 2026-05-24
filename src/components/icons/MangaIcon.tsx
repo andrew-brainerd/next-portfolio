@@ -9,6 +9,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const MemoOpenBook = memo(SvgIcon);
-
-export default MemoOpenBook;
+export const MemoOpenBook = memo(SvgIcon);

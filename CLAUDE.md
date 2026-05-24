@@ -18,7 +18,7 @@ Next.js React web app. Personal portfolio and suite of tools including Steam gam
 
 - `pnpm dev` — local dev server with HTTPS on `local.brainerd.dev:3001`
 - `pnpm build` — production build
-- `pnpm verify` — type check + lint (run before committing)
+- `pnpm verify` — type check + lint + tests (run before committing)
 - `pnpm test` — run unit tests
 - `pnpm lint:fix` — auto-fix lint issues
 
@@ -52,7 +52,7 @@ src/
 ### Utility Functions
 
 - Complex logic (data transformations, scoring algorithms, deduplication, formatting) belongs in `src/utils/` not inline in components
-- All utility functions must have unit tests (Vitest) in a co-located `.test.ts` file
+- Utility functions with non-trivial logic must have unit tests (Vitest) in a co-located `.test.ts` file. Thin SDK wrappers and side-effect-only modules (e.g. Firebase Auth/Storage initializers, S3 client passthroughs, Pusher subscriptions, Web Audio synthesis) are exempt.
 - Prefer pure functions that are easy to test
 - Util file names should be short and simple and camelCase
 

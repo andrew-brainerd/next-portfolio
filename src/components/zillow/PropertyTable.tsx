@@ -13,7 +13,7 @@ interface PropertyTableProps {
   isLoggedIn: boolean;
 }
 
-export default function PropertyTable({ properties, isLoggedIn }: PropertyTableProps) {
+export const PropertyTable = ({ properties, isLoggedIn }: PropertyTableProps) => {
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [backupSortField, setBackupSortField] = useState<SortField>('price');
@@ -389,4 +389,4 @@ export default function PropertyTable({ properties, isLoggedIn }: PropertyTableP
       )}
     </>
   );
-}
+};

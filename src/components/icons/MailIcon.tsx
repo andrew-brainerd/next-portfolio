@@ -9,6 +9,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const MailIcon = memo(SvgIcon);
-
-export default MailIcon;
+export const MailIcon = memo(SvgIcon);

@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useSpotifyAuth } from '@/hooks/usePeapod';
-import SpotifyConnect from '@/components/peapod/SpotifyConnect';
-import PodDetail from '@/components/peapod/PodDetail';
-import PeapodLoader from '@/components/peapod/PeapodLoader';
+import { SpotifyConnect } from '@/components/peapod/SpotifyConnect';
+import { PodDetail } from '@/components/peapod/PodDetail';
+import { PeapodLoader } from '@/components/peapod/PeapodLoader';
 
 export default function PodPage() {
   const params = useParams();

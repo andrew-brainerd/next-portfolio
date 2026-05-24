@@ -11,6 +11,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const AppsIcon = memo(SvgIcon);
-
-export default AppsIcon;
+export const AppsIcon = memo(SvgIcon);

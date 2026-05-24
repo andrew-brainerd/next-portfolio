@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getFavorites, removeFavorite } from '@/api/peapod';
-import Modal from './Modal';
+import { Modal } from './Modal';
 import { CloseIcon, PlusIcon } from './Icons';
 import type { PodFavorite, SpotifyTrack } from '@/types/peapod';
 
@@ -14,13 +14,13 @@ interface FavoritesModalProps {
   onBulkAddToQueue: (tracks: SpotifyTrack[]) => void;
 }
 
-export default function FavoritesModal({
+export const FavoritesModal = ({
   isOpen,
   podId,
   onClose,
   onAddToQueue,
   onBulkAddToQueue
-}: FavoritesModalProps) {
+}: FavoritesModalProps) => {
   const [favorites, setFavorites] = useState<PodFavorite[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -112,4 +112,4 @@ export default function FavoritesModal({
       </div>
     </Modal>
   );
-}
+};

@@ -4,14 +4,14 @@ import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { signOutUser } from '@/utils/firebase';
-import SettingsIcon from '@/components/icons/SettingsIcon';
+import { SettingsIcon } from '@/components/icons/SettingsIcon';
 
 interface NavigationProps {
   isLoggedIn: boolean;
   pathname: string;
 }
 
-export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
+export const Navigation = ({ isLoggedIn, pathname }: NavigationProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -120,4 +120,4 @@ export default function Navigation({ isLoggedIn, pathname }: NavigationProps) {
       </div>
     </nav>
   );
-}
+};

@@ -8,7 +8,7 @@ const tabs = [
   { href: '/kalshme/settlements', label: 'Settlements' }
 ];
 
-const PortfolioNav = () => {
+export const PortfolioNav = () => {
   const pathname = usePathname();
 
   return (
@@ -36,5 +36,3 @@ const PortfolioNav = () => {
     </div>
   );
 };
-
-export default PortfolioNav;

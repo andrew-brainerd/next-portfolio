@@ -15,7 +15,7 @@ const deviceIcons: Record<string, string> = {
   Tablet: '📱'
 };
 
-export default function Devices({ devices, onTransferPlayback }: DevicesProps) {
+export const Devices = ({ devices, onTransferPlayback }: DevicesProps) => {
   return (
     <div className="flex flex-col m-6 max-w-xs w-[90%]">
       <div className="text-lg pb-1 relative underline">Available Devices</div>
@@ -39,4 +39,4 @@ export default function Devices({ devices, onTransferPlayback }: DevicesProps) {
       })}
     </div>
   );
-}
+};

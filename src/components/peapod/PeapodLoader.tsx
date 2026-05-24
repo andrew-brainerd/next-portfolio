@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 
-export default function PeapodLoader({ text = 'Loading...' }: { text?: string }) {
+export const PeapodLoader = ({ text = 'Loading...' }: { text?: string }) => {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-12">
       <motion.svg
@@ -45,4 +45,4 @@ export default function PeapodLoader({ text = 'Loading...' }: { text?: string })
       <p className="text-neutral-400 text-sm">{text}</p>
     </div>
   );
-}
+};

@@ -3,9 +3,9 @@
 import { AnimatePresence, motion } from 'motion/react';
 import type { SpotifyTrack } from '@/types/peapod';
 import { getAlbumArtUrl } from '@/utils/peapod';
-import Track from './Track';
+import { Track } from './Track';
 import { CloseIcon, HeartIcon } from './Icons';
-import PeapodLoader from './PeapodLoader';
+import { PeapodLoader } from './PeapodLoader';
 
 interface PlayQueueProps {
   queue: SpotifyTrack[];
@@ -14,7 +14,7 @@ interface PlayQueueProps {
   onToggleFavorite: (track: SpotifyTrack) => void;
 }
 
-export default function PlayQueue({ queue, favoriteTrackIds, onRemove, onToggleFavorite }: PlayQueueProps) {
+export const PlayQueue = ({ queue, favoriteTrackIds, onRemove, onToggleFavorite }: PlayQueueProps) => {
   if (queue.length === 0) {
     return <PeapodLoader text="Queue is empty — search for songs to add" />;
   }
@@ -58,4 +58,4 @@ export default function PlayQueue({ queue, favoriteTrackIds, onRemove, onToggleF
       </AnimatePresence>
     </div>
   );
-}
+};

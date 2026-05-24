@@ -21,6 +21,4 @@ function SvgIcon(props: SVGAttributes<SVGElement>) {
   );
 }
 
-const KeikenIcon = memo(SvgIcon);
-
-export default KeikenIcon;
+export const KeikenIcon = memo(SvgIcon);

@@ -5,7 +5,7 @@ interface SearchBarProps {
   onSearchTextChange: (text: string) => void;
 }
 
-export default function SearchBar({ searchText, onSearchTextChange }: SearchBarProps) {
+export const SearchBar = ({ searchText, onSearchTextChange }: SearchBarProps) => {
   return (
     <div className="mt-2.5">
       <input
@@ -17,4 +17,4 @@ export default function SearchBar({ searchText, onSearchTextChange }: SearchBarP
       />
     </div>
   );
-}
+};
