@@ -42,3 +42,6 @@ next-env.d.ts
 admin.json
 
 certificates
+
+# raw scraped images — curate manually, then upload via pnpm upload:venue-images
+/scripts/scraped/

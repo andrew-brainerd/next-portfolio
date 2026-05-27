@@ -8,5 +8,6 @@ onlyBuiltDependencies:
   - '@firebase/util'
   - '@parcel/watcher'
   - '@tailwindcss/oxide'
+  - puppeteer
   - sharp
   - unrs-resolver
