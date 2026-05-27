@@ -154,8 +154,8 @@ export const PropertyMap = ({ properties }: PropertyMapProps) => {
     );
   }
 
-  // Center on Las Vegas
-  const center: [number, number] = [36.1699, -115.1398];
+  // Center on Madison, WI
+  const center: [number, number] = [43.0731, -89.4012];
 
   return (
     <div className="relative">
