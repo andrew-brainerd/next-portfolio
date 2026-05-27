@@ -1,0 +1,10 @@
+overrides:
+  '@types/react': 19.2.15
+  '@types/react-dom': 19.2.3
+
+onlyBuiltDependencies:
+  - '@firebase/util'
+  - '@parcel/watcher'
+  - '@tailwindcss/oxide'
+  - sharp
+  - unrs-resolver

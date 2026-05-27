@@ -87,10 +87,16 @@ export const usePodSession = (podId: string): PodSession => {
   const isPlayingNextRef = useRef(false);
   const activeSessionIdRef = useRef<string | null>(null);
   const hasAttemptedResumeRef = useRef(false);
+  const devicesRef = useRef<SpotifyDevice[]>([]);
+  const displayItemRef = useRef<SpotifyTrack | undefined>(undefined);
 
   useEffect(() => {
     activeSessionIdRef.current = activeSessionId;
   }, [activeSessionId]);
+
+  useEffect(() => {
+    devicesRef.current = devices;
+  }, [devices]);
 
   const handlePlayerStateChange = useCallback(
     (data: NowPlaying) => {
@@ -215,7 +221,7 @@ export const usePodSession = (podId: string): PodSession => {
         setIsSyncing(true);
       });
     }
-  }, [accessToken, pod, profile, isPodOwner, isConnected, isSyncing, podId]);
+  }, [accessToken, pod, profile, isPodOwner, isConnected, isSyncing, podId, setConnecting, setConnected, setSyncedNowPlaying]);
 
   useEffect(() => {
     if (!podId || !profile) return;
@@ -265,7 +271,8 @@ export const usePodSession = (podId: string): PodSession => {
 
   useEffect(() => {
     if (!isPlayerReady || !browserDeviceId) return;
-    const hasActiveDevice = devices.some(d => d.is_active);
+    // Read latest devices via ref so changes to `devices` don't re-trigger transfer.
+    const hasActiveDevice = devicesRef.current.some(d => d.is_active);
     if (!hasActiveDevice) {
       spotifyTransferPlayback([browserDeviceId], false)
         .catch(() => {})
@@ -286,7 +293,7 @@ export const usePodSession = (podId: string): PodSession => {
     if (nowPlaying.is_playing) return;
     hasAttemptedResumeRef.current = true;
     spotifyPlay().catch(() => {});
-  }, [isPodOwner, isPlayerReady, browserDeviceId, nowPlaying, pod?.currentlyPlaying]);
+  }, [isPodOwner, isPlayerReady, browserDeviceId, nowPlaying, pod?.currentlyPlaying, podId]);
 
   useEffect(() => {
     if (accessToken && isPodOwner && nowPlaying && Object.keys(nowPlaying).length > 0) {
@@ -294,6 +301,12 @@ export const usePodSession = (podId: string): PodSession => {
       sessionStorage.setItem(`pod_${podId}_playing`, String(!!nowPlaying.is_playing));
     }
   }, [accessToken, nowPlaying, isPodOwner, podId]);
+
+  // Keep latest displayed item in a ref so the track-history effect can capture
+  // it on a track change without re-running when the item reference churns.
+  useEffect(() => {
+    displayItemRef.current = displayNowPlaying?.item;
+  });
 
   useEffect(() => {
     if (
@@ -308,7 +321,7 @@ export const usePodSession = (podId: string): PodSession => {
       }
     }
     prevTrackNameRef.current = trackName;
-    prevTrackItemRef.current = displayNowPlaying?.item;
+    prevTrackItemRef.current = displayItemRef.current;
     trackStartTimeRef.current = Date.now();
   }, [trackName, isPodOwner, podId]);
 
@@ -319,7 +332,7 @@ export const usePodSession = (podId: string): PodSession => {
       }
       setDisconnected();
     };
-  }, [podId, profile]);
+  }, [podId, profile, setDisconnected]);
 
   const updatePodName = useCallback(
     async (name: string) => {
