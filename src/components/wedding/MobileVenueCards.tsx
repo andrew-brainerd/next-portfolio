@@ -1,11 +1,14 @@
+'use client';
+
 import type { Venue } from '@/types/wedding';
 import { VenueCard } from './VenueCard';
 
 interface MobileVenueCardsProps {
   venues: Venue[];
+  onOpenGallery?: (venue: Venue) => void;
 }
 
-export const MobileVenueCards = ({ venues }: MobileVenueCardsProps) => {
+export const MobileVenueCards = ({ venues, onOpenGallery }: MobileVenueCardsProps) => {
   const sorted = [...venues].sort((a, b) => a.priceMidpoint - b.priceMidpoint);
 
   if (sorted.length === 0) {
@@ -19,7 +22,7 @@ export const MobileVenueCards = ({ venues }: MobileVenueCardsProps) => {
   return (
     <div className="md:hidden flex flex-col gap-3">
       {sorted.map(venue => (
-        <VenueCard key={venue.slug} venue={venue} />
+        <VenueCard key={venue.slug} venue={venue} onOpenGallery={onOpenGallery} />
       ))}
     </div>
   );

@@ -23,9 +23,10 @@ const venueIcon = new L.Icon({
 
 interface VenueMapProps {
   venues: Venue[];
+  onOpenGallery?: (venue: Venue) => void;
 }
 
-export const VenueMap = ({ venues }: VenueMapProps) => {
+export const VenueMap = ({ venues, onOpenGallery }: VenueMapProps) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -66,16 +67,33 @@ export const VenueMap = ({ venues }: VenueMapProps) => {
           <Marker key={venue.slug} position={[venue.coords.lat, venue.coords.lng]} icon={venueIcon}>
             <Popup>
               <div className="p-1 min-w-[220px]">
-                {venue.imageUrls?.[0] && (
-                  <img
-                    src={venue.imageUrls[0]}
-                    alt={venue.name}
-                    width={220}
-                    height={124}
-                    className="w-full h-32 object-cover rounded mb-2"
-                    loading="lazy"
-                  />
-                )}
+                {venue.imageUrls?.[0] &&
+                  (onOpenGallery ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenGallery(venue)}
+                      aria-label={`Open ${venue.name} image gallery`}
+                      className="block w-full p-0 mb-2 rounded overflow-hidden cursor-zoom-in border-0 bg-transparent"
+                    >
+                      <img
+                        src={venue.imageUrls[0]}
+                        alt={venue.name}
+                        width={220}
+                        height={124}
+                        className="w-full h-32 object-cover"
+                        loading="lazy"
+                      />
+                    </button>
+                  ) : (
+                    <img
+                      src={venue.imageUrls[0]}
+                      alt={venue.name}
+                      width={220}
+                      height={124}
+                      className="w-full h-32 object-cover rounded mb-2"
+                      loading="lazy"
+                    />
+                  ))}
                 <h3 className="font-bold text-neutral-900 mb-1">{venue.name}</h3>
                 <p className="text-xs text-neutral-600 mb-2">{venue.city}</p>
                 <div className="text-sm text-neutral-800 mb-2">

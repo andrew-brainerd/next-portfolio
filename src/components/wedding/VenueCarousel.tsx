@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 
 interface VenueCarouselProps {
   images: string[];
@@ -19,8 +19,21 @@ export const VenueCarousel = ({ images, alt }: VenueCarouselProps) => {
   const current = images[Math.min(index, images.length - 1)];
   const showControls = images.length > 1;
 
-  const prev = () => setIndex(i => (i - 1 + images.length) % images.length);
-  const next = () => setIndex(i => (i + 1) % images.length);
+  // stopPropagation on the controls — parent containers (e.g. mobile VenueCard) often
+  // wrap the carousel in a click handler that opens a fullscreen lightbox; we don't
+  // want arrow/dot taps to bubble up and trigger that.
+  const prev = (e: MouseEvent) => {
+    e.stopPropagation();
+    setIndex(i => (i - 1 + images.length) % images.length);
+  };
+  const next = (e: MouseEvent) => {
+    e.stopPropagation();
+    setIndex(i => (i + 1) % images.length);
+  };
+  const goTo = (e: MouseEvent, i: number) => {
+    e.stopPropagation();
+    setIndex(i);
+  };
 
   return (
     <div className="relative -mx-4 -mt-4 mb-3 group">
@@ -54,7 +67,7 @@ export const VenueCarousel = ({ images, alt }: VenueCarouselProps) => {
             {images.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setIndex(i)}
+                onClick={e => goTo(e, i)}
                 type="button"
                 aria-label={`Go to image ${i + 1}`}
                 className={`w-1.5 h-1.5 rounded-full transition-all ${

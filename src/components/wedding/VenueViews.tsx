@@ -15,6 +15,7 @@ type ViewMode = 'table' | 'map' | 'chart';
 interface VenueViewsProps {
   venues: Venue[];
   budgetTarget: number;
+  onOpenGallery?: (venue: Venue) => void;
 }
 
 const VIEW_LABEL: Record<ViewMode, string> = {
@@ -25,7 +26,7 @@ const VIEW_LABEL: Record<ViewMode, string> = {
 
 const isViewMode = (v: string | null): v is ViewMode => v === 'table' || v === 'map' || v === 'chart';
 
-export const VenueViews = ({ venues, budgetTarget }: VenueViewsProps) => {
+export const VenueViews = ({ venues, budgetTarget, onOpenGallery }: VenueViewsProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const viewParam = searchParams.get('view');
@@ -64,8 +65,8 @@ export const VenueViews = ({ venues, budgetTarget }: VenueViewsProps) => {
         ))}
       </div>
 
-      {viewMode === 'table' && <VenueTable venues={venues} />}
-      {viewMode === 'map' && <VenueMap venues={venues} />}
+      {viewMode === 'table' && <VenueTable venues={venues} onOpenGallery={onOpenGallery} />}
+      {viewMode === 'map' && <VenueMap venues={venues} onOpenGallery={onOpenGallery} />}
       {viewMode === 'chart' && <VenuePriceChart venues={venues} budgetTarget={budgetTarget} />}
     </>
   );

@@ -16,8 +16,9 @@ const VenueViews = dynamic(() => import('@/components/wedding/VenueViews').then(
 interface VenueViewsWrapperProps {
   venues: Venue[];
   budgetTarget: number;
+  onOpenGallery?: (venue: Venue) => void;
 }
 
-export const VenueViewsWrapper = ({ venues, budgetTarget }: VenueViewsWrapperProps) => {
-  return <VenueViews venues={venues} budgetTarget={budgetTarget} />;
+export const VenueViewsWrapper = ({ venues, budgetTarget, onOpenGallery }: VenueViewsWrapperProps) => {
+  return <VenueViews venues={venues} budgetTarget={budgetTarget} onOpenGallery={onOpenGallery} />;
 };
