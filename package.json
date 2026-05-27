@@ -7,9 +7,6 @@
   "scripts": {
     "build": "next build",
     "analyze": "next experimental-analyze",
-    "geocode:venues": "node --env-file=.env --experimental-strip-types scripts/geocode-venues.ts",
-    "scrape:venues": "node --experimental-strip-types scripts/scrape-venue-images.ts",
-    "upload:venue-images": "node --env-file=.env --experimental-strip-types scripts/upload-venue-images.ts",
     "clean": "rm -rf node_modules .next",
     "dev": "next dev --experimental-https --hostname local.brainerd.dev --port 3001",
     "lint": "pnpm lint:js && pnpm lint:css",
@@ -61,7 +58,6 @@
   "devDependencies": {
     "lint-staged": "^17.0.5",
     "postcss-html": "^1.8.0",
-    "puppeteer": "^25.1.0",
     "stylelint": "^17.12.0",
     "stylelint-config-standard": "^40.0.0",
     "stylelint-order": "^8.1.1",
