@@ -8,3 +8,5 @@ export const PEAPOD_ROUTE = '/peapod';
 export const ROLL_WITH_ME_ROUTE = '/roll-with-me';
 export const APPS_ROUTE = '/apps';
 export const APPS_CONDENSATE_ROUTE = '/apps/condensate';
+export const SCOREBOOK_ROUTE = '/scorebook';
+export const SCOREBOOK_FRISBEE_GOLF_ROUTE = '/scorebook/frisbee-golf';

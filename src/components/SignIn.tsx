@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import AppleIcon from '@mui/icons-material/Apple';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import TextField from '@mui/material/TextField';
@@ -16,43 +14,20 @@ import type { AuthResponse } from 'types/firebase';
 import { signInUser } from 'utils/firebase';
 import { FORGOT_PASSWORD_ROUTE } from 'constants/routes';
 import { useAppLoading } from 'hooks/useAppLoading';
-import { Separator } from 'components/Separator';
 
-const LOGO_SIZE = 125;
 const INPUT_WIDTH = 300;
 
 interface SignInProps {
   redirectRoute: string;
-  fromPath: string;
 }
 
-export const SignIn = ({ redirectRoute, fromPath }: SignInProps) => {
+export const SignIn = ({ redirectRoute }: SignInProps) => {
   const { isLoading, setIsLoading } = useAppLoading();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [authResponse, setAuthResponse] = useState<AuthResponse>({ isError: false, message: '' });
   const router = useRouter();
-
-  // Determine theme based on fromPath
-  const isMangaTheme = fromPath.startsWith('/manga');
-
-  const getThemeClasses = () => {
-    if (isMangaTheme) {
-      return {
-        background: 'bg-neutral-800',
-        title: 'text-neutral-300',
-        titleText: 'Manga Login'
-      };
-    }
-    return {
-      background: 'bg-neutral-800',
-      title: 'text-neutral-300',
-      titleText: 'Login'
-    };
-  };
-
-  const theme = getThemeClasses();
 
   const handleKeyPress = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
@@ -82,80 +57,77 @@ export const SignIn = ({ redirectRoute, fromPath }: SignInProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-y-6 w-full h-screen">
-      <div className=" mt-[5%] input-box flex max-w-[572px] flex-col gap-y-2 rounded bg-white shadow p-8">
-        <h1 className={`mb-7 overflow-visible text-2xl ${theme.title} text-center`}>{theme.titleText}</h1>
-        <div className="mb-3">
-          <TextField
-            label="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            autoFocus={true}
-            onKeyDown={handleKeyPress}
-            data-testid="emailInput"
-            autoCapitalize="off"
-            disabled={isLoading}
-            size="small"
-            sx={{ width: INPUT_WIDTH }}
-          />
-        </div>
-        <div className="mb-5 flex flex-col">
-          <TextField
-            type={showPassword ? 'text' : 'password'}
-            label="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            onKeyDown={handleKeyPress}
-            data-testid="passwordInput"
-            autoCapitalize="off"
-            disabled={isLoading}
-            size="small"
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton className="relative left-[2px]" onClick={() => setShowPassword(show => !show)}>
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }
-            }}
-            sx={{ width: INPUT_WIDTH }}
-          />
-          <Button
-            className="self-end"
-            variant="text"
-            size="small"
-            color="info"
-            onClick={() => router.push(FORGOT_PASSWORD_ROUTE)}
-          >
-            Forgot password?
-          </Button>
-        </div>
-        <Button
-          variant="contained"
-          onClick={handleSignIn}
+    <div className="flex flex-col gap-y-2">
+      <div className="mb-3">
+        <TextField
+          label="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          autoFocus={true}
+          onKeyDown={handleKeyPress}
+          data-testid="emailInput"
+          autoCapitalize="off"
           disabled={isLoading}
-          data-testid="signInButton"
-          sx={{
-            width: INPUT_WIDTH,
-            backgroundColor: 'var(--color-brand-600)',
-            '&:hover': { backgroundColor: 'var(--color-brand-700)' }
-          }}
-        >
-          Log In
-        </Button>
-        {authResponse.message && (
-          <div className="mt-4">
-            {authResponse.isError ? (
-              <Alert severity="error">{authResponse.message}</Alert>
-            ) : (
-              <Alert severity="success">{authResponse.message}</Alert>
-            )}
-          </div>
-        )}
+          size="small"
+          sx={{ width: INPUT_WIDTH }}
+        />
       </div>
+      <div className="mb-5 flex flex-col">
+        <TextField
+          type={showPassword ? 'text' : 'password'}
+          label="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          onKeyDown={handleKeyPress}
+          data-testid="passwordInput"
+          autoCapitalize="off"
+          disabled={isLoading}
+          size="small"
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton className="relative left-[2px]" onClick={() => setShowPassword(show => !show)}>
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }
+          }}
+          sx={{ width: INPUT_WIDTH }}
+        />
+        <Button
+          className="self-end"
+          variant="text"
+          size="small"
+          color="info"
+          onClick={() => router.push(FORGOT_PASSWORD_ROUTE)}
+        >
+          Forgot password?
+        </Button>
+      </div>
+      <Button
+        variant="contained"
+        onClick={handleSignIn}
+        disabled={isLoading}
+        data-testid="signInButton"
+        sx={{
+          width: INPUT_WIDTH,
+          backgroundColor: 'var(--color-brand-600)',
+          '&:hover': { backgroundColor: 'var(--color-brand-700)' }
+        }}
+      >
+        Log In
+      </Button>
+      {authResponse.message && (
+        <div className="mt-4" style={{ width: INPUT_WIDTH }}>
+          {authResponse.isError ? (
+            <Alert severity="error">{authResponse.message}</Alert>
+          ) : (
+            <Alert severity="success">{authResponse.message}</Alert>
+          )}
+        </div>
+      )}
     </div>
   );
 };

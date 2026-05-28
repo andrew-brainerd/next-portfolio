@@ -1,4 +1,4 @@
-import { SignIn } from 'components/SignIn';
+import { LoginTabs } from 'components/LoginTabs';
 
 interface LoginPageProps {
   searchParams: Promise<{ returnTo?: string; from?: string }>;
@@ -9,5 +9,5 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const redirectRoute = params.returnTo || params.from || '/';
   const fromPath = params.from || '/';
 
-  return <SignIn redirectRoute={redirectRoute} fromPath={fromPath} />;
+  return <LoginTabs redirectRoute={redirectRoute} fromPath={fromPath} />;
 }

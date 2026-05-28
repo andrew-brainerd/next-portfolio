@@ -2,14 +2,37 @@ import { initializeApp } from 'firebase/app';
 import {
   type AuthError,
   confirmPasswordReset,
+  createUserWithEmailAndPassword,
   getAuth,
+  GoogleAuthProvider,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut
 } from 'firebase/auth';
 
 import type { AuthResponse } from 'types/firebase';
 import { bakeCookie } from 'api/authentication';
+
+const friendlyAuthError = (code: string | undefined, fallback: string): string => {
+  switch (code) {
+    case 'auth/email-already-in-use':
+      return 'An account already exists for that email';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email';
+    case 'auth/weak-password':
+      return 'Password must be at least 6 characters';
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return 'Sign-in cancelled';
+    case 'auth/popup-blocked':
+      return 'Pop-up blocked by your browser';
+    case 'auth/account-exists-with-different-credential':
+      return 'An account with that email exists with a different sign-in method';
+    default:
+      return fallback;
+  }
+};
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -59,6 +82,84 @@ export const signInUser = (email: string, password: string): Promise<AuthRespons
         message: 'Login failed. Please try again.'
       };
     });
+};
+
+export const signUpUser = async (email: string, password: string): Promise<AuthResponse> => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+    const idToken = await userCredential.user.getIdToken();
+
+    await bakeCookie(idToken);
+
+    return {
+      isError: false,
+      message: 'Account created'
+    };
+  } catch (error) {
+    const err = error as AuthError;
+    console.error('Sign-up error', err.message);
+
+    return {
+      isError: true,
+      message: friendlyAuthError(err.code, 'Sign-up failed. Please try again.')
+    };
+  }
+};
+
+export const signInWithGoogle = async (): Promise<AuthResponse> => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(firebaseAuth, provider);
+    const idToken = await userCredential.user.getIdToken();
+
+    await bakeCookie(idToken);
+
+    return {
+      isError: false,
+      message: 'Sign-in successful'
+    };
+  } catch (error) {
+    const err = error as AuthError;
+    console.error('Google sign-in error', err.message);
+
+    return {
+      isError: true,
+      message: friendlyAuthError(err.code, 'Google sign-in failed. Please try again.')
+    };
+  }
+};
+
+export const validateInviteCode = async (code: string): Promise<AuthResponse> => {
+  const BASE_URL = process.env.NEXT_PUBLIC_BRAINERD_API_URL;
+
+  try {
+    const response = await fetch(`${BASE_URL}/register/invite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+
+    if (response.ok) {
+      return { isError: false, message: 'Invite code accepted' };
+    }
+
+    if (response.status === 401) {
+      return { isError: true, message: 'Invalid invite code' };
+    }
+
+    const body = (await response.json().catch(() => ({}))) as { message?: string };
+    return {
+      isError: true,
+      message: body.message || 'Could not verify invite code'
+    };
+  } catch (error) {
+    console.error('Invite code validation error', error);
+
+    return {
+      isError: true,
+      message: 'Could not verify invite code'
+    };
+  }
 };
 
 export const signOutUser = async (): Promise<void> => {
