@@ -1,10 +1,21 @@
 'use server';
 
-import { deleteRequest, getRequest, postRequest } from '@/api/client';
-import type { CreateFrisbeeGolfRoundInput, FrisbeeGolfRound } from '@/types/scorebook';
+import { deleteRequest, getRequest, patchRequest, postRequest } from '@/api/client';
+import type {
+  CreateFrisbeeGolfRoundInput,
+  FrisbeeGolfHole,
+  FrisbeeGolfPlayer,
+  FrisbeeGolfRound
+} from '@/types/scorebook';
 
 interface ListRoundsResponse {
   rounds: FrisbeeGolfRound[];
+}
+
+export interface FrisbeeGolfUserLookup {
+  uid: string;
+  email: string;
+  displayName: string;
 }
 
 export const listFrisbeeGolfRounds = async (): Promise<FrisbeeGolfRound[]> => {
@@ -22,4 +33,46 @@ export const createFrisbeeGolfRound = (input: CreateFrisbeeGolfRoundInput): Prom
 
 export const deleteFrisbeeGolfRound = async (roundId: string): Promise<void> => {
   await deleteRequest(`/scorebook/frisbee-golf/rounds/${roundId}`);
+};
+
+export const updateFrisbeeGolfRoundName = (
+  roundId: string,
+  name: string
+): Promise<FrisbeeGolfRound | undefined> => {
+  return patchRequest<{ name: string }, FrisbeeGolfRound>(`/scorebook/frisbee-golf/rounds/${roundId}`, { name });
+};
+
+export const updateFrisbeeGolfHoles = (
+  roundId: string,
+  holes: FrisbeeGolfHole[]
+): Promise<FrisbeeGolfRound | undefined> => {
+  return patchRequest<{ holes: FrisbeeGolfHole[] }, FrisbeeGolfRound>(
+    `/scorebook/frisbee-golf/rounds/${roundId}`,
+    { holes }
+  );
+};
+
+export const addFrisbeeGolfPlayer = (
+  roundId: string,
+  player: Omit<FrisbeeGolfPlayer, 'id'>
+): Promise<FrisbeeGolfRound> => {
+  return postRequest<Omit<FrisbeeGolfPlayer, 'id'>, FrisbeeGolfRound>(
+    `/scorebook/frisbee-golf/rounds/${roundId}/players`,
+    player
+  );
+};
+
+export const removeFrisbeeGolfPlayer = async (roundId: string, playerId: string): Promise<void> => {
+  await deleteRequest(`/scorebook/frisbee-golf/rounds/${roundId}/players/${playerId}`);
+};
+
+export const startFrisbeeGolfRound = (roundId: string): Promise<FrisbeeGolfRound> => {
+  return postRequest<Record<string, never>, FrisbeeGolfRound>(
+    `/scorebook/frisbee-golf/rounds/${roundId}/start`,
+    {}
+  );
+};
+
+export const lookupFrisbeeGolfUser = (email: string): Promise<FrisbeeGolfUserLookup | undefined> => {
+  return getRequest<FrisbeeGolfUserLookup>('/scorebook/frisbee-golf/users/lookup', { email });
 };
