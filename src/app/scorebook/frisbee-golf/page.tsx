@@ -7,6 +7,7 @@ import {
   LOGIN_ROUTE,
   SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE,
   SCOREBOOK_FRISBEE_GOLF_ROUTE,
+  SCOREBOOK_FRISBEE_GOLF_STATS_ROUTE,
   SCOREBOOK_ROUTE
 } from 'constants/routes';
 import { Loading } from '@/components/Loading';
@@ -52,12 +53,20 @@ export default async function FrisbeeGolfPage() {
       </div>
       <div className="flex items-baseline justify-between mb-6">
         <h1 className="text-3xl font-bold text-white">Frisbee Golf</h1>
-        <Link
-          href={SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded transition-colors"
-        >
-          New round
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={SCOREBOOK_FRISBEE_GOLF_STATS_ROUTE}
+            className="text-sm text-neutral-300 hover:text-white"
+          >
+            Stats
+          </Link>
+          <Link
+            href={SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE}
+            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded transition-colors"
+          >
+            New round
+          </Link>
+        </div>
       </div>
 
       <Suspense fallback={<RoundsLoading />}>

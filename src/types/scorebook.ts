@@ -42,3 +42,28 @@ export interface CreateFrisbeeGolfRoundInput {
   defaultPar: number;
   players: Omit<FrisbeeGolfPlayer, 'id'>[];
 }
+
+export interface FrisbeeGolfBestRound {
+  roundId: string;
+  name: string;
+  total: number;
+  overUnder: number;
+  completedAt: number;
+}
+
+export interface FrisbeeGolfHeadToHead {
+  opponentUserId: string;
+  opponentName: string;
+  sharedRounds: number;
+  wins: number;
+  losses: number;
+  ties: number;
+}
+
+export interface FrisbeeGolfUserStats {
+  roundsPlayed: number;
+  averageScore: number | null;
+  averageOverUnder: number | null;
+  bestRound: FrisbeeGolfBestRound | null;
+  headToHead: FrisbeeGolfHeadToHead[];
+}

@@ -5,6 +5,7 @@ import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
 import { getFrisbeeGolfRound } from '@/api/scorebook';
 import { LOGIN_ROUTE, SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
 import { RoundActive } from '@/components/scorebook/RoundActive';
+import { RoundCompleted } from '@/components/scorebook/RoundCompleted';
 import { RoundSetup } from '@/components/scorebook/RoundSetup';
 
 export const metadata = {
@@ -66,12 +67,12 @@ export default async function FrisbeeGolfRoundPage({ params }: RoundDetailPagePr
       {isSetup && isOwner ? (
         <RoundSetup initialRound={round} />
       ) : round.status === 'active' ? (
-        <RoundActive initialRound={round} />
+        <RoundActive initialRound={round} isOwner={isOwner} />
+      ) : round.status === 'completed' ? (
+        <RoundCompleted round={round} />
       ) : (
         <>
-          {isSetup && (
-            <p className="text-neutral-400 italic mb-4">Waiting for the owner to start the round.</p>
-          )}
+          <p className="text-neutral-400 italic mb-4">Waiting for the owner to start the round.</p>
 
           <section className="mb-6">
             <h2 className="text-xl font-semibold text-white mb-2">Players</h2>

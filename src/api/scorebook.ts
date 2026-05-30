@@ -5,7 +5,8 @@ import type {
   CreateFrisbeeGolfRoundInput,
   FrisbeeGolfHole,
   FrisbeeGolfPlayer,
-  FrisbeeGolfRound
+  FrisbeeGolfRound,
+  FrisbeeGolfUserStats
 } from '@/types/scorebook';
 
 interface ListRoundsResponse {
@@ -95,4 +96,15 @@ export const clearFrisbeeGolfScore = async (
   holeNumber: number
 ): Promise<void> => {
   await deleteRequest(`/scorebook/frisbee-golf/rounds/${roundId}/scores/${playerId}/${holeNumber}`);
+};
+
+export const completeFrisbeeGolfRound = (roundId: string): Promise<FrisbeeGolfRound> => {
+  return postRequest<Record<string, never>, FrisbeeGolfRound>(
+    `/scorebook/frisbee-golf/rounds/${roundId}/complete`,
+    {}
+  );
+};
+
+export const getFrisbeeGolfStats = (): Promise<FrisbeeGolfUserStats | undefined> => {
+  return getRequest<FrisbeeGolfUserStats>('/scorebook/frisbee-golf/stats');
 };

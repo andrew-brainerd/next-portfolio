@@ -10,6 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 
 import {
   clearFrisbeeGolfScore,
+  completeFrisbeeGolfRound,
   getFrisbeeGolfRound,
   setFrisbeeGolfScore
 } from '@/api/scorebook';
@@ -21,12 +22,14 @@ const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
 
 interface RoundActiveProps {
   initialRound: FrisbeeGolfRound;
+  isOwner: boolean;
 }
 
-export const RoundActive = ({ initialRound }: RoundActiveProps) => {
+export const RoundActive = ({ initialRound, isOwner }: RoundActiveProps) => {
   const [round, setRound] = useState(initialRound);
   const [currentHole, setCurrentHole] = useState(initialRound.holes[0]?.number ?? 1);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [completing, setCompleting] = useState(false);
 
   useEffect(() => {
     const channel = getChannel(initialRound.id);
@@ -76,6 +79,29 @@ export const RoundActive = ({ initialRound }: RoundActiveProps) => {
       console.error(err);
     } finally {
       setPendingKey(null);
+    }
+  };
+
+  const missingScores = round.players.reduce((acc, player) => {
+    const playerScores = round.scores[player.id] || {};
+    const missing = round.holes.filter(h => typeof playerScores[h.number] !== 'number').length;
+    return acc + missing;
+  }, 0);
+
+  const handleComplete = async () => {
+    if (missingScores > 0) {
+      const ok = window.confirm(
+        `${missingScores} score${missingScores === 1 ? ' is' : 's are'} still missing. Complete the round anyway?`
+      );
+      if (!ok) return;
+    }
+    setCompleting(true);
+    try {
+      const updated = await completeFrisbeeGolfRound(round.id);
+      setRound(updated);
+    } catch (err) {
+      console.error(err);
+      setCompleting(false);
     }
   };
 
@@ -175,7 +201,26 @@ export const RoundActive = ({ initialRound }: RoundActiveProps) => {
         </ul>
       </section>
 
-      <p className="text-neutral-500 text-sm">Round completion and stats are coming next.</p>
+      {isOwner && (
+        <div className="flex items-center justify-between gap-3 border-t border-neutral-800 pt-6">
+          <div className="text-sm text-neutral-400">
+            {missingScores === 0
+              ? 'All scores entered. Ready to complete the round.'
+              : `${missingScores} score${missingScores === 1 ? '' : 's'} still missing.`}
+          </div>
+          <Button
+            variant="contained"
+            onClick={handleComplete}
+            disabled={completing}
+            sx={{
+              backgroundColor: 'var(--color-brand-600)',
+              '&:hover': { backgroundColor: 'var(--color-brand-700)' }
+            }}
+          >
+            {completing ? 'Completing...' : 'Complete round'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
