@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
 import { getFrisbeeGolfRound } from '@/api/scorebook';
 import { LOGIN_ROUTE, SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
+import { RoundActive } from '@/components/scorebook/RoundActive';
 import { RoundSetup } from '@/components/scorebook/RoundSetup';
 
 export const metadata = {
@@ -64,6 +65,8 @@ export default async function FrisbeeGolfRoundPage({ params }: RoundDetailPagePr
 
       {isSetup && isOwner ? (
         <RoundSetup initialRound={round} />
+      ) : round.status === 'active' ? (
+        <RoundActive initialRound={round} />
       ) : (
         <>
           {isSetup && (
@@ -92,10 +95,6 @@ export default async function FrisbeeGolfRoundPage({ params }: RoundDetailPagePr
               ))}
             </ul>
           </section>
-
-          {round.status === 'active' && (
-            <p className="text-neutral-500 text-sm mt-8">Live scoring is coming in the next phase.</p>
-          )}
         </>
       )}
     </div>

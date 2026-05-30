@@ -1,6 +1,6 @@
 'use server';
 
-import { deleteRequest, getRequest, patchRequest, postRequest } from '@/api/client';
+import { deleteRequest, getRequest, patchRequest, postRequest, putRequest } from '@/api/client';
 import type {
   CreateFrisbeeGolfRoundInput,
   FrisbeeGolfHole,
@@ -75,4 +75,24 @@ export const startFrisbeeGolfRound = (roundId: string): Promise<FrisbeeGolfRound
 
 export const lookupFrisbeeGolfUser = (email: string): Promise<FrisbeeGolfUserLookup | undefined> => {
   return getRequest<FrisbeeGolfUserLookup>('/scorebook/frisbee-golf/users/lookup', { email });
+};
+
+export const setFrisbeeGolfScore = (
+  roundId: string,
+  playerId: string,
+  holeNumber: number,
+  score: number
+): Promise<FrisbeeGolfRound> => {
+  return putRequest<{ score: number }, FrisbeeGolfRound>(
+    `/scorebook/frisbee-golf/rounds/${roundId}/scores/${playerId}/${holeNumber}`,
+    { score }
+  );
+};
+
+export const clearFrisbeeGolfScore = async (
+  roundId: string,
+  playerId: string,
+  holeNumber: number
+): Promise<void> => {
+  await deleteRequest(`/scorebook/frisbee-golf/rounds/${roundId}/scores/${playerId}/${holeNumber}`);
 };

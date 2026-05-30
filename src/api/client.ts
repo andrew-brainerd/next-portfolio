@@ -41,6 +41,11 @@ export const patchRequest = async <T, R>(url: string, data: T): Promise<R> => {
     .catch((err: AxiosError) => handleError('PATCH', url, err));
 };
 
+export const putRequest = async <T, R>(url: string, data: T): Promise<R> => {
+  const headers = await getAuthHeaders();
+  return client.put(url, data, { headers }).then(response => response?.data);
+};
+
 export const getRequest = async <T>(url: string, params?: RequestParams): Promise<T | undefined> => {
   const headers = await getAuthHeaders();
   return client
