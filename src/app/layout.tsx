@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { GoogleAnalytics } from '@next/third-parties/google';
 
 import { headers } from 'next/headers';
-import { ConditionalNavigation } from '@/components/ConditionalNavigation';
+import { SiteChrome } from '@/components/SiteChrome';
 import ThemeProvider from '@/providers/ThemeProvider';
 import { TOKEN_COOKIE } from '@/constants/authentication';
 import 'styles/index.css';
@@ -34,6 +34,10 @@ const themeScript = `
     } else {
       var serverTheme = document.documentElement.getAttribute('data-theme');
       if (serverTheme) sessionStorage.setItem('theme', serverTheme);
+    }
+    // Win95 mode is a separate, cross-session presentation mode. Apply before paint.
+    if (localStorage.getItem('win95Mode') === '1') {
+      document.documentElement.setAttribute('data-mode', 'win95');
     }
   } catch (e) {}
 })();
@@ -107,8 +111,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to main content
         </a>
         <ThemeProvider>
-          <ConditionalNavigation isLoggedIn={isLoggedIn} />
-          <div id="main-content">{children}</div>
+          <SiteChrome isLoggedIn={isLoggedIn}>{children}</SiteChrome>
         </ThemeProvider>
       </body>
       {gaMeasurementId && <GoogleAnalytics gaId={gaMeasurementId} />}

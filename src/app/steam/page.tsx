@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import { MY_STEAM_ID } from 'constants/steam';
 import { getPlayerSummary } from 'api/steam';
 import { SteamGamesList } from 'components/steam/SteamGamesList';
+import { Win95SteamGamesList } from 'components/win95/apps/Win95SteamGamesList';
+import { ModeSwitch } from 'components/win95/ModeSwitch';
 import { Loading } from '@/components/Loading';
 import type { Metadata } from 'next';
 
@@ -50,14 +52,23 @@ const Steam = async (props: SteamProps) => {
   const shouldFetchTTB = ttb === 'true';
 
   return (
-    <main
-      className="font-roboto my-0 mx-0 sm:mx-auto max-w-[1200px] p-2 sm:p-12"
-      data-steam-id={steamId || MY_STEAM_ID}
-    >
-      <Suspense fallback={<SteamLoadingFallback />}>
-        <SteamGamesList steamId={steamId} count={countNumber} shouldFetchTTB={shouldFetchTTB} />
-      </Suspense>
-    </main>
+    <ModeSwitch
+      win95={
+        <Suspense fallback={<SteamLoadingFallback />}>
+          <Win95SteamGamesList steamId={steamId} count={countNumber} shouldFetchTTB={shouldFetchTTB} />
+        </Suspense>
+      }
+      normal={
+        <main
+          className="font-roboto my-0 mx-0 sm:mx-auto max-w-[1200px] p-2 sm:p-12"
+          data-steam-id={steamId || MY_STEAM_ID}
+        >
+          <Suspense fallback={<SteamLoadingFallback />}>
+            <SteamGamesList steamId={steamId} count={countNumber} shouldFetchTTB={shouldFetchTTB} />
+          </Suspense>
+        </main>
+      }
+    />
   );
 };
 

@@ -32,3 +32,13 @@ export interface OwnedGame {
   name: string;
   hoursToBeat: number;
 }
+
+export interface ProcessedSteamGame extends OwnedGame {
+  isRecent: boolean;
+  isCompleted: boolean;
+}
+
+export interface SteamGamesData {
+  pageHeading: string;
+  games: ProcessedSteamGame[];
+}

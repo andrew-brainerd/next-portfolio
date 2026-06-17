@@ -1,49 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSpotifyAuth, usePeapodNotify } from '@/hooks/usePeapod';
-import { getPods, createPod } from '@/api/peapod';
-import { getSpotifyProfile } from '@/api/spotifyClient';
-import type { Pod, SpotifyProfile } from '@/types/peapod';
-import { PEAPOD_ROUTE } from '@/constants/routes';
+import { usePodList } from '@/hooks/usePodList';
 
 export const PodList = () => {
-  const router = useRouter();
-  const accessToken = useSpotifyAuth(s => s.accessToken);
-  const displayNotification = usePeapodNotify(s => s.displayNotification);
-  const [pods, setPods] = useState<Pod[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [profile, setProfile] = useState<SpotifyProfile | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-
-  useEffect(() => {
-    if (!accessToken) return;
-    setIsLoading(true);
-    getSpotifyProfile()
-      .then(p => {
-        setProfile(p);
-        return getPods(p.id);
-      })
-      .then(data => {
-        setPods((data as { items: Pod[] })?.items || []);
-      })
-      .finally(() => setIsLoading(false));
-  }, [accessToken]);
-
-  const handleCreatePod = async () => {
-    if (!accessToken || !profile || isCreating) return;
-    setIsCreating(true);
-    try {
-      const newPod = await createPod(profile);
-      displayNotification('Pod created!', { icon: 'success' });
-      router.push(`${PEAPOD_ROUTE}/${(newPod as Pod).id}`);
-    } catch {
-      displayNotification('Failed to create pod', { icon: 'error' });
-    } finally {
-      setIsCreating(false);
-    }
-  };
+  const { pods, isLoading, isCreating, handleCreatePod, openPod } = usePodList();
 
   return (
     <div className="p-5">
@@ -56,7 +16,7 @@ export const PodList = () => {
               <button
                 key={pod.id}
                 className="shadow-md hover:shadow-lg items-center bg-neutral-800 border border-neutral-700 flex flex-col h-32 justify-center m-5 transition-shadow duration-150 w-52 rounded-lg cursor-pointer hover:bg-neutral-700 hover:border-brand-400 max-sm:w-full max-sm:mx-0 max-sm:my-2.5"
-                onClick={() => router.push(`${PEAPOD_ROUTE}/${pod.id}`)}
+                onClick={() => openPod(pod.id)}
                 type="button"
               >
                 <div className="text-white text-lg mb-2">{pod.name || 'Untitled Pod'}</div>
