@@ -58,6 +58,9 @@ export const Navigation = ({ isLoggedIn, pathname }: NavigationProps) => {
             <Link href="/roll-with-me" className={`${iconColor} text-sm leading-none transition-colors`}>
               Roll With Me
             </Link>
+            <Link href="/appearance" className={`${iconColor} text-sm leading-none transition-colors`}>
+              Appearance
+            </Link>
             {isLoggedIn ? (
               <div className="relative" ref={menuRef}>
                 <button

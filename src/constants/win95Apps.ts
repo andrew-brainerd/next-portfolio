@@ -6,7 +6,7 @@ export const WIN95_APPS: Win95App[] = [
   { id: 'portfolio', label: 'My Portfolio', route: '/' },
   { id: 'steam', label: 'Steam', route: '/steam' },
   { id: 'peapod', label: 'Peapod', route: '/peapod' },
-  { id: 'control-panel', label: 'Control Panel', route: '/settings' }
+  { id: 'control-panel', label: 'Control Panel', route: '/appearance' }
 ];
 
 export const WIN95_DEFAULT_TITLE = 'Andrew Brainerd';
