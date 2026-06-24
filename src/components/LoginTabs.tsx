@@ -6,6 +6,8 @@ import Tabs from '@mui/material/Tabs';
 
 import { SignIn } from 'components/SignIn';
 import { SignUp } from 'components/SignUp';
+import { useWin95Mode } from 'hooks/useWin95Mode';
+import { Win95LoginDialog } from 'components/win95/apps/Win95LoginDialog';
 
 interface LoginTabsProps {
   redirectRoute: string;
@@ -16,9 +18,14 @@ type TabValue = 'signIn' | 'signUp';
 
 export const LoginTabs = ({ redirectRoute, fromPath }: LoginTabsProps) => {
   const [activeTab, setActiveTab] = useState<TabValue>('signIn');
+  const win95 = useWin95Mode(s => s.enabled);
 
   const isMangaTheme = fromPath.startsWith('/manga');
   const titleText = isMangaTheme ? 'Manga Login' : 'Login';
+
+  if (win95) {
+    return <Win95LoginDialog redirectRoute={redirectRoute} fromPath={fromPath} />;
+  }
 
   return (
     <div className="flex flex-col items-center gap-y-6 w-full h-screen">

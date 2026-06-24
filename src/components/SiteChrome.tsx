@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { ConditionalNavigation } from '@/components/ConditionalNavigation';
 import { Win95Shell } from '@/components/win95/Win95Shell';
+import { Win95Monitor } from '@/components/win95/Win95Monitor';
 import { useWin95Mode } from '@/hooks/useWin95Mode';
 
 interface SiteChromeProps {
@@ -21,9 +22,11 @@ export const SiteChrome = ({ isLoggedIn, children }: SiteChromeProps) => {
 
   if (enabled) {
     return (
-      <Win95Shell isLoggedIn={isLoggedIn} pathname={pathname}>
-        <div id="main-content">{children}</div>
-      </Win95Shell>
+      <Win95Monitor>
+        <Win95Shell isLoggedIn={isLoggedIn} pathname={pathname}>
+          <div id="main-content">{children}</div>
+        </Win95Shell>
+      </Win95Monitor>
     );
   }
 

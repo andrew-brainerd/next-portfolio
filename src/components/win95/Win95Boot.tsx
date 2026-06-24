@@ -32,7 +32,7 @@ export const Win95Boot = () => {
   return (
     <div
       aria-hidden="true"
-      className={`fixed inset-0 z-[100] flex items-center justify-center bg-black transition-opacity duration-200 ${
+      className={`absolute inset-0 z-[100] flex items-center justify-center bg-black transition-opacity duration-200 ${
         leaving ? 'opacity-0' : 'opacity-100'
       }`}
     >

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useWin95Mode } from '@/hooks/useWin95Mode';
 import { WIN95_APPS, WIN95_DEFAULT_TITLE } from '@/constants/win95Apps';
 import { win95AppForPath } from '@/utils/win95';
@@ -8,6 +9,7 @@ import { Win95AppIcon, StartLogo } from '@/components/win95/Win95Icons';
 import { StartMenu } from '@/components/win95/StartMenu';
 import { Win95Clock } from '@/components/win95/Win95Clock';
 import { Win95Boot } from '@/components/win95/Win95Boot';
+import { Win95Desktop } from '@/components/win95/Win95Desktop';
 
 interface Win95ShellProps {
   isLoggedIn: boolean;
@@ -19,7 +21,9 @@ const MENU_ITEMS = ['File', 'Edit', 'View', 'Help'];
 
 export const Win95Shell = ({ pathname, children }: Win95ShellProps) => {
   const { disable } = useWin95Mode();
+  const router = useRouter();
   const [startOpen, setStartOpen] = useState(false);
+  const [minimized, setMinimized] = useState(false);
   const startRef = useRef<HTMLDivElement>(null);
   const startBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -29,6 +33,11 @@ export const Win95Shell = ({ pathname, children }: Win95ShellProps) => {
   const closeStart = (returnFocus = false) => {
     setStartOpen(false);
     if (returnFocus) startBtnRef.current?.focus();
+  };
+
+  const launchFromDesktop = (route: string) => {
+    router.push(route);
+    setMinimized(false);
   };
 
   useEffect(() => {
@@ -41,16 +50,24 @@ export const Win95Shell = ({ pathname, children }: Win95ShellProps) => {
   }, [startOpen]);
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[#008080]">
+    <div className="absolute inset-0 flex flex-col bg-[#008080]">
       <Win95Boot />
-      <div className="win95-window m-1 flex min-h-0 flex-1 flex-col">
+      <Win95Desktop activeId={activeApp?.id} onLaunch={launchFromDesktop} />
+      <div
+        className={`win95-window relative z-10 m-1 min-h-0 flex-1 flex-col ${minimized ? 'hidden' : 'flex'}`}
+      >
         <div className="win95-title-bar">
           <span className="win95-title-text">
             {activeApp && <Win95AppIcon id={activeApp.id} />}
             {title}
           </span>
           <span className="flex items-center gap-0.5">
-            <button type="button" className="win95-control-btn" aria-label="Minimize" tabIndex={-1}>
+            <button
+              type="button"
+              className="win95-control-btn win95-focusable"
+              aria-label="Minimize"
+              onClick={() => setMinimized(true)}
+            >
               <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
                 <rect x="1" y="6" width="5" height="1.5" fill="#000" />
               </svg>
@@ -91,7 +108,7 @@ export const Win95Shell = ({ pathname, children }: Win95ShellProps) => {
         </div>
       </div>
 
-      <div className="flex h-7 shrink-0 items-center gap-1 bg-[#c0c0c0] px-0.5 shadow-[inset_0_1px_0_#fff]">
+      <div className="relative z-20 mt-auto flex h-7 shrink-0 items-center gap-1 bg-[#c0c0c0] px-0.5 shadow-[inset_0_1px_0_#fff]">
         <div className="relative" ref={startRef}>
           <button
             ref={startBtnRef}
@@ -109,7 +126,10 @@ export const Win95Shell = ({ pathname, children }: Win95ShellProps) => {
           {startOpen && (
             <StartMenu
               activeId={activeApp?.id}
-              onNavigate={() => setStartOpen(false)}
+              onNavigate={() => {
+                setStartOpen(false);
+                setMinimized(false);
+              }}
               onLogOff={disable}
               onClose={() => closeStart(true)}
             />
@@ -120,7 +140,12 @@ export const Win95Shell = ({ pathname, children }: Win95ShellProps) => {
 
         <button
           type="button"
-          className="win95-raised win95-pressed win95-focusable flex min-w-0 flex-1 items-center justify-start gap-1.5 px-2 py-1 text-[11px]"
+          onClick={() => setMinimized(m => !m)}
+          aria-label={`${title} window`}
+          aria-pressed={!minimized}
+          className={`win95-raised win95-focusable flex min-w-0 flex-1 items-center justify-start gap-1.5 px-2 py-1 text-[11px] ${
+            minimized ? '' : 'win95-pressed'
+          }`}
         >
           {activeApp && <Win95AppIcon id={activeApp.id} />}
           <span className="truncate">{title}</span>

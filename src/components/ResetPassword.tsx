@@ -15,17 +15,20 @@ import type { AuthResponse } from 'types/firebase';
 import { resetPassword } from 'utils/firebase';
 import { LOGIN_ROUTE } from 'constants/routes';
 import { useAppLoading } from 'hooks/useAppLoading';
+import { useWin95Mode } from 'hooks/useWin95Mode';
+import { Win95Dialog } from 'components/win95/Win95Dialog';
 
 const LOGO_SIZE = 125;
 const INPUT_WIDTH = 300;
 
 export const ResetPassword = () => {
-  const { isLoading, setIsLoading } = useAppLoading();
+  const { isLoading } = useAppLoading();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const win95 = useWin95Mode(s => s.enabled);
 
   // Derive validation state from password values - useMemo avoids setState in effect
   const authResponse = useMemo<AuthResponse>(() => {
@@ -61,6 +64,60 @@ export const ResetPassword = () => {
       handleResetPassword();
     }
   };
+
+  if (win95) {
+    return (
+      <Win95Dialog title="Reset Password">
+        <div className="flex flex-col gap-3">
+          <p>Choose a new password.</p>
+          <label className="flex items-center gap-2">
+            <span className="w-24 shrink-0 text-right">Password:</span>
+            <input
+              className="win95-field flex-1"
+              type={showPasswords ? 'text' : 'password'}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoCapitalize="off"
+              autoComplete="off"
+              disabled={isLoading}
+            />
+          </label>
+          <label className="flex items-center gap-2">
+            <span className="w-24 shrink-0 text-right">Confirm:</span>
+            <input
+              className="win95-field flex-1"
+              type={showPasswords ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              onKeyDown={handleKeyPress}
+              autoCapitalize="off"
+              autoComplete="off"
+              disabled={isLoading}
+            />
+          </label>
+          <label className="flex items-center gap-2 pl-[6.5rem]">
+            <input
+              type="checkbox"
+              checked={showPasswords}
+              onChange={() => setShowPasswords(show => !show)}
+            />
+            Show passwords
+          </label>
+          {authResponse.message && (
+            <div className={authResponse.isError ? 'text-[#a00000]' : 'text-[#007000]'}>
+              {authResponse.isError ? '⚠ ' : '✓ '}
+              {authResponse.message}
+            </div>
+          )}
+          <div className="flex justify-end">
+            <button type="button" className="win95-btn" onClick={handleResetPassword} disabled={isLoading}>
+              Confirm
+            </button>
+          </div>
+        </div>
+      </Win95Dialog>
+    );
+  }
 
   return (
     <div className="mt-[5%] flex flex-col items-center gap-y-6 sm:bg-inherit">

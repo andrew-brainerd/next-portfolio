@@ -279,6 +279,35 @@ html[data-mode='win95'] .win95-desktop-icon-label {
   padding: 0 2px;
 }
 
+/* Desktop wallpaper icons (on the teal background) */
+html[data-mode='win95'] .win95-wallpaper-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 76px;
+  padding: 4px;
+  color: #ffffff;
+  text-align: center;
+  cursor: default;
+}
+
+html[data-mode='win95'] .win95-wallpaper-icon-label {
+  padding: 1px 3px;
+  text-shadow: 1px 1px 0 rgb(0 0 0 / 0.6);
+}
+
+html[data-mode='win95'] .win95-wallpaper-icon-selected .win95-wallpaper-icon-label {
+  background: var(--win95-dialog-blue);
+  text-shadow: none;
+  outline: 1px dotted #ffffff;
+}
+
+html[data-mode='win95'] .win95-wallpaper-icon-selected img,
+html[data-mode='win95'] .win95-wallpaper-icon-selected svg {
+  filter: brightness(0.7) sepia(1) hue-rotate(180deg);
+}
+
 /* Status bar */
 html[data-mode='win95'] .win95-statusbar {
   display: flex;

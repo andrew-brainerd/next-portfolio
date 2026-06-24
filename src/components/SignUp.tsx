@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -9,9 +8,7 @@ import TextField from '@mui/material/TextField';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-import type { AuthResponse } from 'types/firebase';
-import { signInWithGoogle, signUpUser, validateInviteCode } from 'utils/firebase';
-import { useAppLoading } from 'hooks/useAppLoading';
+import { useSignUpForm } from 'hooks/useAuthForms';
 import { Separator } from 'components/Separator';
 
 const INPUT_WIDTH = 300;
@@ -42,64 +39,20 @@ const GoogleIcon = () => (
 );
 
 export const SignUp = ({ redirectRoute }: SignUpProps) => {
-  const { isLoading, setIsLoading } = useAppLoading();
-  const [inviteCode, setInviteCode] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [authResponse, setAuthResponse] = useState<AuthResponse>({ isError: false, message: '' });
-
-  const handleSuccess = (message: string) => {
-    setAuthResponse({ isError: false, message });
-    window.location.href = redirectRoute;
-  };
-
-  const handleFailure = (message: string) => {
-    setAuthResponse({ isError: true, message });
-    setIsLoading(false);
-  };
-
-  const verifyInvite = async (): Promise<boolean> => {
-    if (!inviteCode.trim()) {
-      handleFailure('Invite code is required');
-      return false;
-    }
-
-    const result = await validateInviteCode(inviteCode);
-    if (result.isError) {
-      handleFailure(result.message);
-      return false;
-    }
-    return true;
-  };
-
-  const handleEmailSignUp = async (): Promise<void> => {
-    setIsLoading(true);
-    setAuthResponse({ isError: false, message: '' });
-
-    if (!(await verifyInvite())) return;
-
-    const response = await signUpUser(email, password);
-    if (response.isError) {
-      handleFailure(response.message);
-    } else {
-      handleSuccess(response.message);
-    }
-  };
-
-  const handleGoogleSignUp = async (): Promise<void> => {
-    setIsLoading(true);
-    setAuthResponse({ isError: false, message: '' });
-
-    if (!(await verifyInvite())) return;
-
-    const response = await signInWithGoogle();
-    if (response.isError) {
-      handleFailure(response.message);
-    } else {
-      handleSuccess(response.message);
-    }
-  };
+  const {
+    inviteCode,
+    setInviteCode,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    showPassword,
+    toggleShowPassword,
+    isLoading,
+    authResponse,
+    handleEmailSignUp,
+    handleGoogleSignUp
+  } = useSignUpForm(redirectRoute);
 
   const handleKeyPress = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
@@ -150,7 +103,7 @@ export const SignUp = ({ redirectRoute }: SignUpProps) => {
             input: {
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton className="relative left-[2px]" onClick={() => setShowPassword(show => !show)}>
+                  <IconButton className="relative left-[2px]" onClick={toggleShowPassword}>
                     {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                   </IconButton>
                 </InputAdornment>

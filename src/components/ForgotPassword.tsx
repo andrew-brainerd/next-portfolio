@@ -2,23 +2,24 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 
 import type { AuthResponse } from 'types/firebase';
 import { sendForgotPasswordEmail } from 'utils/firebase';
 import { useAppLoading } from 'hooks/useAppLoading';
+import { useWin95Mode } from 'hooks/useWin95Mode';
+import { Win95Dialog } from 'components/win95/Win95Dialog';
 import TextField from '@mui/material/TextField';
 
 const LOGO_SIZE = 125;
 const INPUT_WIDTH = 300;
 
 export const ForgotPassword = () => {
-  const { isLoading, setIsLoading } = useAppLoading();
+  const { isLoading } = useAppLoading();
   const [email, setEmail] = useState('');
   const [authResponse, setAuthResponse] = useState<AuthResponse>({ isError: false, message: '' });
-  const router = useRouter();
+  const win95 = useWin95Mode(s => s.enabled);
 
   const handleForgotPassword = async (): Promise<void> => {
     try {
@@ -37,6 +38,39 @@ export const ForgotPassword = () => {
       handleForgotPassword();
     }
   };
+
+  if (win95) {
+    return (
+      <Win95Dialog title="Forgot Password">
+        <div className="flex flex-col gap-3">
+          <p>Enter your email and we&apos;ll send a reset link.</p>
+          <label className="flex items-center gap-2">
+            <span className="w-16 shrink-0 text-right">Email:</span>
+            <input
+              className="win95-field flex-1"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={handleKeyPress}
+              autoFocus
+              autoCapitalize="off"
+              disabled={isLoading}
+            />
+          </label>
+          {authResponse.message && (
+            <div className={authResponse.isError ? 'text-[#a00000]' : 'text-[#007000]'}>
+              {authResponse.isError ? '⚠ ' : '✓ '}
+              {authResponse.message}
+            </div>
+          )}
+          <div className="flex justify-end">
+            <button type="button" className="win95-btn" onClick={handleForgotPassword} disabled={isLoading}>
+              Send Reset Email
+            </button>
+          </div>
+        </div>
+      </Win95Dialog>
+    );
+  }
 
   return (
     <div className="mt-[5%] flex flex-col items-center gap-y-6 sm:bg-inherit">
