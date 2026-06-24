@@ -24,11 +24,11 @@ export const listFrisbeeGolfRounds = async (): Promise<FrisbeeGolfRound[]> => {
   return response?.rounds ?? [];
 };
 
-export const getFrisbeeGolfRound = (roundId: string): Promise<FrisbeeGolfRound | undefined> => {
+export const getFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGolfRound | undefined> => {
   return getRequest<FrisbeeGolfRound>(`/scorebook/frisbee-golf/rounds/${roundId}`);
 };
 
-export const createFrisbeeGolfRound = (input: CreateFrisbeeGolfRoundInput): Promise<FrisbeeGolfRound> => {
+export const createFrisbeeGolfRound = async (input: CreateFrisbeeGolfRoundInput): Promise<FrisbeeGolfRound> => {
   return postRequest<CreateFrisbeeGolfRoundInput, FrisbeeGolfRound>('/scorebook/frisbee-golf/rounds', input);
 };
 
@@ -36,14 +36,14 @@ export const deleteFrisbeeGolfRound = async (roundId: string): Promise<void> => 
   await deleteRequest(`/scorebook/frisbee-golf/rounds/${roundId}`);
 };
 
-export const updateFrisbeeGolfRoundName = (
+export const updateFrisbeeGolfRoundName = async (
   roundId: string,
   name: string
 ): Promise<FrisbeeGolfRound | undefined> => {
   return patchRequest<{ name: string }, FrisbeeGolfRound>(`/scorebook/frisbee-golf/rounds/${roundId}`, { name });
 };
 
-export const updateFrisbeeGolfHoles = (
+export const updateFrisbeeGolfHoles = async (
   roundId: string,
   holes: FrisbeeGolfHole[]
 ): Promise<FrisbeeGolfRound | undefined> => {
@@ -53,7 +53,7 @@ export const updateFrisbeeGolfHoles = (
   );
 };
 
-export const addFrisbeeGolfPlayer = (
+export const addFrisbeeGolfPlayer = async (
   roundId: string,
   player: Omit<FrisbeeGolfPlayer, 'id'>
 ): Promise<FrisbeeGolfRound> => {
@@ -67,18 +67,18 @@ export const removeFrisbeeGolfPlayer = async (roundId: string, playerId: string)
   await deleteRequest(`/scorebook/frisbee-golf/rounds/${roundId}/players/${playerId}`);
 };
 
-export const startFrisbeeGolfRound = (roundId: string): Promise<FrisbeeGolfRound> => {
+export const startFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGolfRound> => {
   return postRequest<Record<string, never>, FrisbeeGolfRound>(
     `/scorebook/frisbee-golf/rounds/${roundId}/start`,
     {}
   );
 };
 
-export const lookupFrisbeeGolfUser = (email: string): Promise<FrisbeeGolfUserLookup | undefined> => {
+export const lookupFrisbeeGolfUser = async (email: string): Promise<FrisbeeGolfUserLookup | undefined> => {
   return getRequest<FrisbeeGolfUserLookup>('/scorebook/frisbee-golf/users/lookup', { email });
 };
 
-export const setFrisbeeGolfScore = (
+export const setFrisbeeGolfScore = async (
   roundId: string,
   playerId: string,
   holeNumber: number,
@@ -98,13 +98,13 @@ export const clearFrisbeeGolfScore = async (
   await deleteRequest(`/scorebook/frisbee-golf/rounds/${roundId}/scores/${playerId}/${holeNumber}`);
 };
 
-export const completeFrisbeeGolfRound = (roundId: string): Promise<FrisbeeGolfRound> => {
+export const completeFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGolfRound> => {
   return postRequest<Record<string, never>, FrisbeeGolfRound>(
     `/scorebook/frisbee-golf/rounds/${roundId}/complete`,
     {}
   );
 };
 
-export const getFrisbeeGolfStats = (): Promise<FrisbeeGolfUserStats | undefined> => {
+export const getFrisbeeGolfStats = async (): Promise<FrisbeeGolfUserStats | undefined> => {
   return getRequest<FrisbeeGolfUserStats>('/scorebook/frisbee-golf/stats');
 };

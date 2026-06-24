@@ -9,6 +9,10 @@
     "analyze": "next experimental-analyze",
     "clean": "rm -rf node_modules .next",
     "dev": "next dev --experimental-https --hostname local.brainerd.dev --port 3001",
+    "e2e": "playwright test",
+    "e2e:auth": "playwright test --project=setup",
+    "e2e:ui": "playwright test --ui",
+    "e2e:report": "playwright show-report",
     "lint": "pnpm lint:js && pnpm lint:css",
     "lint:fix": "pnpm lint:js:fix && pnpm lint:css:fix",
     "lint:js": "eslint .",
@@ -56,6 +60,7 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "lint-staged": "^17.0.5",
     "postcss-html": "^1.8.0",
     "stylelint": "^17.12.0",
