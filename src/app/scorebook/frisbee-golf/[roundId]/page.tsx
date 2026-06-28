@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
 import { getFrisbeeGolfRound } from '@/api/scorebook';
@@ -23,17 +24,7 @@ export default async function FrisbeeGolfRoundPage({ params }: RoundDetailPagePr
   const { roundId } = await params;
 
   if (!token) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen gap-y-4">
-        <p className="text-white text-xl">Please log in to view this round.</p>
-        <Link
-          href={`${LOGIN_ROUTE}?returnTo=${SCOREBOOK_FRISBEE_GOLF_ROUTE}/${roundId}`}
-          className="text-brand-400 underline hover:text-brand-300"
-        >
-          Go to login
-        </Link>
-      </div>
-    );
+    redirect(`${LOGIN_ROUTE}?from=${encodeURIComponent(`${SCOREBOOK_FRISBEE_GOLF_ROUTE}/${roundId}`)}`);
   }
 
   const round = await getFrisbeeGolfRound(roundId);

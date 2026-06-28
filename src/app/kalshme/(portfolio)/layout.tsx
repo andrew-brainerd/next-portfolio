@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
+import { KALSHME_ROUTE, LOGIN_ROUTE } from '@/constants/routes';
 import { PortfolioNav } from '@/components/kalshi/PortfolioNav';
 
 export default async function KalshmeLayout({ children }: { children: React.ReactNode }) {
@@ -9,11 +11,7 @@ export default async function KalshmeLayout({ children }: { children: React.Reac
   const userId = cookieJar.get(USER_COOKIE)?.value;
 
   if (!token || !userId) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-white text-xl">Please log in to view your Kalshi portfolio.</p>
-      </div>
-    );
+    redirect(`${LOGIN_ROUTE}?from=${encodeURIComponent(KALSHME_ROUTE)}`);
   }
 
   return (

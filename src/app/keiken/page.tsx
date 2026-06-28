@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
+import { KEIKEN_ROUTE, LOGIN_ROUTE } from '@/constants/routes';
 import { CreateExperienceGroupForm } from '@/components/keiken/CreateExperienceGroupForm';
 import { ExperienceGroupsList } from '@/components/keiken/ExperienceGroupsList';
 import { Loading } from '@/components/Loading';
@@ -21,11 +23,7 @@ export default async function KeikenPage() {
   const userId = cookieJar.get(USER_COOKIE)?.value;
 
   if (!token || !userId) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-white text-xl">Please log in to view your experience groups.</p>
-      </div>
-    );
+    redirect(`${LOGIN_ROUTE}?from=${encodeURIComponent(KEIKEN_ROUTE)}`);
   }
 
   return (

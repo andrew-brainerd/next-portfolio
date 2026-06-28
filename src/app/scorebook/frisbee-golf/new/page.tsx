@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 import { TOKEN_COOKIE } from '@/constants/authentication';
 import {
@@ -18,17 +19,7 @@ export default async function NewFrisbeeGolfRoundPage() {
   const token = cookieJar.get(TOKEN_COOKIE)?.value;
 
   if (!token) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen gap-y-4">
-        <p className="text-white text-xl">Please log in to start a round.</p>
-        <Link
-          href={`${LOGIN_ROUTE}?returnTo=${SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE}`}
-          className="text-brand-400 underline hover:text-brand-300"
-        >
-          Go to login
-        </Link>
-      </div>
-    );
+    redirect(`${LOGIN_ROUTE}?from=${encodeURIComponent(SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE)}`);
   }
 
   return (

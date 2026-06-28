@@ -6,6 +6,7 @@ export const KEIKEN_ROUTE = '/keiken';
 export const KALSHME_ROUTE = '/kalshme';
 export const PEAPOD_ROUTE = '/peapod';
 export const ROLL_WITH_ME_ROUTE = '/roll-with-me';
+export const WEDDING_ROUTE = '/wedding';
 export const APPS_ROUTE = '/apps';
 export const APPS_CONDENSATE_ROUTE = '/apps/condensate';
 export const SCOREBOOK_ROUTE = '/scorebook';

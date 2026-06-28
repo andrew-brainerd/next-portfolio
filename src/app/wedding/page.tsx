@@ -1,7 +1,9 @@
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 
 import { TOKEN_COOKIE } from '@/constants/authentication';
+import { LOGIN_ROUTE, WEDDING_ROUTE } from '@/constants/routes';
 import { getWeddingVenues } from '@/api/wedding';
 import { WeddingShell } from '@/components/wedding/WeddingShell';
 
@@ -32,11 +34,7 @@ export default async function WeddingPage() {
   const token = cookieJar.get(TOKEN_COOKIE)?.value;
 
   if (!token) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-white text-xl">Please log in to view wedding planning.</p>
-      </div>
-    );
+    redirect(`${LOGIN_ROUTE}?from=${encodeURIComponent(WEDDING_ROUTE)}`);
   }
 
   const venues = (await getWeddingVenues()) ?? [];

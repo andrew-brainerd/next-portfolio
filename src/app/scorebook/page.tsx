@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 import { TOKEN_COOKIE } from '@/constants/authentication';
 import { LOGIN_ROUTE, SCOREBOOK_ROUTE } from 'constants/routes';
@@ -14,17 +15,7 @@ export default async function ScorebookPage() {
   const token = cookieJar.get(TOKEN_COOKIE)?.value;
 
   if (!token) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen gap-y-4">
-        <p className="text-white text-xl">Please log in to access the Scorebook.</p>
-        <Link
-          href={`${LOGIN_ROUTE}?returnTo=${SCOREBOOK_ROUTE}`}
-          className="text-brand-400 underline hover:text-brand-300"
-        >
-          Go to login
-        </Link>
-      </div>
-    );
+    redirect(`${LOGIN_ROUTE}?from=${encodeURIComponent(SCOREBOOK_ROUTE)}`);
   }
 
   return (

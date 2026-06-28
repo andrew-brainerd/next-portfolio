@@ -1,8 +1,10 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 import { getExperienceGroup, getExperiences } from '@/api/keiken';
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
+import { KEIKEN_ROUTE, LOGIN_ROUTE } from '@/constants/routes';
 import { CreateExperienceForm } from '@/components/keiken/CreateExperienceForm';
 import { ExperienceGroupSettings } from '@/components/keiken/ExperienceGroupSettings';
 import { RatingStars } from '@/components/keiken/RatingStars';
@@ -20,11 +22,7 @@ export default async function ExperienceGroupPage({ params }: ExperienceGroupPag
   const userId = cookieJar.get(USER_COOKIE)?.value;
 
   if (!token || !userId) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-white text-xl">Please log in to view this experience group.</p>
-      </div>
-    );
+    redirect(`${LOGIN_ROUTE}?from=${encodeURIComponent(`${KEIKEN_ROUTE}/${experienceGroupId}`)}`);
   }
 
   const [experienceGroup, experiences] = await Promise.all([
