@@ -18,6 +18,7 @@ import {
   type FrisbeeGolfUserLookup
 } from '@/api/scorebook';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
+import { darkFieldSx } from '@/components/scorebook/fieldStyles';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 interface RoundSetupProps {
@@ -154,6 +155,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
             size="small"
             fullWidth
             disabled={pending}
+            sx={darkFieldSx}
           />
           <Button variant="outlined" disabled={!nameDirty || pending} onClick={handleSaveName}>
             Save
@@ -176,6 +178,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
                 size="small"
                 slotProps={{ htmlInput: { min: 1, style: { textAlign: 'center' } } }}
                 disabled={pending}
+                sx={darkFieldSx}
               />
             </li>
           ))}
@@ -235,6 +238,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
                 size="small"
                 placeholder="player@example.com"
                 disabled={pending || lookupPending}
+                sx={darkFieldSx}
               />
               <Button variant="outlined" onClick={handleLookup} disabled={pending || lookupPending}>
                 {lookupPending ? 'Looking up...' : 'Look up'}
@@ -266,6 +270,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
                 size="small"
                 placeholder="Guest name"
                 disabled={pending}
+                sx={darkFieldSx}
               />
               <Button variant="outlined" onClick={handleAddGuest} disabled={pending || !guestDraft.trim()}>
                 Add guest

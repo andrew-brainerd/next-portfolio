@@ -12,6 +12,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { createFrisbeeGolfRound } from '@/api/scorebook';
 import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
+import { darkFieldSx } from '@/components/scorebook/fieldStyles';
 import type { CreateFrisbeeGolfRoundInput } from '@/types/scorebook';
 
 const DEFAULT_HOLE_COUNT = 9;
@@ -79,6 +80,7 @@ export const NewRoundForm = () => {
           size="small"
           placeholder="e.g. 4th of July 2026"
           disabled={submitting}
+          sx={darkFieldSx}
         />
       </div>
 
@@ -91,6 +93,7 @@ export const NewRoundForm = () => {
           size="small"
           slotProps={{ htmlInput: { min: 1, max: MAX_HOLES } }}
           disabled={submitting}
+          sx={darkFieldSx}
         />
         <TextField
           label="Default par"
@@ -100,6 +103,7 @@ export const NewRoundForm = () => {
           size="small"
           slotProps={{ htmlInput: { min: 1 } }}
           disabled={submitting}
+          sx={darkFieldSx}
         />
       </div>
 
@@ -107,7 +111,7 @@ export const NewRoundForm = () => {
         <h3 className="text-white font-semibold mb-2">Players</h3>
         <ul className="space-y-2">
           <li className="flex items-center gap-2">
-            <TextField value={ownerName} disabled fullWidth size="small" label="You" />
+            <TextField value={ownerName} disabled fullWidth size="small" label="You" sx={darkFieldSx} />
           </li>
           {guestNames.map((guestName, index) => (
             <li key={index} className="flex items-center gap-2">
@@ -119,6 +123,7 @@ export const NewRoundForm = () => {
                 label={`Guest ${index + 1}`}
                 placeholder="Name"
                 disabled={submitting}
+                sx={darkFieldSx}
               />
               <IconButton
                 aria-label="Remove guest"
