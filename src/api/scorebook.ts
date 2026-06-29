@@ -68,17 +68,24 @@ export const startFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGol
   );
 };
 
-export const joinFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGolfRound> => {
-  return postRequest<Record<string, never>, FrisbeeGolfRound>(
+export const joinFrisbeeGolfRound = async (
+  roundId: string,
+  displayName?: string
+): Promise<FrisbeeGolfRound> => {
+  return postRequest<{ displayName?: string }, FrisbeeGolfRound>(
     `/scorebook/frisbee-golf/rounds/${roundId}/join`,
-    {}
+    { displayName }
   );
 };
 
-export const joinFrisbeeGolfRoundByCode = async (code: string): Promise<FrisbeeGolfRound> => {
-  return postRequest<{ code: string }, FrisbeeGolfRound>('/scorebook/frisbee-golf/rounds/join-by-code', {
-    code
-  });
+export const joinFrisbeeGolfRoundByCode = async (
+  code: string,
+  displayName?: string
+): Promise<FrisbeeGolfRound> => {
+  return postRequest<{ code: string; displayName?: string }, FrisbeeGolfRound>(
+    '/scorebook/frisbee-golf/rounds/join-by-code',
+    { code, displayName }
+  );
 };
 
 export const setFrisbeeGolfCurrentHole = async (

@@ -9,7 +9,6 @@ import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import {
-  addFrisbeeGolfPlayer,
   getFrisbeeGolfRound,
   removeFrisbeeGolfPlayer,
   setFrisbeeGolfGamemaster,
@@ -45,8 +44,6 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
     () => round.holes.some(h => parDrafts[h.number] !== h.par),
     [round.holes, parDrafts]
   );
-
-  const [guestDraft, setGuestDraft] = useState('');
 
   const [inviteUrl, setInviteUrl] = useState('');
   const [copied, setCopied] = useState(false);
@@ -109,13 +106,6 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
   const handleSavePars = () => {
     const nextHoles = round.holes.map(h => ({ ...h, par: Math.max(1, parDrafts[h.number] || h.par) }));
     return runAction(() => updateFrisbeeGolfHoles(round.id, nextHoles));
-  };
-
-  const handleAddGuest = async () => {
-    const name = guestDraft.trim();
-    if (!name) return;
-    await runAction(() => addFrisbeeGolfPlayer(round.id, { kind: 'guest', displayName: name }));
-    setGuestDraft('');
   };
 
   const handleRemovePlayer = async (playerId: string) => {
@@ -257,31 +247,6 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
                 </Button>
               </div>
             )}
-          </div>
-
-          <div className="rounded border border-brand-200 bg-brand-100 p-3">
-            <h3 className="text-sm font-semibold text-neutral-700 mb-2">Add a guest</h3>
-            <div className="flex items-center gap-2">
-              <TextField
-                value={guestDraft}
-                onChange={e => setGuestDraft(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') handleAddGuest();
-                }}
-                size="small"
-                placeholder="Guest name"
-                disabled={pending}
-                sx={lightFieldSx}
-              />
-              <Button
-                variant="outlined"
-                onClick={handleAddGuest}
-                disabled={pending || !guestDraft.trim()}
-                sx={brandButtonSx}
-              >
-                Add guest
-              </Button>
-            </div>
           </div>
         </div>
       </section>

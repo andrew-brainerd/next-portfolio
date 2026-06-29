@@ -44,10 +44,7 @@ test.describe('frisbee golf — full round lifecycle', () => {
 
     await page.getByRole('textbox', { name: 'Round name (optional)' }).fill(roundName);
     await setNumberField(page, 'Holes', HOLE_COUNT);
-
-    // Add a guest player in the create form.
-    await page.getByRole('button', { name: 'Add player' }).click();
-    await page.getByRole('textbox', { name: 'Guest 1' }).fill('Alice');
+    await page.getByRole('textbox', { name: 'Your nickname' }).fill('E2E Player');
 
     await page.getByRole('button', { name: 'Create round' }).click();
 
@@ -61,10 +58,8 @@ test.describe('frisbee golf — full round lifecycle', () => {
     await expect(page.getByRole('heading', { name: roundName, level: 1 })).toBeVisible();
     await expect(page.getByText(`Status: setup · ${HOLE_COUNT} holes`)).toBeVisible();
 
-    // Add a second guest from the setup screen (exercises addFrisbeeGolfPlayer).
-    await page.getByPlaceholder('Guest name').fill('Bob');
-    await page.getByRole('button', { name: 'Add guest' }).click();
-    await expect(page.getByText('Bob')).toBeVisible();
+    // The owner is the sole player; others would join via the invite link/code.
+    await expect(page.getByText('E2E Player')).toBeVisible();
 
     // Start the round → server re-renders into the active view.
     await page.getByRole('button', { name: 'Start round' }).click();
@@ -95,9 +90,8 @@ test.describe('frisbee golf — full round lifecycle', () => {
     await expect(page.getByText(`Status: completed`)).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Scorecard' })).toBeVisible();
     await expect(page.getByText('Winner')).toBeVisible();
-    // Both guests appear in the final scorecard.
-    await expect(page.getByText('Alice')).toBeVisible();
-    await expect(page.getByText('Bob')).toBeVisible();
+    // The owner appears in the final scorecard.
+    await expect(page.getByText('E2E Player')).toBeVisible();
 
     // --- Stats reflects the completed round ---
     await page.goto(SCOREBOOK_FRISBEE_GOLF_STATS_ROUTE);

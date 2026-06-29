@@ -4,15 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 import { createFrisbeeGolfRound } from '@/api/scorebook';
 import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
-import { lightFieldSx, brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
+import { lightFieldSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
 import type { CreateFrisbeeGolfRoundInput } from '@/types/scorebook';
 
@@ -27,33 +24,24 @@ export const NewRoundForm = () => {
   const [name, setName] = useState('');
   const [holeCount, setHoleCount] = useState(DEFAULT_HOLE_COUNT);
   const [defaultPar, setDefaultPar] = useState(DEFAULT_PAR);
-  const [guestNames, setGuestNames] = useState<string[]>(['']);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const ownerName = user?.displayName || user?.email || 'You';
-
-  const updateGuest = (index: number, value: string) => {
-    setGuestNames(prev => prev.map((n, i) => (i === index ? value : n)));
-  };
-
-  const addGuest = () => setGuestNames(prev => [...prev, '']);
-  const removeGuest = (index: number) => setGuestNames(prev => prev.filter((_, i) => i !== index));
+  // Default to the account name; once the user edits, their override sticks.
+  const defaultName = user?.displayName || user?.email || '';
+  const [nicknameInput, setNicknameInput] = useState<string | null>(null);
+  const nickname = nicknameInput ?? defaultName;
 
   const handleSubmit = async () => {
     if (!user) return;
     setError(null);
 
-    const trimmedGuests = guestNames.map(n => n.trim()).filter(Boolean);
-
+    const ownerName = nickname.trim() || user.displayName || user.email || 'You';
     const input: CreateFrisbeeGolfRoundInput = {
       name: name.trim() || undefined,
       holeCount,
       defaultPar,
-      players: [
-        { kind: 'user', userId: user.uid, displayName: ownerName },
-        ...trimmedGuests.map(guestName => ({ kind: 'guest' as const, displayName: guestName }))
-      ]
+      players: [{ kind: 'user', userId: user.uid, displayName: ownerName }]
     };
 
     setSubmitting(true);
@@ -80,6 +68,19 @@ export const NewRoundForm = () => {
           fullWidth
           size="small"
           placeholder="e.g. 4th of July 2026"
+          disabled={submitting}
+          sx={lightFieldSx}
+        />
+      </div>
+
+      <div>
+        <TextField
+          label="Your nickname"
+          value={nickname}
+          onChange={e => setNicknameInput(e.target.value)}
+          fullWidth
+          size="small"
+          placeholder="The name others will see"
           disabled={submitting}
           sx={lightFieldSx}
         />
@@ -112,43 +113,9 @@ export const NewRoundForm = () => {
         </div>
       </div>
 
-      <section>
-        <h3 className="text-neutral-900 font-semibold mb-2">Players</h3>
-        <ul className="space-y-2">
-          <li className="flex items-center gap-2">
-            <TextField value={ownerName} disabled fullWidth size="small" label="You" sx={lightFieldSx} />
-          </li>
-          {guestNames.map((guestName, index) => (
-            <li key={index} className="flex items-center gap-2">
-              <TextField
-                value={guestName}
-                onChange={e => updateGuest(index, e.target.value)}
-                fullWidth
-                size="small"
-                label={`Guest ${index + 1}`}
-                placeholder="Name"
-                disabled={submitting}
-                sx={lightFieldSx}
-              />
-              <IconButton
-                aria-label="Remove guest"
-                onClick={() => removeGuest(index)}
-                disabled={submitting || guestNames.length === 1}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </li>
-          ))}
-        </ul>
-        <Button
-          startIcon={<AddIcon />}
-          onClick={addGuest}
-          disabled={submitting}
-          sx={{ ...brandButtonSx, mt: 1 }}
-        >
-          Add player
-        </Button>
-      </section>
+      <p className="text-sm text-neutral-500">
+        It’s just you for now — others join from the invite link or code once the round is created.
+      </p>
 
       {error && <Alert severity="error">{error}</Alert>}
 
