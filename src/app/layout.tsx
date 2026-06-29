@@ -1,10 +1,11 @@
 import { Oswald, Pacifico, Roboto_Mono } from 'next/font/google';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 import { GoogleAnalytics } from '@next/third-parties/google';
 
 import { headers } from 'next/headers';
 import { SiteChrome } from '@/components/SiteChrome';
+import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 import ThemeProvider from '@/providers/ThemeProvider';
 import { TOKEN_COOKIE } from '@/constants/authentication';
 import 'styles/index.css';
@@ -82,7 +83,19 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1
     }
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'Andrew Brainerd',
+    statusBarStyle: 'black-translucent'
   }
+};
+
+export const viewport: Viewport = {
+  themeColor: '#191919',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover'
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -113,6 +126,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider>
           <SiteChrome isLoggedIn={isLoggedIn}>{children}</SiteChrome>
         </ThemeProvider>
+        <ServiceWorkerRegister />
       </body>
       {gaMeasurementId && <GoogleAnalytics gaId={gaMeasurementId} />}
     </html>
