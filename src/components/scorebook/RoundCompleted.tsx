@@ -1,4 +1,5 @@
 import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
+import { PlayerColorDot } from '@/components/scorebook/PlayerColorDot';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 interface RoundCompletedProps {
@@ -26,7 +27,8 @@ export const RoundCompleted = ({ round }: RoundCompletedProps) => {
               >
                 <div className="flex items-center gap-3">
                   <span className="w-6 text-right text-neutral-500">{medal ?? `${index + 1}.`}</span>
-                  <span className={`font-medium ${isWinner ? 'text-brand-300' : 'text-white'}`}>
+                  <span className={`flex items-center gap-2 font-medium ${isWinner ? 'text-brand-300' : 'text-white'}`}>
+                    <PlayerColorDot color={entry.color} />
                     {entry.displayName}
                   </span>
                   {isWinner && <span className="text-xs uppercase tracking-wider text-brand-400">Winner</span>}
@@ -73,7 +75,10 @@ export const RoundCompleted = ({ round }: RoundCompletedProps) => {
                 return (
                   <tr key={player.id} className="text-neutral-200">
                     <td className="sticky left-0 bg-neutral-900 px-3 py-2 font-medium border border-neutral-700">
-                      {player.displayName}
+                      <span className="flex items-center gap-2">
+                        <PlayerColorDot color={player.color} />
+                        {player.displayName}
+                      </span>
                     </td>
                     {round.holes.map(hole => {
                       const score = playerScores[hole.number];

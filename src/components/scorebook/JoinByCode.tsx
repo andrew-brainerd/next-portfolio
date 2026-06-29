@@ -6,11 +6,13 @@ import { useRouter } from 'next/navigation';
 import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { joinFrisbeeGolfRoundByCode } from '@/api/scorebook';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
+import { DEFAULT_DISC_COLOR } from '@/components/scorebook/PlayerColorDot';
 
 export const JoinByCode = () => {
   const router = useRouter();
   const { user } = useFirebaseUser();
   const [nicknameInput, setNicknameInput] = useState<string | null>(null);
+  const [color, setColor] = useState(DEFAULT_DISC_COLOR);
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export const JoinByCode = () => {
     setPending(true);
     setError(null);
     try {
-      const round = await joinFrisbeeGolfRoundByCode(trimmed, nickname.trim() || undefined);
+      const round = await joinFrisbeeGolfRoundByCode(trimmed, nickname.trim() || undefined, color);
       router.push(`${SCOREBOOK_FRISBEE_GOLF_ROUTE}/${round.id}`);
     } catch {
       setError('That code didn’t match a round that’s open to join.');
@@ -50,10 +52,28 @@ export const JoinByCode = () => {
           />
         </label>
         <label className="text-xs text-neutral-400">
+          Color
+          <input
+            type="color"
+            value={color}
+            onChange={e => setColor(e.target.value)}
+            disabled={pending}
+            aria-label="Frisbee color"
+            className="mt-1 block h-10 w-12 cursor-pointer rounded border border-neutral-700 bg-neutral-900 p-1 disabled:opacity-60"
+          />
+        </label>
+        <label className="text-xs text-neutral-400">
           Code
           <input
             value={code}
-            onChange={e => setCode(e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 10))}
+            onChange={e =>
+              setCode(
+                e.target.value
+                  .toUpperCase()
+                  .replace(/[^0-9A-Z]/g, '')
+                  .slice(0, 10)
+              )
+            }
             onKeyDown={e => {
               if (e.key === 'Enter') handleJoin();
             }}

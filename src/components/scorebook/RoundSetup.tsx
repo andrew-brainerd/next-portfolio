@@ -20,6 +20,7 @@ import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
 import { getChannel } from '@/utils/pusher';
 import { lightFieldSx, brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
+import { PlayerColorDot } from '@/components/scorebook/PlayerColorDot';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
@@ -37,13 +38,10 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
   const [nameDraft, setNameDraft] = useState(round.name);
   const nameDirty = nameDraft.trim() !== round.name;
 
-  const [parDrafts, setParDrafts] = useState<Record<number, number>>(
-    () => Object.fromEntries(round.holes.map(h => [h.number, h.par]))
+  const [parDrafts, setParDrafts] = useState<Record<number, number>>(() =>
+    Object.fromEntries(round.holes.map(h => [h.number, h.par]))
   );
-  const parDirty = useMemo(
-    () => round.holes.some(h => parDrafts[h.number] !== h.par),
-    [round.holes, parDrafts]
-  );
+  const parDirty = useMemo(() => round.holes.some(h => parDrafts[h.number] !== h.par), [round.holes, parDrafts]);
 
   const [inviteUrl, setInviteUrl] = useState('');
   const [copied, setCopied] = useState(false);
@@ -125,8 +123,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
     }
   };
 
-  const handleSetGamemaster = (userId: string) =>
-    runAction(() => setFrisbeeGolfGamemaster(round.id, userId));
+  const handleSetGamemaster = (userId: string) => runAction(() => setFrisbeeGolfGamemaster(round.id, userId));
 
   const handleStart = async () => {
     setPending(true);
@@ -196,11 +193,10 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
                 key={player.id}
                 className="flex items-center justify-between rounded border border-brand-200 bg-brand-100 p-2"
               >
-                <div>
+                <div className="flex items-center gap-2">
+                  <PlayerColorDot color={player.color} />
                   <span className="text-neutral-900">{player.displayName}</span>
-                  <span className="text-xs text-neutral-500 ml-2">
-                    {isOwner ? 'owner' : player.kind}
-                  </span>
+                  <span className="text-xs text-neutral-500 ml-2">{isOwner ? 'owner' : player.kind}</span>
                 </div>
                 {!isOwner && (
                   <IconButton
@@ -239,9 +235,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
             {round.joinCode && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="text-xs text-neutral-500">Or share this code:</span>
-                <span className="font-mono text-lg font-bold tracking-[0.3em] text-neutral-900">
-                  {round.joinCode}
-                </span>
+                <span className="font-mono text-lg font-bold tracking-[0.3em] text-neutral-900">{round.joinCode}</span>
                 <Button variant="outlined" size="small" onClick={handleCopyCode} sx={brandButtonSx}>
                   {copiedCode ? 'Copied!' : 'Copy code'}
                 </Button>

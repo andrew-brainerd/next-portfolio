@@ -3,6 +3,7 @@ import type { FrisbeeGolfHole, FrisbeeGolfPlayer, FrisbeeGolfRound } from '@/typ
 export interface LeaderboardEntry {
   playerId: string;
   displayName: string;
+  color?: string;
   holesPlayed: number;
   total: number;
   parThrough: number;
@@ -33,6 +34,7 @@ export const computeLeaderboard = (
     return {
       playerId: player.id,
       displayName: player.displayName,
+      color: player.color,
       holesPlayed,
       total,
       parThrough,

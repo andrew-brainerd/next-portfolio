@@ -20,6 +20,7 @@ import {
 import { getChannel } from '@/utils/pusher';
 import { brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
+import { PlayerColorDot } from '@/components/scorebook/PlayerColorDot';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
@@ -185,7 +186,10 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
               <li key={entry.playerId} className="flex items-center justify-between p-3">
                 <div className="flex items-center gap-3">
                   <span className="w-6 text-right text-neutral-500">{medal ?? `${index + 1}.`}</span>
-                  <span className="text-white font-medium">{entry.displayName}</span>
+                  <span className="flex items-center gap-2 font-medium text-white">
+                    <PlayerColorDot color={entry.color} />
+                    {entry.displayName}
+                  </span>
                 </div>
                 <div className="text-right">
                   <div className="text-white font-mono">{entry.total}</div>
@@ -275,7 +279,10 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
                 key={player.id}
                 className="flex items-center justify-between rounded border border-neutral-700 bg-neutral-800 p-3"
               >
-                <span className="text-white font-medium truncate mr-3">{player.displayName}</span>
+                <span className="mr-3 flex items-center gap-2 truncate font-medium text-white">
+                  <PlayerColorDot color={player.color} />
+                  {player.displayName}
+                </span>
                 <div className="flex items-center gap-2">
                   <IconButton
                     aria-label="Decrease score"

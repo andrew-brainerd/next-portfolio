@@ -11,6 +11,7 @@ import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
 import { lightFieldSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
+import { DEFAULT_DISC_COLOR } from '@/components/scorebook/PlayerColorDot';
 import type { CreateFrisbeeGolfRoundInput } from '@/types/scorebook';
 
 const DEFAULT_HOLE_COUNT = 9;
@@ -22,6 +23,7 @@ export const NewRoundForm = () => {
   const { user, ready } = useFirebaseUser();
 
   const [name, setName] = useState('');
+  const [color, setColor] = useState(DEFAULT_DISC_COLOR);
   const [holeCount, setHoleCount] = useState(DEFAULT_HOLE_COUNT);
   const [defaultPar, setDefaultPar] = useState(DEFAULT_PAR);
   const [submitting, setSubmitting] = useState(false);
@@ -41,7 +43,7 @@ export const NewRoundForm = () => {
       name: name.trim() || undefined,
       holeCount,
       defaultPar,
-      players: [{ kind: 'user', userId: user.uid, displayName: ownerName }]
+      players: [{ kind: 'user', userId: user.uid, displayName: ownerName, color }]
     };
 
     setSubmitting(true);
@@ -86,6 +88,20 @@ export const NewRoundForm = () => {
         />
       </div>
 
+      <div className="flex items-center gap-3">
+        <label htmlFor="disc-color" className="text-sm text-neutral-600">
+          Your frisbee color
+        </label>
+        <input
+          id="disc-color"
+          type="color"
+          value={color}
+          onChange={e => setColor(e.target.value)}
+          disabled={submitting}
+          className="h-9 w-12 cursor-pointer rounded border border-brand-200 bg-white p-1"
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="mb-1 block text-sm text-neutral-600">Holes</label>
@@ -120,12 +136,7 @@ export const NewRoundForm = () => {
       {error && <Alert severity="error">{error}</Alert>}
 
       <div className="flex gap-2">
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={submitting || !user}
-          sx={brandContainedButtonSx}
-        >
+        <Button variant="contained" onClick={handleSubmit} disabled={submitting || !user} sx={brandContainedButtonSx}>
           {submitting ? 'Creating...' : 'Create round'}
         </Button>
         <Button

@@ -41,10 +41,9 @@ export const updateFrisbeeGolfHoles = async (
   roundId: string,
   holes: FrisbeeGolfHole[]
 ): Promise<FrisbeeGolfRound | undefined> => {
-  return patchRequest<{ holes: FrisbeeGolfHole[] }, FrisbeeGolfRound>(
-    `/scorebook/frisbee-golf/rounds/${roundId}`,
-    { holes }
-  );
+  return patchRequest<{ holes: FrisbeeGolfHole[] }, FrisbeeGolfRound>(`/scorebook/frisbee-golf/rounds/${roundId}`, {
+    holes
+  });
 };
 
 export const addFrisbeeGolfPlayer = async (
@@ -62,50 +61,42 @@ export const removeFrisbeeGolfPlayer = async (roundId: string, playerId: string)
 };
 
 export const startFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGolfRound> => {
-  return postRequest<Record<string, never>, FrisbeeGolfRound>(
-    `/scorebook/frisbee-golf/rounds/${roundId}/start`,
-    {}
-  );
+  return postRequest<Record<string, never>, FrisbeeGolfRound>(`/scorebook/frisbee-golf/rounds/${roundId}/start`, {});
 };
 
 export const joinFrisbeeGolfRound = async (
   roundId: string,
-  displayName?: string
+  displayName?: string,
+  color?: string
 ): Promise<FrisbeeGolfRound> => {
-  return postRequest<{ displayName?: string }, FrisbeeGolfRound>(
+  return postRequest<{ displayName?: string; color?: string }, FrisbeeGolfRound>(
     `/scorebook/frisbee-golf/rounds/${roundId}/join`,
-    { displayName }
+    { displayName, color }
   );
 };
 
 export const joinFrisbeeGolfRoundByCode = async (
   code: string,
-  displayName?: string
+  displayName?: string,
+  color?: string
 ): Promise<FrisbeeGolfRound> => {
-  return postRequest<{ code: string; displayName?: string }, FrisbeeGolfRound>(
+  return postRequest<{ code: string; displayName?: string; color?: string }, FrisbeeGolfRound>(
     '/scorebook/frisbee-golf/rounds/join-by-code',
-    { code, displayName }
+    { code, displayName, color }
   );
 };
 
-export const setFrisbeeGolfCurrentHole = async (
-  roundId: string,
-  holeNumber: number
-): Promise<FrisbeeGolfRound> => {
+export const setFrisbeeGolfCurrentHole = async (roundId: string, holeNumber: number): Promise<FrisbeeGolfRound> => {
   return putRequest<{ holeNumber: number }, FrisbeeGolfRound>(
     `/scorebook/frisbee-golf/rounds/${roundId}/current-hole`,
     { holeNumber }
   );
 };
 
-export const setFrisbeeGolfGamemaster = async (
-  roundId: string,
-  userId: string
-): Promise<FrisbeeGolfRound> => {
-  return putRequest<{ userId: string }, FrisbeeGolfRound>(
-    `/scorebook/frisbee-golf/rounds/${roundId}/gamemaster`,
-    { userId }
-  );
+export const setFrisbeeGolfGamemaster = async (roundId: string, userId: string): Promise<FrisbeeGolfRound> => {
+  return putRequest<{ userId: string }, FrisbeeGolfRound>(`/scorebook/frisbee-golf/rounds/${roundId}/gamemaster`, {
+    userId
+  });
 };
 
 export const setFrisbeeGolfScore = async (
@@ -120,19 +111,12 @@ export const setFrisbeeGolfScore = async (
   );
 };
 
-export const clearFrisbeeGolfScore = async (
-  roundId: string,
-  playerId: string,
-  holeNumber: number
-): Promise<void> => {
+export const clearFrisbeeGolfScore = async (roundId: string, playerId: string, holeNumber: number): Promise<void> => {
   await deleteRequest(`/scorebook/frisbee-golf/rounds/${roundId}/scores/${playerId}/${holeNumber}`);
 };
 
 export const completeFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGolfRound> => {
-  return postRequest<Record<string, never>, FrisbeeGolfRound>(
-    `/scorebook/frisbee-golf/rounds/${roundId}/complete`,
-    {}
-  );
+  return postRequest<Record<string, never>, FrisbeeGolfRound>(`/scorebook/frisbee-golf/rounds/${roundId}/complete`, {});
 };
 
 export const getFrisbeeGolfStats = async (): Promise<FrisbeeGolfUserStats | undefined> => {

@@ -20,6 +20,7 @@ export interface FrisbeeGolfPlayer {
   kind: FrisbeeGolfPlayerKind;
   userId?: string;
   displayName: string;
+  color?: string;
 }
 
 export interface FrisbeeGolfRound {
