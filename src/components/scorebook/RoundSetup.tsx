@@ -18,7 +18,8 @@ import {
   type FrisbeeGolfUserLookup
 } from '@/api/scorebook';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
-import { darkFieldSx } from '@/components/scorebook/fieldStyles';
+import { lightFieldSx, brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
+import { NumberInput } from '@/components/scorebook/NumberInput';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 interface RoundSetupProps {
@@ -145,9 +146,9 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
   };
 
   return (
-    <div className="space-y-8 max-w-2xl">
+    <div className="max-w-2xl space-y-8 rounded-xl border border-brand-200 bg-white p-6 text-neutral-900 shadow-sm">
       <section>
-        <h2 className="text-xl font-semibold text-white mb-2">Name</h2>
+        <h2 className="text-xl font-semibold text-neutral-900 mb-2">Name</h2>
         <div className="flex items-center gap-2">
           <TextField
             value={nameDraft}
@@ -155,53 +156,51 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
             size="small"
             fullWidth
             disabled={pending}
-            sx={darkFieldSx}
+            sx={lightFieldSx}
           />
-          <Button variant="outlined" disabled={!nameDirty || pending} onClick={handleSaveName}>
+          <Button variant="outlined" disabled={!nameDirty || pending} onClick={handleSaveName} sx={brandButtonSx}>
             Save
           </Button>
         </div>
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold text-white mb-2">Holes</h2>
-        <ul className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-9 gap-2">
+        <h2 className="text-xl font-semibold text-neutral-900 mb-2">Holes</h2>
+        <ul className="grid grid-cols-3 gap-2">
           {round.holes.map(hole => (
-            <li key={hole.number} className="rounded border border-neutral-700 bg-neutral-800 p-2 text-center">
-              <div className="text-xs text-neutral-400 mb-1">Hole {hole.number}</div>
-              <TextField
-                type="number"
+            <li key={hole.number} className="rounded border border-brand-200 bg-brand-100 p-2 text-center">
+              <div className="text-xs text-neutral-500 mb-1">Hole {hole.number}</div>
+              <NumberInput
                 value={parDrafts[hole.number] ?? hole.par}
-                onChange={e =>
-                  setParDrafts(prev => ({ ...prev, [hole.number]: Math.max(1, Number(e.target.value) || 1) }))
-                }
-                size="small"
-                slotProps={{ htmlInput: { min: 1, style: { textAlign: 'center' } } }}
+                onChange={n => setParDrafts(prev => ({ ...prev, [hole.number]: n }))}
+                min={1}
+                max={9}
                 disabled={pending}
-                sx={darkFieldSx}
+                fullWidth
+                ariaLabel={`Par for hole ${hole.number}`}
               />
             </li>
           ))}
         </ul>
         {parDirty && (
-          <Button variant="outlined" onClick={handleSavePars} disabled={pending} sx={{ mt: 2 }}>
+          <Button variant="outlined" onClick={handleSavePars} disabled={pending} sx={{ ...brandButtonSx, mt: 2 }}>
             Save par changes
           </Button>
         )}
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold text-white mb-2">Players</h2>
+        <h2 className="text-xl font-semibold text-neutral-900 mb-2">Players</h2>
         <ul className="space-y-2 mb-4">
           {round.players.map(player => {
             const isOwner = player.userId === round.ownerUserId;
             return (
               <li
                 key={player.id}
-                className="flex items-center justify-between rounded border border-neutral-700 bg-neutral-800 p-2"
+                className="flex items-center justify-between rounded border border-brand-200 bg-brand-100 p-2"
               >
                 <div>
-                  <span className="text-white">{player.displayName}</span>
+                  <span className="text-neutral-900">{player.displayName}</span>
                   <span className="text-xs text-neutral-500 ml-2">
                     {isOwner ? 'owner' : player.kind}
                   </span>
@@ -222,8 +221,8 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
         </ul>
 
         <div className="space-y-4">
-          <div className="rounded border border-neutral-700 bg-neutral-800 p-3">
-            <h3 className="text-sm font-semibold text-neutral-300 mb-2">Invite by email</h3>
+          <div className="rounded border border-brand-200 bg-brand-100 p-3">
+            <h3 className="text-sm font-semibold text-neutral-700 mb-2">Invite by email</h3>
             <div className="flex flex-wrap items-center gap-2">
               <TextField
                 value={emailDraft}
@@ -238,28 +237,39 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
                 size="small"
                 placeholder="player@example.com"
                 disabled={pending || lookupPending}
-                sx={darkFieldSx}
+                sx={lightFieldSx}
               />
-              <Button variant="outlined" onClick={handleLookup} disabled={pending || lookupPending}>
+              <Button
+                variant="outlined"
+                onClick={handleLookup}
+                disabled={pending || lookupPending}
+                sx={brandButtonSx}
+              >
                 {lookupPending ? 'Looking up...' : 'Look up'}
               </Button>
             </div>
-            {lookupError && <p className="text-sm text-red-400 mt-2">{lookupError}</p>}
+            {lookupError && <p className="text-sm text-red-600 mt-2">{lookupError}</p>}
             {lookupResult && (
               <div className="flex items-center justify-between mt-2">
-                <p className="text-sm text-neutral-300">
-                  Found <span className="text-white">{lookupResult.displayName}</span>{' '}
+                <p className="text-sm text-neutral-700">
+                  Found <span className="text-neutral-900">{lookupResult.displayName}</span>{' '}
                   <span className="text-neutral-500">({lookupResult.email})</span>
                 </p>
-                <Button variant="contained" size="small" onClick={handleAddLookedUpUser} disabled={pending}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleAddLookedUpUser}
+                  disabled={pending}
+                  sx={brandContainedButtonSx}
+                >
                   Add
                 </Button>
               </div>
             )}
           </div>
 
-          <div className="rounded border border-neutral-700 bg-neutral-800 p-3">
-            <h3 className="text-sm font-semibold text-neutral-300 mb-2">Add a guest</h3>
+          <div className="rounded border border-brand-200 bg-brand-100 p-3">
+            <h3 className="text-sm font-semibold text-neutral-700 mb-2">Add a guest</h3>
             <div className="flex items-center gap-2">
               <TextField
                 value={guestDraft}
@@ -270,9 +280,14 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
                 size="small"
                 placeholder="Guest name"
                 disabled={pending}
-                sx={darkFieldSx}
+                sx={lightFieldSx}
               />
-              <Button variant="outlined" onClick={handleAddGuest} disabled={pending || !guestDraft.trim()}>
+              <Button
+                variant="outlined"
+                onClick={handleAddGuest}
+                disabled={pending || !guestDraft.trim()}
+                sx={brandButtonSx}
+              >
                 Add guest
               </Button>
             </div>
@@ -287,10 +302,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
           variant="contained"
           onClick={handleStart}
           disabled={pending || round.players.length === 0}
-          sx={{
-            backgroundColor: 'var(--color-brand-600)',
-            '&:hover': { backgroundColor: 'var(--color-brand-700)' }
-          }}
+          sx={brandContainedButtonSx}
         >
           {pending ? 'Working...' : 'Start round'}
         </Button>
@@ -301,6 +313,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
             router.refresh();
           }}
           disabled={pending}
+          sx={{ color: 'var(--color-brand-700)' }}
         >
           Back to rounds
         </Button>

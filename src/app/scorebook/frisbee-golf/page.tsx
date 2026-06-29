@@ -13,6 +13,7 @@ import {
 } from 'constants/routes';
 import { Loading } from '@/components/Loading';
 import { RoundsList } from '@/components/scorebook/RoundsList';
+import { StatsIcon } from '@/components/icons/StatsIcon';
 
 export const metadata = {
   title: 'Frisbee Golf'
@@ -44,12 +45,14 @@ export default async function FrisbeeGolfPage() {
       </div>
       <div className="flex items-baseline justify-between mb-6">
         <h1 className="text-3xl font-bold text-white">Frisbee Golf</h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-5">
           <Link
             href={SCOREBOOK_FRISBEE_GOLF_STATS_ROUTE}
-            className="text-sm text-neutral-300 hover:text-white"
+            className="text-neutral-300 hover:text-white"
+            aria-label="Stats"
+            title="Stats"
           >
-            Stats
+            <StatsIcon className="h-7 w-7" />
           </Link>
           <Link
             href={SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE}

@@ -1,7 +1,4 @@
-import Link from 'next/link';
-
 import { listFrisbeeGolfRounds } from '@/api/scorebook';
-import { SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE } from 'constants/routes';
 import { RoundCard } from 'components/scorebook/RoundCard';
 
 export const RoundsList = async () => {
@@ -13,13 +10,7 @@ export const RoundsList = async () => {
   if (rounds.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-neutral-700 p-10 text-center">
-        <p className="text-neutral-300 mb-4">No rounds yet.</p>
-        <Link
-          href={SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE}
-          className="inline-block bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded transition-colors"
-        >
-          Start your first round
-        </Link>
+        <p className="text-neutral-300">No rounds yet. Start one with “New round” above.</p>
       </div>
     );
   }

@@ -12,7 +12,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { createFrisbeeGolfRound } from '@/api/scorebook';
 import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
-import { darkFieldSx } from '@/components/scorebook/fieldStyles';
+import { lightFieldSx, brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
+import { NumberInput } from '@/components/scorebook/NumberInput';
 import type { CreateFrisbeeGolfRoundInput } from '@/types/scorebook';
 
 const DEFAULT_HOLE_COUNT = 9;
@@ -70,7 +71,7 @@ export const NewRoundForm = () => {
   if (!ready) return null;
 
   return (
-    <div className="max-w-xl space-y-6">
+    <div className="max-w-xl space-y-6 rounded-xl border border-brand-200 bg-white p-6 text-neutral-900 shadow-sm">
       <div>
         <TextField
           label="Round name (optional)"
@@ -80,38 +81,42 @@ export const NewRoundForm = () => {
           size="small"
           placeholder="e.g. 4th of July 2026"
           disabled={submitting}
-          sx={darkFieldSx}
+          sx={lightFieldSx}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <TextField
-          label="Holes"
-          type="number"
-          value={holeCount}
-          onChange={e => setHoleCount(Math.max(1, Math.min(MAX_HOLES, Number(e.target.value) || 1)))}
-          size="small"
-          slotProps={{ htmlInput: { min: 1, max: MAX_HOLES } }}
-          disabled={submitting}
-          sx={darkFieldSx}
-        />
-        <TextField
-          label="Default par"
-          type="number"
-          value={defaultPar}
-          onChange={e => setDefaultPar(Math.max(1, Number(e.target.value) || 1))}
-          size="small"
-          slotProps={{ htmlInput: { min: 1 } }}
-          disabled={submitting}
-          sx={darkFieldSx}
-        />
+        <div>
+          <label className="mb-1 block text-sm text-neutral-600">Holes</label>
+          <NumberInput
+            value={holeCount}
+            onChange={setHoleCount}
+            min={1}
+            max={MAX_HOLES}
+            disabled={submitting}
+            fullWidth
+            ariaLabel="Holes"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-neutral-600">Default par</label>
+          <NumberInput
+            value={defaultPar}
+            onChange={setDefaultPar}
+            min={1}
+            max={9}
+            disabled={submitting}
+            fullWidth
+            ariaLabel="Default par"
+          />
+        </div>
       </div>
 
       <section>
-        <h3 className="text-white font-semibold mb-2">Players</h3>
+        <h3 className="text-neutral-900 font-semibold mb-2">Players</h3>
         <ul className="space-y-2">
           <li className="flex items-center gap-2">
-            <TextField value={ownerName} disabled fullWidth size="small" label="You" sx={darkFieldSx} />
+            <TextField value={ownerName} disabled fullWidth size="small" label="You" sx={lightFieldSx} />
           </li>
           {guestNames.map((guestName, index) => (
             <li key={index} className="flex items-center gap-2">
@@ -123,7 +128,7 @@ export const NewRoundForm = () => {
                 label={`Guest ${index + 1}`}
                 placeholder="Name"
                 disabled={submitting}
-                sx={darkFieldSx}
+                sx={lightFieldSx}
               />
               <IconButton
                 aria-label="Remove guest"
@@ -135,7 +140,12 @@ export const NewRoundForm = () => {
             </li>
           ))}
         </ul>
-        <Button startIcon={<AddIcon />} onClick={addGuest} disabled={submitting} sx={{ mt: 1 }}>
+        <Button
+          startIcon={<AddIcon />}
+          onClick={addGuest}
+          disabled={submitting}
+          sx={{ ...brandButtonSx, mt: 1 }}
+        >
           Add player
         </Button>
       </section>
@@ -147,14 +157,16 @@ export const NewRoundForm = () => {
           variant="contained"
           onClick={handleSubmit}
           disabled={submitting || !user}
-          sx={{
-            backgroundColor: 'var(--color-brand-600)',
-            '&:hover': { backgroundColor: 'var(--color-brand-700)' }
-          }}
+          sx={brandContainedButtonSx}
         >
           {submitting ? 'Creating...' : 'Create round'}
         </Button>
-        <Button variant="text" onClick={() => router.back()} disabled={submitting}>
+        <Button
+          variant="text"
+          onClick={() => router.back()}
+          disabled={submitting}
+          sx={{ color: 'var(--color-brand-700)' }}
+        >
           Cancel
         </Button>
       </div>
