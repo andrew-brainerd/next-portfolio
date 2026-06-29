@@ -19,7 +19,7 @@ import {
 } from '@/api/scorebook';
 import { getChannel } from '@/utils/pusher';
 import { brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
-import { computeLeaderboard, formatOverUnder } from '@/utils/frisbeeGolfLeaderboard';
+import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
@@ -74,8 +74,7 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
 
   const userPlayers = round.players.filter(p => p.kind === 'user' && p.userId);
   const gamemasterUserId = round.gamemasterUserId ?? round.ownerUserId;
-  const gamemasterName =
-    userPlayers.find(p => p.userId === gamemasterUserId)?.displayName ?? 'Owner';
+  const gamemasterName = userPlayers.find(p => p.userId === gamemasterUserId)?.displayName ?? 'Owner';
 
   // Move the shared live hole (what players score) and follow it with the local view.
   const setLiveHole = async (holeNumber: number) => {
@@ -180,20 +179,23 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
       <section>
         <h2 className="text-xl font-semibold text-white mb-3">Leaderboard</h2>
         <ol className="rounded border border-neutral-700 bg-neutral-800 divide-y divide-neutral-700">
-          {leaderboard.map((entry, index) => (
-            <li key={entry.playerId} className="flex items-center justify-between p-3">
-              <div className="flex items-center gap-3">
-                <span className="text-neutral-500 w-5 text-right">{index + 1}.</span>
-                <span className="text-white font-medium">{entry.displayName}</span>
-              </div>
-              <div className="text-right">
-                <div className="text-white font-mono">{entry.total}</div>
-                <div className="text-xs text-neutral-400">
-                  {formatOverUnder(entry.overUnder)} · {entry.holesPlayed}/{round.holes.length} holes
+          {leaderboard.map((entry, index) => {
+            const medal = entry.holesPlayed > 0 ? medalForRank(index) : null;
+            return (
+              <li key={entry.playerId} className="flex items-center justify-between p-3">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 text-right text-neutral-500">{medal ?? `${index + 1}.`}</span>
+                  <span className="text-white font-medium">{entry.displayName}</span>
                 </div>
-              </div>
-            </li>
-          ))}
+                <div className="text-right">
+                  <div className="text-white font-mono">{entry.total}</div>
+                  <div className="text-xs text-neutral-400">
+                    {formatOverUnder(entry.overUnder)} · {entry.holesPlayed}/{round.holes.length} holes
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ol>
       </section>
 
@@ -324,7 +326,7 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
           onClick={handleComplete}
           disabled={completing}
           sx={{
-            backgroundColor: 'var(--color-brand-600)',
+            'backgroundColor': 'var(--color-brand-600)',
             '&:hover': { backgroundColor: 'var(--color-brand-700)' }
           }}
         >

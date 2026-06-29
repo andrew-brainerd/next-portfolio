@@ -1,4 +1,4 @@
-import { computeLeaderboard, formatOverUnder } from '@/utils/frisbeeGolfLeaderboard';
+import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 interface RoundCompletedProps {
@@ -7,28 +7,25 @@ interface RoundCompletedProps {
 
 export const RoundCompleted = ({ round }: RoundCompletedProps) => {
   const leaderboard = computeLeaderboard(round);
-  const completedDate = round.completedAt
-    ? new Date(round.completedAt).toLocaleDateString()
-    : null;
+  const completedDate = round.completedAt ? new Date(round.completedAt).toLocaleDateString() : null;
 
   return (
     <div className="space-y-8">
-      {completedDate && (
-        <p className="text-sm text-neutral-400">Completed {completedDate}</p>
-      )}
+      {completedDate && <p className="text-sm text-neutral-400">Completed {completedDate}</p>}
 
       <section>
         <h2 className="text-xl font-semibold text-white mb-3">Final standings</h2>
         <ol className="rounded border border-neutral-700 bg-neutral-800 divide-y divide-neutral-700">
           {leaderboard.map((entry, index) => {
             const isWinner = index === 0 && entry.holesPlayed > 0;
+            const medal = entry.holesPlayed > 0 ? medalForRank(index) : null;
             return (
               <li
                 key={entry.playerId}
                 className={`flex items-center justify-between p-3 ${isWinner ? 'bg-brand-900/40' : ''}`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-neutral-500 w-5 text-right">{index + 1}.</span>
+                  <span className="w-6 text-right text-neutral-500">{medal ?? `${index + 1}.`}</span>
                   <span className={`font-medium ${isWinner ? 'text-brand-300' : 'text-white'}`}>
                     {entry.displayName}
                   </span>

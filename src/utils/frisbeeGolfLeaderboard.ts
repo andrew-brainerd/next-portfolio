@@ -25,7 +25,9 @@ const sumHoles = (holes: FrisbeeGolfHole[], scoresByHole: Record<number, number>
   return { total, holesPlayed, parThrough };
 };
 
-export const computeLeaderboard = (round: Pick<FrisbeeGolfRound, 'holes' | 'players' | 'scores'>): LeaderboardEntry[] => {
+export const computeLeaderboard = (
+  round: Pick<FrisbeeGolfRound, 'holes' | 'players' | 'scores'>
+): LeaderboardEntry[] => {
   const entries: LeaderboardEntry[] = round.players.map((player: FrisbeeGolfPlayer) => {
     const { total, holesPlayed, parThrough } = sumHoles(round.holes, round.scores[player.id]);
     return {
@@ -51,3 +53,8 @@ export const formatOverUnder = (value: number): string => {
   if (value === 0) return 'E';
   return value > 0 ? `+${value}` : `${value}`;
 };
+
+const MEDALS = ['🥇', '🥈', '🥉'];
+
+/** Gold/silver/bronze medal for the top three finishers; null beyond third place. */
+export const medalForRank = (index: number): string | null => MEDALS[index] ?? null;

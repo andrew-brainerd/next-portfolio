@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { FrisbeeGolfRound } from '@/types/scorebook';
-import { computeLeaderboard, formatOverUnder } from '@/utils/frisbeeGolfLeaderboard';
+import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
 
 const buildRound = (overrides: Partial<FrisbeeGolfRound> = {}): FrisbeeGolfRound => ({
   id: 'r1',
@@ -22,6 +22,15 @@ const buildRound = (overrides: Partial<FrisbeeGolfRound> = {}): FrisbeeGolfRound
   scores: {},
   createdAt: 0,
   ...overrides
+});
+
+describe('medalForRank', () => {
+  it('awards medals to the top three only', () => {
+    expect(medalForRank(0)).toBe('🥇');
+    expect(medalForRank(1)).toBe('🥈');
+    expect(medalForRank(2)).toBe('🥉');
+    expect(medalForRank(3)).toBeNull();
+  });
 });
 
 describe('computeLeaderboard', () => {
