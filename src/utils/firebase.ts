@@ -13,6 +13,7 @@ import {
 
 import type { AuthResponse } from 'types/firebase';
 import { bakeCookie } from 'api/authentication';
+import { TOKEN_COOKIE, USER_COOKIE } from 'constants/authentication';
 
 const friendlyAuthError = (code: string | undefined, fallback: string): string => {
   switch (code) {
@@ -162,7 +163,21 @@ export const validateInviteCode = async (code: string): Promise<AuthResponse> =>
   }
 };
 
+// Clear a non-httpOnly cookie across every scope it might have been set with
+// during local dev (host-only and the shared `.brainerd.dev` parent domain).
+const clearClientCookie = (name: string) => {
+  if (typeof document === 'undefined') return;
+  const expiry = 'Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  const host = window.location.hostname;
+  const parent = host.split('.').slice(-2).join('.'); // e.g. brainerd.dev
+  for (const domainAttr of ['', `; domain=${host}`, `; domain=.${parent}`]) {
+    document.cookie = `${name}=; path=/${domainAttr}; ${expiry}`;
+  }
+};
+
 export const signOutUser = async (): Promise<void> => {
   await fetch('/api/auth', { method: 'DELETE' });
+  clearClientCookie(TOKEN_COOKIE);
+  clearClientCookie(USER_COOKIE);
   await signOut(firebaseAuth);
 };

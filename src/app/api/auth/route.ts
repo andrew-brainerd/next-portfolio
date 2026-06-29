@@ -9,8 +9,9 @@ export async function DELETE() {
   const domain = process.env.COOKIE_DOMAIN;
 
   for (const name of [TOKEN_COOKIE, USER_COOKIE]) {
+    // Match the Domain the cookie was set with; a host-only delete here would
+    // overwrite this domain-scoped clear and leave the cookie in place.
     cookieJar.set(name, '', { path: '/', domain, maxAge: 0 });
-    cookieJar.delete(name); // also clear any host-only variant
   }
 
   return NextResponse.json({ success: true, message: 'Logged out successfully' });
