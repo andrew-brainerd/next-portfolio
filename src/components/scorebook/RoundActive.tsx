@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -12,6 +13,8 @@ import {
   clearFrisbeeGolfScore,
   completeFrisbeeGolfRound,
   getFrisbeeGolfRound,
+  setFrisbeeGolfCurrentHole,
+  setFrisbeeGolfGamemaster,
   setFrisbeeGolfScore
 } from '@/api/scorebook';
 import { getChannel } from '@/utils/pusher';
@@ -23,33 +26,70 @@ const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
 interface RoundActiveProps {
   initialRound: FrisbeeGolfRound;
   isOwner: boolean;
+  currentUserId: string;
 }
 
-export const RoundActive = ({ initialRound, isOwner }: RoundActiveProps) => {
+export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiveProps) => {
+  const router = useRouter();
   const [round, setRound] = useState(initialRound);
-  const [currentHole, setCurrentHole] = useState(initialRound.holes[0]?.number ?? 1);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [holePending, setHolePending] = useState(false);
   const [completing, setCompleting] = useState(false);
 
   useEffect(() => {
     const channel = getChannel(initialRound.id);
     const refetch = async () => {
       const fresh = await getFrisbeeGolfRound(initialRound.id);
-      if (fresh) setRound(fresh);
+      if (!fresh) return;
+      // Status change (completed) or losing control (gamemaster reassigned) re-routes via the server.
+      const stillControls =
+        fresh.ownerUserId === currentUserId || (fresh.gamemasterUserId ?? fresh.ownerUserId) === currentUserId;
+      if (fresh.status !== 'active' || !stillControls) {
+        router.refresh();
+        return;
+      }
+      setRound(fresh);
     };
     channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
     return () => {
       channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
       channel.unsubscribe();
     };
-  }, [initialRound.id]);
+  }, [initialRound.id, router, currentUserId]);
 
   const leaderboard = useMemo(() => computeLeaderboard(round), [round]);
 
-  const hole = round.holes.find(h => h.number === currentHole) ?? round.holes[0];
+  const currentHoleNumber = round.currentHole ?? round.holes[0]?.number ?? 1;
+  const hole = round.holes.find(h => h.number === currentHoleNumber) ?? round.holes[0];
   const currentIndex = round.holes.findIndex(h => h.number === hole.number);
   const isFirstHole = currentIndex <= 0;
   const isLastHole = currentIndex >= round.holes.length - 1;
+
+  const userPlayers = round.players.filter(p => p.kind === 'user' && p.userId);
+  const gamemasterUserId = round.gamemasterUserId ?? round.ownerUserId;
+  const gamemasterName =
+    userPlayers.find(p => p.userId === gamemasterUserId)?.displayName ?? 'Owner';
+
+  const goToHole = async (holeNumber: number) => {
+    setHolePending(true);
+    try {
+      const updated = await setFrisbeeGolfCurrentHole(round.id, holeNumber);
+      if (updated) setRound(updated);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setHolePending(false);
+    }
+  };
+
+  const handleSetGamemaster = async (userId: string) => {
+    try {
+      const updated = await setFrisbeeGolfGamemaster(round.id, userId);
+      if (updated) setRound(updated);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const adjustScore = async (playerId: string, delta: number) => {
     const existing = round.scores[playerId]?.[hole.number];
@@ -97,8 +137,8 @@ export const RoundActive = ({ initialRound, isOwner }: RoundActiveProps) => {
     }
     setCompleting(true);
     try {
-      const updated = await completeFrisbeeGolfRound(round.id);
-      setRound(updated);
+      await completeFrisbeeGolfRound(round.id);
+      router.refresh();
     } catch (err) {
       console.error(err);
       setCompleting(false);
@@ -107,6 +147,27 @@ export const RoundActive = ({ initialRound, isOwner }: RoundActiveProps) => {
 
   return (
     <div className="space-y-8 max-w-2xl">
+      <section className="flex items-center justify-between gap-3 rounded border border-neutral-700 bg-neutral-800 p-3">
+        <span className="text-sm text-neutral-400">Gamemaster</span>
+        {isOwner ? (
+          <select
+            value={gamemasterUserId}
+            onChange={e => handleSetGamemaster(e.target.value)}
+            aria-label="Gamemaster"
+            className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm text-white outline-none focus:border-brand-500"
+          >
+            {userPlayers.map(p => (
+              <option key={p.userId} value={p.userId}>
+                {p.displayName}
+                {p.userId === round.ownerUserId ? ' (owner)' : ''}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className="text-sm font-medium text-white">{gamemasterName}</span>
+        )}
+      </section>
+
       <section>
         <h2 className="text-xl font-semibold text-white mb-3">Leaderboard</h2>
         <ol className="rounded border border-neutral-700 bg-neutral-800 divide-y divide-neutral-700">
@@ -131,8 +192,8 @@ export const RoundActive = ({ initialRound, isOwner }: RoundActiveProps) => {
         <div className="flex items-center justify-between mb-3">
           <IconButton
             aria-label="Previous hole"
-            onClick={() => setCurrentHole(round.holes[currentIndex - 1].number)}
-            disabled={isFirstHole}
+            onClick={() => goToHole(round.holes[currentIndex - 1].number)}
+            disabled={isFirstHole || holePending}
           >
             <ChevronLeftIcon />
           </IconButton>
@@ -144,8 +205,8 @@ export const RoundActive = ({ initialRound, isOwner }: RoundActiveProps) => {
           </div>
           <IconButton
             aria-label="Next hole"
-            onClick={() => setCurrentHole(round.holes[currentIndex + 1].number)}
-            disabled={isLastHole}
+            onClick={() => goToHole(round.holes[currentIndex + 1].number)}
+            disabled={isLastHole || holePending}
           >
             <ChevronRightIcon />
           </IconButton>
@@ -201,26 +262,24 @@ export const RoundActive = ({ initialRound, isOwner }: RoundActiveProps) => {
         </ul>
       </section>
 
-      {isOwner && (
-        <div className="flex items-center justify-between gap-3 border-t border-neutral-800 pt-6">
-          <div className="text-sm text-neutral-400">
-            {missingScores === 0
-              ? 'All scores entered. Ready to complete the round.'
-              : `${missingScores} score${missingScores === 1 ? '' : 's'} still missing.`}
-          </div>
-          <Button
-            variant="contained"
-            onClick={handleComplete}
-            disabled={completing}
-            sx={{
-              backgroundColor: 'var(--color-brand-600)',
-              '&:hover': { backgroundColor: 'var(--color-brand-700)' }
-            }}
-          >
-            {completing ? 'Completing...' : 'Complete round'}
-          </Button>
+      <div className="flex items-center justify-between gap-3 border-t border-neutral-800 pt-6">
+        <div className="text-sm text-neutral-400">
+          {missingScores === 0
+            ? 'All scores entered. Ready to complete the round.'
+            : `${missingScores} score${missingScores === 1 ? '' : 's'} still missing.`}
         </div>
-      )}
+        <Button
+          variant="contained"
+          onClick={handleComplete}
+          disabled={completing}
+          sx={{
+            backgroundColor: 'var(--color-brand-600)',
+            '&:hover': { backgroundColor: 'var(--color-brand-700)' }
+          }}
+        >
+          {completing ? 'Completing...' : 'Complete round'}
+        </Button>
+      </div>
     </div>
   );
 };

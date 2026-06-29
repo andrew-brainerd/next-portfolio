@@ -12,6 +12,7 @@ import {
   addFrisbeeGolfPlayer,
   getFrisbeeGolfRound,
   removeFrisbeeGolfPlayer,
+  setFrisbeeGolfGamemaster,
   startFrisbeeGolfRound,
   updateFrisbeeGolfHoles,
   updateFrisbeeGolfRoundName
@@ -133,6 +134,9 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
       setPending(false);
     }
   };
+
+  const handleSetGamemaster = (userId: string) =>
+    runAction(() => setFrisbeeGolfGamemaster(round.id, userId));
 
   const handleStart = async () => {
     setPending(true);
@@ -280,6 +284,29 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
             </div>
           </div>
         </div>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold text-neutral-900 mb-1">Gamemaster</h2>
+        <p className="text-sm text-neutral-500 mb-2">
+          The gamemaster runs the round live — controlling the current hole and entering scores. Defaults to you.
+        </p>
+        <select
+          value={round.gamemasterUserId ?? round.ownerUserId}
+          onChange={e => handleSetGamemaster(e.target.value)}
+          disabled={pending}
+          aria-label="Gamemaster"
+          className="rounded border border-brand-300 bg-white px-3 py-2 text-neutral-900 outline-none focus:border-brand-600 disabled:opacity-60"
+        >
+          {round.players
+            .filter(p => p.kind === 'user' && p.userId)
+            .map(p => (
+              <option key={p.userId} value={p.userId}>
+                {p.displayName}
+                {p.userId === round.ownerUserId ? ' (owner)' : ''}
+              </option>
+            ))}
+        </select>
       </section>
 
       {error && <Alert severity="error">{error}</Alert>}

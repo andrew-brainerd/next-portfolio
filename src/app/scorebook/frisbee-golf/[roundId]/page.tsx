@@ -6,6 +6,7 @@ import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
 import { getFrisbeeGolfRound } from '@/api/scorebook';
 import { LOGIN_ROUTE, SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
 import { RoundActive } from '@/components/scorebook/RoundActive';
+import { RoundPlayerActive } from '@/components/scorebook/RoundPlayerActive';
 import { RoundCompleted } from '@/components/scorebook/RoundCompleted';
 import { RoundSetup } from '@/components/scorebook/RoundSetup';
 
@@ -41,6 +42,8 @@ export default async function FrisbeeGolfRoundPage({ params }: RoundDetailPagePr
   }
 
   const isOwner = userId === round.ownerUserId;
+  const gamemasterUserId = round.gamemasterUserId ?? round.ownerUserId;
+  const canControl = isOwner || userId === gamemasterUserId;
   const isSetup = round.status === 'setup';
 
   return (
@@ -58,7 +61,11 @@ export default async function FrisbeeGolfRoundPage({ params }: RoundDetailPagePr
       {isSetup && isOwner ? (
         <RoundSetup initialRound={round} />
       ) : round.status === 'active' ? (
-        <RoundActive initialRound={round} isOwner={isOwner} />
+        canControl ? (
+          <RoundActive initialRound={round} isOwner={isOwner} currentUserId={userId ?? ''} />
+        ) : (
+          <RoundPlayerActive initialRound={round} currentUserId={userId ?? ''} />
+        )
       ) : round.status === 'completed' ? (
         <RoundCompleted round={round} />
       ) : (

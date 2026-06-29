@@ -81,6 +81,26 @@ export const joinFrisbeeGolfRoundByCode = async (code: string): Promise<FrisbeeG
   });
 };
 
+export const setFrisbeeGolfCurrentHole = async (
+  roundId: string,
+  holeNumber: number
+): Promise<FrisbeeGolfRound> => {
+  return putRequest<{ holeNumber: number }, FrisbeeGolfRound>(
+    `/scorebook/frisbee-golf/rounds/${roundId}/current-hole`,
+    { holeNumber }
+  );
+};
+
+export const setFrisbeeGolfGamemaster = async (
+  roundId: string,
+  userId: string
+): Promise<FrisbeeGolfRound> => {
+  return putRequest<{ userId: string }, FrisbeeGolfRound>(
+    `/scorebook/frisbee-golf/rounds/${roundId}/gamemaster`,
+    { userId }
+  );
+};
+
 export const setFrisbeeGolfScore = async (
   roundId: string,
   playerId: string,

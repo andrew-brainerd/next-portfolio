@@ -25,6 +25,7 @@ export interface FrisbeeGolfPlayer {
 export interface FrisbeeGolfRound {
   id: string;
   ownerUserId: string;
+  gamemasterUserId?: string;
   participantUserIds: string[];
   joinCode: string;
   name: string;
@@ -32,6 +33,7 @@ export interface FrisbeeGolfRound {
   holes: FrisbeeGolfHole[];
   players: FrisbeeGolfPlayer[];
   scores: Record<string, Record<number, number>>;
+  currentHole?: number;
   createdAt: number;
   startedAt?: number;
   completedAt?: number;
