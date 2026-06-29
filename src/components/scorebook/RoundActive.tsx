@@ -18,6 +18,7 @@ import {
   setFrisbeeGolfScore
 } from '@/api/scorebook';
 import { getChannel } from '@/utils/pusher';
+import { brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { computeLeaderboard, formatOverUnder } from '@/utils/frisbeeGolfLeaderboard';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
@@ -32,6 +33,7 @@ interface RoundActiveProps {
 export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiveProps) => {
   const router = useRouter();
   const [round, setRound] = useState(initialRound);
+  const [viewedHole, setViewedHole] = useState(initialRound.currentHole ?? initialRound.holes[0]?.number ?? 1);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [holePending, setHolePending] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -59,22 +61,29 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
 
   const leaderboard = useMemo(() => computeLeaderboard(round), [round]);
 
-  const currentHoleNumber = round.currentHole ?? round.holes[0]?.number ?? 1;
-  const hole = round.holes.find(h => h.number === currentHoleNumber) ?? round.holes[0];
-  const currentIndex = round.holes.findIndex(h => h.number === hole.number);
-  const isFirstHole = currentIndex <= 0;
-  const isLastHole = currentIndex >= round.holes.length - 1;
+  // The "live" hole drives every player's screen; "viewed" is the gamemaster's local
+  // cursor for reviewing/fixing any hole without moving the group.
+  const liveHole = round.currentHole ?? round.holes[0]?.number ?? 1;
+  const viewedIndexRaw = round.holes.findIndex(h => h.number === viewedHole);
+  const viewedIndex = viewedIndexRaw < 0 ? 0 : viewedIndexRaw;
+  const hole = round.holes[viewedIndex];
+  const isFirstHole = viewedIndex <= 0;
+  const isLastHole = viewedIndex >= round.holes.length - 1;
+  const viewingLive = hole.number === liveHole;
+  const nextHoleNumber = round.holes[viewedIndex + 1]?.number;
 
   const userPlayers = round.players.filter(p => p.kind === 'user' && p.userId);
   const gamemasterUserId = round.gamemasterUserId ?? round.ownerUserId;
   const gamemasterName =
     userPlayers.find(p => p.userId === gamemasterUserId)?.displayName ?? 'Owner';
 
-  const goToHole = async (holeNumber: number) => {
+  // Move the shared live hole (what players score) and follow it with the local view.
+  const setLiveHole = async (holeNumber: number) => {
     setHolePending(true);
     try {
       const updated = await setFrisbeeGolfCurrentHole(round.id, holeNumber);
       if (updated) setRound(updated);
+      setViewedHole(holeNumber);
     } catch (err) {
       console.error(err);
     } finally {
@@ -189,11 +198,11 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
       </section>
 
       <section>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <IconButton
             aria-label="Previous hole"
-            onClick={() => goToHole(round.holes[currentIndex - 1].number)}
-            disabled={isFirstHole || holePending}
+            onClick={() => setViewedHole(round.holes[viewedIndex - 1].number)}
+            disabled={isFirstHole}
           >
             <ChevronLeftIcon />
           </IconButton>
@@ -202,14 +211,56 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
               Hole {hole.number} of {round.holes.length}
             </div>
             <div className="text-2xl text-white">Par {hole.par}</div>
+            {viewingLive ? (
+              <span className="mt-1 inline-block rounded bg-green-600/20 px-2 py-0.5 text-xs font-medium text-green-400">
+                Live hole
+              </span>
+            ) : (
+              <span className="mt-1 inline-block text-xs text-neutral-400">
+                Reviewing · players are on hole {liveHole}
+              </span>
+            )}
           </div>
           <IconButton
             aria-label="Next hole"
-            onClick={() => goToHole(round.holes[currentIndex + 1].number)}
-            disabled={isLastHole || holePending}
+            onClick={() => setViewedHole(round.holes[viewedIndex + 1].number)}
+            disabled={isLastHole}
           >
             <ChevronRightIcon />
           </IconButton>
+        </div>
+
+        <div className="mb-3 flex items-center justify-center gap-3">
+          {viewingLive ? (
+            !isLastHole && (
+              <Button
+                variant="contained"
+                onClick={() => setLiveHole(nextHoleNumber)}
+                disabled={holePending}
+                sx={brandContainedButtonSx}
+              >
+                Advance group to hole {nextHoleNumber} →
+              </Button>
+            )
+          ) : (
+            <>
+              <Button
+                variant="text"
+                onClick={() => setViewedHole(liveHole)}
+                sx={{ color: 'var(--color-brand-400)', textTransform: 'none' }}
+              >
+                Jump to live hole
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => setLiveHole(hole.number)}
+                disabled={holePending}
+                sx={brandContainedButtonSx}
+              >
+                Set hole {hole.number} as current
+              </Button>
+            </>
+          )}
         </div>
 
         <ul className="space-y-2">

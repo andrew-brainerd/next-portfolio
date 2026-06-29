@@ -9,6 +9,7 @@ import { RoundActive } from '@/components/scorebook/RoundActive';
 import { RoundPlayerActive } from '@/components/scorebook/RoundPlayerActive';
 import { RoundCompleted } from '@/components/scorebook/RoundCompleted';
 import { RoundSetup } from '@/components/scorebook/RoundSetup';
+import { RoundWaiting } from '@/components/scorebook/RoundWaiting';
 
 export const metadata = {
   title: 'Frisbee Golf round'
@@ -69,32 +70,7 @@ export default async function FrisbeeGolfRoundPage({ params }: RoundDetailPagePr
       ) : round.status === 'completed' ? (
         <RoundCompleted round={round} />
       ) : (
-        <>
-          <p className="text-neutral-400 italic mb-4">Waiting for the owner to start the round.</p>
-
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold text-white mb-2">Players</h2>
-            <ul className="text-neutral-300 list-disc list-inside">
-              {round.players.map(player => (
-                <li key={player.id}>
-                  {player.displayName} <span className="text-xs text-neutral-500">({player.kind})</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-2">Holes</h2>
-            <ul className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-9 gap-2 text-center">
-              {round.holes.map(hole => (
-                <li key={hole.number} className="rounded border border-neutral-700 bg-neutral-800 p-2">
-                  <div className="text-xs text-neutral-400">Hole {hole.number}</div>
-                  <div className="text-lg text-white">Par {hole.par}</div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </>
+        <RoundWaiting initialRound={round} />
       )}
     </div>
   );
