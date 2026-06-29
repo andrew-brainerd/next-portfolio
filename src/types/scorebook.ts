@@ -26,6 +26,7 @@ export interface FrisbeeGolfRound {
   id: string;
   ownerUserId: string;
   participantUserIds: string[];
+  joinCode: string;
   name: string;
   status: FrisbeeGolfRoundStatus;
   holes: FrisbeeGolfHole[];

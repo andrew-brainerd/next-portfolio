@@ -13,6 +13,7 @@ import {
 } from 'constants/routes';
 import { Loading } from '@/components/Loading';
 import { RoundsList } from '@/components/scorebook/RoundsList';
+import { JoinByCode } from '@/components/scorebook/JoinByCode';
 import { StatsIcon } from '@/components/icons/StatsIcon';
 
 export const metadata = {
@@ -61,6 +62,10 @@ export default async function FrisbeeGolfPage() {
             New round
           </Link>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <JoinByCode />
       </div>
 
       <Suspense fallback={<RoundsLoading />}>

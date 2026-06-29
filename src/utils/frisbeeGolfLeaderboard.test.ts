@@ -7,6 +7,7 @@ const buildRound = (overrides: Partial<FrisbeeGolfRound> = {}): FrisbeeGolfRound
   id: 'r1',
   ownerUserId: 'owner',
   participantUserIds: ['owner'],
+  joinCode: 'ABC12',
   name: 'Test',
   status: 'active',
   holes: [

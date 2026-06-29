@@ -75,6 +75,12 @@ export const joinFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGolf
   );
 };
 
+export const joinFrisbeeGolfRoundByCode = async (code: string): Promise<FrisbeeGolfRound> => {
+  return postRequest<{ code: string }, FrisbeeGolfRound>('/scorebook/frisbee-golf/rounds/join-by-code', {
+    code
+  });
+};
+
 export const setFrisbeeGolfScore = async (
   roundId: string,
   playerId: string,

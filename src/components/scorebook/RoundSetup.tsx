@@ -49,6 +49,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
 
   const [inviteUrl, setInviteUrl] = useState('');
   const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   useEffect(() => {
     setInviteUrl(`${window.location.origin}${SCOREBOOK_FRISBEE_GOLF_ROUTE}/${round.id}/join`);
@@ -75,6 +76,16 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       setError('Could not copy the link. Copy it manually.');
+    }
+  };
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(round.joinCode);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } catch {
+      setError('Could not copy the code. Copy it manually.');
     }
   };
 
@@ -231,6 +242,17 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
                 {copied ? 'Copied!' : 'Copy link'}
               </Button>
             </div>
+            {round.joinCode && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="text-xs text-neutral-500">Or share this code:</span>
+                <span className="font-mono text-lg font-bold tracking-[0.3em] text-neutral-900">
+                  {round.joinCode}
+                </span>
+                <Button variant="outlined" size="small" onClick={handleCopyCode} sx={brandButtonSx}>
+                  {copiedCode ? 'Copied!' : 'Copy code'}
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="rounded border border-brand-200 bg-brand-100 p-3">
