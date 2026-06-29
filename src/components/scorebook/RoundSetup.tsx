@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
@@ -10,17 +10,19 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 import {
   addFrisbeeGolfPlayer,
-  lookupFrisbeeGolfUser,
+  getFrisbeeGolfRound,
   removeFrisbeeGolfPlayer,
   startFrisbeeGolfRound,
   updateFrisbeeGolfHoles,
-  updateFrisbeeGolfRoundName,
-  type FrisbeeGolfUserLookup
+  updateFrisbeeGolfRoundName
 } from '@/api/scorebook';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
+import { getChannel } from '@/utils/pusher';
 import { lightFieldSx, brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
+
+const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
 
 interface RoundSetupProps {
   initialRound: FrisbeeGolfRound;
@@ -43,12 +45,38 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
     [round.holes, parDrafts]
   );
 
-  const [emailDraft, setEmailDraft] = useState('');
-  const [lookupResult, setLookupResult] = useState<FrisbeeGolfUserLookup | null>(null);
-  const [lookupError, setLookupError] = useState<string | null>(null);
-  const [lookupPending, setLookupPending] = useState(false);
-
   const [guestDraft, setGuestDraft] = useState('');
+
+  const [inviteUrl, setInviteUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setInviteUrl(`${window.location.origin}${SCOREBOOK_FRISBEE_GOLF_ROUTE}/${round.id}/join`);
+  }, [round.id]);
+
+  // Live-refresh the roster as people join via the invite link.
+  useEffect(() => {
+    const channel = getChannel(initialRound.id);
+    const refetch = async () => {
+      const fresh = await getFrisbeeGolfRound(initialRound.id);
+      if (fresh) setRound(fresh);
+    };
+    channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
+    return () => {
+      channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
+      channel.unsubscribe();
+    };
+  }, [initialRound.id]);
+
+  const handleCopyInvite = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError('Could not copy the link. Copy it manually.');
+    }
+  };
 
   const runAction = async (action: () => Promise<FrisbeeGolfRound | undefined>) => {
     setPending(true);
@@ -69,42 +97,6 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
   const handleSavePars = () => {
     const nextHoles = round.holes.map(h => ({ ...h, par: Math.max(1, parDrafts[h.number] || h.par) }));
     return runAction(() => updateFrisbeeGolfHoles(round.id, nextHoles));
-  };
-
-  const handleLookup = async () => {
-    setLookupError(null);
-    setLookupResult(null);
-    const email = emailDraft.trim();
-    if (!email) {
-      setLookupError('Enter an email');
-      return;
-    }
-    setLookupPending(true);
-    try {
-      const result = await lookupFrisbeeGolfUser(email);
-      if (!result) {
-        setLookupError('No account with that email');
-      } else {
-        setLookupResult(result);
-      }
-    } catch {
-      setLookupError('Lookup failed');
-    } finally {
-      setLookupPending(false);
-    }
-  };
-
-  const handleAddLookedUpUser = async () => {
-    if (!lookupResult) return;
-    await runAction(() =>
-      addFrisbeeGolfPlayer(round.id, {
-        kind: 'user',
-        userId: lookupResult.uid,
-        displayName: lookupResult.displayName
-      })
-    );
-    setEmailDraft('');
-    setLookupResult(null);
   };
 
   const handleAddGuest = async () => {
@@ -222,50 +214,23 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
 
         <div className="space-y-4">
           <div className="rounded border border-brand-200 bg-brand-100 p-3">
-            <h3 className="text-sm font-semibold text-neutral-700 mb-2">Invite by email</h3>
+            <h3 className="text-sm font-semibold text-neutral-700 mb-1">Invite with a link</h3>
+            <p className="text-xs text-neutral-500 mb-2">
+              Anyone with this link can sign in and join the round before it starts.
+            </p>
             <div className="flex flex-wrap items-center gap-2">
               <TextField
-                value={emailDraft}
-                onChange={e => {
-                  setEmailDraft(e.target.value);
-                  setLookupResult(null);
-                  setLookupError(null);
-                }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') handleLookup();
-                }}
+                value={inviteUrl}
                 size="small"
-                placeholder="player@example.com"
-                disabled={pending || lookupPending}
+                fullWidth
+                slotProps={{ input: { readOnly: true } }}
+                onFocus={e => e.target.select()}
                 sx={lightFieldSx}
               />
-              <Button
-                variant="outlined"
-                onClick={handleLookup}
-                disabled={pending || lookupPending}
-                sx={brandButtonSx}
-              >
-                {lookupPending ? 'Looking up...' : 'Look up'}
+              <Button variant="contained" onClick={handleCopyInvite} sx={brandContainedButtonSx}>
+                {copied ? 'Copied!' : 'Copy link'}
               </Button>
             </div>
-            {lookupError && <p className="text-sm text-red-600 mt-2">{lookupError}</p>}
-            {lookupResult && (
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-sm text-neutral-700">
-                  Found <span className="text-neutral-900">{lookupResult.displayName}</span>{' '}
-                  <span className="text-neutral-500">({lookupResult.email})</span>
-                </p>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleAddLookedUpUser}
-                  disabled={pending}
-                  sx={brandContainedButtonSx}
-                >
-                  Add
-                </Button>
-              </div>
-            )}
           </div>
 
           <div className="rounded border border-brand-200 bg-brand-100 p-3">

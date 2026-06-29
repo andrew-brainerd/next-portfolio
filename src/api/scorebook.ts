@@ -13,12 +13,6 @@ interface ListRoundsResponse {
   rounds: FrisbeeGolfRound[];
 }
 
-export interface FrisbeeGolfUserLookup {
-  uid: string;
-  email: string;
-  displayName: string;
-}
-
 export const listFrisbeeGolfRounds = async (): Promise<FrisbeeGolfRound[]> => {
   const response = await getRequest<ListRoundsResponse>('/scorebook/frisbee-golf/rounds');
   return response?.rounds ?? [];
@@ -74,8 +68,11 @@ export const startFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGol
   );
 };
 
-export const lookupFrisbeeGolfUser = async (email: string): Promise<FrisbeeGolfUserLookup | undefined> => {
-  return getRequest<FrisbeeGolfUserLookup>('/scorebook/frisbee-golf/users/lookup', { email });
+export const joinFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGolfRound> => {
+  return postRequest<Record<string, never>, FrisbeeGolfRound>(
+    `/scorebook/frisbee-golf/rounds/${roundId}/join`,
+    {}
+  );
 };
 
 export const setFrisbeeGolfScore = async (
