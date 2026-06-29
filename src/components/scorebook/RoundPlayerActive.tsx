@@ -8,6 +8,7 @@ import { getFrisbeeGolfRound, setFrisbeeGolfScore } from '@/api/scorebook';
 import { getChannel } from '@/utils/pusher';
 import { golfTermForScore } from '@/utils/frisbeeGolfTerms';
 import { playScoreError, playScoreSuccess } from '@/utils/scorebookSound';
+import { speak } from '@/utils/speech';
 import { brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
 import { ScoreCelebration, type Celebration } from '@/components/scorebook/ScoreCelebration';
@@ -85,9 +86,11 @@ export const RoundPlayerActive = ({ initialRound, currentUserId }: RoundPlayerAc
     try {
       const updated = await setFrisbeeGolfScore(round.id, myPlayer.id, hole.number, draft);
       if (updated) setRound(updated);
+      const term = golfTermForScore(draft, hole.par);
       celebrationId.current += 1;
-      setCelebration({ ...golfTermForScore(draft, hole.par), id: celebrationId.current });
+      setCelebration({ ...term, id: celebrationId.current });
       playScoreSuccess();
+      speak(term.term);
     } catch (err) {
       console.error(err);
       playScoreError();
