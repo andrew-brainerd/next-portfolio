@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { signOutUser } from '@/utils/firebase';
 import { SettingsIcon } from '@/components/icons/SettingsIcon';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 interface NavigationProps {
   isLoggedIn: boolean;
@@ -58,9 +59,7 @@ export const Navigation = ({ isLoggedIn, pathname }: NavigationProps) => {
             <Link href="/roll-with-me" className={`${iconColor} text-sm leading-none transition-colors`}>
               Roll With Me
             </Link>
-            <Link href="/appearance" className={`${iconColor} text-sm leading-none transition-colors`}>
-              Appearance
-            </Link>
+            <ThemeSwitcher />
             {isLoggedIn ? (
               <div className="relative" ref={menuRef}>
                 <button

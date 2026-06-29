@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ThemeName = 'ocean' | 'sunset' | 'forest' | 'lavender';
+export type ThemeName = 'ocean' | 'lavender';
 
 export interface ThemeConfig {
   name: ThemeName;
@@ -12,8 +12,6 @@ export interface ThemeConfig {
 
 export const themes: ThemeConfig[] = [
   { name: 'ocean', label: 'Ocean', primary: '#217efd', secondary: '#84afea', tertiary: '#00429b' },
-  { name: 'sunset', label: 'Sunset', primary: '#f97316', secondary: '#fdba74', tertiary: '#c2410c' },
-  { name: 'forest', label: 'Forest', primary: '#22c55e', secondary: '#86efac', tertiary: '#15803d' },
   { name: 'lavender', label: 'Lavender', primary: '#a855f7', secondary: '#d8b4fe', tertiary: '#7e22ce' }
 ];
 

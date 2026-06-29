@@ -10,7 +10,7 @@ export const AppearanceSettings = () => (
 
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4 text-neutral-200">Color Theme</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {themes.map(theme => (
             <ThemeCard key={theme.name} theme={theme} />
           ))}

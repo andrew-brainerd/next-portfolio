@@ -9,6 +9,8 @@ import { MailIcon } from 'components/icons/MailIcon';
 import { SteamIcon } from 'components/icons/SteamIcon';
 import { RollWithMeIcon } from 'components/icons/RollWithMeIcon';
 import { CondensateIcon } from 'components/icons/CondensateIcon';
+import { ScorebookIcon } from 'components/icons/ScorebookIcon';
+import { SCOREBOOK_ROUTE } from 'constants/routes';
 
 const TABS = [
   { id: 'work', label: 'Work', description: 'Connect with me professionally and explore my work' },
@@ -24,7 +26,7 @@ type TabId = (typeof TABS)[number]['id'];
 
 const ICON_CLASS = 'fill-white h-14 w-14 sm:h-18 sm:w-18';
 
-function linksFor(id: TabId): ReactNode {
+function linksFor(id: TabId, isLoggedIn: boolean): ReactNode {
   if (id === 'work') {
     return (
       <>
@@ -60,11 +62,20 @@ function linksFor(id: TabId): ReactNode {
       <HomeLink name="Roll With Me" path="/roll-with-me" openNewTab={false}>
         <RollWithMeIcon className={ICON_CLASS} aria-hidden="true" />
       </HomeLink>
+      {isLoggedIn && (
+        <HomeLink name="Scorebook" path={SCOREBOOK_ROUTE} openNewTab={false}>
+          <ScorebookIcon className={ICON_CLASS} aria-hidden="true" />
+        </HomeLink>
+      )}
     </>
   );
 }
 
-export const HomeTabs = () => {
+interface HomeTabsProps {
+  isLoggedIn: boolean;
+}
+
+export const HomeTabs = ({ isLoggedIn }: HomeTabsProps) => {
   const [active, setActive] = useState<TabId>('work');
   const tabRefs = useRef<Partial<Record<TabId, HTMLButtonElement | null>>>({});
 
@@ -145,7 +156,7 @@ export const HomeTabs = () => {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto"
               aria-label={`${tab.label} links`}
             >
-              {linksFor(tab.id)}
+              {linksFor(tab.id, isLoggedIn)}
             </nav>
           </div>
         ))}

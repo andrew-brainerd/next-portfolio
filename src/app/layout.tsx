@@ -11,7 +11,7 @@ import 'styles/index.css';
 
 const gaMeasurementId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID;
 
-const allThemes = ['ocean', 'sunset', 'forest', 'lavender'];
+const allThemes = ['ocean', 'lavender'];
 
 async function getRandomTheme() {
   // Use a request-unique value to seed the pick
