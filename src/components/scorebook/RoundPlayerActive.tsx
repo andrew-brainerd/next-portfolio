@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import { getFrisbeeGolfRound, setFrisbeeGolfScore } from '@/api/scorebook';
 import { getChannel } from '@/utils/pusher';
 import { golfTermForScore } from '@/utils/frisbeeGolfTerms';
+import { playScoreError, playScoreSuccess } from '@/utils/scorebookSound';
 import { brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
 import { ScoreCelebration, type Celebration } from '@/components/scorebook/ScoreCelebration';
@@ -86,8 +87,10 @@ export const RoundPlayerActive = ({ initialRound, currentUserId }: RoundPlayerAc
       if (updated) setRound(updated);
       celebrationId.current += 1;
       setCelebration({ ...golfTermForScore(draft, hole.par), id: celebrationId.current });
+      playScoreSuccess();
     } catch (err) {
       console.error(err);
+      playScoreError();
     } finally {
       setSaving(false);
     }
