@@ -10,6 +10,7 @@ import {
   signInWithPopup,
   signOut
 } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 
 import type { AuthResponse } from 'types/firebase';
 import { bakeCookie } from 'api/authentication';
@@ -53,6 +54,8 @@ if (!firebaseConfig.apiKey) {
 const firebaseApp = initializeApp(firebaseConfig);
 
 export const firebaseAuth = getAuth(firebaseApp);
+
+export const firebaseStorage = getStorage(firebaseApp);
 
 export const resetPassword = (code: string, newPassword: string): Promise<void> => {
   return confirmPasswordReset(firebaseAuth, code, newPassword);

@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { signOutUser } from '@/utils/firebase';
-import { SettingsIcon } from '@/components/icons/SettingsIcon';
-import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+
+import { UserMenu } from '@/components/UserMenu';
+import { LOGIN_ROUTE } from 'constants/routes';
 
 interface NavigationProps {
   isLoggedIn: boolean;
@@ -13,29 +11,6 @@ interface NavigationProps {
 }
 
 export const Navigation = ({ isLoggedIn, pathname }: NavigationProps) => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    if (menuOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [menuOpen]);
-
-  const handleLogout = async () => {
-    setMenuOpen(false);
-    try {
-      await signOutUser();
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
   const iconColor = 'text-white hover:text-brand-300';
 
   return (
@@ -59,55 +34,11 @@ export const Navigation = ({ isLoggedIn, pathname }: NavigationProps) => {
             <Link href="/roll-with-me" className={`${iconColor} text-sm leading-none transition-colors`}>
               Roll With Me
             </Link>
-            <ThemeSwitcher />
             {isLoggedIn ? (
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setMenuOpen(prev => !prev)}
-                  className={`${iconColor} flex items-center transition-colors cursor-pointer`}
-                  type="button"
-                  aria-label="User menu"
-                >
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                  </svg>
-                </button>
-                <AnimatePresence>
-                  {menuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -5 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                      transition={{ duration: 0.12 }}
-                      className="absolute right-0 mt-1 w-40 bg-neutral-800 border border-neutral-600 rounded-lg shadow-lg overflow-hidden z-50"
-                    >
-                      <Link
-                        href="/settings"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-3 text-sm text-white hover:bg-neutral-700 transition-colors"
-                      >
-                        <SettingsIcon className="w-4 h-4" />
-                        Settings
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 px-4 py-3 text-sm text-white hover:bg-neutral-700 transition-colors w-full cursor-pointer"
-                        type="button"
-                      >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                          <polyline points="16 17 21 12 16 7" />
-                          <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                        Logout
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <UserMenu />
             ) : (
               <Link
-                href={`/login?from=${encodeURIComponent(pathname)}`}
+                href={`${LOGIN_ROUTE}?from=${encodeURIComponent(pathname)}`}
                 className={`${iconColor} transition-colors`}
                 aria-label="Login"
               >

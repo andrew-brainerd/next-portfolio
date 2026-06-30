@@ -1,5 +1,6 @@
 'use client';
 
+import { ProfilePictureSettings } from 'components/settings/ProfilePictureSettings';
 import { DisplayNameSettings } from 'components/settings/DisplayNameSettings';
 import { ThemeSelector } from 'components/settings/ThemeSelector';
 
@@ -11,6 +12,7 @@ export const SettingsHub = () => (
 
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4 text-neutral-200">Account</h2>
+        <ProfilePictureSettings />
         <DisplayNameSettings />
       </section>
 

@@ -29,8 +29,8 @@ interface ThemeSelection {
 }
 
 // Single source of truth for the unified theme picker (color schemes + Win95 mode).
-// Shared by the nav ThemeSwitcher, the Settings hub, and the Win95 Control Panel so
-// they can never drift apart.
+// Shared by the Settings hub (`ThemeSelector`) and the Win95 Control Panel so they
+// can never drift apart.
 export const useThemeSelection = (): ThemeSelection => {
   const { theme: current, setTheme } = useTheme();
   const { enabled: win95, enable: enableWin95, disable: disableWin95 } = useWin95Mode();
