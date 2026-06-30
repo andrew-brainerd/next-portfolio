@@ -1,7 +1,15 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-// Appearance settings moved to the public /appearance route. Keep /settings working (and
-// reserved for future account-only settings) by redirecting for now.
+import { useWin95Mode } from 'hooks/useWin95Mode';
+import { SettingsHub } from 'components/settings/SettingsHub';
+import { Win95ControlPanel } from 'components/win95/apps/Win95ControlPanel';
+
 export default function SettingsPage() {
-  redirect('/appearance');
+  const win95 = useWin95Mode(state => state.enabled);
+
+  if (win95) {
+    return <Win95ControlPanel />;
+  }
+
+  return <SettingsHub />;
 }

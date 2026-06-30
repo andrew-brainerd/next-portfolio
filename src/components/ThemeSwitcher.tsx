@@ -1,28 +1,15 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useTheme, themes, type ThemeName } from 'hooks/useTheme';
-import { useWin95Mode } from 'hooks/useWin95Mode';
+import { useThemeSelection } from 'hooks/useThemeSelection';
 import { PaletteIcon } from 'components/icons/PaletteIcon';
-
-const WIN95_OPTION = {
-  id: 'win95',
-  label: 'Windows 95',
-  swatches: ['#c0c0c0', '#000080', '#008080']
-} as const;
-
-const OPTIONS = [
-  ...themes.map(t => ({ id: t.name, label: t.label, swatches: [t.primary, t.secondary, t.tertiary] })),
-  WIN95_OPTION
-];
 
 interface ThemeSwitcherProps {
   className?: string;
 }
 
 export const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
-  const { theme: current, setTheme } = useTheme();
-  const { enabled: win95, enable: enableWin95, disable: disableWin95 } = useWin95Mode();
+  const { options, activeId, select } = useThemeSelection();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,15 +21,8 @@ export const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [open]);
 
-  const activeId = win95 ? WIN95_OPTION.id : current;
-
   const handleSelect = (id: string) => {
-    if (id === WIN95_OPTION.id) {
-      enableWin95();
-    } else {
-      if (win95) disableWin95();
-      setTheme(id as ThemeName);
-    }
+    select(id);
     setOpen(false);
   };
 
@@ -63,7 +43,7 @@ export const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
           role="menu"
           className="absolute right-0 mt-1 w-44 bg-neutral-800 border border-neutral-600 rounded-lg shadow-lg overflow-hidden z-50"
         >
-          {OPTIONS.map(option => {
+          {options.map(option => {
             const active = activeId === option.id;
             return (
               <button

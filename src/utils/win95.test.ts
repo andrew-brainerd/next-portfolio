@@ -5,7 +5,7 @@ import { Win95App } from '@/types/win95';
 const apps: Win95App[] = [
   { id: 'portfolio', label: 'My Portfolio', route: '/' },
   { id: 'steam', label: 'Steam', route: '/steam' },
-  { id: 'control-panel', label: 'Control Panel', route: '/appearance' }
+  { id: 'control-panel', label: 'Control Panel', route: '/settings' }
 ];
 
 describe('win95AppForPath', () => {
