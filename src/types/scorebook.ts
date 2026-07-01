@@ -66,6 +66,13 @@ export interface FrisbeeGolfHeadToHead {
   ties: number;
 }
 
+export interface FrisbeeGolfFamilyMember {
+  userId: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
+}
+
 export interface FrisbeeGolfUserStats {
   roundsPlayed: number;
   averageScore: number | null;

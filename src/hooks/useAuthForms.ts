@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AuthResponse } from 'types/firebase';
 import { signInUser, signUpUser, signInWithGoogle, validateInviteCode } from 'utils/firebase';
+import { redeemFamilyInvite } from 'api/register';
 import { FORGOT_PASSWORD_ROUTE } from 'constants/routes';
 import { useAppLoading } from 'hooks/useAppLoading';
 
@@ -87,8 +88,13 @@ export const useSignUpForm = (redirectRoute: string) => {
     setAuthResponse(EMPTY);
     if (!(await verifyInvite())) return;
     const response = await signUpUser(email, password);
-    if (response.isError) handleFailure(response.message);
-    else handleSuccess(response.message);
+    if (response.isError) {
+      handleFailure(response.message);
+      return;
+    }
+    // Invite-code sign-up → flag the user as family (best-effort) before redirecting.
+    await redeemFamilyInvite(inviteCode);
+    handleSuccess(response.message);
   };
 
   const handleGoogleSignUp = async (): Promise<void> => {
@@ -96,8 +102,12 @@ export const useSignUpForm = (redirectRoute: string) => {
     setAuthResponse(EMPTY);
     if (!(await verifyInvite())) return;
     const response = await signInWithGoogle();
-    if (response.isError) handleFailure(response.message);
-    else handleSuccess(response.message);
+    if (response.isError) {
+      handleFailure(response.message);
+      return;
+    }
+    await redeemFamilyInvite(inviteCode);
+    handleSuccess(response.message);
   };
 
   return {

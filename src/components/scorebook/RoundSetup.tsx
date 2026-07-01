@@ -9,6 +9,8 @@ import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import {
+  addFrisbeeGolfPlayer,
+  getFrisbeeGolfFamily,
   getFrisbeeGolfRound,
   removeFrisbeeGolfPlayer,
   setFrisbeeGolfGamemaster,
@@ -21,7 +23,7 @@ import { getChannel } from '@/utils/pusher';
 import { lightFieldSx, brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
-import type { FrisbeeGolfRound } from '@/types/scorebook';
+import type { FrisbeeGolfFamilyMember, FrisbeeGolfRound } from '@/types/scorebook';
 
 const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
 
@@ -46,6 +48,20 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
   const [inviteUrl, setInviteUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+
+  const [family, setFamily] = useState<FrisbeeGolfFamilyMember[]>([]);
+
+  useEffect(() => {
+    getFrisbeeGolfFamily()
+      .then(setFamily)
+      .catch(() => setFamily([]));
+  }, []);
+
+  // Family members not already in the round (the owner is already a player).
+  const availableFamily = useMemo(
+    () => family.filter(member => !round.players.some(p => p.userId === member.userId)),
+    [family, round.players]
+  );
 
   useEffect(() => {
     setInviteUrl(`${window.location.origin}${SCOREBOOK_FRISBEE_GOLF_ROUTE}/${round.id}/join`);
@@ -124,6 +140,14 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
   };
 
   const handleSetGamemaster = (userId: string) => runAction(() => setFrisbeeGolfGamemaster(round.id, userId));
+
+  const handleAddFamily = (userId: string) => {
+    const member = family.find(m => m.userId === userId);
+    if (!member) return;
+    return runAction(() =>
+      addFrisbeeGolfPlayer(round.id, { kind: 'user', userId: member.userId, displayName: member.displayName })
+    );
+  };
 
   const handleStart = async () => {
     setPending(true);
@@ -219,6 +243,31 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
         </ul>
 
         <div className="space-y-4">
+          {availableFamily.length > 0 && (
+            <div className="rounded border border-brand-200 bg-brand-100 p-3">
+              <h3 className="text-sm font-semibold text-neutral-700 mb-1">Add family</h3>
+              <p className="text-xs text-neutral-500 mb-2">
+                Family members can be added directly — no invite link needed.
+              </p>
+              <select
+                value=""
+                onChange={e => handleAddFamily(e.target.value)}
+                disabled={pending}
+                aria-label="Add family member"
+                className="w-full rounded border border-brand-300 bg-white px-3 py-2 text-neutral-900 outline-none focus:border-brand-600 disabled:opacity-60"
+              >
+                <option value="" disabled>
+                  Add a family member…
+                </option>
+                {availableFamily.map(member => (
+                  <option key={member.userId} value={member.userId}>
+                    {member.displayName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div className="rounded border border-brand-200 bg-brand-100 p-3">
             <h3 className="text-sm font-semibold text-neutral-700 mb-1">Invite with a link</h3>
             <p className="text-xs text-neutral-500 mb-2">

@@ -3,6 +3,7 @@
 import { deleteRequest, getRequest, patchRequest, postRequest, putRequest } from '@/api/client';
 import type {
   CreateFrisbeeGolfRoundInput,
+  FrisbeeGolfFamilyMember,
   FrisbeeGolfHole,
   FrisbeeGolfPlayer,
   FrisbeeGolfRound,
@@ -12,6 +13,15 @@ import type {
 interface ListRoundsResponse {
   rounds: FrisbeeGolfRound[];
 }
+
+interface FamilyResponse {
+  family: FrisbeeGolfFamilyMember[];
+}
+
+export const getFrisbeeGolfFamily = async (): Promise<FrisbeeGolfFamilyMember[]> => {
+  const response = await getRequest<FamilyResponse>('/scorebook/frisbee-golf/family');
+  return response?.family ?? [];
+};
 
 export const listFrisbeeGolfRounds = async (): Promise<FrisbeeGolfRound[]> => {
   const response = await getRequest<ListRoundsResponse>('/scorebook/frisbee-golf/rounds');
