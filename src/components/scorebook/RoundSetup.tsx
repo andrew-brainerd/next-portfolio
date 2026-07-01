@@ -20,7 +20,7 @@ import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
 import { getChannel } from '@/utils/pusher';
 import { lightFieldSx, brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
-import { PlayerColorDot } from '@/components/scorebook/PlayerColorDot';
+import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
@@ -194,7 +194,12 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
                 className="flex items-center justify-between rounded border border-brand-200 bg-brand-100 p-2"
               >
                 <div className="flex items-center gap-2">
-                  <PlayerColorDot color={player.color} />
+                  <PlayerAvatar
+                    userId={player.userId}
+                    displayName={player.displayName}
+                    photoURL={player.photoURL}
+                    color={player.color}
+                  />
                   <span className="text-neutral-900">{player.displayName}</span>
                   <span className="text-xs text-neutral-500 ml-2">{isOwner ? 'owner' : player.kind}</span>
                 </div>

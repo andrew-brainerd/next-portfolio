@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { getFrisbeeGolfRound } from '@/api/scorebook';
 import { getChannel } from '@/utils/pusher';
-import { PlayerColorDot } from '@/components/scorebook/PlayerColorDot';
+import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
@@ -47,7 +47,12 @@ export const RoundWaiting = ({ initialRound }: RoundWaitingProps) => {
         <ul className="space-y-1 text-neutral-300">
           {round.players.map(player => (
             <li key={player.id} className="flex items-center gap-2">
-              <PlayerColorDot color={player.color} />
+              <PlayerAvatar
+                userId={player.userId}
+                displayName={player.displayName}
+                photoURL={player.photoURL}
+                color={player.color}
+              />
               {player.displayName} <span className="text-xs text-neutral-500">({player.kind})</span>
             </li>
           ))}

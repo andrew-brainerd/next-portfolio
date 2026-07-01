@@ -2,8 +2,10 @@ import type { FrisbeeGolfHole, FrisbeeGolfPlayer, FrisbeeGolfRound } from '@/typ
 
 export interface LeaderboardEntry {
   playerId: string;
+  userId?: string;
   displayName: string;
   color?: string;
+  photoURL?: string;
   holesPlayed: number;
   total: number;
   parThrough: number;
@@ -33,8 +35,10 @@ export const computeLeaderboard = (
     const { total, holesPlayed, parThrough } = sumHoles(round.holes, round.scores[player.id]);
     return {
       playerId: player.id,
+      userId: player.userId,
       displayName: player.displayName,
       color: player.color,
+      photoURL: player.photoURL,
       holesPlayed,
       total,
       parThrough,

@@ -65,6 +65,23 @@ describe('computeLeaderboard', () => {
     expect(board[1].holesPlayed).toBe(0);
   });
 
+  it('carries userId, color, and photoURL through to entries', () => {
+    const round = buildRound({
+      players: [
+        { id: 'p1', kind: 'user', userId: 'u1', displayName: 'Alice', color: '#fff', photoURL: 'http://x/a.jpg' },
+        { id: 'p2', kind: 'guest', displayName: 'Bob', color: '#000' }
+      ]
+    });
+    const board = computeLeaderboard(round);
+    const alice = board.find(e => e.playerId === 'p1')!;
+    expect(alice.userId).toBe('u1');
+    expect(alice.color).toBe('#fff');
+    expect(alice.photoURL).toBe('http://x/a.jpg');
+    const bob = board.find(e => e.playerId === 'p2')!;
+    expect(bob.userId).toBeUndefined();
+    expect(bob.photoURL).toBeUndefined();
+  });
+
   it('computes parThrough for partial rounds (over/under reflects holes played only)', () => {
     const round = buildRound({
       scores: { p1: { 1: 4 } }

@@ -21,6 +21,7 @@ export interface FrisbeeGolfPlayer {
   userId?: string;
   displayName: string;
   color?: string;
+  photoURL?: string;
 }
 
 export interface FrisbeeGolfRound {
@@ -58,6 +59,7 @@ export interface FrisbeeGolfBestRound {
 export interface FrisbeeGolfHeadToHead {
   opponentUserId: string;
   opponentName: string;
+  opponentPhotoURL?: string;
   sharedRounds: number;
   wins: number;
   losses: number;

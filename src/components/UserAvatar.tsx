@@ -7,6 +7,8 @@ interface UserAvatarProps {
   displayName?: string | null;
   email?: string | null;
   size?: number;
+  // Background color for the initials fallback (e.g. a Scorebook player's frisbee color).
+  tintColor?: string;
   className?: string;
 }
 
@@ -15,6 +17,7 @@ export const UserAvatar = ({
   displayName,
   email,
   size = 32,
+  tintColor,
   className
 }: UserAvatarProps) => {
   const dimension = { width: size, height: size };
@@ -37,8 +40,8 @@ export const UserAvatar = ({
 
   return (
     <span
-      style={{ ...dimension, fontSize: Math.round(size * 0.4) }}
-      className={`flex items-center justify-center rounded-full bg-brand-600 font-medium text-white ${className ?? ''}`}
+      style={{ ...dimension, fontSize: Math.round(size * 0.4), ...(tintColor ? { backgroundColor: tintColor } : {}) }}
+      className={`flex items-center justify-center rounded-full font-medium text-white ${tintColor ? '' : 'bg-brand-600'} ${className ?? ''}`}
       aria-hidden={!initials}
     >
       {initials || (

@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { getFrisbeeGolfStats } from '@/api/scorebook';
 import { formatOverUnder } from '@/utils/frisbeeGolfLeaderboard';
+import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
 
 const formatNumber = (value: number | null, digits = 1): string => {
@@ -79,7 +80,17 @@ export const StatsView = async () => {
               <tbody>
                 {stats.headToHead.map(entry => (
                   <tr key={entry.opponentUserId} className="text-neutral-200">
-                    <td className="px-3 py-2 border border-neutral-700">{entry.opponentName}</td>
+                    <td className="px-3 py-2 border border-neutral-700">
+                      <span className="flex items-center gap-2">
+                        <PlayerAvatar
+                          userId={entry.opponentUserId}
+                          displayName={entry.opponentName}
+                          photoURL={entry.opponentPhotoURL}
+                          size={20}
+                        />
+                        {entry.opponentName}
+                      </span>
+                    </td>
                     <td className="px-3 py-2 text-center border border-neutral-700 font-mono">
                       {entry.sharedRounds}
                     </td>

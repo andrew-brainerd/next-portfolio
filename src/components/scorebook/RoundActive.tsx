@@ -20,7 +20,7 @@ import {
 import { getChannel } from '@/utils/pusher';
 import { brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
-import { PlayerColorDot } from '@/components/scorebook/PlayerColorDot';
+import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
@@ -187,7 +187,12 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
                 <div className="flex items-center gap-3">
                   <span className="w-6 text-right text-neutral-500">{medal ?? `${index + 1}.`}</span>
                   <span className="flex items-center gap-2 font-medium text-white">
-                    <PlayerColorDot color={entry.color} />
+                    <PlayerAvatar
+                      userId={entry.userId}
+                      displayName={entry.displayName}
+                      photoURL={entry.photoURL}
+                      color={entry.color}
+                    />
                     {entry.displayName}
                   </span>
                 </div>
@@ -280,7 +285,12 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
                 className="flex items-center justify-between rounded border border-neutral-700 bg-neutral-800 p-3"
               >
                 <span className="mr-3 flex items-center gap-2 truncate font-medium text-white">
-                  <PlayerColorDot color={player.color} />
+                  <PlayerAvatar
+                    userId={player.userId}
+                    displayName={player.displayName}
+                    photoURL={player.photoURL}
+                    color={player.color}
+                  />
                   {player.displayName}
                 </span>
                 <div className="flex items-center gap-2">
