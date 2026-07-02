@@ -64,8 +64,12 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
   );
 
   useEffect(() => {
-    setInviteUrl(`${window.location.origin}${SCOREBOOK_FRISBEE_GOLF_ROUTE}/${round.id}/join`);
-  }, [round.id]);
+    // Prefer the short link; fall back to the full join URL for legacy rounds with no join code.
+    const path = round.joinCode
+      ? `/j/${round.joinCode}`
+      : `${SCOREBOOK_FRISBEE_GOLF_ROUTE}/${round.id}/join`;
+    setInviteUrl(`${window.location.origin}${path}`);
+  }, [round.id, round.joinCode]);
 
   // Live-refresh the roster as people join via the invite link.
   useEffect(() => {

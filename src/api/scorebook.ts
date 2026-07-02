@@ -32,6 +32,11 @@ export const getFrisbeeGolfRound = async (roundId: string): Promise<FrisbeeGolfR
   return getRequest<FrisbeeGolfRound>(`/scorebook/frisbee-golf/rounds/${roundId}`);
 };
 
+// Read-only resolve of a join code to its round (backs the short invite link /j/:code).
+export const lookupFrisbeeGolfRoundByCode = async (code: string): Promise<FrisbeeGolfRound | undefined> => {
+  return getRequest<FrisbeeGolfRound>(`/scorebook/frisbee-golf/join-code/${encodeURIComponent(code)}`);
+};
+
 export const createFrisbeeGolfRound = async (input: CreateFrisbeeGolfRoundInput): Promise<FrisbeeGolfRound> => {
   return postRequest<CreateFrisbeeGolfRoundInput, FrisbeeGolfRound>('/scorebook/frisbee-golf/rounds', input);
 };
