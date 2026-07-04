@@ -10,6 +10,7 @@ export interface LeaderboardEntry {
   total: number;
   parThrough: number;
   overUnder: number;
+  disqualified: boolean;
 }
 
 const sumHoles = (holes: FrisbeeGolfHole[], scoresByHole: Record<number, number> | undefined) => {
@@ -29,8 +30,9 @@ const sumHoles = (holes: FrisbeeGolfHole[], scoresByHole: Record<number, number>
 };
 
 export const computeLeaderboard = (
-  round: Pick<FrisbeeGolfRound, 'holes' | 'players' | 'scores'>
+  round: Pick<FrisbeeGolfRound, 'holes' | 'players' | 'scores'> & { disqualifiedPlayerIds?: string[] }
 ): LeaderboardEntry[] => {
+  const disqualified = new Set(round.disqualifiedPlayerIds ?? []);
   const entries: LeaderboardEntry[] = round.players.map((player: FrisbeeGolfPlayer) => {
     const { total, holesPlayed, parThrough } = sumHoles(round.holes, round.scores[player.id]);
     return {
@@ -42,11 +44,14 @@ export const computeLeaderboard = (
       holesPlayed,
       total,
       parThrough,
-      overUnder: total - parThrough
+      overUnder: total - parThrough,
+      disqualified: disqualified.has(player.id)
     };
   });
 
   return entries.sort((a, b) => {
+    // Disqualified players always sink below everyone else, regardless of score.
+    if (a.disqualified !== b.disqualified) return a.disqualified ? 1 : -1;
     if (a.holesPlayed === 0 && b.holesPlayed === 0) return 0;
     if (a.holesPlayed === 0) return 1;
     if (b.holesPlayed === 0) return -1;

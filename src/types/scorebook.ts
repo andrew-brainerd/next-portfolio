@@ -35,6 +35,8 @@ export interface FrisbeeGolfRound {
   holes: FrisbeeGolfHole[];
   players: FrisbeeGolfPlayer[];
   scores: Record<string, Record<number, number>>;
+  // Player ids the owner/gamemaster has disqualified; excluded from ranking/winner, data retained.
+  disqualifiedPlayerIds: string[];
   currentHole?: number;
   createdAt: number;
   startedAt?: number;

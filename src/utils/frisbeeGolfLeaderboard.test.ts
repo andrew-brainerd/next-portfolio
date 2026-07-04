@@ -20,6 +20,7 @@ const buildRound = (overrides: Partial<FrisbeeGolfRound> = {}): FrisbeeGolfRound
     { id: 'p2', kind: 'guest', displayName: 'Bob' }
   ],
   scores: {},
+  disqualifiedPlayerIds: [],
   createdAt: 0,
   ...overrides
 });
@@ -92,6 +93,19 @@ describe('computeLeaderboard', () => {
     expect(alice.total).toBe(4);
     expect(alice.parThrough).toBe(3);
     expect(alice.overUnder).toBe(1);
+  });
+
+  it('sinks disqualified players to the bottom and marks them, regardless of score', () => {
+    const round = buildRound({
+      // Bob (p2) has the better score, but is disqualified.
+      scores: { p1: { 1: 5, 2: 6, 3: 5 }, p2: { 1: 3, 2: 4, 3: 3 } },
+      disqualifiedPlayerIds: ['p2']
+    });
+    const board = computeLeaderboard(round);
+    expect(board[0].playerId).toBe('p1');
+    expect(board[0].disqualified).toBe(false);
+    expect(board[board.length - 1].playerId).toBe('p2');
+    expect(board[board.length - 1].disqualified).toBe(true);
   });
 });
 

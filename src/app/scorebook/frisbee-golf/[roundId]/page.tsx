@@ -68,7 +68,7 @@ export default async function FrisbeeGolfRoundPage({ params }: RoundDetailPagePr
           <RoundPlayerActive initialRound={round} currentUserId={userId ?? ''} />
         )
       ) : round.status === 'completed' ? (
-        <RoundCompleted round={round} />
+        <RoundCompleted round={round} canControl={canControl} />
       ) : (
         <RoundWaiting initialRound={round} />
       )}

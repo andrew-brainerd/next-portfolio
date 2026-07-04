@@ -201,18 +201,31 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
         <h2 className="text-xl font-semibold text-white mb-3">Leaderboard</h2>
         <ol className="rounded border border-neutral-700 bg-neutral-800 divide-y divide-neutral-700">
           {leaderboard.map((entry, index) => {
-            const medal = entry.holesPlayed > 0 ? medalForRank(index) : null;
+            const medal = !entry.disqualified && entry.holesPlayed > 0 ? medalForRank(index) : null;
             return (
               <li key={entry.playerId} className="flex items-center justify-between gap-3 p-3">
                 <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                  <span className="w-5 shrink-0 text-right text-sm text-neutral-500">{medal ?? `${index + 1}.`}</span>
+                  <span className="w-5 shrink-0 text-right text-sm text-neutral-500">
+                    {entry.disqualified ? '' : (medal ?? `${index + 1}.`)}
+                  </span>
                   <PlayerAvatar
                     userId={entry.userId}
                     displayName={entry.displayName}
                     photoURL={entry.photoURL}
                     color={entry.color}
                   />
-                  <span className="truncate font-medium text-white">{entry.displayName}</span>
+                  <span
+                    className={`truncate font-medium ${
+                      entry.disqualified ? 'text-neutral-500 line-through' : 'text-white'
+                    }`}
+                  >
+                    {entry.displayName}
+                  </span>
+                  {entry.disqualified && (
+                    <span className="shrink-0 rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">
+                      DQ
+                    </span>
+                  )}
                 </div>
                 <div className="shrink-0 text-right">
                   <div className="font-mono text-white">{entry.total}</div>

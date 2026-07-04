@@ -114,6 +114,17 @@ export const setFrisbeeGolfGamemaster = async (roundId: string, userId: string):
   });
 };
 
+export const setFrisbeeGolfDisqualified = async (
+  roundId: string,
+  playerId: string,
+  disqualified: boolean
+): Promise<FrisbeeGolfRound | undefined> => {
+  return putRequest<{ disqualified: boolean }, FrisbeeGolfRound>(
+    `/scorebook/frisbee-golf/rounds/${roundId}/players/${playerId}/disqualified`,
+    { disqualified }
+  );
+};
+
 export const setFrisbeeGolfScore = async (
   roundId: string,
   playerId: string,

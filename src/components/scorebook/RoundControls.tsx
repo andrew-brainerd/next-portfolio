@@ -10,6 +10,7 @@ import {
   addFrisbeeGolfPlayer,
   getFrisbeeGolfFamily,
   removeFrisbeeGolfPlayer,
+  setFrisbeeGolfDisqualified,
   setFrisbeeGolfGamemaster,
   updateFrisbeeGolfHoles
 } from '@/api/scorebook';
@@ -88,6 +89,9 @@ export const RoundControls = ({ round, isOwner, onRoundUpdate }: RoundControlsPr
   };
 
   const handleSetGamemaster = (userId: string) => runAction(() => setFrisbeeGolfGamemaster(round.id, userId));
+
+  const handleToggleDisqualified = (playerId: string, disqualified: boolean) =>
+    runAction(() => setFrisbeeGolfDisqualified(round.id, playerId, disqualified));
 
   const handleSavePars = () => {
     const nextHoles = round.holes.map(h => ({ ...h, par: Math.max(1, parDrafts[h.number] || h.par) }));
@@ -212,32 +216,56 @@ export const RoundControls = ({ round, isOwner, onRoundUpdate }: RoundControlsPr
         <ul className="space-y-2">
           {round.players.map(player => {
             const isRoundOwner = player.userId === round.ownerUserId;
+            const disqualified = (round.disqualifiedPlayerIds ?? []).includes(player.id);
             return (
               <li
                 key={player.id}
-                className="flex items-center justify-between rounded border border-neutral-700 bg-neutral-800 p-2"
+                className="flex items-center justify-between gap-2 rounded border border-neutral-700 bg-neutral-800 p-2"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 items-center gap-2">
                   <PlayerAvatar
                     userId={player.userId}
                     displayName={player.displayName}
                     photoURL={player.photoURL}
                     color={player.color}
                   />
-                  <span className="text-white">{player.displayName}</span>
-                  <span className="ml-2 text-xs text-neutral-500">{isRoundOwner ? 'owner' : player.kind}</span>
+                  <span className={`truncate ${disqualified ? 'text-neutral-500 line-through' : 'text-white'}`}>
+                    {player.displayName}
+                  </span>
+                  {disqualified && (
+                    <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">
+                      DQ
+                    </span>
+                  )}
+                  <span className="ml-1 text-xs text-neutral-500">{isRoundOwner ? 'owner' : player.kind}</span>
                 </div>
-                {(!isRoundOwner || isOwner) && (
-                  <IconButton
-                    aria-label={isRoundOwner ? 'Remove yourself as a player' : `Remove ${player.displayName}`}
-                    onClick={() => handleRemovePlayer(player.id, isRoundOwner)}
-                    disabled={pending}
+                <div className="flex shrink-0 items-center gap-1">
+                  <Button
                     size="small"
-                    sx={{ color: 'var(--color-neutral-400)' }}
+                    variant="text"
+                    color={disqualified ? 'inherit' : 'error'}
+                    onClick={() => handleToggleDisqualified(player.id, !disqualified)}
+                    disabled={pending}
+                    sx={{
+                      minWidth: 0,
+                      textTransform: 'none',
+                      ...(disqualified ? { color: 'var(--color-brand-400)' } : {})
+                    }}
                   >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                )}
+                    {disqualified ? 'Reinstate' : 'Disqualify'}
+                  </Button>
+                  {(!isRoundOwner || isOwner) && (
+                    <IconButton
+                      aria-label={isRoundOwner ? 'Remove yourself as a player' : `Remove ${player.displayName}`}
+                      onClick={() => handleRemovePlayer(player.id, isRoundOwner)}
+                      disabled={pending}
+                      size="small"
+                      sx={{ color: 'var(--color-neutral-400)' }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                </div>
               </li>
             );
           })}

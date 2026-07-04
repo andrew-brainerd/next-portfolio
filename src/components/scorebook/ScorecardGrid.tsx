@@ -94,6 +94,7 @@ export const ScorecardGrid = ({ round, canEdit, onRoundUpdate }: ScorecardGridPr
               const played = round.holes.filter(h => typeof scores[h.number] === 'number');
               const total = played.reduce((sum, h) => sum + (scores[h.number] as number), 0);
               const overUnder = played.reduce((sum, h) => sum + ((scores[h.number] as number) - h.par), 0);
+              const disqualified = (round.disqualifiedPlayerIds ?? []).includes(player.id);
               return (
                 <tr key={player.id} className="border-t border-neutral-700">
                   <td className="sticky left-0 z-10 bg-neutral-800 p-2">
@@ -104,7 +105,18 @@ export const ScorecardGrid = ({ round, canEdit, onRoundUpdate }: ScorecardGridPr
                         photoURL={player.photoURL}
                         color={player.color}
                       />
-                      <span className="max-w-[8rem] truncate font-medium text-white">{player.displayName}</span>
+                      <span
+                        className={`max-w-[8rem] truncate font-medium ${
+                          disqualified ? 'text-neutral-500 line-through' : 'text-white'
+                        }`}
+                      >
+                        {player.displayName}
+                      </span>
+                      {disqualified && (
+                        <span className="rounded bg-red-500/20 px-1 text-[9px] font-semibold uppercase text-red-400">
+                          DQ
+                        </span>
+                      )}
                     </span>
                   </td>
                   {round.holes.map(h => {
