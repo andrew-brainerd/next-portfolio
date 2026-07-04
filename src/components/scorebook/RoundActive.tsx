@@ -148,9 +148,9 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
   };
 
   return (
-    <div className="space-y-8 max-w-2xl">
-      <section className="flex items-center justify-between gap-3 rounded border border-neutral-700 bg-neutral-800 p-3">
-        <span className="text-sm text-neutral-400">
+    <div className="space-y-6 max-w-2xl sm:space-y-8">
+      <section className="flex flex-wrap items-center justify-between gap-2 rounded border border-neutral-700 bg-neutral-800 p-3">
+        <span className="min-w-0 truncate text-sm text-neutral-400">
           Gamemaster: <span className="font-medium text-white">{gamemasterName}</span>
         </span>
         <Button
@@ -170,23 +170,21 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
           {leaderboard.map((entry, index) => {
             const medal = entry.holesPlayed > 0 ? medalForRank(index) : null;
             return (
-              <li key={entry.playerId} className="flex items-center justify-between p-3">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 text-right text-neutral-500">{medal ?? `${index + 1}.`}</span>
-                  <span className="flex items-center gap-2 font-medium text-white">
-                    <PlayerAvatar
-                      userId={entry.userId}
-                      displayName={entry.displayName}
-                      photoURL={entry.photoURL}
-                      color={entry.color}
-                    />
-                    {entry.displayName}
-                  </span>
+              <li key={entry.playerId} className="flex items-center justify-between gap-3 p-3">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                  <span className="w-5 shrink-0 text-right text-sm text-neutral-500">{medal ?? `${index + 1}.`}</span>
+                  <PlayerAvatar
+                    userId={entry.userId}
+                    displayName={entry.displayName}
+                    photoURL={entry.photoURL}
+                    color={entry.color}
+                  />
+                  <span className="truncate font-medium text-white">{entry.displayName}</span>
                 </div>
-                <div className="text-right">
-                  <div className="text-white font-mono">{entry.total}</div>
-                  <div className="text-xs text-neutral-400">
-                    {formatOverUnder(entry.overUnder)} · {entry.holesPlayed}/{round.holes.length} holes
+                <div className="shrink-0 text-right">
+                  <div className="font-mono text-white">{entry.total}</div>
+                  <div className="whitespace-nowrap text-xs text-neutral-400">
+                    {formatOverUnder(entry.overUnder)} · {entry.holesPlayed}/{round.holes.length}
                   </div>
                 </div>
               </li>
@@ -228,7 +226,7 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
           </IconButton>
         </div>
 
-        <div className="mb-3 flex items-center justify-center gap-3">
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
           {viewingLive ? (
             !isLastHole && (
               <Button
@@ -269,18 +267,18 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
             return (
               <li
                 key={player.id}
-                className="flex items-center justify-between rounded border border-neutral-700 bg-neutral-800 p-3"
+                className="flex items-center justify-between gap-2 rounded border border-neutral-700 bg-neutral-800 p-3"
               >
-                <span className="mr-3 flex items-center gap-2 truncate font-medium text-white">
+                <span className="flex min-w-0 items-center gap-2 font-medium text-white">
                   <PlayerAvatar
                     userId={player.userId}
                     displayName={player.displayName}
                     photoURL={player.photoURL}
                     color={player.color}
                   />
-                  {player.displayName}
+                  <span className="truncate">{player.displayName}</span>
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                   <IconButton
                     aria-label="Decrease score"
                     onClick={() => adjustScore(player.id, -1)}
@@ -328,8 +326,8 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
       />
 
       {isLastHole && (
-        <div className="flex items-center justify-between gap-3 border-t border-neutral-800 pt-6">
-          <div className="text-sm text-neutral-400">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-800 pt-6">
+          <div className="min-w-0 flex-1 text-sm text-neutral-400">
             {missingScores === 0
               ? 'All scores entered. Ready to complete the round.'
               : `${missingScores} score${missingScores === 1 ? '' : 's'} still missing.`}

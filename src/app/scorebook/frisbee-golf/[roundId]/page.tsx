@@ -48,13 +48,13 @@ export default async function FrisbeeGolfRoundPage({ params }: RoundDetailPagePr
   const isSetup = round.status === 'setup';
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-6">
       <div className="mb-4">
         <Link href={SCOREBOOK_FRISBEE_GOLF_ROUTE} className="text-sm text-neutral-400 hover:text-white">
           ← Back to rounds
         </Link>
       </div>
-      <h1 className="text-3xl font-bold text-white mb-2">{round.name}</h1>
+      <h1 className="text-2xl font-bold text-white mb-2 sm:text-3xl">{round.name}</h1>
       <p className="text-neutral-400 mb-6">
         Status: {round.status} · {round.holes.length} holes · {round.players.length} players
       </p>
