@@ -99,4 +99,44 @@ test.describe('frisbee golf — full round lifecycle', () => {
     const roundsPlayed = page.locator('div', { hasText: /^Rounds played$/ }).locator('xpath=following-sibling::div[1]');
     await expect(roundsPlayed).toHaveText(/^\d+$/);
   });
+
+  test('gamemaster view updates in real-time as scores are submitted', async ({ page, context }) => {
+    const roundName = `E2E realtime ${Date.now()}`;
+
+    // --- Create + start a round (tab A = the gamemaster's live view) ---
+    await page.goto(SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE);
+    await page.getByRole('textbox', { name: 'Round name (optional)' }).fill(roundName);
+    await setNumberField(page, 'Holes', HOLE_COUNT);
+    await page.getByRole('textbox', { name: 'Your nickname' }).fill('E2E Player');
+    await page.getByRole('button', { name: 'Create round' }).click();
+
+    await page.waitForURL(`**${SCOREBOOK_FRISBEE_GOLF_ROUTE}`);
+    await page.getByRole('heading', { name: roundName }).click();
+    await page.getByRole('button', { name: 'Start round' }).click();
+    await expect(page.getByRole('heading', { name: 'Leaderboard' })).toBeVisible();
+
+    const roundUrl = page.url();
+
+    // No scores yet → the player's leaderboard total reads 0.
+    const leaderboardA = page.locator('section', { has: page.getByRole('heading', { name: 'Leaderboard' }) });
+    const totalA = leaderboardA.locator('.font-mono').first();
+    await expect(totalA).toHaveText('0');
+
+    // --- tab B: the same round in a second client ---
+    const pageB = await context.newPage();
+    await pageB.goto(roundUrl);
+    await expect(pageB.getByRole('heading', { name: 'Leaderboard' })).toBeVisible();
+
+    // Give tab A's Pusher socket a beat to finish subscribing before we mutate,
+    // so the single round-updated event isn't fired before it's listening.
+    await page.waitForTimeout(1500);
+
+    // Submitting a score in tab B must surface in tab A with NO local interaction —
+    // only the Pusher `frisbeeGolfRoundUpdated` → refetch path can update tab A.
+    await pageB.getByRole('button', { name: 'Increase score' }).first().click();
+
+    await expect(totalA).not.toHaveText('0');
+
+    await pageB.close();
+  });
 });

@@ -63,6 +63,12 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
     [family, round.players]
   );
 
+  // The gamemaster may be the owner (even when they aren't playing) or any user player.
+  const userPlayers = round.players.filter(p => p.kind === 'user' && p.userId);
+  const gamemasterChoices = userPlayers.some(p => p.userId === round.ownerUserId)
+    ? userPlayers
+    : [{ id: 'owner', kind: 'user' as const, userId: round.ownerUserId, displayName: 'You' }, ...userPlayers];
+
   useEffect(() => {
     // Prefer the short link; fall back to the full join URL for legacy rounds with no join code.
     const path = round.joinCode
@@ -315,14 +321,12 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
           aria-label="Gamemaster"
           className="rounded border border-brand-300 bg-white px-3 py-2 text-neutral-900 outline-none focus:border-brand-600 disabled:opacity-60"
         >
-          {round.players
-            .filter(p => p.kind === 'user' && p.userId)
-            .map(p => (
-              <option key={p.userId} value={p.userId}>
-                {p.displayName}
-                {p.userId === round.ownerUserId ? ' (owner)' : ''}
-              </option>
-            ))}
+          {gamemasterChoices.map(p => (
+            <option key={p.userId} value={p.userId}>
+              {p.displayName}
+              {p.userId === round.ownerUserId ? ' (owner)' : ''}
+            </option>
+          ))}
         </select>
       </section>
 

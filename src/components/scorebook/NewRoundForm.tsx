@@ -23,6 +23,7 @@ export const NewRoundForm = () => {
   const { user, ready } = useFirebaseUser();
 
   const [name, setName] = useState('');
+  const [isPlaying, setIsPlaying] = useState(true);
   const [color, setColor] = useState(DEFAULT_DISC_COLOR);
   const [holeCount, setHoleCount] = useState(DEFAULT_HOLE_COUNT);
   const [defaultPar, setDefaultPar] = useState(DEFAULT_PAR);
@@ -43,7 +44,9 @@ export const NewRoundForm = () => {
       name: name.trim() || undefined,
       holeCount,
       defaultPar,
-      players: [{ kind: 'user', userId: user.uid, displayName: ownerName, color }]
+      // When the owner opts out of playing, the round starts with no players —
+      // they run it as organizer and others join via the invite link/code.
+      players: isPlaying ? [{ kind: 'user', userId: user.uid, displayName: ownerName, color }] : []
     };
 
     setSubmitting(true);
@@ -75,32 +78,47 @@ export const NewRoundForm = () => {
         />
       </div>
 
-      <div>
-        <TextField
-          label="Your nickname"
-          value={nickname}
-          onChange={e => setNicknameInput(e.target.value)}
-          fullWidth
-          size="small"
-          placeholder="The name others will see"
-          disabled={submitting}
-          sx={lightFieldSx}
-        />
-      </div>
-
-      <div className="flex items-center gap-3">
-        <label htmlFor="disc-color" className="text-sm text-neutral-600">
-          Your frisbee color
-        </label>
+      <label className="flex items-center gap-2 text-sm text-neutral-700">
         <input
-          id="disc-color"
-          type="color"
-          value={color}
-          onChange={e => setColor(e.target.value)}
+          type="checkbox"
+          checked={isPlaying}
+          onChange={e => setIsPlaying(e.target.checked)}
           disabled={submitting}
-          className="h-9 w-12 cursor-pointer rounded border border-brand-200 bg-white p-1"
+          className="h-4 w-4 accent-brand-600"
         />
-      </div>
+        I’m playing in this round
+      </label>
+
+      {isPlaying && (
+        <>
+          <div>
+            <TextField
+              label="Your nickname"
+              value={nickname}
+              onChange={e => setNicknameInput(e.target.value)}
+              fullWidth
+              size="small"
+              placeholder="The name others will see"
+              disabled={submitting}
+              sx={lightFieldSx}
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <label htmlFor="disc-color" className="text-sm text-neutral-600">
+              Your frisbee color
+            </label>
+            <input
+              id="disc-color"
+              type="color"
+              value={color}
+              onChange={e => setColor(e.target.value)}
+              disabled={submitting}
+              className="h-9 w-12 cursor-pointer rounded border border-brand-200 bg-white p-1"
+            />
+          </div>
+        </>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -130,7 +148,9 @@ export const NewRoundForm = () => {
       </div>
 
       <p className="text-sm text-neutral-500">
-        It’s just you for now — others join from the invite link or code once the round is created.
+        {isPlaying
+          ? 'It’s just you for now — others join from the invite link or code once the round is created.'
+          : 'You’ll run the round as organizer — players join from the invite link or code once it’s created.'}
       </p>
 
       {error && <Alert severity="error">{error}</Alert>}

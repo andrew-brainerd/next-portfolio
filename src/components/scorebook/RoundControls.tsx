@@ -13,6 +13,7 @@ import {
   setFrisbeeGolfGamemaster,
   updateFrisbeeGolfHoles
 } from '@/api/scorebook';
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
 import { brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
@@ -33,6 +34,7 @@ const darkSelectClass =
 // invite late joiners, and manage the roster once play is underway. Rendered
 // inside the round-settings modal, which only controllers ever reach.
 export const RoundControls = ({ round, isOwner, onRoundUpdate }: RoundControlsProps) => {
+  const { user } = useFirebaseUser();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -60,6 +62,11 @@ export const RoundControls = ({ round, isOwner, onRoundUpdate }: RoundControlsPr
   const userPlayers = round.players.filter(p => p.kind === 'user' && p.userId);
   const gamemasterUserId = round.gamemasterUserId ?? round.ownerUserId;
   const gamemasterName = userPlayers.find(p => p.userId === gamemasterUserId)?.displayName ?? 'Owner';
+  const ownerIsPlayer = userPlayers.some(p => p.userId === round.ownerUserId);
+  // The gamemaster may be the owner (even when they aren't playing) or any user player.
+  const gamemasterChoices = ownerIsPlayer
+    ? userPlayers
+    : [{ id: 'owner', kind: 'user' as const, userId: round.ownerUserId, displayName: 'You' }, ...userPlayers];
 
   useEffect(() => {
     const path = round.joinCode ? `/j/${round.joinCode}` : `${SCOREBOOK_FRISBEE_GOLF_ROUTE}/${round.id}/join`;
@@ -95,7 +102,13 @@ export const RoundControls = ({ round, isOwner, onRoundUpdate }: RoundControlsPr
     );
   };
 
-  const handleRemovePlayer = async (playerId: string) => {
+  const handleRemovePlayer = async (playerId: string, isSelfOwner = false) => {
+    if (
+      isSelfOwner &&
+      !window.confirm('Remove yourself as a player? You’ll keep running the round, but your scores will be cleared.')
+    ) {
+      return;
+    }
     setPending(true);
     setError(null);
     try {
@@ -107,6 +120,19 @@ export const RoundControls = ({ round, isOwner, onRoundUpdate }: RoundControlsPr
     } finally {
       setPending(false);
     }
+  };
+
+  // The owner can rejoin as a player after dropping out, since the invite link
+  // just redirects them (they're already a participant).
+  const handleAddSelf = () => {
+    if (!user) return;
+    return runAction(() =>
+      addFrisbeeGolfPlayer(round.id, {
+        kind: 'user',
+        userId: user.uid,
+        displayName: user.displayName || user.email || 'Player'
+      })
+    );
   };
 
   const handleCopyInvite = async () => {
@@ -144,7 +170,7 @@ export const RoundControls = ({ round, isOwner, onRoundUpdate }: RoundControlsPr
             aria-label="Gamemaster"
             className={darkSelectClass}
           >
-            {userPlayers.map(p => (
+            {gamemasterChoices.map(p => (
               <option key={p.userId} value={p.userId}>
                 {p.displayName}
                 {p.userId === round.ownerUserId ? ' (owner)' : ''}
@@ -201,10 +227,10 @@ export const RoundControls = ({ round, isOwner, onRoundUpdate }: RoundControlsPr
                   <span className="text-white">{player.displayName}</span>
                   <span className="ml-2 text-xs text-neutral-500">{isRoundOwner ? 'owner' : player.kind}</span>
                 </div>
-                {!isRoundOwner && (
+                {(!isRoundOwner || isOwner) && (
                   <IconButton
-                    aria-label={`Remove ${player.displayName}`}
-                    onClick={() => handleRemovePlayer(player.id)}
+                    aria-label={isRoundOwner ? 'Remove yourself as a player' : `Remove ${player.displayName}`}
+                    onClick={() => handleRemovePlayer(player.id, isRoundOwner)}
                     disabled={pending}
                     size="small"
                     sx={{ color: 'var(--color-neutral-400)' }}
@@ -216,6 +242,12 @@ export const RoundControls = ({ round, isOwner, onRoundUpdate }: RoundControlsPr
             );
           })}
         </ul>
+
+        {isOwner && !ownerIsPlayer && (
+          <Button variant="outlined" onClick={handleAddSelf} disabled={pending || !user} sx={{ ...brandButtonSx, mt: 3 }}>
+            Add me as a player
+          </Button>
+        )}
 
         {availableFamily.length > 0 && (
           <div className="mt-4">

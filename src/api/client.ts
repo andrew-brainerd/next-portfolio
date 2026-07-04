@@ -11,7 +11,8 @@ export interface RequestParams {
 
 const client = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BRAINERD_API_URL,
-  withCredentials: true
+  withCredentials: true,
+  timeout: 15000
 });
 
 const getAuthHeaders = async (): Promise<Record<string, string>> => {
