@@ -22,6 +22,7 @@ import { brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fi
 import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import { PlayerScoreEntry } from '@/components/scorebook/PlayerScoreEntry';
+import { ScorecardGrid } from '@/components/scorebook/ScorecardGrid';
 import { RoundControlsModal } from '@/components/scorebook/RoundControlsModal';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
@@ -41,10 +42,15 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
   const [holePending, setHolePending] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [view, setView] = useState<'manage' | 'mine'>('manage');
+  const [view, setView] = useState<'manage' | 'grid' | 'mine'>('manage');
 
   // The gamemaster is only "playing" if they're also on the roster; that gates the My Score tab.
   const myPlayer = round.players.find(p => p.kind === 'user' && p.userId === currentUserId);
+
+  const tabClass = (active: boolean) =>
+    `rounded-md px-4 py-1.5 transition-colors ${
+      active ? 'bg-brand-600 font-medium text-white' : 'text-neutral-300 hover:text-white'
+    }`;
 
   useEffect(() => {
     const channel = getChannel(initialRound.id);
@@ -154,33 +160,26 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
 
   return (
     <div className="space-y-6 max-w-2xl sm:space-y-8">
-      {myPlayer && (
-        <div className="flex justify-center">
-          <div className="inline-flex rounded-lg border border-neutral-700 bg-neutral-800 p-1 text-sm">
-            <button
-              type="button"
-              onClick={() => setView('manage')}
-              className={`rounded-md px-4 py-1.5 transition-colors ${
-                view === 'manage' ? 'bg-brand-600 font-medium text-white' : 'text-neutral-300 hover:text-white'
-              }`}
-            >
-              Manage Round
-            </button>
-            <button
-              type="button"
-              onClick={() => setView('mine')}
-              className={`rounded-md px-4 py-1.5 transition-colors ${
-                view === 'mine' ? 'bg-brand-600 font-medium text-white' : 'text-neutral-300 hover:text-white'
-              }`}
-            >
+      <div className="flex justify-center">
+        <div className="inline-flex rounded-lg border border-neutral-700 bg-neutral-800 p-1 text-sm">
+          <button type="button" onClick={() => setView('manage')} className={tabClass(view === 'manage')}>
+            Manage Round
+          </button>
+          <button type="button" onClick={() => setView('grid')} className={tabClass(view === 'grid')}>
+            Scorecard
+          </button>
+          {myPlayer && (
+            <button type="button" onClick={() => setView('mine')} className={tabClass(view === 'mine')}>
               My Score
             </button>
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
       {view === 'mine' && myPlayer ? (
         <PlayerScoreEntry round={round} myPlayer={myPlayer} onRoundUpdate={setRound} />
+      ) : view === 'grid' ? (
+        <ScorecardGrid round={round} canEdit onRoundUpdate={setRound} />
       ) : (
         <>
       <section className="flex flex-wrap items-center justify-between gap-2 rounded border border-neutral-700 bg-neutral-800 p-3">
