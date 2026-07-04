@@ -8,19 +8,20 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 import {
   clearFrisbeeGolfScore,
   completeFrisbeeGolfRound,
   getFrisbeeGolfRound,
   setFrisbeeGolfCurrentHole,
-  setFrisbeeGolfGamemaster,
   setFrisbeeGolfScore
 } from '@/api/scorebook';
 import { getChannel } from '@/utils/pusher';
-import { brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
+import { brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
+import { RoundControlsModal } from '@/components/scorebook/RoundControlsModal';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
 const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
@@ -38,6 +39,7 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [holePending, setHolePending] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     const channel = getChannel(initialRound.id);
@@ -73,9 +75,9 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
   const viewingLive = hole.number === liveHole;
   const nextHoleNumber = round.holes[viewedIndex + 1]?.number;
 
-  const userPlayers = round.players.filter(p => p.kind === 'user' && p.userId);
   const gamemasterUserId = round.gamemasterUserId ?? round.ownerUserId;
-  const gamemasterName = userPlayers.find(p => p.userId === gamemasterUserId)?.displayName ?? 'Owner';
+  const gamemasterName =
+    round.players.find(p => p.kind === 'user' && p.userId === gamemasterUserId)?.displayName ?? 'Owner';
 
   // Move the shared live hole (what players score) and follow it with the local view.
   const setLiveHole = async (holeNumber: number) => {
@@ -88,15 +90,6 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
       console.error(err);
     } finally {
       setHolePending(false);
-    }
-  };
-
-  const handleSetGamemaster = async (userId: string) => {
-    try {
-      const updated = await setFrisbeeGolfGamemaster(round.id, userId);
-      if (updated) setRound(updated);
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -157,24 +150,18 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
   return (
     <div className="space-y-8 max-w-2xl">
       <section className="flex items-center justify-between gap-3 rounded border border-neutral-700 bg-neutral-800 p-3">
-        <span className="text-sm text-neutral-400">Gamemaster</span>
-        {isOwner ? (
-          <select
-            value={gamemasterUserId}
-            onChange={e => handleSetGamemaster(e.target.value)}
-            aria-label="Gamemaster"
-            className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm text-white outline-none focus:border-brand-500"
-          >
-            {userPlayers.map(p => (
-              <option key={p.userId} value={p.userId}>
-                {p.displayName}
-                {p.userId === round.ownerUserId ? ' (owner)' : ''}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <span className="text-sm font-medium text-white">{gamemasterName}</span>
-        )}
+        <span className="text-sm text-neutral-400">
+          Gamemaster: <span className="font-medium text-white">{gamemasterName}</span>
+        </span>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<SettingsIcon />}
+          onClick={() => setShowSettings(true)}
+          sx={brandButtonSx}
+        >
+          Round settings
+        </Button>
       </section>
 
       <section>
@@ -332,24 +319,34 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
         </ul>
       </section>
 
-      <div className="flex items-center justify-between gap-3 border-t border-neutral-800 pt-6">
-        <div className="text-sm text-neutral-400">
-          {missingScores === 0
-            ? 'All scores entered. Ready to complete the round.'
-            : `${missingScores} score${missingScores === 1 ? '' : 's'} still missing.`}
+      <RoundControlsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        round={round}
+        isOwner={isOwner}
+        onRoundUpdate={setRound}
+      />
+
+      {isLastHole && (
+        <div className="flex items-center justify-between gap-3 border-t border-neutral-800 pt-6">
+          <div className="text-sm text-neutral-400">
+            {missingScores === 0
+              ? 'All scores entered. Ready to complete the round.'
+              : `${missingScores} score${missingScores === 1 ? '' : 's'} still missing.`}
+          </div>
+          <Button
+            variant="contained"
+            onClick={handleComplete}
+            disabled={completing}
+            sx={{
+              'backgroundColor': 'var(--color-brand-600)',
+              '&:hover': { backgroundColor: 'var(--color-brand-700)' }
+            }}
+          >
+            {completing ? 'Completing...' : 'Complete round'}
+          </Button>
         </div>
-        <Button
-          variant="contained"
-          onClick={handleComplete}
-          disabled={completing}
-          sx={{
-            'backgroundColor': 'var(--color-brand-600)',
-            '&:hover': { backgroundColor: 'var(--color-brand-700)' }
-          }}
-        >
-          {completing ? 'Completing...' : 'Complete round'}
-        </Button>
-      </div>
+      )}
     </div>
   );
 };
