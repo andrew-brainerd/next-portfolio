@@ -1,0 +1,148 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import Button from '@mui/material/Button';
+
+import { setFrisbeeGolfScore } from '@/api/scorebook';
+import { golfTermForScore } from '@/utils/frisbeeGolfTerms';
+import { playScoreError, playScoreSuccess } from '@/utils/scorebookSound';
+import { speak } from '@/utils/speech';
+import { brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
+import { NumberInput } from '@/components/scorebook/NumberInput';
+import { ScoreCelebration, type Celebration } from '@/components/scorebook/ScoreCelebration';
+import type { FrisbeeGolfPlayer, FrisbeeGolfRound } from '@/types/scorebook';
+
+const MAX_SCORE = 15;
+
+interface PlayerScoreEntryProps {
+  round: FrisbeeGolfRound;
+  myPlayer: FrisbeeGolfPlayer;
+  onRoundUpdate: (round: FrisbeeGolfRound) => void;
+}
+
+// Presentational own-score entry for a single player at the live hole. Realtime
+// (Pusher) and routing are owned by the parent — this only reads `round` and
+// writes scores through `onRoundUpdate`, so it works both for a regular player
+// (RoundPlayerActive) and for the gamemaster's "My Score" tab (RoundActive).
+export const PlayerScoreEntry = ({ round, myPlayer, onRoundUpdate }: PlayerScoreEntryProps) => {
+  const [saving, setSaving] = useState(false);
+  const [showScorecard, setShowScorecard] = useState(false);
+  const [celebration, setCelebration] = useState<Celebration | null>(null);
+  const celebrationId = useRef(0);
+
+  const currentHoleNumber = round.currentHole ?? round.holes[0]?.number ?? 1;
+  const hole = round.holes.find(h => h.number === currentHoleNumber) ?? round.holes[0];
+  const savedScore = round.scores[myPlayer.id]?.[hole.number];
+
+  const [draft, setDraft] = useState(savedScore ?? hole.par);
+
+  // When the gamemaster moves to a new hole, reset the input to that hole's saved score (or par).
+  useEffect(() => {
+    setDraft(savedScore ?? hole.par);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hole.number]);
+
+  useEffect(() => {
+    if (!celebration) return;
+    const timer = setTimeout(() => setCelebration(null), 2600);
+    return () => clearTimeout(timer);
+  }, [celebration]);
+
+  const isDirty = draft !== savedScore;
+
+  const handleSubmit = async () => {
+    if (!isDirty) return;
+    setSaving(true);
+    try {
+      const updated = await setFrisbeeGolfScore(round.id, myPlayer.id, hole.number, draft);
+      if (updated) onRoundUpdate(updated);
+      const term = golfTermForScore(draft, hole.par);
+      celebrationId.current += 1;
+      setCelebration({ ...term, id: celebrationId.current });
+      playScoreSuccess();
+      speak(term.term);
+    } catch (err) {
+      console.error(err);
+      playScoreError();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const submitLabel = saving ? 'Saving…' : isDirty ? 'Submit score' : 'Saved ✓';
+
+  return (
+    <>
+      <ScoreCelebration celebration={celebration} />
+      <div className="mx-auto max-w-md space-y-6">
+        <div className="rounded-xl border border-brand-200 bg-white p-6 text-center text-neutral-900 shadow-sm">
+          <div className="text-xs uppercase tracking-wider text-neutral-500">
+            Hole {hole.number} of {round.holes.length}
+          </div>
+          <div className="text-3xl font-bold">Par {hole.par}</div>
+
+          <p className="mt-4 text-sm text-neutral-500">Your score</p>
+          <div className="mt-2 flex justify-center">
+            <NumberInput value={draft} onChange={setDraft} min={1} max={MAX_SCORE} ariaLabel="Your score" />
+          </div>
+
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={saving || !isDirty}
+            sx={{ ...brandContainedButtonSx, mt: 3 }}
+          >
+            {submitLabel}
+          </Button>
+
+          <p className="mt-3 text-xs text-neutral-500">
+            You can update this until the gamemaster moves to the next hole.
+          </p>
+        </div>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => setShowScorecard(s => !s)}
+            className="text-sm text-brand-400 underline-offset-2 hover:underline"
+          >
+            {showScorecard ? 'Hide my scorecard' : 'My scorecard'}
+          </button>
+        </div>
+
+        {showScorecard && (
+          <div className="overflow-hidden rounded-xl border border-neutral-700 bg-neutral-800">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-neutral-700 text-neutral-400">
+                  <th className="p-2 text-left font-medium">Hole</th>
+                  <th className="p-2 text-right font-medium">Par</th>
+                  <th className="p-2 text-right font-medium">Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {round.holes.map(h => {
+                  const score = round.scores[myPlayer.id]?.[h.number];
+                  const isCurrent = h.number === hole.number;
+                  return (
+                    <tr
+                      key={h.number}
+                      className={`border-b border-neutral-800 last:border-0 ${isCurrent ? 'bg-neutral-700/40' : ''}`}
+                    >
+                      <td className="p-2 text-left text-white">
+                        {h.number}
+                        {isCurrent && <span className="ml-2 text-xs text-brand-400">current</span>}
+                      </td>
+                      <td className="p-2 text-right text-neutral-400">{h.par}</td>
+                      <td className="p-2 text-right font-mono text-white">{typeof score === 'number' ? score : '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
