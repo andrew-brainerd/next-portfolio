@@ -18,7 +18,7 @@ const TABS = [
   {
     id: 'play',
     label: 'Play',
-    description: 'Explore my gaming stats, music pods, and experience tracker'
+    description: 'Explore my gaming stats, music pods, and an async multiplayer dice game'
   }
 ] as const;
 
