@@ -29,9 +29,10 @@ const handleError = (method: Method, url: string, err: AxiosError): void => {
   console.error(`${method} ${url}: ${err.message}`, global.window);
 };
 
-export const postRequest = async <T, R>(url: string, data?: T): Promise<R> => {
+export const postRequest = async <T, R>(url: string, data?: T, timeoutMs?: number): Promise<R> => {
   const headers = await getAuthHeaders();
-  return client.post(url, data || {}, { headers }).then(response => response?.data);
+  // timeoutMs overrides the client default (15s) for slower endpoints; omit to keep the default.
+  return client.post(url, data || {}, { headers, timeout: timeoutMs }).then(response => response?.data);
 };
 
 export const patchRequest = async <T, R>(url: string, data: T): Promise<R> => {

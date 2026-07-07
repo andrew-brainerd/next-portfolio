@@ -108,7 +108,8 @@ export const disconnectGmail = async (): Promise<void> => {
 };
 
 export const scanPantry = async (id: string, fullRescan = false): Promise<ScanSummary> => {
-  return postRequest<{ fullRescan: boolean }, ScanSummary>(`/oishii/pantries/${id}/scan`, { fullRescan });
+  // Scanning fans out to Gmail; give it more headroom than the 15s default.
+  return postRequest<{ fullRescan: boolean }, ScanSummary>(`/oishii/pantries/${id}/scan`, { fullRescan }, 60000);
 };
 
 export const getPreferences = async (): Promise<DietaryPreferences> => {
