@@ -1,14 +1,16 @@
 'use server';
 
-import { deleteRequest, getRequest, patchRequest, postRequest } from '@/api/client';
+import { deleteRequest, getRequest, patchRequest, postRequest, putRequest } from '@/api/client';
 import type {
   AcceptInviteResult,
   AddItemInput,
+  DietaryPreferences,
   InvitePreview,
   Pantry,
   PantryDetail,
   PantryInvite,
   PantryItem,
+  RecipeIdeasResult,
   ScanSummary,
   UpdateItemInput
 } from '@/types/oishii';
@@ -107,4 +109,23 @@ export const disconnectGmail = async (): Promise<void> => {
 
 export const scanPantry = async (id: string, fullRescan = false): Promise<ScanSummary> => {
   return postRequest<{ fullRescan: boolean }, ScanSummary>(`/oishii/pantries/${id}/scan`, { fullRescan });
+};
+
+export const getPreferences = async (): Promise<DietaryPreferences> => {
+  const response = await getRequest<DietaryPreferences>('/oishii/preferences');
+  return { intolerances: response?.intolerances ?? [], diets: response?.diets ?? [] };
+};
+
+export const setPreferences = async (prefs: DietaryPreferences): Promise<DietaryPreferences> => {
+  return putRequest<DietaryPreferences, DietaryPreferences>('/oishii/preferences', prefs);
+};
+
+export const getRecipeIdeas = async (id: string, forUserIds?: string[]): Promise<RecipeIdeasResult> => {
+  const params = forUserIds && forUserIds.length > 0 ? { forUserIds: forUserIds.join(',') } : undefined;
+  const response = await getRequest<RecipeIdeasResult>(`/oishii/pantries/${id}/recipes`, params);
+  return {
+    recipes: response?.recipes ?? [],
+    appliedIntolerances: response?.appliedIntolerances ?? [],
+    appliedDiets: response?.appliedDiets ?? []
+  };
 };

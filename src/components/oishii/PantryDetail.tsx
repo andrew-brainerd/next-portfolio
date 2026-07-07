@@ -7,6 +7,7 @@ import { AddItemForm } from '@/components/oishii/AddItemForm';
 import { ItemGrid } from '@/components/oishii/ItemGrid';
 import { MembersPanel } from '@/components/oishii/MembersPanel';
 import { PantrySettings } from '@/components/oishii/PantrySettings';
+import { RecipeIdeasPanel } from '@/components/oishii/RecipeIdeasPanel';
 import { ScanButton } from '@/components/oishii/ScanButton';
 import type { PantryDetail as PantryDetailType } from '@/types/oishii';
 
@@ -50,6 +51,11 @@ export const PantryDetail = ({ initialPantry, currentUserId, gmailConnected }: P
       <section>
         <h2 className="mb-3 text-xl font-semibold text-white">Items</h2>
         <ItemGrid pantry={pantry} onChanged={refresh} />
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-xl font-semibold text-white">Recipe ideas</h2>
+        <RecipeIdeasPanel pantry={pantry} />
       </section>
 
       <section>

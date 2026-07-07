@@ -84,3 +84,24 @@ export interface ScanSummary {
   itemsAdded: number;
   itemsMerged: number;
 }
+
+export interface DietaryPreferences {
+  intolerances: string[];
+  diets: string[];
+}
+
+export interface RecipeIdea {
+  id: number;
+  title: string;
+  image?: string;
+  usedIngredientCount: number;
+  missedIngredientCount: number;
+  sourceUrl?: string;
+  diets: string[];
+}
+
+export interface RecipeIdeasResult {
+  recipes: RecipeIdea[];
+  appliedIntolerances: string[];
+  appliedDiets: string[];
+}
