@@ -29,3 +29,8 @@ export const OISHII_DIETS = [
   'low fodmap',
   'whole30'
 ] as const;
+
+// Realtime: public per-pantry Pusher channel + event (mirrors brainerd-api
+// constants/oishii.ts). The event is a re-fetch ping with no payload.
+export const PANTRY_UPDATED_EVENT = 'pantryUpdated';
+export const pantryChannelName = (pantryId: string) => `pantry-${pantryId}`;
