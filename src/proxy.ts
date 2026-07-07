@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { TOKEN_COOKIE } from 'constants/authentication';
-import { KEIKEN_ROUTE, LOGIN_ROUTE, MANGA_ROUTE } from 'constants/routes';
+import { KEIKEN_ROUTE, LOGIN_ROUTE, MANGA_ROUTE, OISHII_ROUTE } from 'constants/routes';
 import { getCookie } from 'utils/server';
 
 export async function proxy(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function proxy(request: NextRequest) {
   const hostname = requestHeaders.get('host');
   const { pathname } = request.nextUrl;
 
-  const protectedRoutes = [MANGA_ROUTE, KEIKEN_ROUTE];
+  const protectedRoutes = [MANGA_ROUTE, KEIKEN_ROUTE, OISHII_ROUTE];
   const isProtectedRoute = protectedRoutes.some(route => pathname.includes(route));
 
   if (isProtectedRoute && !authCookie && hostname) {
