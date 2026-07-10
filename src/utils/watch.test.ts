@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { StreamingOption, WatchListItem } from '../types/watch';
-import { groupByStatus, hasLeavingSoon, splitAvailability } from './watch';
+import { groupByStatus, hasLeavingSoon, requiresRental, splitAvailability } from './watch';
 
 const option = (serviceId: string, type: StreamingOption['type'], extra: Partial<StreamingOption> = {}): StreamingOption => ({
   service: { id: serviceId, name: serviceId },
@@ -9,6 +9,16 @@ const option = (serviceId: string, type: StreamingOption['type'], extra: Partial
   link: `https://${serviceId}.com/title`,
   ...extra
 });
+
+const itemWith = (options: StreamingOption[]): WatchListItem =>
+  ({
+    id: 'x',
+    showType: 'movie',
+    status: 'watchlist',
+    addedAt: 0,
+    updatedAt: 0,
+    media: { id: 'x', country: 'us', showType: 'movie', title: 'T', streamingOptions: options }
+  }) as WatchListItem;
 
 describe('splitAvailability', () => {
   it('puts subscription options on my services into primary', () => {
@@ -73,5 +83,19 @@ describe('hasLeavingSoon', () => {
     expect(hasLeavingSoon([option('netflix', 'subscription', { expiresSoon: true })])).toBe(true);
     expect(hasLeavingSoon([option('netflix', 'subscription')])).toBe(false);
     expect(hasLeavingSoon([])).toBe(false);
+  });
+});
+
+describe('requiresRental', () => {
+  it('is true when every option is rent or buy', () => {
+    expect(requiresRental(itemWith([option('apple', 'rent'), option('amazon', 'buy')]))).toBe(true);
+  });
+
+  it('is false when a subscription option exists', () => {
+    expect(requiresRental(itemWith([option('apple', 'rent'), option('netflix', 'subscription')]))).toBe(false);
+  });
+
+  it('is false when availability is unknown (no options)', () => {
+    expect(requiresRental(itemWith([]))).toBe(false);
   });
 });

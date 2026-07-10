@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { WatchListResponse, WatchStatus } from 'types/watch';
 import { getWatchList } from 'api/watch';
-import { WATCH_STATUS_LABELS, WATCH_STATUS_ORDER, groupByStatus } from 'utils/watch';
+import { WATCH_STATUS_LABELS, WATCH_STATUS_ORDER, groupByStatus, requiresRental } from 'utils/watch';
+import { useShowRentalTitles } from 'hooks/useShowRentalTitles';
 import { Loading } from 'components/Loading';
 import { WatchSearch } from 'components/watch/WatchSearch';
 import { WatchCard } from 'components/watch/WatchCard';
@@ -17,6 +18,7 @@ export const WatchLibrary = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<WatchStatus | 'favorites'>('watching');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showRentalTitles, setShowRentalTitles] = useShowRentalTitles();
 
   // Re-fetch after mutations (called from child event handlers, not from an effect).
   const refresh = useCallback(async () => {
@@ -42,7 +44,11 @@ export const WatchLibrary = () => {
     };
   }, []);
 
-  const groups = useMemo(() => groupByStatus(data?.items ?? []), [data]);
+  // Status tabs respect the rental filter (counts + items stay consistent); favorites always show all.
+  const groups = useMemo(() => {
+    const items = data?.items ?? [];
+    return groupByStatus(showRentalTitles ? items : items.filter(item => !requiresRental(item)));
+  }, [data, showRentalTitles]);
   const favorites = useMemo(() => (data?.items ?? []).filter(item => item.favorite), [data]);
   const services = data?.settings.services ?? [];
   const existingIds = useMemo(() => new Set((data?.items ?? []).map(item => item.id)), [data]);
@@ -56,13 +62,24 @@ export const WatchLibrary = () => {
             ? `Highlighting what's on your ${services.length} service${services.length === 1 ? '' : 's'}.`
             : 'Set your streaming services to see what you can watch now.'}
         </p>
-        <button
-          type="button"
-          onClick={() => setSettingsOpen(true)}
-          className="rounded border border-neutral-700 px-3 py-1.5 text-sm text-neutral-200 transition-colors hover:border-neutral-500 hover:text-white"
-        >
-          My services
-        </button>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-1.5 text-sm text-neutral-400" title="Show titles only available to rent or buy">
+            <input
+              type="checkbox"
+              checked={showRentalTitles}
+              onChange={e => setShowRentalTitles(e.target.checked)}
+              className="h-4 w-4 accent-brand-500"
+            />
+            Show rentals
+          </label>
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            className="rounded border border-neutral-700 px-3 py-1.5 text-sm text-neutral-200 transition-colors hover:border-neutral-500 hover:text-white"
+          >
+            My services
+          </button>
+        </div>
       </div>
 
       <WatchSearch existingIds={existingIds} onChanged={refresh} />
