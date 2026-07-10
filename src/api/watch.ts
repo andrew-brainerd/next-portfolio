@@ -1,4 +1,5 @@
 import type {
+  ApiUsage,
   ShowType,
   StreamingServiceRef,
   WatchItem,
@@ -15,6 +16,8 @@ export const searchWatch = (q: string): Promise<WatchSearchResult[] | undefined>
 
 export const getWatchList = (): Promise<WatchListResponse | undefined> =>
   getRequest<WatchListResponse>('/watch/list');
+
+export const getWatchUsage = (): Promise<ApiUsage[] | undefined> => getRequest<ApiUsage[]>('/watch/usage');
 
 export const addToWatch = (input: { id: string; showType: ShowType; status?: WatchStatus }): Promise<WatchItem> =>
   postRequest<typeof input, WatchItem>('/watch/list', input);

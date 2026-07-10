@@ -105,3 +105,12 @@ export interface WatchListResponse {
   items: WatchListItem[];
   settings: WatchSettings;
 }
+
+export interface ApiUsage {
+  provider: string;
+  label: string;
+  quota: number | null;
+  used: number | null;
+  resetAt: string | null;
+  updatedAt: number;
+}

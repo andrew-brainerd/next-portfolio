@@ -8,6 +8,7 @@ export const PEAPOD_ROUTE = '/peapod';
 export const ROLL_WITH_ME_ROUTE = '/roll-with-me';
 export const WEDDING_ROUTE = '/wedding';
 export const WATCH_ROUTE = '/watch';
+export const WATCH_USAGE_ROUTE = '/watch/usage';
 export const RSVP_ROUTE = '/rsvp';
 export const SETTINGS_ROUTE = '/settings';
 export const APPS_ROUTE = '/apps';
