@@ -15,7 +15,7 @@ const EMPTY: WatchListResponse = { items: [], settings: { country: 'us', service
 export const WatchLibrary = () => {
   const [data, setData] = useState<WatchListResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<WatchStatus>('watching');
+  const [activeTab, setActiveTab] = useState<WatchStatus | 'favorites'>('watching');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Re-fetch after mutations (called from child event handlers, not from an effect).
@@ -43,9 +43,10 @@ export const WatchLibrary = () => {
   }, []);
 
   const groups = useMemo(() => groupByStatus(data?.items ?? []), [data]);
+  const favorites = useMemo(() => (data?.items ?? []).filter(item => item.favorite), [data]);
   const services = data?.settings.services ?? [];
   const existingIds = useMemo(() => new Set((data?.items ?? []).map(item => item.id)), [data]);
-  const activeItems = groups[activeTab];
+  const activeItems = activeTab === 'favorites' ? favorites : groups[activeTab];
 
   return (
     <div>
@@ -90,12 +91,27 @@ export const WatchLibrary = () => {
                 {WATCH_STATUS_LABELS[status]} ({groups[status].length})
               </button>
             ))}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'favorites'}
+              onClick={() => setActiveTab('favorites')}
+              className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'favorites'
+                  ? 'border-brand-400 text-white'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              Favorites ({favorites.length})
+            </button>
           </div>
 
           <div className="mt-6">
             {activeItems.length === 0 ? (
               <p className="py-10 text-center text-sm text-neutral-500">
-                Nothing in {WATCH_STATUS_LABELS[activeTab].toLowerCase()} yet. Search above to add something.
+                {activeTab === 'favorites'
+                  ? 'No favorites yet. Tap the star on a title to add it here.'
+                  : `Nothing in ${WATCH_STATUS_LABELS[activeTab].toLowerCase()} yet. Search above to add something.`}
               </p>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

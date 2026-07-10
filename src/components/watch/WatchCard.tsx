@@ -43,6 +43,16 @@ export const WatchCard = ({ item, services, onChanged }: WatchCardProps) => {
     }
   };
 
+  const toggleFavorite = async () => {
+    setBusy(true);
+    try {
+      await updateWatchItem(item.id, { favorite: !item.favorite });
+      await onChanged();
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900/50">
       <div className="flex gap-3 p-3">
@@ -56,15 +66,38 @@ export const WatchCard = ({ item, services, onChanged }: WatchCardProps) => {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold leading-tight text-white">{media?.title ?? item.id}</h3>
-            <button
-              type="button"
-              onClick={remove}
-              disabled={busy}
-              aria-label="Remove from library"
-              className="shrink-0 text-lg leading-none text-neutral-500 hover:text-red-400 disabled:opacity-50"
-            >
-              ×
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={toggleFavorite}
+                disabled={busy}
+                aria-label={item.favorite ? 'Remove from favorites' : 'Add to favorites'}
+                title={item.favorite ? 'Favorited' : 'Add to favorites'}
+                className={`leading-none transition-colors disabled:opacity-50 ${
+                  item.favorite ? 'text-amber-400' : 'text-neutral-500 hover:text-amber-400'
+                }`}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill={item.favorite ? 'currentColor' : 'none'}
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 2.5l2.9 6.06 6.6.62-4.98 4.4 1.46 6.48L12 16.9l-5.98 3.16 1.46-6.48L2.5 9.18l6.6-.62L12 2.5z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={remove}
+                disabled={busy}
+                aria-label="Remove from library"
+                className="text-lg leading-none text-neutral-500 hover:text-red-400 disabled:opacity-50"
+              >
+                ×
+              </button>
+            </div>
           </div>
 
           <p className="mt-0.5 text-xs text-neutral-400">

@@ -21,7 +21,7 @@ export const addToWatch = (input: { id: string; showType: ShowType; status?: Wat
 
 export const updateWatchItem = (
   id: string,
-  patch: { status?: WatchStatus; progress?: { season: number; episode: number } }
+  patch: { status?: WatchStatus; progress?: { season: number; episode: number }; favorite?: boolean }
 ): Promise<WatchItem | void> => patchRequest<typeof patch, WatchItem>(`/watch/list/${id}`, patch);
 
 export const removeFromWatch = (id: string): Promise<void> => deleteRequest(`/watch/list/${id}`);

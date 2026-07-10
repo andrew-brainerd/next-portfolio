@@ -17,6 +17,7 @@ export interface WatchItem {
   addedAt: number;
   updatedAt: number;
   progress?: SeriesProgress;
+  favorite?: boolean;
 }
 
 export interface WatchSettings {
