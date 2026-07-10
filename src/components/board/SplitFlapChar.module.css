@@ -1,54 +1,45 @@
-/* One split-flap cell. Two static halves + two animated flaps per step.
-   Sizing is container-query driven: the cell is a size container and glyphs
-   scale to its height, so the board is fully responsive at any grid size. */
+/* One split-flap cell — an authentic two-leaf fold.
+   The cell is split at a center seam. A flip advances one glyph:
+   the top leaf (old top) folds forward/down around the seam, revealing the new
+   top behind it; then the bottom leaf (new bottom) falls from upright down onto
+   the seam, covering the old bottom. Folds are chained one glyph at a time by
+   the component (on animationend), so a roll reads as a rapid stack of flips.
+   Sizing is container-query driven so the board is responsive at any grid size. */
 
 .cell {
   position: relative;
-  border-radius: 3px;
-  background: #050505;
-  color: #f2efe6;
-  font-family: var(--font-roboto), ui-monospace, SFMono-Regular, monospace;
-  font-weight: 600;
-  user-select: none;
   container-type: size;
-  aspect-ratio: 1 / 1.32;
-  perspective: 220px;
+  aspect-ratio: 1 / 1.35;
+  border-radius: 4px;
+  background: #080808;
+  color: #f4f1e8;
+  font-family: var(--font-roboto), ui-monospace, SFMono-Regular, monospace;
+  font-weight: 700;
+  perspective: 170px;
+  perspective-origin: center center;
+  user-select: none;
 }
 
 .half,
-.flap {
+.leaf {
   position: absolute;
   right: 0;
   left: 0;
   height: 50%;
-  background: #171717;
-  background-image: linear-gradient(180deg, #1f1f1f 0%, #141414 100%);
   overflow: hidden;
+  backface-visibility: hidden;
 }
 
 .top {
   top: 0;
-  align-items: flex-end;
-  border-radius: 3px 3px 0 0;
+  border-radius: 4px 4px 0 0;
+  background-image: linear-gradient(180deg, #242424 0%, #191919 100%);
 }
 
 .bottom {
   bottom: 0;
-  border-radius: 0 0 3px 3px;
-  background-image: linear-gradient(180deg, #131313 0%, #0d0d0d 100%);
-}
-
-/* The horizontal seam across the middle of the cell. */
-.cell::after {
-  position: absolute;
-  top: calc(50% - 0.5px);
-  right: 0;
-  left: 0;
-  z-index: 6;
-  height: 1px;
-  background: rgb(0 0 0 / 0.6);
-  pointer-events: none;
-  content: '';
+  border-radius: 0 0 4px 4px;
+  background-image: linear-gradient(180deg, #151515 0%, #0f0f0f 100%);
 }
 
 .glyph {
@@ -59,7 +50,7 @@
   justify-content: center;
   align-items: center;
   height: 200%;
-  font-size: 66cqh;
+  font-size: 70cqh;
   line-height: 1;
 }
 
@@ -71,30 +62,54 @@
   bottom: 0;
 }
 
-/* Animated flaps. flapDown folds the outgoing top away; flapUp drops the
-   incoming bottom into place. --flap-ms is the full single-flap duration. */
-.flapDown {
-  top: 0;
-  z-index: 4;
-  border-radius: 3px 3px 0 0;
-  transform-origin: center bottom;
-  animation: flap-down calc(var(--flap-ms) * 0.5) ease-in forwards;
-  backface-visibility: hidden;
+/* Center seam — the physical split between the two leaves. */
+.cell::after {
+  position: absolute;
+  top: calc(50% - 1px);
+  right: 0;
+  left: 0;
+  z-index: 6;
+  height: 2px;
+  background: rgb(0 0 0 / 0.55);
+  pointer-events: none;
+  content: "";
 }
 
-.flapUp {
+.leaf {
+  z-index: 5;
+  will-change: transform;
+}
+
+/* Top leaf: shows the outgoing glyph's top, folds down around the seam (bottom edge). */
+.leafTop {
+  top: 0;
+  border-radius: 4px 4px 0 0;
+  background-image: linear-gradient(180deg, #242424 0%, #191919 100%);
+  transform-origin: center bottom;
+  animation: fold-down calc(var(--fold-ms) / 2) ease-in forwards;
+}
+
+/* Bottom leaf: shows the incoming glyph's bottom, falls from upright onto the seam (top edge). */
+.leafBottom {
   bottom: 0;
-  z-index: 4;
-  border-radius: 0 0 3px 3px;
-  background-image: linear-gradient(180deg, #131313 0%, #0d0d0d 100%);
+  border-radius: 0 0 4px 4px;
+  background-image: linear-gradient(180deg, #151515 0%, #0f0f0f 100%);
   transform: rotateX(90deg);
   transform-origin: center top;
-  animation: flap-up calc(var(--flap-ms) * 0.5) ease-out forwards;
-  animation-delay: calc(var(--flap-ms) * 0.5);
-  backface-visibility: hidden;
+  animation: fold-up calc(var(--fold-ms) / 2) ease-out calc(var(--fold-ms) / 2) forwards;
 }
 
-@keyframes flap-down {
+/* A moving shadow across the top leaf as it folds — sells the depth. */
+.leafTop::before {
+  position: absolute;
+  background: #000;
+  opacity: 0;
+  animation: shade calc(var(--fold-ms) / 2) ease-in forwards;
+  content: "";
+  inset: 0;
+}
+
+@keyframes fold-down {
   from {
     transform: rotateX(0deg);
   }
@@ -104,12 +119,22 @@
   }
 }
 
-@keyframes flap-up {
+@keyframes fold-up {
   from {
     transform: rotateX(90deg);
   }
 
   to {
     transform: rotateX(0deg);
+  }
+}
+
+@keyframes shade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0.55;
   }
 }

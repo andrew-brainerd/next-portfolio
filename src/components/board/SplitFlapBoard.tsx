@@ -6,7 +6,7 @@ import { SplitFlapChar } from './SplitFlapChar';
 interface SplitFlapBoardProps {
   // rows×cols grid of flap codes.
   grid: number[][];
-  flapSpeedMs: number;
+  foldMs: number;
 }
 
 const gridToText = (grid: number[][]): string =>
@@ -23,7 +23,7 @@ const gridToText = (grid: number[][]): string =>
     .join(' ')
     .trim();
 
-export const SplitFlapBoard = ({ grid, flapSpeedMs }: SplitFlapBoardProps) => {
+export const SplitFlapBoard = ({ grid, foldMs }: SplitFlapBoardProps) => {
   const cols = grid[0]?.length ?? 0;
 
   return (
@@ -39,7 +39,7 @@ export const SplitFlapBoard = ({ grid, flapSpeedMs }: SplitFlapBoardProps) => {
       >
         {grid.flatMap((row, r) =>
           row.map((code, c) => (
-            <SplitFlapChar key={`${r}-${c}`} code={code} flapSpeedMs={flapSpeedMs} staggerMs={(r + c) * 13} />
+            <SplitFlapChar key={`${r}-${c}`} code={code} foldMs={foldMs} staggerMs={(r + c) * 9} />
           ))
         )}
       </div>

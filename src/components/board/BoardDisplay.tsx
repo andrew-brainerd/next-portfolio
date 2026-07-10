@@ -14,7 +14,7 @@ import { SplitFlapBoard } from './SplitFlapBoard';
 // Prototype grid — will become a per-user setting later.
 const ROWS = 6;
 const COLS = 22;
-const FLAP_SPEED_MS = 60;
+const FOLD_MS = 110;
 
 const SpeakerIcon = ({ muted }: { muted: boolean }) => (
   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
@@ -116,7 +116,7 @@ export const BoardDisplay = () => {
         </div>
       </div>
 
-      <SplitFlapBoard grid={grid} flapSpeedMs={FLAP_SPEED_MS} />
+      <SplitFlapBoard grid={grid} foldMs={FOLD_MS} />
 
       {showNotes && <BoardNotesPanel notes={notes} onChange={loadNotes} />}
 
