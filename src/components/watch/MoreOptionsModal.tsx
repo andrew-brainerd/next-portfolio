@@ -42,7 +42,7 @@ export const MoreOptionsModal = ({ isOpen, onClose, title, options }: MoreOption
               >
                 <span className="text-sm text-white">{option.service.name}</span>
                 <span className="text-xs text-neutral-400">
-                  {TYPE_LABELS[option.type]}
+                  {option.type === 'addon' && option.addon ? `Add-on · ${option.addon.name}` : TYPE_LABELS[option.type]}
                   {option.price ? ` · ${option.price.formatted}` : ''}
                 </span>
               </a>
