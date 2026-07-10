@@ -1,0 +1,115 @@
+/* One split-flap cell. Two static halves + two animated flaps per step.
+   Sizing is container-query driven: the cell is a size container and glyphs
+   scale to its height, so the board is fully responsive at any grid size. */
+
+.cell {
+  position: relative;
+  border-radius: 3px;
+  background: #050505;
+  color: #f2efe6;
+  font-family: var(--font-roboto), ui-monospace, SFMono-Regular, monospace;
+  font-weight: 600;
+  user-select: none;
+  container-type: size;
+  aspect-ratio: 1 / 1.32;
+  perspective: 220px;
+}
+
+.half,
+.flap {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 50%;
+  background: #171717;
+  background-image: linear-gradient(180deg, #1f1f1f 0%, #141414 100%);
+  overflow: hidden;
+}
+
+.top {
+  top: 0;
+  align-items: flex-end;
+  border-radius: 3px 3px 0 0;
+}
+
+.bottom {
+  bottom: 0;
+  border-radius: 0 0 3px 3px;
+  background-image: linear-gradient(180deg, #131313 0%, #0d0d0d 100%);
+}
+
+/* The horizontal seam across the middle of the cell. */
+.cell::after {
+  position: absolute;
+  top: calc(50% - 0.5px);
+  right: 0;
+  left: 0;
+  z-index: 6;
+  height: 1px;
+  background: rgb(0 0 0 / 0.6);
+  pointer-events: none;
+  content: '';
+}
+
+.glyph {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200%;
+  font-size: 66cqh;
+  line-height: 1;
+}
+
+.glyphTop {
+  top: 0;
+}
+
+.glyphBottom {
+  bottom: 0;
+}
+
+/* Animated flaps. flapDown folds the outgoing top away; flapUp drops the
+   incoming bottom into place. --flap-ms is the full single-flap duration. */
+.flapDown {
+  top: 0;
+  z-index: 4;
+  border-radius: 3px 3px 0 0;
+  transform-origin: center bottom;
+  animation: flap-down calc(var(--flap-ms) * 0.5) ease-in forwards;
+  backface-visibility: hidden;
+}
+
+.flapUp {
+  bottom: 0;
+  z-index: 4;
+  border-radius: 0 0 3px 3px;
+  background-image: linear-gradient(180deg, #131313 0%, #0d0d0d 100%);
+  transform: rotateX(90deg);
+  transform-origin: center top;
+  animation: flap-up calc(var(--flap-ms) * 0.5) ease-out forwards;
+  animation-delay: calc(var(--flap-ms) * 0.5);
+  backface-visibility: hidden;
+}
+
+@keyframes flap-down {
+  from {
+    transform: rotateX(0deg);
+  }
+
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes flap-up {
+  from {
+    transform: rotateX(90deg);
+  }
+
+  to {
+    transform: rotateX(0deg);
+  }
+}

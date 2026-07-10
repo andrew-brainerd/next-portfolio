@@ -13,6 +13,7 @@ export const SETTINGS_ROUTE = '/settings';
 export const APPS_ROUTE = '/apps';
 export const APPS_CONDENSATE_ROUTE = '/apps/condensate';
 export const OISHII_ROUTE = '/oishii';
+export const BOARD_ROUTE = '/board';
 export const SCOREBOOK_ROUTE = '/scorebook';
 export const SCOREBOOK_FRISBEE_GOLF_ROUTE = '/scorebook/frisbee-golf';
 export const SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE = '/scorebook/frisbee-golf/new';
