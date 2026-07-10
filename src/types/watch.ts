@@ -63,6 +63,12 @@ export interface WatchSeason {
   episodes: WatchEpisode[];
 }
 
+export interface Trailer {
+  site: string;
+  key: string;
+  name?: string;
+}
+
 export interface WatchMedia {
   id: string;
   country: string;
@@ -79,6 +85,7 @@ export interface WatchMedia {
   poster?: string;
   streamingOptions: StreamingOption[];
   seasons?: WatchSeason[];
+  trailer?: Trailer;
 }
 
 export interface WatchSearchResult {

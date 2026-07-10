@@ -6,6 +6,7 @@ import type { WatchListItem, WatchStatus } from 'types/watch';
 import { removeFromWatch, updateWatchItem } from 'api/watch';
 import { WATCH_STATUS_LABELS, WATCH_STATUS_ORDER, hasLeavingSoon, splitAvailability } from 'utils/watch';
 import { MoreOptionsModal } from 'components/watch/MoreOptionsModal';
+import { TrailerModal } from 'components/watch/TrailerModal';
 
 interface WatchCardProps {
   item: WatchListItem;
@@ -15,6 +16,7 @@ interface WatchCardProps {
 
 export const WatchCard = ({ item, services, onChanged }: WatchCardProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
+  const [trailerOpen, setTrailerOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const media = item.media;
@@ -93,15 +95,26 @@ export const WatchCard = ({ item, services, onChanged }: WatchCardProps) => {
             )}
           </div>
 
-          {more.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setMoreOpen(true)}
-              className="mt-2 text-xs text-neutral-300 underline hover:text-white"
-            >
-              More options ({more.length})
-            </button>
-          )}
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            {media?.trailer && (
+              <button
+                type="button"
+                onClick={() => setTrailerOpen(true)}
+                className="text-xs text-neutral-300 underline hover:text-white"
+              >
+                Trailer
+              </button>
+            )}
+            {more.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setMoreOpen(true)}
+                className="text-xs text-neutral-300 underline hover:text-white"
+              >
+                More options ({more.length})
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -125,6 +138,7 @@ export const WatchCard = ({ item, services, onChanged }: WatchCardProps) => {
       </div>
 
       <MoreOptionsModal isOpen={moreOpen} onClose={() => setMoreOpen(false)} title={media?.title ?? ''} options={more} />
+      <TrailerModal isOpen={trailerOpen} onClose={() => setTrailerOpen(false)} title={media?.title ?? ''} trailer={media?.trailer} />
     </div>
   );
 };
