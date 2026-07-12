@@ -19,18 +19,17 @@ export const listBuzzedGames = async (): Promise<BuzzedGame[]> => {
 export const getBuzzedGame = async (gameId: string): Promise<BuzzedGame | undefined> =>
   getRequest<BuzzedGame>(`/buzzed/games/${gameId}`);
 
-// Read-only resolve of a join code (backs the short invite link /j/:code).
 export const lookupBuzzedGameByCode = async (code: string): Promise<BuzzedGame | undefined> =>
   getRequest<BuzzedGame>(`/buzzed/games/join-code/${encodeURIComponent(code)}`);
 
 export const createBuzzedGame = async (input: CreateBuzzedGameInput): Promise<BuzzedGame> =>
   postRequest<CreateBuzzedGameInput, BuzzedGame>('/buzzed/games', input);
 
-export const joinBuzzedGameByCode = async (code: string): Promise<BuzzedGame> =>
-  postRequest<{ code: string }, BuzzedGame>('/buzzed/games/join-by-code', { code });
+export const joinBuzzedGameByCode = async (code: string, color?: string): Promise<BuzzedGame> =>
+  postRequest<{ code: string; color?: string }, BuzzedGame>('/buzzed/games/join-by-code', { code, color });
 
-export const joinBuzzedGame = async (gameId: string): Promise<BuzzedGame> =>
-  postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/join`, {});
+export const joinBuzzedGame = async (gameId: string, color?: string): Promise<BuzzedGame> =>
+  postRequest<{ color?: string }, BuzzedGame>(`/buzzed/games/${gameId}/join`, { color });
 
 export const updateBuzzedGame = async (
   gameId: string,
@@ -46,8 +45,6 @@ export const completeBuzzedGame = async (gameId: string): Promise<BuzzedGame> =>
 export const deleteBuzzedGame = async (gameId: string): Promise<void> =>
   deleteRequest(`/buzzed/games/${gameId}`);
 
-// THE hot path. The response tells the caller whether they won — they act on that, not on the
-// Pusher event, which is what keeps the pause exactly-once and as fast as it can be.
 export const buzzBuzzedGame = async (
   gameId: string,
   questionIndex: number,
@@ -84,7 +81,6 @@ export const setBuzzedPlayback = async (
     positionSec
   });
 
-// The clock the resume countdown is measured against, so every client counts down together.
 export const getBuzzedServerTime = async (): Promise<number | undefined> => {
   const response = await getRequest<ServerTimeResponse>('/buzzed/time');
   return response?.now;

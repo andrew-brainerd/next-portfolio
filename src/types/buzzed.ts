@@ -39,6 +39,7 @@ export interface BuzzedQuestion {
   state: BuzzedQuestionState;
   videoId?: string;
   armedAt: number;
+  // When the buzzer goes live — pushed past armedAt by the resume countdown, and by every reopen.
   rearmedAt: number;
   lockedBy?: string;
   lockedAt?: number;
@@ -82,9 +83,9 @@ export interface CreateBuzzedGameInput {
   target?: BuzzedTarget;
   rokuDeviceIp?: string;
   settings?: Partial<BuzzedSettings>;
+  color?: string;
 }
 
-// The buzz response is the winner's fast path — they learn they won from this, not from Pusher.
 export interface BuzzResponse {
   won: boolean;
   game: BuzzedGame;

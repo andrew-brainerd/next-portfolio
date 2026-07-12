@@ -2,7 +2,6 @@ import type { BuzzedSettings, BuzzedTarget } from '@/types/buzzed';
 
 export const buzzedChannelName = (gameId: string) => `buzzed-game-${gameId}`;
 
-// Mirrors brainerd-api/src/constants/buzzed.ts. Duplicated rather than imported — the house pattern.
 export const BUZZED_GAME_UPDATED = 'buzzedGameUpdated';
 export const BUZZED_BUZZ_LOCKED = 'buzzedBuzzLocked';
 export const BUZZED_BUZZ_REOPENED = 'buzzedBuzzReopened';
@@ -14,6 +13,19 @@ export const DEFAULT_BUZZED_SETTINGS: BuzzedSettings = {
   resumeDelayMs: 5_000,
   disputeWindowMs: 20_000
 };
+
+export const BUZZED_PLAYER_COLORS = [
+  '#dc2626', // red
+  '#ea580c', // orange
+  '#ca8a04', // gold
+  '#16a34a', // green
+  '#0891b2', // cyan
+  '#2563eb', // blue
+  '#7c3aed', // violet
+  '#db2777' // pink
+] as const;
+
+export const DEFAULT_BUZZER_COLOR = '#737373';
 
 export const BUZZED_TARGET_LABELS: Record<BuzzedTarget, string> = {
   host: 'Host’s screen',

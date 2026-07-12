@@ -12,7 +12,6 @@ interface GameCompletedProps {
 export const GameCompleted = ({ game, currentUserId }: GameCompletedProps) => {
   const standings = computeStandings(game);
   const top = standings[0];
-  // A shared top rank means nobody actually won.
   const outrightWinner = top && standings.filter(s => s.rank === 1).length === 1 ? top : undefined;
   const questionsPlayed = game.history.filter(q => q.state === 'resolved' || q.state === 'skipped').length;
 

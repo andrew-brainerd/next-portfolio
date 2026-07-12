@@ -1,6 +1,7 @@
 'use client';
 
 import { computeStandings, formatBuzzMs, medalForRank } from '@/utils/buzzed';
+import { DEFAULT_BUZZER_COLOR } from '@/constants/buzzed';
 import type { BuzzedGame } from '@/types/buzzed';
 
 interface ScoreboardProps {
@@ -35,6 +36,12 @@ export const Scoreboard = ({ game, currentUserId, final = false }: ScoreboardPro
               <span className="w-6 shrink-0 text-sm text-neutral-500">
                 {final && medalForRank(row.rank) ? medalForRank(row.rank) : row.rank}
               </span>
+
+              <span
+                aria-hidden
+                className="h-3 w-3 shrink-0 rounded-full"
+                style={{ backgroundColor: row.color ?? DEFAULT_BUZZER_COLOR }}
+              />
 
               <div className="min-w-0 flex-1">
                 <p className={`truncate text-sm ${isOut ? 'text-neutral-600 line-through' : 'text-white'}`}>

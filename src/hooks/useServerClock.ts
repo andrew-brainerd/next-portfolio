@@ -6,12 +6,8 @@ import { getBuzzedServerTime } from '@/api/buzzed';
 
 const TICK_MS = 200;
 
-// Every client counts the resume countdown down against the SERVER's clock, not its own — otherwise a
-// player with a skewed system clock sees a different countdown from everyone else, and the buzzer
-// appears to open at the wrong moment. `serverNow()` is the local clock plus a measured offset.
-//
-// The offset is sampled once on mount. Round-trip time is halved and folded in, which is crude, but the
-// countdown is 5 seconds long — being off by tens of milliseconds is invisible.
+// The resume countdown ticks against the server's clock, not the device's — otherwise a player with a
+// skewed system clock sees the buzzer open at a different moment from everyone else.
 export const useServerClock = () => {
   const offsetRef = useRef(0);
   const [, forceTick] = useState(0);
@@ -34,8 +30,6 @@ export const useServerClock = () => {
     };
   }, []);
 
-  // Re-render on a tick so countdowns and the buzzer's live/dead state stay honest without every
-  // consumer wiring up its own interval.
   useEffect(() => {
     const id = setInterval(() => forceTick(t => t + 1), TICK_MS);
     return () => clearInterval(id);

@@ -7,7 +7,8 @@ import Button from '@mui/material/Button';
 
 import { joinBuzzedGameByCode } from '@/api/buzzed';
 import { BUZZED_NEW_ROUTE, BUZZED_ROUTE } from '@/constants/routes';
-import { BUZZED_TARGET_LABELS } from '@/constants/buzzed';
+import { BUZZED_PLAYER_COLORS, BUZZED_TARGET_LABELS } from '@/constants/buzzed';
+import { ColorPicker } from '@/components/buzzed/ColorPicker';
 import type { BuzzedGame } from '@/types/buzzed';
 
 const JOIN_CODE_LENGTH = 5;
@@ -19,6 +20,7 @@ interface GamesListProps {
 export const GamesList = ({ games }: GamesListProps) => {
   const router = useRouter();
   const [code, setCode] = useState('');
+  const [color, setColor] = useState<string>(BUZZED_PLAYER_COLORS[0]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +31,7 @@ export const GamesList = ({ games }: GamesListProps) => {
     setPending(true);
     setError(null);
     try {
-      const game = await joinBuzzedGameByCode(code.trim().toUpperCase());
+      const game = await joinBuzzedGameByCode(code.trim().toUpperCase(), color);
       router.push(`${BUZZED_ROUTE}/${game.id}`);
     } catch {
       setError('No game with that code.');
@@ -59,27 +61,34 @@ export const GamesList = ({ games }: GamesListProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="flex flex-1 gap-2">
-          <input
-            type="text"
-            value={code}
-            maxLength={JOIN_CODE_LENGTH}
-            onChange={e => setCode(e.target.value.toUpperCase())}
-            placeholder="Join code"
-            className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 font-mono tracking-widest text-white uppercase placeholder:font-sans placeholder:tracking-normal placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
-          />
-          <Button
-            variant="outlined"
-            disabled={pending || code.trim().length < JOIN_CODE_LENGTH}
-            onClick={onJoin}
-          >
-            Join
+      <div className="space-y-3 rounded-lg border border-neutral-800 bg-neutral-900/60 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-1 gap-2">
+            <input
+              type="text"
+              value={code}
+              maxLength={JOIN_CODE_LENGTH}
+              onChange={e => setCode(e.target.value.toUpperCase())}
+              placeholder="Join code"
+              className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 font-mono tracking-widest text-white uppercase placeholder:font-sans placeholder:tracking-normal placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
+            />
+            <Button
+              variant="outlined"
+              disabled={pending || code.trim().length < JOIN_CODE_LENGTH}
+              onClick={onJoin}
+            >
+              Join
+            </Button>
+          </div>
+          <Button variant="contained" href={BUZZED_NEW_ROUTE}>
+            New game
           </Button>
         </div>
-        <Button variant="contained" href={BUZZED_NEW_ROUTE}>
-          New game
-        </Button>
+
+        <div>
+          <p className="mb-2 text-xs text-neutral-500">Your buzzer colour</p>
+          <ColorPicker value={color} onChange={setColor} />
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-400">{error}</p>}

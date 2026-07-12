@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { buzzBlockedReason, canBuzz, computeStandings, countdownSeconds, isDisputable } from '@/utils/buzzed';
+import {
+  buzzBlockedReason,
+  canBuzz,
+  computeStandings,
+  countdownSeconds,
+  isDisputable,
+  shadeColor
+} from '@/utils/buzzed';
 import type { BuzzedAttempt, BuzzedGame, BuzzedQuestion } from '@/types/buzzed';
 
 const NOW = 100_000;
@@ -131,6 +138,24 @@ describe('isDisputable', () => {
   });
 });
 
+describe('shadeColor', () => {
+  it('darkens a hex colour toward black', () => {
+    expect(shadeColor('#dc2626', 0.6)).toBe('#841717');
+  });
+
+  it('expands 3-char hex', () => {
+    expect(shadeColor('#fff', 0.5)).toBe('#808080');
+  });
+
+  it('clamps rather than overflowing past white', () => {
+    expect(shadeColor('#ffffff', 2)).toBe('#ffffff');
+  });
+
+  it('returns garbage input untouched instead of emitting a broken colour', () => {
+    expect(shadeColor('not-a-color', 0.6)).toBe('not-a-color');
+  });
+});
+
 describe('computeStandings', () => {
   it('ranks by score, and counts an overturned win as a miss', () => {
     const g = game({
@@ -141,7 +166,6 @@ describe('computeStandings', () => {
           state: 'resolved',
           attempts: [
             attempt({ userId: 'bob', correct: true, buzzMs: 500 }),
-            // Claimed it, then got overturned — this is a miss, not a win.
             attempt({ userId: 'alice', correct: true, overturned: true, buzzMs: 300 })
           ]
         })
@@ -174,7 +198,6 @@ describe('computeStandings', () => {
           attempts: [
             attempt({ userId: 'host', correct: true, buzzMs: 2_000 }),
             attempt({ userId: 'alice', correct: true, buzzMs: 400 }),
-            // Same score and same hits as alice, but slower on the buzzer.
             attempt({ userId: 'bob', correct: true, buzzMs: 1_000 })
           ]
         })

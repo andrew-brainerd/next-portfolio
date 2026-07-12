@@ -35,7 +35,6 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   const router = useRouter();
   const { serverNow } = useServerClock();
   const [game, setGame] = useState(initialGame);
-  const [answer, setAnswer] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +47,6 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   const refetch = useCallback(async () => {
     const fresh = await getBuzzedGame(game.id);
     if (!fresh) return;
-    // A finished game changes which view the route renders, so bounce it back through the server.
     if (fresh.status !== 'active') {
       router.refresh();
       return;
@@ -56,9 +54,6 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     setGame(fresh);
   }, [game.id, router]);
 
-  // Every hot event carries a payload, but they all mean "the game moved" — refetching keeps one source
-  // of truth and sidesteps having to reconcile a partial payload against local state. The payload's job
-  // is to let us react instantly where it matters (see the pause in Q-C); the refetch is the correctness net.
   useEffect(() => {
     const channel = getChannel(buzzedChannelName(initialGame.id));
     const events = [
@@ -93,8 +88,6 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     setPending(true);
     setError(null);
     try {
-      // We act on THIS response, not on the Pusher event — the winner knows first, which is what makes
-      // the pause exactly-once. Losing the race is a normal outcome, not an error.
       const { game: fresh } = await buzzBuzzedGame(game.id, question.index, game.playback.positionSec);
       setGame(fresh);
     } catch {
@@ -104,12 +97,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     }
   };
 
-  const onResolve = (correct: boolean) =>
-    run(async () => {
-      const fresh = await resolveBuzzedQuestion(game.id, correct, answer.trim() || undefined);
-      setAnswer('');
-      return fresh;
-    });
+  const onResolve = (correct: boolean) => run(() => resolveBuzzedQuestion(game.id, correct));
 
   const canDispute = isDisputable(game, currentUserId, now);
   const lastWinner = game.history[game.history.length - 1];
@@ -126,15 +114,9 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
         )}
 
         {iRangIn ? (
-          <div className="w-full max-w-sm rounded-lg border border-brand-600/50 bg-brand-600/15 p-4">
-            <p className="mb-3 text-center text-lg font-semibold text-white">You rang in!</p>
-            <input
-              type="text"
-              value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              placeholder="What was it? (optional)"
-              className="mb-3 w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
-            />
+          <div className="w-full max-w-sm rounded-lg border border-brand-600/50 bg-brand-600/15 p-6">
+            <p className="text-center text-lg font-semibold text-white">You rang in!</p>
+            <p className="mb-4 text-center text-sm text-neutral-400">Say it out loud — were you right?</p>
             <div className="flex gap-2">
               <Button
                 fullWidth

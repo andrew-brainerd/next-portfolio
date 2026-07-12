@@ -6,10 +6,15 @@ import Button from '@mui/material/Button';
 
 import { createBuzzedGame } from '@/api/buzzed';
 import { BUZZED_ROUTE } from '@/constants/routes';
-import { BUZZED_TARGET_DESCRIPTIONS, BUZZED_TARGET_LABELS, DEFAULT_BUZZED_SETTINGS } from '@/constants/buzzed';
+import {
+  BUZZED_PLAYER_COLORS,
+  BUZZED_TARGET_DESCRIPTIONS,
+  BUZZED_TARGET_LABELS,
+  DEFAULT_BUZZED_SETTINGS
+} from '@/constants/buzzed';
+import { ColorPicker } from '@/components/buzzed/ColorPicker';
 import type { BuzzedTarget } from '@/types/buzzed';
 
-// 'synced' is deferred (spec Q-G), so it isn't offered yet.
 const TARGETS: BuzzedTarget[] = ['host', 'roku'];
 
 export const NewGameForm = () => {
@@ -18,6 +23,7 @@ export const NewGameForm = () => {
   const [target, setTarget] = useState<BuzzedTarget>('host');
   const [rokuDeviceIp, setRokuDeviceIp] = useState('');
   const [wrongPenalty, setWrongPenalty] = useState(DEFAULT_BUZZED_SETTINGS.wrongPenalty);
+  const [color, setColor] = useState<string>(BUZZED_PLAYER_COLORS[0]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +38,8 @@ export const NewGameForm = () => {
         name: name.trim() || undefined,
         target,
         rokuDeviceIp: needsRoku ? rokuDeviceIp.trim() : undefined,
-        settings: { ...DEFAULT_BUZZED_SETTINGS, wrongPenalty }
+        settings: { ...DEFAULT_BUZZED_SETTINGS, wrongPenalty },
+        color
       });
       router.push(`${BUZZED_ROUTE}/${game.id}`);
     } catch {
@@ -104,6 +111,11 @@ export const NewGameForm = () => {
           </p>
         </div>
       )}
+
+      <fieldset>
+        <legend className="mb-1.5 text-sm text-neutral-300">Your buzzer colour</legend>
+        <ColorPicker value={color} onChange={setColor} />
+      </fieldset>
 
       <fieldset>
         <legend className="mb-1.5 text-sm text-neutral-300">Wrong answers</legend>

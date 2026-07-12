@@ -6,7 +6,12 @@ import Button from '@mui/material/Button';
 
 import { getBuzzedGame, startBuzzedGame } from '@/api/buzzed';
 import { getChannel } from '@/utils/pusher';
-import { BUZZED_GAME_UPDATED, BUZZED_TARGET_LABELS, buzzedChannelName } from '@/constants/buzzed';
+import {
+  BUZZED_GAME_UPDATED,
+  BUZZED_TARGET_LABELS,
+  DEFAULT_BUZZER_COLOR,
+  buzzedChannelName
+} from '@/constants/buzzed';
 import type { BuzzedGame } from '@/types/buzzed';
 
 const MIN_PLAYERS = 2;
@@ -28,7 +33,6 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
   const refetch = useCallback(async () => {
     const fresh = await getBuzzedGame(game.id);
     if (!fresh) return;
-    // The host started it — the route renders a different view now.
     if (fresh.status !== 'lobby') {
       router.refresh();
       return;
@@ -86,8 +90,13 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
           {game.players.map(player => (
             <li
               key={player.userId}
-              className="flex items-center gap-2 border-b border-neutral-800/60 px-4 py-2.5 text-sm text-white last:border-b-0"
+              className="flex items-center gap-2.5 border-b border-neutral-800/60 px-4 py-2.5 text-sm text-white last:border-b-0"
             >
+              <span
+                aria-hidden
+                className="h-3 w-3 shrink-0 rounded-full"
+                style={{ backgroundColor: player.color ?? DEFAULT_BUZZER_COLOR }}
+              />
               <span className="flex-1 truncate">{player.displayName}</span>
               {player.userId === game.ownerUserId && <span className="text-xs text-neutral-500">host</span>}
               {player.userId === currentUserId && <span className="text-xs text-neutral-500">you</span>}
