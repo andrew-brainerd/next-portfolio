@@ -4,14 +4,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 
-import { getBuzzedGame, startBuzzedGame } from '@/api/buzzed';
+import { getBuzzedGame, setBuzzedVideo, startBuzzedGame } from '@/api/buzzed';
 import { getChannel } from '@/utils/pusher';
+import { parseYouTubeVideoId, youTubeThumbnail, youTubeWatchUrl } from '@/utils/buzzed';
 import {
   BUZZED_GAME_UPDATED,
   BUZZED_TARGET_LABELS,
   DEFAULT_BUZZER_COLOR,
   buzzedChannelName
 } from '@/constants/buzzed';
+import { VideoLinkInput } from '@/components/buzzed/VideoLinkInput';
 import type { BuzzedGame } from '@/types/buzzed';
 
 const MIN_PLAYERS = 2;
@@ -26,8 +28,23 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
   const [game, setGame] = useState(initialGame);
   const [pending, setPending] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [savingVideo, setSavingVideo] = useState(false);
 
   const isHost = game.ownerUserId === currentUserId;
+  const pendingVideoId = parseYouTubeVideoId(videoUrl);
+
+  const onSaveVideo = async () => {
+    if (!pendingVideoId) return;
+    setSavingVideo(true);
+    try {
+      const fresh = await setBuzzedVideo(game.id, pendingVideoId);
+      setGame(fresh);
+      setVideoUrl('');
+    } finally {
+      setSavingVideo(false);
+    }
+  };
   const enoughPlayers = game.players.length >= MIN_PLAYERS;
 
   const refetch = useCallback(async () => {
@@ -103,6 +120,53 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="rounded-lg border border-neutral-800 bg-neutral-900/60">
+        <div className="border-b border-neutral-800 px-4 py-2">
+          <h2 className="text-sm font-medium text-neutral-300">Video</h2>
+        </div>
+
+        <div className="space-y-3 p-4">
+          {game.videoId ? (
+            <a
+              href={youTubeWatchUrl(game.videoId)}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 rounded-md transition-colors hover:bg-neutral-800/40"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={youTubeThumbnail(game.videoId)}
+                alt=""
+                className="h-14 w-24 shrink-0 rounded object-cover"
+              />
+              <div className="min-w-0">
+                <p className="truncate text-sm text-white">{game.videoTitle ?? 'YouTube video'}</p>
+                <p className="truncate font-mono text-xs text-neutral-500">{game.videoId}</p>
+              </div>
+            </a>
+          ) : (
+            <p className="text-sm text-neutral-500">
+              {isHost ? 'No video set yet.' : 'The host hasn’t picked a video yet.'}
+            </p>
+          )}
+
+          {isHost && (
+            <div className="space-y-2">
+              <VideoLinkInput value={videoUrl} onChange={setVideoUrl} id="lobby-video" />
+              <Button
+                fullWidth
+                variant="outlined"
+                size="small"
+                disabled={!pendingVideoId || savingVideo}
+                onClick={onSaveVideo}
+              >
+                {game.videoId ? 'Change video' : 'Set video'}
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       <p className="text-center text-sm text-neutral-500">

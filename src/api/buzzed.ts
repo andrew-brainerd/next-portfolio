@@ -71,6 +71,16 @@ export const skipBuzzedQuestion = async (gameId: string): Promise<BuzzedGame> =>
 export const overturnBuzzedQuestion = async (gameId: string): Promise<BuzzedGame> =>
   postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/overturn`, {});
 
+export const setBuzzedVideo = async (
+  gameId: string,
+  videoId: string,
+  videoTitle?: string
+): Promise<BuzzedGame> =>
+  putRequest<{ videoId: string; videoTitle?: string }, BuzzedGame>(`/buzzed/games/${gameId}/video`, {
+    videoId,
+    videoTitle
+  });
+
 export const setBuzzedPlayback = async (
   gameId: string,
   playing: boolean,

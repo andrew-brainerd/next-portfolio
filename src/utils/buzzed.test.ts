@@ -6,6 +6,7 @@ import {
   computeStandings,
   countdownSeconds,
   isDisputable,
+  parseYouTubeVideoId,
   shadeColor
 } from '@/utils/buzzed';
 import type { BuzzedAttempt, BuzzedGame, BuzzedQuestion } from '@/types/buzzed';
@@ -135,6 +136,40 @@ describe('isDisputable', () => {
   it('has nothing to dispute on a skipped question', () => {
     const g = disputable({ history: [resolved({ state: 'skipped', correct: undefined })] });
     expect(isDisputable(g, 'bob', NOW)).toBe(false);
+  });
+});
+
+describe('parseYouTubeVideoId', () => {
+  it.each([
+    ['https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
+    ['https://youtu.be/dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
+    ['https://www.youtube.com/embed/dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
+    ['https://www.youtube.com/shorts/dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
+    ['https://m.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
+    ['dQw4w9WgXcQ', 'dQw4w9WgXcQ']
+  ])('parses %s', (url, expected) => {
+    expect(parseYouTubeVideoId(url)).toBe(expected);
+  });
+
+  it('ignores timestamps, playlists and other params hanging off the link', () => {
+    expect(parseYouTubeVideoId('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s&list=PLabc')).toBe(
+      'dQw4w9WgXcQ'
+    );
+    expect(parseYouTubeVideoId('https://youtu.be/dQw4w9WgXcQ?si=xyz&t=90')).toBe('dQw4w9WgXcQ');
+  });
+
+  it('tolerates a link pasted without the scheme', () => {
+    expect(parseYouTubeVideoId('youtube.com/watch?v=dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
+  });
+
+  it.each([
+    ['', 'empty'],
+    ['https://vimeo.com/12345', 'a non-YouTube host'],
+    ['https://www.youtube.com/watch?v=tooshort', 'a malformed id'],
+    ['https://www.youtube.com/', 'no video at all'],
+    ['just some words', 'nonsense']
+  ])('rejects %s (%s)', input => {
+    expect(parseYouTubeVideoId(input)).toBeNull();
   });
 });
 

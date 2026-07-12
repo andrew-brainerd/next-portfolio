@@ -13,6 +13,8 @@ import {
   DEFAULT_BUZZED_SETTINGS
 } from '@/constants/buzzed';
 import { ColorPicker } from '@/components/buzzed/ColorPicker';
+import { VideoLinkInput } from '@/components/buzzed/VideoLinkInput';
+import { parseYouTubeVideoId } from '@/utils/buzzed';
 import type { BuzzedTarget } from '@/types/buzzed';
 
 const TARGETS: BuzzedTarget[] = ['host', 'roku'];
@@ -22,13 +24,17 @@ export const NewGameForm = () => {
   const [name, setName] = useState('');
   const [target, setTarget] = useState<BuzzedTarget>('host');
   const [rokuDeviceIp, setRokuDeviceIp] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
   const [wrongPenalty, setWrongPenalty] = useState(DEFAULT_BUZZED_SETTINGS.wrongPenalty);
   const [color, setColor] = useState<string>(BUZZED_PLAYER_COLORS[0]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const needsRoku = target === 'roku';
-  const canSubmit = !pending && (!needsRoku || rokuDeviceIp.trim().length > 0);
+  const videoId = parseYouTubeVideoId(videoUrl);
+  const videoInvalid = videoUrl.trim().length > 0 && !videoId;
+
+  const canSubmit = !pending && !videoInvalid && (!needsRoku || rokuDeviceIp.trim().length > 0);
 
   const onSubmit = async () => {
     setPending(true);
@@ -39,7 +45,8 @@ export const NewGameForm = () => {
         target,
         rokuDeviceIp: needsRoku ? rokuDeviceIp.trim() : undefined,
         settings: { ...DEFAULT_BUZZED_SETTINGS, wrongPenalty },
-        color
+        color,
+        videoId: videoId ?? undefined
       });
       router.push(`${BUZZED_ROUTE}/${game.id}`);
     } catch {
@@ -111,6 +118,18 @@ export const NewGameForm = () => {
           </p>
         </div>
       )}
+
+      <div>
+        <label htmlFor="video" className="mb-1.5 block text-sm text-neutral-300">
+          YouTube link
+        </label>
+        <VideoLinkInput value={videoUrl} onChange={setVideoUrl} />
+        <p className="mt-1 text-xs text-neutral-500">
+          {needsRoku
+            ? 'This is what gets cast to the TV. You can change it before you start.'
+            : 'This is what you’ll play on your screen. You can change it before you start.'}
+        </p>
+      </div>
 
       <fieldset>
         <legend className="mb-1.5 text-sm text-neutral-300">Your buzzer colour</legend>

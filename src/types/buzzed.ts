@@ -84,6 +84,8 @@ export interface CreateBuzzedGameInput {
   rokuDeviceIp?: string;
   settings?: Partial<BuzzedSettings>;
   color?: string;
+  videoId?: string;
+  videoTitle?: string;
 }
 
 export interface BuzzResponse {
