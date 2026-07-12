@@ -4,19 +4,29 @@ import { redirect } from 'next/navigation';
 
 import { TOKEN_COOKIE } from 'constants/authentication';
 import { LOGIN_ROUTE, WATCH_ROUTE, WATCH_USAGE_ROUTE } from 'constants/routes';
+import { getYoutubeConnection } from 'api/youtube';
 import { WatchLibrary } from 'components/watch/WatchLibrary';
+import { YoutubeConnectCard } from 'components/watch/YoutubeConnectCard';
 
 export const metadata = {
   title: 'Watch'
 };
 
-export default async function WatchPage() {
+interface WatchPageProps {
+  searchParams: Promise<{ youtube?: string }>;
+}
+
+export default async function WatchPage({ searchParams }: WatchPageProps) {
   const cookieJar = await cookies();
   const token = cookieJar.get(TOKEN_COOKIE)?.value;
 
   if (!token) {
     redirect(`${LOGIN_ROUTE}?from=${encodeURIComponent(WATCH_ROUTE)}`);
   }
+
+  const { youtube } = await searchParams;
+  const youtubeNotice = youtube === 'connected' ? 'connected' : youtube === 'error' ? 'error' : null;
+  const youtubeConnected = await getYoutubeConnection();
 
   return (
     <div className="container mx-auto p-6">
@@ -29,6 +39,9 @@ export default async function WatchPage() {
         >
           API usage →
         </Link>
+      </div>
+      <div className="mb-8">
+        <YoutubeConnectCard connected={youtubeConnected} notice={youtubeNotice} />
       </div>
       <WatchLibrary />
     </div>
