@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { WatchListResponse, WatchStatus } from 'types/watch';
 import { getWatchList } from 'api/watch';
+import { syncYoutubeWatchlist } from 'api/youtube';
 import { WATCH_STATUS_LABELS, WATCH_STATUS_ORDER, groupByStatus, requiresRental } from 'utils/watch';
 import { useShowRentalTitles } from 'hooks/useShowRentalTitles';
 import { Loading } from 'components/Loading';
@@ -13,11 +14,21 @@ import { ServiceSettingsModal } from 'components/watch/ServiceSettingsModal';
 
 const EMPTY: WatchListResponse = { items: [], settings: { country: 'us', services: [] } };
 
-export const WatchLibrary = () => {
+interface WatchLibraryProps {
+  // When YouTube is connected, auto-sync the "Watchlist" playlist before the first list load so newly
+  // added videos show up on open.
+  youtubeConnected?: boolean;
+  // Set after the OAuth redirect (?youtube=connected|error); opens Settings so the result is visible
+  // (the YouTube connection lives in the Settings modal now).
+  youtubeNotice?: 'connected' | 'error' | null;
+}
+
+export const WatchLibrary = ({ youtubeConnected = false, youtubeNotice = null }: WatchLibraryProps) => {
   const [data, setData] = useState<WatchListResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<WatchStatus | 'favorites'>('watching');
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(Boolean(youtubeNotice));
+  const [syncNotice, setSyncNotice] = useState<{ tone: 'error' | 'warn' | 'info'; text: string } | null>(null);
   const [showRentalTitles, setShowRentalTitles] = useShowRentalTitles();
 
   // Re-fetch after mutations (called from child event handlers, not from an effect).
@@ -30,6 +41,29 @@ export const WatchLibrary = () => {
     let active = true;
 
     const load = async () => {
+      // Pull in newly-added "Watchlist" videos before showing the list. Surface the outcome so a failed
+      // sync (or a missing "Watchlist" playlist) isn't invisible; it never blocks the list.
+      if (youtubeConnected) {
+        const sync = await syncYoutubeWatchlist();
+        if (active) {
+          if (sync.error) {
+            setSyncNotice({
+              tone: 'error',
+              text: `Couldn't sync your YouTube “Watchlist” playlist (${sync.error}). Check Settings → YouTube; details are in the server logs.`
+            });
+          } else if (sync.playlistFound === false) {
+            setSyncNotice({
+              tone: 'warn',
+              text: 'No YouTube playlist named “Watchlist” was found. Rename a playlist to “Watchlist”, or import manually from Settings → YouTube.'
+            });
+          } else if (sync.imported > 0) {
+            setSyncNotice({
+              tone: 'info',
+              text: `Imported ${sync.imported} new video${sync.imported === 1 ? '' : 's'} from your YouTube Watchlist.`
+            });
+          }
+        }
+      }
       const result = await getWatchList();
       if (active) {
         setData(result ?? EMPTY);
@@ -42,7 +76,7 @@ export const WatchLibrary = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [youtubeConnected]);
 
   // Status tabs respect the rental filter (counts + items stay consistent); favorites always show all.
   const groups = useMemo(() => {
@@ -77,10 +111,32 @@ export const WatchLibrary = () => {
             onClick={() => setSettingsOpen(true)}
             className="rounded border border-neutral-700 px-3 py-1.5 text-sm text-neutral-200 transition-colors hover:border-neutral-500 hover:text-white"
           >
-            My services
+            Settings
           </button>
         </div>
       </div>
+
+      {syncNotice && (
+        <div
+          className={`mb-4 flex items-start justify-between gap-3 rounded-lg border px-3 py-2 text-sm ${
+            syncNotice.tone === 'error'
+              ? 'border-red-500/40 bg-red-500/10 text-red-300'
+              : syncNotice.tone === 'warn'
+                ? 'border-amber-500/40 bg-amber-500/10 text-amber-200'
+                : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+          }`}
+        >
+          <span>{syncNotice.text}</span>
+          <button
+            type="button"
+            onClick={() => setSyncNotice(null)}
+            aria-label="Dismiss"
+            className="shrink-0 leading-none opacity-70 transition-opacity hover:opacity-100"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <WatchSearch existingIds={existingIds} onChanged={refresh} />
 
@@ -145,6 +201,8 @@ export const WatchLibrary = () => {
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         currentServices={services}
+        youtubeConnected={youtubeConnected}
+        youtubeNotice={youtubeNotice}
         onSaved={refresh}
       />
     </div>

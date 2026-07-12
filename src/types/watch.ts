@@ -1,6 +1,6 @@
 export type WatchStatus = 'watchlist' | 'watching' | 'completed' | 'dropped';
 
-export type ShowType = 'movie' | 'series';
+export type ShowType = 'movie' | 'series' | 'video';
 
 export type StreamingOptionType = 'free' | 'subscription' | 'buy' | 'rent' | 'addon';
 
@@ -73,6 +73,8 @@ export interface Trailer {
 export interface WatchMedia {
   id: string;
   country: string;
+  source?: 'motn' | 'youtube';
+  youtube?: { videoId: string; channelTitle?: string; duration?: number };
   showType: ShowType;
   title: string;
   overview?: string;

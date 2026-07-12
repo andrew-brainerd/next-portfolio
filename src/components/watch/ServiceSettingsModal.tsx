@@ -5,15 +5,25 @@ import { useEffect, useState } from 'react';
 import type { StreamingServiceRef } from 'types/watch';
 import { getWatchServices, updateWatchSettings } from 'api/watch';
 import { Modal } from 'components/peapod/Modal';
+import { YoutubeConnectCard } from 'components/watch/YoutubeConnectCard';
 
 interface ServiceSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentServices: string[];
+  youtubeConnected: boolean;
+  youtubeNotice?: 'connected' | 'error' | null;
   onSaved: () => void | Promise<void>;
 }
 
-export const ServiceSettingsModal = ({ isOpen, onClose, currentServices, onSaved }: ServiceSettingsModalProps) => {
+export const ServiceSettingsModal = ({
+  isOpen,
+  onClose,
+  currentServices,
+  youtubeConnected,
+  youtubeNotice = null,
+  onSaved
+}: ServiceSettingsModalProps) => {
   const [services, setServices] = useState<StreamingServiceRef[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set(currentServices));
   const [loading, setLoading] = useState(false);
@@ -55,8 +65,12 @@ export const ServiceSettingsModal = ({ isOpen, onClose, currentServices, onSaved
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-md rounded-lg border border-neutral-700 bg-neutral-900 p-5">
-        <h3 className="font-semibold text-white">My streaming services</h3>
+      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-900 p-5">
+        <h2 className="mb-4 text-lg font-semibold text-white">Watch settings</h2>
+
+        <YoutubeConnectCard connected={youtubeConnected} notice={youtubeNotice} />
+
+        <h3 className="mt-6 font-semibold text-white">My streaming services</h3>
         <p className="mt-1 text-xs text-neutral-400">
           Pick the services you subscribe to — we&apos;ll highlight what you can watch now.
         </p>

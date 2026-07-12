@@ -16,7 +16,10 @@ export const splitAvailability = (options: StreamingOption[], myServices: string
   const more: StreamingOption[] = [];
 
   options.forEach(option => {
-    const isMine = mine.has(option.service.id) && INCLUDED_TYPES.has(option.type);
+    // YouTube (imported videos) is free and always watchable, so it's primary regardless of the user's
+    // subscribed services.
+    const isMine =
+      option.service.id === 'youtube' || (mine.has(option.service.id) && INCLUDED_TYPES.has(option.type));
     if (isMine) {
       // One "Watch now" per service, even if it lists multiple qualities.
       if (!primaryByService.has(option.service.id)) {

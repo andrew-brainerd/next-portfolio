@@ -101,7 +101,7 @@ export const WatchCard = ({ item, services, onChanged }: WatchCardProps) => {
           </div>
 
           <p className="mt-0.5 text-xs text-neutral-400">
-            {media?.showType === 'series' ? 'Series' : 'Movie'}
+            {media?.showType === 'series' ? 'Series' : media?.showType === 'video' ? 'Video' : 'Movie'}
             {media?.year ? ` · ${media.year}` : ''}
             {hasLeavingSoon(primary) && (
               <span className="ml-2 rounded bg-amber-500/20 px-1.5 py-0.5 text-amber-300">Leaving soon</span>
