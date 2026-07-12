@@ -39,10 +39,13 @@ export const youTubeThumbnail = (videoId: string) => `https://i.ytimg.com/vi/${v
 
 export const youTubeWatchUrl = (videoId: string) => `https://www.youtube.com/watch?v=${videoId}`;
 
+export const isOnRoster = (game: BuzzedGame, userId: string): boolean =>
+  game.players.some(p => p.userId === userId);
+
 // Mirrors the server's atomic filter, so the button is never lit when the server would reject the buzz.
 export const canBuzz = (game: BuzzedGame, userId: string, now: number): boolean => {
   if (game.status !== 'active') return false;
-  if (!game.participantUserIds.includes(userId)) return false;
+  if (!isOnRoster(game, userId)) return false;
 
   const question = game.currentQuestion;
   if (!question || question.state !== 'armed') return false;
@@ -54,6 +57,7 @@ export const canBuzz = (game: BuzzedGame, userId: string, now: number): boolean 
 
 export const buzzBlockedReason = (game: BuzzedGame, userId: string, now: number): string | null => {
   if (canBuzz(game, userId, now)) return null;
+  if (!isOnRoster(game, userId)) return 'You’re running the game';
   if (game.status !== 'active') return 'The game isn’t running';
 
   const question = game.currentQuestion;

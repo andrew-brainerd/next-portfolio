@@ -86,6 +86,7 @@ export interface CreateBuzzedGameInput {
   color?: string;
   videoId?: string;
   videoTitle?: string;
+  hostPlaying?: boolean;
 }
 
 export interface BuzzResponse {

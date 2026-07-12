@@ -4,11 +4,19 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 
-import { getBuzzedGame, setBuzzedVideo, startBuzzedGame } from '@/api/buzzed';
+import {
+  getBuzzedGame,
+  joinBuzzedGame,
+  leaveBuzzedRoster,
+  setBuzzedVideo,
+  startBuzzedGame
+} from '@/api/buzzed';
 import { getChannel } from '@/utils/pusher';
-import { parseYouTubeVideoId, youTubeThumbnail, youTubeWatchUrl } from '@/utils/buzzed';
+import { BUZZED_ROUTE } from '@/constants/routes';
+import { isOnRoster, parseYouTubeVideoId, youTubeThumbnail, youTubeWatchUrl } from '@/utils/buzzed';
 import {
   BUZZED_GAME_UPDATED,
+  BUZZED_PLAYER_COLORS,
   BUZZED_TARGET_LABELS,
   DEFAULT_BUZZER_COLOR,
   buzzedChannelName
@@ -33,6 +41,10 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
 
   const isHost = game.ownerUserId === currentUserId;
   const pendingVideoId = parseYouTubeVideoId(videoUrl);
+  const enoughPlayers = game.players.length >= MIN_PLAYERS;
+
+  const onRoster = isOnRoster(game, currentUserId);
+  const takenColors = game.players.map(p => p.color).filter((c): c is string => !!c);
 
   const onSaveVideo = async () => {
     if (!pendingVideoId) return;
@@ -45,7 +57,22 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
       setSavingVideo(false);
     }
   };
-  const enoughPlayers = game.players.length >= MIN_PLAYERS;
+
+  const onToggleRoster = async () => {
+    setPending(true);
+    try {
+      if (onRoster) {
+        await leaveBuzzedRoster(game.id);
+      } else {
+        const free = BUZZED_PLAYER_COLORS.find(c => !takenColors.includes(c)) ?? BUZZED_PLAYER_COLORS[0];
+        await joinBuzzedGame(game.id, free);
+      }
+      const fresh = await getBuzzedGame(game.id);
+      if (fresh) setGame(fresh);
+    } finally {
+      setPending(false);
+    }
+  };
 
   const refetch = useCallback(async () => {
     const fresh = await getBuzzedGame(game.id);
@@ -77,7 +104,8 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
   };
 
   const onCopy = async () => {
-    await navigator.clipboard.writeText(game.joinCode);
+    const link = `${window.location.origin}${BUZZED_ROUTE}/join/${game.joinCode}`;
+    await navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -85,24 +113,37 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
   return (
     <div className="mx-auto max-w-lg space-y-6">
       <div className="rounded-lg border border-neutral-800 bg-neutral-900/60 p-5 text-center">
-        <p className="mb-1 text-sm text-neutral-400">Share this code to let people in</p>
-        <button
-          type="button"
-          onClick={onCopy}
-          className="font-mono text-4xl font-bold tracking-[0.3em] text-white transition-colors hover:text-brand-400"
-        >
-          {game.joinCode}
-        </button>
-        <p className="mt-2 h-4 text-xs text-neutral-500">{copied ? 'Copied' : 'Tap to copy'}</p>
+        <p className="mb-1 text-sm text-neutral-400">Share this to let people in</p>
+        <p className="font-mono text-4xl font-bold tracking-[0.3em] text-white">{game.joinCode}</p>
+        <Button variant="outlined" size="small" className="mt-3" onClick={onCopy}>
+          {copied ? 'Link copied' : 'Copy join link'}
+        </Button>
       </div>
 
       <div className="rounded-lg border border-neutral-800 bg-neutral-900/60">
-        <div className="border-b border-neutral-800 px-4 py-2">
+        <div className="flex items-center justify-between border-b border-neutral-800 px-4 py-2">
           <h2 className="text-sm font-medium text-neutral-300">
             Players ({game.players.length})
             {!enoughPlayers && <span className="ml-2 text-xs text-neutral-500">need at least {MIN_PLAYERS}</span>}
           </h2>
+          {isHost && (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={onToggleRoster}
+              className="text-xs text-neutral-400 underline hover:text-white disabled:opacity-50"
+            >
+              {onRoster ? 'Sit out' : 'Join in'}
+            </button>
+          )}
         </div>
+
+        {game.players.length === 0 && (
+          <p className="px-4 py-3 text-sm text-neutral-500">
+            Nobody yet — send them the join link.
+          </p>
+        )}
+
         <ul>
           {game.players.map(player => (
             <li

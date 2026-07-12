@@ -71,6 +71,9 @@ export const skipBuzzedQuestion = async (gameId: string): Promise<BuzzedGame> =>
 export const overturnBuzzedQuestion = async (gameId: string): Promise<BuzzedGame> =>
   postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/overturn`, {});
 
+export const leaveBuzzedRoster = async (gameId: string): Promise<void> =>
+  deleteRequest(`/buzzed/games/${gameId}/players/me`);
+
 export const setBuzzedVideo = async (
   gameId: string,
   videoId: string,

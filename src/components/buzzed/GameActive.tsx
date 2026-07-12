@@ -14,7 +14,7 @@ import {
 } from '@/api/buzzed';
 import { getChannel } from '@/utils/pusher';
 import { useServerClock } from '@/hooks/useServerClock';
-import { isDisputable } from '@/utils/buzzed';
+import { isDisputable, isOnRoster } from '@/utils/buzzed';
 import {
   BUZZED_BUZZ_LOCKED,
   BUZZED_BUZZ_REOPENED,
@@ -24,6 +24,7 @@ import {
 } from '@/constants/buzzed';
 import { BuzzerButton } from '@/components/buzzed/BuzzerButton';
 import { Scoreboard } from '@/components/buzzed/Scoreboard';
+import { SpectatorPanel } from '@/components/buzzed/SpectatorPanel';
 import type { BuzzedGame } from '@/types/buzzed';
 
 interface GameActiveProps {
@@ -39,6 +40,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   const [error, setError] = useState<string | null>(null);
 
   const isHost = game.ownerUserId === currentUserId;
+  const playing = isOnRoster(game, currentUserId);
   const question = game.currentQuestion;
   const iRangIn = question?.state === 'locked' && question.lockedBy === currentUserId;
   const ringer = game.players.find(p => p.userId === question?.lockedBy);
@@ -138,7 +140,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
               </Button>
             </div>
           </div>
-        ) : (
+        ) : playing ? (
           <BuzzerButton
             game={game}
             currentUserId={currentUserId}
@@ -146,6 +148,24 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
             pending={pending}
             onBuzz={onBuzz}
           />
+        ) : (
+          <SpectatorPanel game={game} now={now} />
+        )}
+
+        {!playing && isHost && question?.state === 'locked' && (
+          <div className="flex gap-2">
+            <Button
+              variant="contained"
+              color="success"
+              disabled={pending}
+              onClick={() => onResolve(true)}
+            >
+              They got it
+            </Button>
+            <Button variant="outlined" color="error" disabled={pending} onClick={() => onResolve(false)}>
+              They missed
+            </Button>
+          </div>
         )}
 
         {canDispute && (

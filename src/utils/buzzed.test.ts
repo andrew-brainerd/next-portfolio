@@ -6,6 +6,7 @@ import {
   computeStandings,
   countdownSeconds,
   isDisputable,
+  isOnRoster,
   parseYouTubeVideoId,
   shadeColor
 } from '@/utils/buzzed';
@@ -86,6 +87,29 @@ describe('canBuzz', () => {
 
   it('refuses a non-participant', () => {
     expect(canBuzz(game(), 'stranger', NOW)).toBe(false);
+  });
+
+  it('gives no buzzer to a host who sat out, even though they still own the game', () => {
+    const g = game({
+      players: [
+        { userId: 'alice', displayName: 'Alice' },
+        { userId: 'bob', displayName: 'Bob' }
+      ]
+    });
+
+    expect(g.participantUserIds).toContain('host');
+    expect(canBuzz(g, 'host', NOW)).toBe(false);
+    expect(buzzBlockedReason(g, 'host', NOW)).toBe('You’re running the game');
+    expect(canBuzz(g, 'alice', NOW)).toBe(true);
+  });
+});
+
+describe('isOnRoster', () => {
+  it('separates who can play from who merely has access', () => {
+    const g = game({ players: [{ userId: 'alice', displayName: 'Alice' }] });
+
+    expect(isOnRoster(g, 'alice')).toBe(true);
+    expect(isOnRoster(g, 'host')).toBe(false);
   });
 });
 
