@@ -8,6 +8,7 @@ import {
   buzzBlockedReason,
   canBuzz,
   computeStandings,
+  defaultBuzzedGameName,
   isOnRoster,
   needsAdvance,
   parseYouTubeVideoId,
@@ -325,5 +326,11 @@ describe('shadeColor', () => {
 
   it('returns garbage input untouched instead of emitting a broken colour', () => {
     expect(shadeColor('not-a-color', 0.6)).toBe('not-a-color');
+  });
+});
+
+describe('defaultBuzzedGameName', () => {
+  it('stamps the date so back-to-back quiz nights are told apart', () => {
+    expect(defaultBuzzedGameName(new Date('2026-07-12T20:30:00Z'))).toBe('Anime Quiz 2026-07-12');
   });
 });

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 
 import { createBuzzedGame } from '@/api/buzzed';
-import { BUZZED_ROUTE } from '@/constants/routes';
+import { BUZZED_NEW_ROUTE, BUZZED_ROUTE } from '@/constants/routes';
 import {
   ANSWER_WINDOW_CHOICES,
   BUZZED_PLAYER_COLORS,
@@ -14,8 +14,8 @@ import {
   DEFAULT_BUZZED_SETTINGS
 } from '@/constants/buzzed';
 import { ColorPicker } from '@/components/buzzed/ColorPicker';
-import { VideoLinkInput } from '@/components/buzzed/VideoLinkInput';
-import { parseYouTubeVideoId } from '@/utils/buzzed';
+import { VideoPicker } from '@/components/buzzed/VideoPicker';
+import { defaultBuzzedGameName, parseYouTubeVideoId } from '@/utils/buzzed';
 import type { BuzzedTarget } from '@/types/buzzed';
 
 const TARGETS: BuzzedTarget[] = ['host', 'roku'];
@@ -48,7 +48,7 @@ export const NewGameForm = () => {
     setError(null);
     try {
       const game = await createBuzzedGame({
-        name: name.trim() || undefined,
+        name: name.trim() || defaultBuzzedGameName(new Date()),
         target,
         rokuDeviceIp: needsRoku ? rokuDeviceIp.trim() : undefined,
         settings: { answerWindowMs },
@@ -67,14 +67,14 @@ export const NewGameForm = () => {
     <div className="mx-auto max-w-lg space-y-6">
       <div>
         <label htmlFor="name" className="mb-1.5 block text-sm text-neutral-300">
-          Name
+          Name <span className="text-neutral-500">(optional)</span>
         </label>
         <input
           id="name"
           type="text"
           value={name}
           onChange={e => setName(e.target.value)}
-          placeholder="Anime quiz night"
+          placeholder={defaultBuzzedGameName(new Date())}
           className="text-base w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-white placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
         />
       </div>
@@ -129,9 +129,14 @@ export const NewGameForm = () => {
 
       <div>
         <label htmlFor="video" className="mb-1.5 block text-sm text-neutral-300">
-          YouTube link
+          Video
         </label>
-        <VideoLinkInput value={videoUrl} onChange={setVideoUrl} />
+        <VideoPicker
+          value={videoUrl}
+          onChange={setVideoUrl}
+          returnPath={BUZZED_NEW_ROUTE}
+          id="video"
+        />
         <p className="mt-1 text-xs text-neutral-500">
           {needsRoku
             ? 'This is what gets cast to the TV. You can change it before you start.'

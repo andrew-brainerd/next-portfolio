@@ -10,7 +10,7 @@ import { BUZZED_ROUTE } from '@/constants/routes';
 import { parseYouTubeVideoId, youTubeThumbnail, youTubeWatchUrl } from '@/utils/buzzed';
 import { BUZZED_TARGET_LABELS, DEFAULT_BUZZER_COLOR } from '@/constants/buzzed';
 import { GameMenu } from '@/components/buzzed/GameMenu';
-import { VideoLinkInput } from '@/components/buzzed/VideoLinkInput';
+import { VideoPicker } from '@/components/buzzed/VideoPicker';
 import type { BuzzedGame } from '@/types/buzzed';
 
 const MIN_PLAYERS = 2;
@@ -149,7 +149,12 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
 
           {isHost && (
             <div className="space-y-2">
-              <VideoLinkInput value={videoUrl} onChange={setVideoUrl} id="lobby-video" />
+              <VideoPicker
+                value={videoUrl}
+                onChange={setVideoUrl}
+                returnPath={`${BUZZED_ROUTE}/${game.id}`}
+                id="lobby-video"
+              />
               <Button
                 fullWidth
                 variant="outlined"

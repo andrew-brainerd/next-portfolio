@@ -64,6 +64,11 @@ export const saveBuzzedPosition = (gameId: string, positionSec: number): void =>
   }).catch(() => undefined);
 };
 
+// The name a new game gets when the host doesn't bother typing one — which is most of the time.
+// Locale-independent (en-CA gives YYYY-MM-DD) so games sort sensibly and read the same on every device.
+export const defaultBuzzedGameName = (now: Date): string =>
+  `Anime Quiz ${now.toLocaleDateString('en-CA')}`;
+
 export const isOnRoster = (game: BuzzedGame, userId: string): boolean =>
   game.players.some(p => p.userId === userId);
 
