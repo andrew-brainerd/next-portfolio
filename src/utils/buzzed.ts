@@ -67,6 +67,8 @@ export const saveBuzzedPosition = (gameId: string, positionSec: number): void =>
 export const isOnRoster = (game: BuzzedGame, userId: string): boolean =>
   game.players.some(p => p.userId === userId);
 
+export const isPaused = (game: BuzzedGame): boolean => game.pausedAt !== undefined;
+
 export const hasRungIn = (question: BuzzedQuestion | null, userId: string): boolean =>
   !!question?.ringIns.some(r => r.userId === userId);
 
@@ -79,6 +81,7 @@ export const ringInPosition = (question: BuzzedQuestion | null, userId: string):
 // Note you can ring in during the ANSWERING window too — that's the whole point of the new flow.
 export const canBuzz = (game: BuzzedGame, userId: string, now: number): boolean => {
   if (game.status !== 'active') return false;
+  if (isPaused(game)) return false;
   if (!isOnRoster(game, userId)) return false;
 
   const question = game.currentQuestion;
@@ -97,6 +100,7 @@ export const buzzBlockedReason = (game: BuzzedGame, userId: string, now: number)
   if (canBuzz(game, userId, now)) return null;
   if (!isOnRoster(game, userId)) return 'You’re not playing';
   if (game.status !== 'active') return 'The game isn’t running';
+  if (isPaused(game)) return 'Paused';
 
   const question = game.currentQuestion;
   if (!question) return 'No question in play';
@@ -121,6 +125,9 @@ export const needsAdvance = (game: BuzzedGame, now: number): boolean => {
   const question = game.currentQuestion;
   return (
     game.status === 'active' &&
+    // Advancing RESUMES the video, so a paused game must never trigger it. The server refuses too, but
+    // without this every client would keep firing /advance at it for as long as the pause lasts.
+    !isPaused(game) &&
     question?.state === 'answering' &&
     question.answerCloseAt != null &&
     now >= question.answerCloseAt

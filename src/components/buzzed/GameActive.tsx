@@ -4,7 +4,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 
-import { completeBuzzedGame, gradeBuzzedRingIn, setBuzzedPlayback } from '@/api/buzzed';
+import {
+  completeBuzzedGame,
+  gradeBuzzedRingIn,
+  pauseBuzzedGame,
+  resumeBuzzedGame,
+  setBuzzedPlayback
+} from '@/api/buzzed';
 import { advanceNow, buzzNow } from '@/api/buzzedClient';
 import { useBuzzedGameSync } from '@/hooks/useBuzzedGameSync';
 import { useServerClock } from '@/hooks/useServerClock';
@@ -15,6 +21,7 @@ import {
   applyWindowClosed,
   answerSecondsLeft,
   isOnRoster,
+  isPaused,
   needsAdvance,
   pendingGrade
 } from '@/utils/buzzed';
@@ -24,6 +31,7 @@ import { BuzzerButton } from '@/components/buzzed/BuzzerButton';
 import { GradePrompt } from '@/components/buzzed/GradePrompt';
 import { HostVideo } from '@/components/buzzed/HostVideo';
 import { GameMenu } from '@/components/buzzed/GameMenu';
+import { PausedPanel } from '@/components/buzzed/PausedPanel';
 import { RingInQueue } from '@/components/buzzed/RingInQueue';
 import { Scoreboard } from '@/components/buzzed/Scoreboard';
 import { SpectatorPanel } from '@/components/buzzed/SpectatorPanel';
@@ -143,8 +151,12 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
       return completeBuzzedGame(game.id);
     });
 
+  const onPause = () => run(() => pauseBuzzedGame(game.id));
+  const onResume = () => run(() => resumeBuzzedGame(game.id));
+
   const secondsLeft = answerSecondsLeft(game, now);
   const answering = question?.state === 'answering';
+  const paused = isPaused(game);
   const toGrade = pendingGrade(game, currentUserId);
   const showVideo = game.target === 'host' && isHost;
 
@@ -157,9 +169,13 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="flex min-w-0 flex-col items-center gap-4">
+          {/* Kept mounted through a pause: tearing the YouTube player down would lose the playhead, and
+              `playback.playing: false` already stops it. Players (no video) just get the panel. */}
           {showVideo && <HostVideo game={game} now={now} onPlaybackChange={onPlaybackChange} />}
 
-          {answering && (
+          {paused && <PausedPanel isHost={isHost} pending={pending} onResume={onResume} />}
+
+          {!paused && answering && (
             <div className="w-full min-w-0 rounded-lg border border-brand-600/50 bg-brand-600/15 px-3 py-3 text-center">
               <p className="text-3xl font-bold tabular-nums text-white">{secondsLeft}</p>
               <p className="text-sm text-neutral-400">Answer now — anyone else can still ring in</p>
@@ -178,38 +194,44 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
             </div>
           )}
 
-          {question && question.ringIns.length > 0 && (
+          {!paused && question && question.ringIns.length > 0 && (
             <RingInQueue game={game} question={question} currentUserId={currentUserId} />
           )}
 
-          {playing ? (
-            <BuzzerButton
-              game={game}
-              currentUserId={currentUserId}
-              now={now}
-              pending={pending}
-              onBuzz={onBuzz}
-            />
-          ) : (
-            <SpectatorPanel game={game} now={now} isHost={isHost} />
-          )}
+          {!paused &&
+            (playing ? (
+              <BuzzerButton
+                game={game}
+                currentUserId={currentUserId}
+                now={now}
+                pending={pending}
+                onBuzz={onBuzz}
+              />
+            ) : (
+              <SpectatorPanel game={game} now={now} isHost={isHost} />
+            ))}
 
-          {toGrade && (
+          {!paused && toGrade && (
             <GradePrompt question={toGrade} pending={pending} onGrade={onGrade} />
           )}
 
           {error && <p className="text-sm text-red-400">{error}</p>}
 
-          {isHost && (
-            <Button
-              variant="outlined"
-              size="small"
-              color="error"
-              disabled={pending}
-              onClick={onEndGame}
-            >
-              End game
-            </Button>
+          {isHost && !paused && (
+            <div className="flex gap-2">
+              <Button variant="outlined" size="small" disabled={pending} onClick={onPause}>
+                Pause game
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                color="error"
+                disabled={pending}
+                onClick={onEndGame}
+              >
+                End game
+              </Button>
+            </div>
           )}
         </div>
 

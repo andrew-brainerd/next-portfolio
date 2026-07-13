@@ -70,6 +70,8 @@ export interface BuzzedGame {
   history: BuzzedQuestion[];
   createdAt: number;
   startedAt?: number;
+  // Presence means paused. A timestamp rather than a boolean so there's no "paused: false" third state.
+  pausedAt?: number;
   completedAt?: number;
 }
 

@@ -39,6 +39,12 @@ export const updateBuzzedGame = async (
 export const startBuzzedGame = async (gameId: string): Promise<BuzzedGame> =>
   postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/start`, {});
 
+export const pauseBuzzedGame = async (gameId: string): Promise<BuzzedGame> =>
+  postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/pause`, {});
+
+export const resumeBuzzedGame = async (gameId: string): Promise<BuzzedGame> =>
+  postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/resume`, {});
+
 export const completeBuzzedGame = async (gameId: string): Promise<BuzzedGame> =>
   postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/complete`, {});
 
