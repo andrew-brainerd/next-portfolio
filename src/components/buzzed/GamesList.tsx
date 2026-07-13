@@ -69,7 +69,7 @@ export const GamesList = ({ games }: GamesListProps) => {
             maxLength={JOIN_CODE_LENGTH}
             onChange={e => setCode(e.target.value.toUpperCase())}
             placeholder="Join code"
-            className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 font-mono text-base tracking-widest text-white uppercase placeholder:font-sans placeholder:tracking-normal placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
+            className="w-32 shrink-0 rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 font-mono text-base tracking-widest text-white uppercase placeholder:font-sans placeholder:tracking-normal placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
           />
           <Button
             variant="contained"
