@@ -1,6 +1,6 @@
 'use client';
 
-import { countdownSeconds } from '@/utils/buzzed';
+import { answerSecondsLeft } from '@/utils/buzzed';
 import type { BuzzedGame } from '@/types/buzzed';
 
 interface SpectatorPanelProps {
@@ -11,23 +11,15 @@ interface SpectatorPanelProps {
 
 export const SpectatorPanel = ({ game, now, isHost }: SpectatorPanelProps) => {
   const question = game.currentQuestion;
-  const countdown = countdownSeconds(game.playback.resumeAt, now);
-  const locked = question?.state === 'locked';
-  const ringer = game.players.find(p => p.userId === question?.lockedBy);
+  const secondsLeft = answerSecondsLeft(game, now);
+  const answering = question?.state === 'answering';
 
-  const status = locked
-    ? `${ringer?.displayName ?? 'Someone'} is answering`
-    : countdown > 0
-      ? 'Resuming…'
-      : 'Buzzers are live';
+  const status = answering ? 'Answering…' : 'Buzzers are live';
 
   return (
-    <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-lg border border-neutral-800 bg-neutral-900/60 p-8 text-center">
-      <div
-        className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-neutral-800 text-4xl font-bold text-neutral-500"
-        style={locked ? { borderColor: ringer?.color ?? undefined } : undefined}
-      >
-        {countdown > 0 ? countdown : locked ? '!' : '···'}
+    <div className="flex w-full min-w-0 max-w-sm flex-col items-center gap-4 rounded-lg border border-neutral-800 bg-neutral-900/60 p-8 text-center">
+      <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-neutral-800 text-4xl font-bold text-neutral-500">
+        {answering ? secondsLeft : '···'}
       </div>
 
       <div>

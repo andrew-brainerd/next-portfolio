@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import { createBuzzedGame } from '@/api/buzzed';
 import { BUZZED_ROUTE } from '@/constants/routes';
 import {
+  ANSWER_WINDOW_CHOICES,
   BUZZED_PLAYER_COLORS,
   BUZZED_TARGET_DESCRIPTIONS,
   BUZZED_TARGET_LABELS,
@@ -25,7 +26,7 @@ export const NewGameForm = () => {
   const [target, setTarget] = useState<BuzzedTarget>('host');
   const [rokuDeviceIp, setRokuDeviceIp] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
-  const [wrongPenalty, setWrongPenalty] = useState(DEFAULT_BUZZED_SETTINGS.wrongPenalty);
+  const [answerWindowMs, setAnswerWindowMs] = useState(DEFAULT_BUZZED_SETTINGS.answerWindowMs);
   const [color, setColor] = useState<string>(BUZZED_PLAYER_COLORS[0]);
   const [hostPlaying, setHostPlaying] = useState(false);
 
@@ -50,7 +51,7 @@ export const NewGameForm = () => {
         name: name.trim() || undefined,
         target,
         rokuDeviceIp: needsRoku ? rokuDeviceIp.trim() : undefined,
-        settings: { ...DEFAULT_BUZZED_SETTINGS, wrongPenalty },
+        settings: { answerWindowMs },
         color: hostPlaying ? color : undefined,
         videoId: videoId ?? undefined,
         hostPlaying
@@ -179,25 +180,26 @@ export const NewGameForm = () => {
       )}
 
       <fieldset>
-        <legend className="mb-1.5 text-sm text-neutral-300">Wrong answers</legend>
+        <legend className="mb-1.5 text-sm text-neutral-300">Answering window</legend>
         <div className="flex gap-2">
-          {[0, 1].map(penalty => (
+          {ANSWER_WINDOW_CHOICES.map(ms => (
             <button
-              key={penalty}
+              key={ms}
               type="button"
-              onClick={() => setWrongPenalty(penalty)}
+              onClick={() => setAnswerWindowMs(ms)}
               className={`flex-1 rounded-md border px-3 py-2 text-sm transition-colors ${
-                wrongPenalty === penalty
+                answerWindowMs === ms
                   ? 'border-brand-500 bg-brand-600/10 text-white'
                   : 'border-neutral-700 text-neutral-400 hover:border-neutral-600'
               }`}
             >
-              {penalty === 0 ? 'Cost nothing' : 'Cost a point'}
+              {ms / 1000}s
             </button>
           ))}
         </div>
         <p className="mt-1 text-xs text-neutral-500">
-          Either way, a wrong answer locks you out of that question.
+          How long the video pauses after the first ring-in. Others can still ring in during it, and you can
+          always resume early.
         </p>
       </fieldset>
 

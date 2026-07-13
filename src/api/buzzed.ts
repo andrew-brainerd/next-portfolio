@@ -1,7 +1,7 @@
 'use server';
 
 import { deleteRequest, getRequest, patchRequest, postRequest, putRequest } from '@/api/client';
-import type { BuzzedGame, BuzzResponse, CreateBuzzedGameInput } from '@/types/buzzed';
+import type { BuzzedGame, BuzzedGrade, BuzzResponse, CreateBuzzedGameInput } from '@/types/buzzed';
 
 interface ListGamesResponse {
   games: BuzzedGame[];
@@ -45,28 +45,23 @@ export const completeBuzzedGame = async (gameId: string): Promise<BuzzedGame> =>
 export const deleteBuzzedGame = async (gameId: string): Promise<void> =>
   deleteRequest(`/buzzed/games/${gameId}`);
 
-export const buzzBuzzedGame = async (
+export const buzzBuzzedGame = async (gameId: string, questionIndex: number): Promise<BuzzResponse> =>
+  postRequest<{ questionIndex: number }, BuzzResponse>(`/buzzed/games/${gameId}/buzz`, { questionIndex });
+
+// Closes the answering window: resumes the video and arms the next question. Idempotent — the host's
+// "Resume now" and whichever client notices the window has elapsed both call it.
+export const advanceBuzzedQuestion = async (gameId: string): Promise<BuzzedGame> =>
+  postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/advance`, {});
+
+export const gradeBuzzedRingIn = async (
   gameId: string,
   questionIndex: number,
-  positionSec?: number
-): Promise<BuzzResponse> =>
-  postRequest<{ questionIndex: number; positionSec?: number }, BuzzResponse>(
-    `/buzzed/games/${gameId}/buzz`,
-    { questionIndex, positionSec }
-  );
-
-export const resolveBuzzedQuestion = async (
-  gameId: string,
-  correct: boolean,
-  answerText?: string
+  grade: BuzzedGrade
 ): Promise<BuzzedGame> =>
-  postRequest<{ correct: boolean; answerText?: string }, BuzzedGame>(`/buzzed/games/${gameId}/resolve`, {
-    correct,
-    answerText
+  postRequest<{ questionIndex: number; grade: BuzzedGrade }, BuzzedGame>(`/buzzed/games/${gameId}/grade`, {
+    questionIndex,
+    grade
   });
-
-export const overturnBuzzedQuestion = async (gameId: string): Promise<BuzzedGame> =>
-  postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/overturn`, {});
 
 export const leaveBuzzedRoster = async (gameId: string): Promise<void> =>
   deleteRequest(`/buzzed/games/${gameId}/players/me`);

@@ -2,7 +2,11 @@ export type BuzzedGameStatus = 'lobby' | 'active' | 'completed';
 
 export type BuzzedTarget = 'host' | 'synced' | 'roku';
 
-export type BuzzedQuestionState = 'armed' | 'locked' | 'resolved' | 'skipped';
+export type BuzzedQuestionState = 'armed' | 'answering' | 'grading' | 'complete';
+
+// Explicit union rather than `correct?: boolean` so "hasn't graded yet" can never be confused with "got it
+// wrong" — that distinction decides whether a ring-in holds a scoring place.
+export type BuzzedGrade = 'correct' | 'missed';
 
 export interface BuzzedPlayer {
   userId: string;
@@ -12,9 +16,7 @@ export interface BuzzedPlayer {
 }
 
 export interface BuzzedSettings {
-  wrongPenalty: number;
-  resumeDelayMs: number;
-  disputeWindowMs: number;
+  answerWindowMs: number;
 }
 
 export interface BuzzedPlayback {
@@ -26,14 +28,14 @@ export interface BuzzedPlayback {
   seekAt?: number;
 }
 
-export interface BuzzedAttempt {
+// Position in this array IS the ring-in order. `points` is filled at grade time, not ring-in time.
+export interface BuzzedRingIn {
   userId: string;
-  lockedAt: number;
+  ringAt: number;
   buzzMs: number;
-  correct: boolean;
-  answerText?: string;
-  resolvedAt: number;
-  overturned?: boolean;
+  grade?: BuzzedGrade;
+  gradedAt?: number;
+  points?: number;
 }
 
 export interface BuzzedQuestion {
@@ -41,18 +43,11 @@ export interface BuzzedQuestion {
   state: BuzzedQuestionState;
   videoId?: string;
   armedAt: number;
-  // When the buzzer goes live — pushed past armedAt by the resume countdown, and by every reopen.
   rearmedAt: number;
-  lockedBy?: string;
-  lockedAt?: number;
-  lockedAtPositionSec?: number;
-  controlClientId?: string;
-  attempts: BuzzedAttempt[];
-  resolvedBy?: string;
-  correct?: boolean;
-  answerText?: string;
-  resolvedAt?: number;
-  overturnedBy?: string;
+  answerCloseAt?: number;
+  pausedAtPositionSec?: number;
+  ringIns: BuzzedRingIn[];
+  closedAt?: number;
 }
 
 export interface BuzzedGame {
@@ -64,7 +59,6 @@ export interface BuzzedGame {
   status: BuzzedGameStatus;
   target: BuzzedTarget;
   rokuDeviceIp?: string;
-  controlClientId?: string;
   players: BuzzedPlayer[];
   scores: Record<string, number>;
   settings: BuzzedSettings;
@@ -91,41 +85,39 @@ export interface CreateBuzzedGameInput {
 }
 
 export interface BuzzResponse {
-  won: boolean;
+  rang: boolean;
+  position?: number;
   game: BuzzedGame;
-}
-
-export interface BuzzLockedPayload {
-  questionIndex: number;
-  userId: string;
-  displayName: string;
-  lockedAt: number;
-  positionSec?: number;
-  controlClientId?: string;
-}
-
-export interface QuestionResolvedPayload {
-  questionIndex: number;
-  userId?: string;
-  correct: boolean;
-  scores?: Record<string, number>;
-  resumeAt?: number;
-}
-
-export interface BuzzReopenedPayload {
-  questionIndex?: number;
-  scores?: Record<string, number>;
-  resumeAt?: number;
 }
 
 export interface BuzzedStanding {
   userId: string;
   displayName: string;
-  photoURL?: string;
   color?: string;
   score: number;
   correct: number;
-  wrong: number;
+  ringIns: number;
   avgBuzzMs: number | null;
   rank: number;
+}
+
+export interface RangInPayload {
+  questionIndex: number;
+  userId: string;
+  displayName: string;
+  position: number;
+  answerCloseAt?: number;
+}
+
+export interface WindowClosedPayload {
+  questionIndex?: number;
+  nextQuestionIndex?: number;
+  rearmedAt?: number;
+}
+
+export interface GradedPayload {
+  questionIndex: number;
+  userId: string;
+  grade: BuzzedGrade;
+  scores?: Record<string, number>;
 }

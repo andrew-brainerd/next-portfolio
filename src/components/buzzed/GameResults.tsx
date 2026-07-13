@@ -18,11 +18,11 @@ export const GameResults = ({ game, currentUserId }: GameResultsProps) => {
   const winners = standings.filter(s => s.rank === 1);
   const outright = winners.length === 1 ? winners[0] : undefined;
 
-  const questionsPlayed = game.history.filter(q => q.state === 'resolved' || q.state === 'skipped').length;
-  const totalBuzzes = game.history.reduce((sum, q) => sum + (q.attempts?.length ?? 0), 0);
+  const questionsPlayed = game.history.length;
+  const totalBuzzes = game.history.reduce((sum, q) => sum + q.ringIns.length, 0);
   const fastest = game.history
-    .flatMap(q => q.attempts ?? [])
-    .filter(a => a.correct && !a.overturned)
+    .flatMap(q => q.ringIns)
+    .filter(r => r.grade === 'correct' && r.buzzMs > 0)
     .sort((a, b) => a.buzzMs - b.buzzMs)[0];
   const fastestName = game.players.find(p => p.userId === fastest?.userId)?.displayName;
 
@@ -90,7 +90,7 @@ export const GameResults = ({ game, currentUserId }: GameResultsProps) => {
                   )}
                 </p>
                 <p className="text-xs text-neutral-500">
-                  {row.correct} correct · {row.wrong} wrong · {formatBuzzMs(row.avgBuzzMs)} avg
+                  {row.correct} correct · {row.ringIns} ring-ins · {formatBuzzMs(row.avgBuzzMs)} avg
                 </p>
               </div>
 

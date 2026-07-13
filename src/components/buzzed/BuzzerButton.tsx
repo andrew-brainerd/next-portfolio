@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { buzzBlockedReason, canBuzz, countdownSeconds, shadeColor } from '@/utils/buzzed';
+import { buzzBlockedReason, canBuzz, ringInPosition, shadeColor } from '@/utils/buzzed';
 import { DEFAULT_BUZZER_COLOR } from '@/constants/buzzed';
 import type { BuzzedGame } from '@/types/buzzed';
 
@@ -21,7 +21,9 @@ export const BuzzerButton = ({ game, currentUserId, now, pending, onBuzz }: Buzz
 
   const live = canBuzz(game, currentUserId, now) && !pending;
   const reason = buzzBlockedReason(game, currentUserId, now);
-  const countdown = countdownSeconds(game.playback.resumeAt, now);
+  // Once you've rung in, the button shows your position in the order rather than a countdown — that's the
+  // number that decides your points now.
+  const position = ringInPosition(game.currentQuestion, currentUserId);
 
   const color = game.players.find(p => p.userId === currentUserId)?.color ?? DEFAULT_BUZZER_COLOR;
   const rim = shadeColor(color, 0.6);
@@ -65,7 +67,7 @@ export const BuzzerButton = ({ game, currentUserId, now, pending, onBuzz }: Buzz
               : 'cursor-not-allowed bg-neutral-800 text-neutral-600'
           }`}
         >
-          {countdown > 0 ? countdown : 'Buzz'}
+          {position ? `#${position}` : 'Buzz'}
         </button>
       </div>
 

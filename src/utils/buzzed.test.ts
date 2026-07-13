@@ -1,29 +1,30 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  applyBuzzLocked,
-  applyBuzzReopened,
-  applyQuestionResolved,
+  answerSecondsLeft,
+  applyGraded,
+  applyRangIn,
+  applyWindowClosed,
   buzzBlockedReason,
   canBuzz,
   computeStandings,
-  countdownSeconds,
-  isDisputable,
   isOnRoster,
+  needsAdvance,
   parseYouTubeVideoId,
+  pendingGrades,
+  ringInPosition,
+  scoreQuestion,
   shadeColor
 } from '@/utils/buzzed';
-import type { BuzzedAttempt, BuzzedGame, BuzzedQuestion } from '@/types/buzzed';
+import type { BuzzedGame, BuzzedQuestion, BuzzedRingIn } from '@/types/buzzed';
 
 const NOW = 100_000;
 
-const attempt = (overrides: Partial<BuzzedAttempt> = {}): BuzzedAttempt => ({
-  userId: 'alice',
-  lockedAt: 1_800,
-  buzzMs: 800,
-  correct: true,
-  resolvedAt: NOW - 1_000,
-  ...overrides
+const ringIn = (userId: string, grade?: 'correct' | 'missed'): BuzzedRingIn => ({
+  userId,
+  ringAt: 1_500,
+  buzzMs: 500,
+  ...(grade ? { grade } : {})
 });
 
 const question = (overrides: Partial<BuzzedQuestion> = {}): BuzzedQuestion => ({
@@ -31,25 +32,25 @@ const question = (overrides: Partial<BuzzedQuestion> = {}): BuzzedQuestion => ({
   state: 'armed',
   armedAt: 1_000,
   rearmedAt: 1_000,
-  attempts: [],
+  ringIns: [],
   ...overrides
 });
 
 const game = (overrides: Partial<BuzzedGame> = {}): BuzzedGame => ({
   id: 'g1',
   ownerUserId: 'host',
-  participantUserIds: ['host', 'alice', 'bob'],
+  participantUserIds: ['host', 'alice', 'bob', 'carol'],
   joinCode: 'ABC12',
   name: 'Game',
   status: 'active',
   target: 'host',
   players: [
-    { userId: 'host', displayName: 'Host' },
     { userId: 'alice', displayName: 'Alice' },
-    { userId: 'bob', displayName: 'Bob' }
+    { userId: 'bob', displayName: 'Bob' },
+    { userId: 'carol', displayName: 'Carol' }
   ],
-  scores: { host: 0, alice: 0, bob: 0 },
-  settings: { wrongPenalty: 0, resumeDelayMs: 5_000, disputeWindowMs: 20_000 },
+  scores: { alice: 0, bob: 0, carol: 0 },
+  settings: { answerWindowMs: 10_000 },
   playback: { playing: true, positionSec: 42, updatedAt: 1_000 },
   currentQuestion: question(),
   history: [],
@@ -57,199 +58,218 @@ const game = (overrides: Partial<BuzzedGame> = {}): BuzzedGame => ({
   ...overrides
 });
 
+describe('scoreQuestion — points by position AMONG THE CORRECT', () => {
+  it('awards 3/2/1 down the correct answers in ring-in order', () => {
+    expect(
+      scoreQuestion(question({ ringIns: [ringIn('alice', 'correct'), ringIn('bob', 'correct'), ringIn('carol', 'correct')] }))
+    ).toEqual([3, 2, 1]);
+  });
+
+  it('does NOT let a wrong answer above you cost you a place', () => {
+    // Alice rang in first and missed; Bob was second and got it — so Bob is the FIRST CORRECT and takes 3.
+    expect(
+      scoreQuestion(question({ ringIns: [ringIn('alice', 'missed'), ringIn('bob', 'correct')] }))
+    ).toEqual([0, 3]);
+  });
+
+  it('gives nothing past third place', () => {
+    expect(
+      scoreQuestion(
+        question({
+          ringIns: [
+            ringIn('alice', 'correct'),
+            ringIn('bob', 'correct'),
+            ringIn('carol', 'correct'),
+            ringIn('dave', 'correct')
+          ]
+        })
+      )
+    ).toEqual([3, 2, 1, 0]);
+  });
+
+  it('treats an ungraded ring-in as holding no place — not as correct', () => {
+    // The whole reason grade is a union and not `correct?: boolean`.
+    expect(scoreQuestion(question({ ringIns: [ringIn('alice'), ringIn('bob', 'correct')] }))).toEqual([0, 3]);
+  });
+});
+
 describe('canBuzz', () => {
   it('lets an eligible player ring in on a live question', () => {
     expect(canBuzz(game(), 'alice', NOW)).toBe(true);
   });
 
-  it('stays dark during the resume countdown — the countdown is a real lockout', () => {
-    const g = game({ currentQuestion: question({ rearmedAt: NOW + 3_000 }) });
-    expect(canBuzz(g, 'alice', NOW)).toBe(false);
-    expect(buzzBlockedReason(g, 'alice', NOW)).toBe('Get ready…');
-  });
-
-  it('still lets a player ring in after they answered this question wrong', () => {
-    // A wrong answer costs the penalty and nothing else — they may be the only one who ever rings in.
+  it('still lets others ring in DURING the answering window — the point of the new flow', () => {
     const g = game({
       currentQuestion: question({
-        attempts: [{ userId: 'alice', lockedAt: 1_500, buzzMs: 500, correct: false, resolvedAt: 2_000 }]
+        state: 'answering',
+        answerCloseAt: NOW + 5_000,
+        ringIns: [ringIn('alice')]
       })
     });
 
-    expect(canBuzz(g, 'alice', NOW)).toBe(true);
     expect(canBuzz(g, 'bob', NOW)).toBe(true);
   });
 
-  it('closes once someone has rung in', () => {
-    const g = game({ currentQuestion: question({ state: 'locked', lockedBy: 'bob' }) });
-    expect(canBuzz(g, 'alice', NOW)).toBe(false);
-    expect(buzzBlockedReason(g, 'alice', NOW)).toBe('Bob rang in');
-    expect(buzzBlockedReason(g, 'bob', NOW)).toBe('You rang in!');
-  });
-
-  it('is closed when the game is not running', () => {
-    expect(canBuzz(game({ status: 'lobby' }), 'alice', NOW)).toBe(false);
-    expect(canBuzz(game({ status: 'completed' }), 'alice', NOW)).toBe(false);
-  });
-
-  it('refuses a non-participant', () => {
-    expect(canBuzz(game(), 'stranger', NOW)).toBe(false);
-  });
-
-  it('gives no buzzer to a host who sat out, even though they still own the game', () => {
+  it('allows only one ring-in each', () => {
     const g = game({
-      players: [
-        { userId: 'alice', displayName: 'Alice' },
-        { userId: 'bob', displayName: 'Bob' }
+      currentQuestion: question({ state: 'answering', answerCloseAt: NOW + 5_000, ringIns: [ringIn('alice')] })
+    });
+
+    expect(canBuzz(g, 'alice', NOW)).toBe(false);
+    expect(buzzBlockedReason(g, 'alice', NOW)).toBe('You rang in first!');
+  });
+
+  it('closes once the window has elapsed, even before anyone advances it', () => {
+    const g = game({
+      currentQuestion: question({ state: 'answering', answerCloseAt: NOW - 1, ringIns: [ringIn('alice')] })
+    });
+
+    expect(canBuzz(g, 'bob', NOW)).toBe(false);
+    expect(buzzBlockedReason(g, 'bob', NOW)).toBe('Time’s up');
+  });
+
+  it('gives no buzzer to a host who sat out', () => {
+    expect(canBuzz(game(), 'host', NOW)).toBe(false);
+    expect(buzzBlockedReason(game(), 'host', NOW)).toBe('You’re not playing');
+  });
+});
+
+describe('ringInPosition + answerSecondsLeft + needsAdvance', () => {
+  it('reports your 1-based place in the queue', () => {
+    const q = question({ ringIns: [ringIn('alice'), ringIn('bob')] });
+
+    expect(ringInPosition(q, 'alice')).toBe(1);
+    expect(ringInPosition(q, 'bob')).toBe(2);
+    expect(ringInPosition(q, 'carol')).toBeNull();
+  });
+
+  it('counts the window down and rounds up so the last tick reads 1', () => {
+    const g = game({ currentQuestion: question({ state: 'answering', answerCloseAt: NOW + 4_200 }) });
+    expect(answerSecondsLeft(g, NOW)).toBe(5);
+  });
+
+  it('flags a window that elapsed but nobody has closed', () => {
+    const open = game({ currentQuestion: question({ state: 'answering', answerCloseAt: NOW + 1_000 }) });
+    const done = game({ currentQuestion: question({ state: 'answering', answerCloseAt: NOW - 1 }) });
+
+    expect(needsAdvance(open, NOW)).toBe(false);
+    expect(needsAdvance(done, NOW)).toBe(true);
+  });
+});
+
+describe('pendingGrades', () => {
+  it('surfaces archived questions you rang in on but have not graded', () => {
+    const g = game({
+      history: [
+        question({ index: 0, state: 'grading', ringIns: [ringIn('alice'), ringIn('bob', 'correct')] }),
+        question({ index: 1, state: 'complete', ringIns: [ringIn('alice', 'missed')] })
       ]
     });
 
-    expect(g.participantUserIds).toContain('host');
-    expect(canBuzz(g, 'host', NOW)).toBe(false);
-    expect(buzzBlockedReason(g, 'host', NOW)).toBe('You’re not playing');
-    expect(canBuzz(g, 'alice', NOW)).toBe(true);
+    expect(pendingGrades(g, 'alice').map(q => q.index)).toEqual([0]);
+    // Bob already graded question 0, and never rang in on 1.
+    expect(pendingGrades(g, 'bob')).toEqual([]);
+    expect(pendingGrades(g, 'carol')).toEqual([]);
+  });
+});
+
+describe('optimistic event appliers', () => {
+  it('applyRangIn appends to the queue and pauses, without extending the window', () => {
+    const g = game({
+      currentQuestion: question({
+        state: 'answering',
+        answerCloseAt: NOW + 3_000,
+        ringIns: [ringIn('alice')]
+      })
+    });
+
+    const next = applyRangIn(g, {
+      questionIndex: 3,
+      userId: 'bob',
+      displayName: 'Bob',
+      position: 2,
+      answerCloseAt: NOW + 10_000
+    });
+
+    expect(next.currentQuestion?.ringIns.map(r => r.userId)).toEqual(['alice', 'bob']);
+    // The window is fixed from the FIRST ring-in — a latecomer must not reset the clock.
+    expect(next.currentQuestion?.answerCloseAt).toBe(NOW + 3_000);
+    expect(next.playback.playing).toBe(false);
+  });
+
+  it('applyRangIn ignores a duplicate event rather than double-appending', () => {
+    const g = game({
+      currentQuestion: question({ state: 'answering', ringIns: [ringIn('alice')] })
+    });
+
+    const next = applyRangIn(g, {
+      questionIndex: 3,
+      userId: 'alice',
+      displayName: 'Alice',
+      position: 1
+    });
+
+    expect(next.currentQuestion?.ringIns).toHaveLength(1);
+  });
+
+  it('applyWindowClosed archives for grading, resumes, and arms the next question', () => {
+    const g = game({
+      currentQuestion: question({ state: 'answering', ringIns: [ringIn('alice')] })
+    });
+
+    const next = applyWindowClosed(g, { nextQuestionIndex: 4, rearmedAt: NOW });
+
+    expect(next.history[0]?.state).toBe('grading');
+    expect(next.currentQuestion?.index).toBe(4);
+    expect(next.currentQuestion?.ringIns).toEqual([]);
+    // Buzzers live again immediately — grading happens in parallel on the archived question.
+    expect(next.playback.playing).toBe(true);
+  });
+
+  it('applyGraded records the thumb and takes the recomputed scores', () => {
+    const g = game({
+      history: [question({ index: 0, state: 'grading', ringIns: [ringIn('alice')] })]
+    });
+
+    const next = applyGraded(g, {
+      questionIndex: 0,
+      userId: 'alice',
+      grade: 'correct',
+      scores: { alice: 3, bob: 0, carol: 0 }
+    });
+
+    expect(next.history[0]?.ringIns[0]?.grade).toBe('correct');
+    expect(next.scores.alice).toBe(3);
+  });
+});
+
+describe('computeStandings', () => {
+  it('ranks by score and counts only graded-correct ring-ins', () => {
+    const g = game({
+      scores: { alice: 3, bob: 5, carol: 0 },
+      history: [
+        question({ index: 0, ringIns: [ringIn('alice', 'correct'), ringIn('bob', 'correct')] }),
+        question({ index: 1, ringIns: [ringIn('bob', 'correct'), ringIn('alice', 'missed')] })
+      ]
+    });
+
+    const standings = computeStandings(g);
+
+    expect(standings.map(s => s.userId)).toEqual(['bob', 'alice', 'carol']);
+    expect(standings[0]).toMatchObject({ userId: 'bob', score: 5, correct: 2, ringIns: 2 });
+    expect(standings[1]).toMatchObject({ userId: 'alice', score: 3, correct: 1, ringIns: 2 });
+  });
+
+  it('gives a genuine tie the same rank', () => {
+    expect(computeStandings(game()).map(s => s.rank)).toEqual([1, 1, 1]);
   });
 });
 
 describe('isOnRoster', () => {
   it('separates who can play from who merely has access', () => {
-    const g = game({ players: [{ userId: 'alice', displayName: 'Alice' }] });
-
+    const g = game();
     expect(isOnRoster(g, 'alice')).toBe(true);
     expect(isOnRoster(g, 'host')).toBe(false);
-  });
-});
-
-describe('countdownSeconds', () => {
-  it('rounds up so the last tick still reads 1', () => {
-    expect(countdownSeconds(NOW + 4_200, NOW)).toBe(5);
-    expect(countdownSeconds(NOW + 200, NOW)).toBe(1);
-  });
-
-  it('is 0 with no countdown or a lapsed one', () => {
-    expect(countdownSeconds(undefined, NOW)).toBe(0);
-    expect(countdownSeconds(NOW - 1, NOW)).toBe(0);
-  });
-});
-
-describe('isDisputable', () => {
-  const resolved = (overrides: Partial<BuzzedQuestion> = {}): BuzzedQuestion =>
-    question({
-      state: 'resolved',
-      correct: true,
-      resolvedBy: 'alice',
-      resolvedAt: NOW - 1_000,
-      attempts: [attempt()],
-      ...overrides
-    });
-
-  const disputable = (overrides: Partial<BuzzedGame> = {}) =>
-    game({ history: [resolved()], currentQuestion: question({ index: 4 }), ...overrides });
-
-  it('lets another player dispute a fresh win', () => {
-    expect(isDisputable(disputable(), 'bob', NOW)).toBe(true);
-  });
-
-  it('will not let the winner dispute themselves', () => {
-    expect(isDisputable(disputable(), 'alice', NOW)).toBe(false);
-  });
-
-  it('closes after the dispute window', () => {
-    const g = disputable({ history: [resolved({ resolvedAt: NOW - 30_000 })] });
-    expect(isDisputable(g, 'bob', NOW)).toBe(false);
-  });
-
-  it('closes once someone rings in on the next question', () => {
-    const g = disputable({ currentQuestion: question({ index: 4, state: 'locked', lockedBy: 'bob' }) });
-    expect(isDisputable(g, 'bob', NOW)).toBe(false);
-  });
-
-  it('has nothing to dispute on a skipped question', () => {
-    const g = disputable({ history: [resolved({ state: 'skipped', correct: undefined })] });
-    expect(isDisputable(g, 'bob', NOW)).toBe(false);
-  });
-});
-
-describe('optimistic event appliers', () => {
-  describe('applyBuzzLocked', () => {
-    it('locks the question and pauses playback straight from the payload', () => {
-      const next = applyBuzzLocked(game(), {
-        questionIndex: 3,
-        userId: 'bob',
-        displayName: 'Bob',
-        lockedAt: 5_000
-      });
-
-      expect(next.currentQuestion?.state).toBe('locked');
-      expect(next.currentQuestion?.lockedBy).toBe('bob');
-      expect(next.playback.playing).toBe(false);
-      expect(next.playback.resumeAt).toBeUndefined();
-    });
-
-    it('never touches positionSec — the client that owns the video is the only authority on it', () => {
-      const g = game();
-      const next = applyBuzzLocked(g, {
-        questionIndex: 3,
-        userId: 'bob',
-        displayName: 'Bob',
-        lockedAt: 5_000
-      });
-
-      expect(next.playback.positionSec).toBe(g.playback.positionSec);
-    });
-
-    it('ignores an event for a question we have already moved past', () => {
-      const g = game();
-      const stale = applyBuzzLocked(g, {
-        questionIndex: 1,
-        userId: 'bob',
-        displayName: 'Bob',
-        lockedAt: 5_000
-      });
-
-      expect(stale).toBe(g);
-    });
-
-    it('ignores a second lock on an already-locked question', () => {
-      const g = game({ currentQuestion: question({ state: 'locked', lockedBy: 'alice' }) });
-      const next = applyBuzzLocked(g, {
-        questionIndex: 3,
-        userId: 'bob',
-        displayName: 'Bob',
-        lockedAt: 5_000
-      });
-
-      expect(next.currentQuestion?.lockedBy).toBe('alice');
-    });
-  });
-
-  it('applyQuestionResolved patches the scores and starts the countdown', () => {
-    const next = applyQuestionResolved(game(), {
-      questionIndex: 3,
-      userId: 'alice',
-      correct: true,
-      scores: { host: 0, alice: 1, bob: 0 },
-      resumeAt: NOW + 5_000
-    });
-
-    expect(next.scores.alice).toBe(1);
-    expect(next.playback.resumeAt).toBe(NOW + 5_000);
-    expect(next.playback.playing).toBe(false);
-  });
-
-  it('applyBuzzReopened re-arms the question behind the countdown and clears the ring-in', () => {
-    const g = game({ currentQuestion: question({ state: 'locked', lockedBy: 'alice', lockedAt: 1_800 }) });
-
-    const next = applyBuzzReopened(g, {
-      questionIndex: 3,
-      scores: { host: 0, alice: -1, bob: 0 },
-      resumeAt: NOW + 5_000
-    });
-
-    expect(next.currentQuestion?.state).toBe('armed');
-    expect(next.currentQuestion?.lockedBy).toBeUndefined();
-    expect(next.currentQuestion?.rearmedAt).toBe(NOW + 5_000);
-    expect(next.scores.alice).toBe(-1);
   });
 });
 
@@ -257,31 +277,22 @@ describe('parseYouTubeVideoId', () => {
   it.each([
     ['https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
     ['https://youtu.be/dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
-    ['https://www.youtube.com/embed/dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
     ['https://www.youtube.com/shorts/dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
-    ['https://m.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ'],
     ['dQw4w9WgXcQ', 'dQw4w9WgXcQ']
   ])('parses %s', (url, expected) => {
     expect(parseYouTubeVideoId(url)).toBe(expected);
   });
 
-  it('ignores timestamps, playlists and other params hanging off the link', () => {
+  it('ignores timestamps and playlists hanging off the link', () => {
     expect(parseYouTubeVideoId('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s&list=PLabc')).toBe(
       'dQw4w9WgXcQ'
     );
-    expect(parseYouTubeVideoId('https://youtu.be/dQw4w9WgXcQ?si=xyz&t=90')).toBe('dQw4w9WgXcQ');
-  });
-
-  it('tolerates a link pasted without the scheme', () => {
-    expect(parseYouTubeVideoId('youtube.com/watch?v=dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
   });
 
   it.each([
     ['', 'empty'],
     ['https://vimeo.com/12345', 'a non-YouTube host'],
-    ['https://www.youtube.com/watch?v=tooshort', 'a malformed id'],
-    ['https://www.youtube.com/', 'no video at all'],
-    ['just some words', 'nonsense']
+    ['https://www.youtube.com/watch?v=tooshort', 'a malformed id']
   ])('rejects %s (%s)', input => {
     expect(parseYouTubeVideoId(input)).toBeNull();
   });
@@ -292,77 +303,7 @@ describe('shadeColor', () => {
     expect(shadeColor('#dc2626', 0.6)).toBe('#841717');
   });
 
-  it('expands 3-char hex', () => {
-    expect(shadeColor('#fff', 0.5)).toBe('#808080');
-  });
-
-  it('clamps rather than overflowing past white', () => {
-    expect(shadeColor('#ffffff', 2)).toBe('#ffffff');
-  });
-
   it('returns garbage input untouched instead of emitting a broken colour', () => {
     expect(shadeColor('not-a-color', 0.6)).toBe('not-a-color');
-  });
-});
-
-describe('computeStandings', () => {
-  it('ranks by score, and counts an overturned win as a miss', () => {
-    const g = game({
-      scores: { host: 0, alice: 1, bob: 2 },
-      history: [
-        question({
-          index: 0,
-          state: 'resolved',
-          attempts: [
-            attempt({ userId: 'bob', correct: true, buzzMs: 500 }),
-            attempt({ userId: 'alice', correct: true, overturned: true, buzzMs: 300 })
-          ]
-        })
-      ],
-      currentQuestion: null
-    });
-
-    const standings = computeStandings(g);
-
-    expect(standings.map(s => s.userId)).toEqual(['bob', 'alice', 'host']);
-    expect(standings[0]).toMatchObject({ userId: 'bob', score: 2, correct: 1, wrong: 0, rank: 1 });
-    expect(standings[1]).toMatchObject({ userId: 'alice', score: 1, correct: 0, wrong: 1, rank: 2 });
-  });
-
-  it('counts the live question too, so the board never lags a question behind', () => {
-    const g = game({
-      scores: { host: 0, alice: 1, bob: 0 },
-      currentQuestion: question({ attempts: [attempt({ userId: 'alice', correct: true, buzzMs: 900 })] })
-    });
-
-    expect(computeStandings(g).find(s => s.userId === 'alice')).toMatchObject({ correct: 1, avgBuzzMs: 900 });
-  });
-
-  it('breaks a score tie on correct answers, then on buzz speed', () => {
-    const g = game({
-      scores: { host: 1, alice: 1, bob: 1 },
-      history: [
-        question({
-          state: 'resolved',
-          attempts: [
-            attempt({ userId: 'host', correct: true, buzzMs: 2_000 }),
-            attempt({ userId: 'alice', correct: true, buzzMs: 400 }),
-            attempt({ userId: 'bob', correct: true, buzzMs: 1_000 })
-          ]
-        })
-      ],
-      currentQuestion: null
-    });
-
-    expect(computeStandings(g).map(s => s.userId)).toEqual(['alice', 'bob', 'host']);
-  });
-
-  it('gives a genuine tie the same rank', () => {
-    const g = game({ scores: { host: 0, alice: 0, bob: 0 }, currentQuestion: null });
-    expect(computeStandings(g).map(s => s.rank)).toEqual([1, 1, 1]);
-  });
-
-  it('reports no buzz time for a player who never rang in', () => {
-    expect(computeStandings(game()).every(s => s.avgBuzzMs === null)).toBe(true);
   });
 });

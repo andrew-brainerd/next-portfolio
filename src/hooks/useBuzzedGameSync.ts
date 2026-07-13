@@ -5,20 +5,20 @@ import { useCallback, useEffect, useRef } from 'react';
 import { getBuzzedGame } from '@/api/buzzed';
 import { getChannel, leaveChannel, onPusherReconnect } from '@/utils/pusher';
 import {
-  BUZZED_BUZZ_LOCKED,
-  BUZZED_BUZZ_REOPENED,
   BUZZED_GAME_UPDATED,
+  BUZZED_GRADED,
   BUZZED_PLAYBACK_UPDATED,
-  BUZZED_QUESTION_RESOLVED,
+  BUZZED_RANG_IN,
+  BUZZED_WINDOW_CLOSED,
   buzzedChannelName
 } from '@/constants/buzzed';
 import type { BuzzedGame } from '@/types/buzzed';
 
 const EVENTS = [
   BUZZED_GAME_UPDATED,
-  BUZZED_BUZZ_LOCKED,
-  BUZZED_BUZZ_REOPENED,
-  BUZZED_QUESTION_RESOLVED,
+  BUZZED_RANG_IN,
+  BUZZED_WINDOW_CLOSED,
+  BUZZED_GRADED,
   BUZZED_PLAYBACK_UPDATED
 ];
 

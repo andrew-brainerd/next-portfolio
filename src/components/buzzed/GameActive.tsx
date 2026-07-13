@@ -1,36 +1,38 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 
-import { completeBuzzedGame, overturnBuzzedQuestion, setBuzzedPlayback } from '@/api/buzzed';
-import { buzzNow, resolveNow } from '@/api/buzzedClient';
+import { completeBuzzedGame, gradeBuzzedRingIn, setBuzzedPlayback } from '@/api/buzzed';
+import { advanceNow, buzzNow } from '@/api/buzzedClient';
 import { useBuzzedGameSync } from '@/hooks/useBuzzedGameSync';
 import { useServerClock } from '@/hooks/useServerClock';
+import { useWakeLock } from '@/hooks/useWakeLock';
 import {
-  applyBuzzLocked,
-  applyBuzzReopened,
-  applyQuestionResolved,
-  isDisputable,
-  isOnRoster
+  applyGraded,
+  applyRangIn,
+  applyWindowClosed,
+  answerSecondsLeft,
+  isOnRoster,
+  needsAdvance,
+  pendingGrades
 } from '@/utils/buzzed';
-import {
-  BUZZED_BUZZ_LOCKED,
-  BUZZED_BUZZ_REOPENED,
-  BUZZED_QUESTION_RESOLVED
-} from '@/constants/buzzed';
+import { BUZZED_GRADED, BUZZED_RANG_IN, BUZZED_WINDOW_CLOSED } from '@/constants/buzzed';
 import { buzzedResultsRoute } from '@/constants/routes';
 import { BuzzerButton } from '@/components/buzzed/BuzzerButton';
+import { GradePrompt } from '@/components/buzzed/GradePrompt';
 import { HostVideo } from '@/components/buzzed/HostVideo';
+import { RingInQueue } from '@/components/buzzed/RingInQueue';
 import { RosterToggle } from '@/components/buzzed/RosterToggle';
 import { Scoreboard } from '@/components/buzzed/Scoreboard';
 import { SpectatorPanel } from '@/components/buzzed/SpectatorPanel';
 import type {
-  BuzzLockedPayload,
-  BuzzReopenedPayload,
   BuzzedGame,
-  QuestionResolvedPayload
+  BuzzedGrade,
+  GradedPayload,
+  RangInPayload,
+  WindowClosedPayload
 } from '@/types/buzzed';
 
 interface GameActiveProps {
@@ -45,14 +47,15 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // A buzzer is the one screen you stare at without touching for minutes and then must react to in under
+  // a second. A sleeping phone loses you the ring-in.
+  useWakeLock(game.status === 'active');
+
   const isHost = game.ownerUserId === currentUserId;
   const playing = isOnRoster(game, currentUserId);
   const question = game.currentQuestion;
-  const iRangIn = question?.state === 'locked' && question.lockedBy === currentUserId;
-  const ringer = game.players.find(p => p.userId === question?.lockedBy);
   const now = serverNow();
 
-  // The host ending the game takes everyone to the results, not just the person who clicked it.
   useBuzzedGameSync(
     initialGame.id,
     fresh => {
@@ -66,17 +69,39 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
       }
       setGame(fresh);
     },
-    // Act on the payload the instant it lands. Waiting for the refetch that follows would put a whole
-    // round-trip between the ring-in and the video pausing — that delay is the lag you feel in the room.
+    // Act on the payload the instant it lands; the refetch behind it reconciles.
     (event, payload) => {
-      if (event === BUZZED_BUZZ_LOCKED) {
-        setGame(g => applyBuzzLocked(g, payload as BuzzLockedPayload));
-      } else if (event === BUZZED_QUESTION_RESOLVED) {
-        setGame(g => applyQuestionResolved(g, payload as QuestionResolvedPayload));
-      } else if (event === BUZZED_BUZZ_REOPENED) {
-        setGame(g => applyBuzzReopened(g, payload as BuzzReopenedPayload));
+      if (event === BUZZED_RANG_IN) {
+        setGame(g => applyRangIn(g, payload as RangInPayload));
+      } else if (event === BUZZED_WINDOW_CLOSED) {
+        setGame(g => applyWindowClosed(g, payload as WindowClosedPayload));
+      } else if (event === BUZZED_GRADED) {
+        setGame(g => applyGraded(g, payload as GradedPayload));
       }
     }
+  );
+
+  // The answering window elapsed but nobody has closed it. Whichever client notices fires /advance —
+  // it's idempotent server-side, so a race between clients is harmless. Guarded by a ref so a re-render
+  // (this component re-renders every 200ms off the clock) can't spam it.
+  const advancingRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!needsAdvance(game, now)) return;
+
+    const index = game.currentQuestion?.index ?? -1;
+    if (advancingRef.current === index) return;
+    advancingRef.current = index;
+
+    void advanceNow(game.id)
+      .then(setGame)
+      .catch(() => undefined);
+  }, [game, now]);
+
+  const onPlaybackChange = useCallback(
+    (isPlaying: boolean, positionSec: number) => {
+      void setBuzzedPlayback(game.id, isPlaying, positionSec);
+    },
+    [game.id]
   );
 
   const run = async (action: () => Promise<BuzzedGame | void>) => {
@@ -106,63 +131,43 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     }
   };
 
-  // Deliberately does NOT setGame from the response. The player fires this asynchronously (a pause on a
-  // ring-in), so it can be in flight while another player resolves — and its response, computed before that
-  // resolve landed, would clobber the fresh scores the Pusher refetch just wrote. The server fans out; the
-  // refetch is the only thing allowed to publish game state that this client did not itself just cause.
-  const onPlaybackChange = useCallback(
-    (isPlaying: boolean, positionSec: number) => {
-      void setBuzzedPlayback(game.id, isPlaying, positionSec);
-    },
-    [game.id]
-  );
+  const onGrade = (questionIndex: number, grade: BuzzedGrade) =>
+    run(() => gradeBuzzedRingIn(game.id, questionIndex, grade));
 
-  const onResolve = (correct: boolean) => run(() => resolveNow(game.id, correct));
-
-  const canDispute = isDisputable(game, currentUserId, now);
-  const lastWinner = game.history[game.history.length - 1];
-  const disputedName = game.players.find(p => p.userId === lastWinner?.resolvedBy)?.displayName;
-
+  const secondsLeft = answerSecondsLeft(game, now);
+  const answering = question?.state === 'answering';
+  const toGrade = pendingGrades(game, currentUserId);
   const showVideo = game.target === 'host' && isHost;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex min-w-0 flex-col items-center gap-4">
         {showVideo && <HostVideo game={game} now={now} onPlaybackChange={onPlaybackChange} />}
 
-        {question?.state === 'locked' && !iRangIn && (
-          <div className="w-full rounded-lg border border-brand-600/50 bg-brand-600/15 px-4 py-3 text-center">
-            <p className="text-lg font-semibold text-white">{ringer?.displayName} rang in!</p>
-            <p className="text-sm text-neutral-400">Waiting for their answer…</p>
+        {answering && (
+          <div className="w-full min-w-0 rounded-lg border border-brand-600/50 bg-brand-600/15 px-3 py-3 text-center">
+            <p className="text-3xl font-bold tabular-nums text-white">{secondsLeft}</p>
+            <p className="text-sm text-neutral-400">Answer now — anyone else can still ring in</p>
+
+            {isHost && (
+              <Button
+                variant="outlined"
+                size="small"
+                className="mt-2"
+                disabled={pending}
+                onClick={() => run(() => advanceNow(game.id))}
+              >
+                Resume now
+              </Button>
+            )}
           </div>
         )}
 
-        {iRangIn ? (
-          <div className="w-full max-w-sm rounded-lg border border-brand-600/50 bg-brand-600/15 p-6">
-            <p className="text-center text-lg font-semibold text-white">You rang in!</p>
-            <p className="mb-4 text-center text-sm text-neutral-400">Say it out loud — were you right?</p>
-            <div className="flex gap-2">
-              <Button
-                fullWidth
-                variant="contained"
-                color="success"
-                disabled={pending}
-                onClick={() => onResolve(true)}
-              >
-                Got it
-              </Button>
-              <Button
-                fullWidth
-                variant="outlined"
-                color="error"
-                disabled={pending}
-                onClick={() => onResolve(false)}
-              >
-                Missed it
-              </Button>
-            </div>
-          </div>
-        ) : playing ? (
+        {question && question.ringIns.length > 0 && (
+          <RingInQueue game={game} question={question} currentUserId={currentUserId} />
+        )}
+
+        {playing ? (
           <BuzzerButton
             game={game}
             currentUserId={currentUserId}
@@ -174,32 +179,14 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
           <SpectatorPanel game={game} now={now} isHost={isHost} />
         )}
 
-        {!playing && isHost && question?.state === 'locked' && (
-          <div className="flex gap-2">
-            <Button
-              variant="contained"
-              color="success"
-              disabled={pending}
-              onClick={() => onResolve(true)}
-            >
-              They got it
-            </Button>
-            <Button variant="outlined" color="error" disabled={pending} onClick={() => onResolve(false)}>
-              They missed
-            </Button>
-          </div>
-        )}
-
-        {canDispute && (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => run(() => overturnBuzzedQuestion(game.id))}
-            className="text-sm text-neutral-400 underline hover:text-white disabled:opacity-50"
-          >
-            {disputedName} didn’t get that — dispute it
-          </button>
-        )}
+        {toGrade.map(pendingQuestion => (
+          <GradePrompt
+            key={pendingQuestion.index}
+            question={pendingQuestion}
+            pending={pending}
+            onGrade={onGrade}
+          />
+        ))}
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
@@ -215,7 +202,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
           </Button>
         )}
 
-        {!iRangIn && <RosterToggle game={game} currentUserId={currentUserId} onChange={setGame} />}
+        <RosterToggle game={game} currentUserId={currentUserId} onChange={setGame} />
       </div>
 
       <Scoreboard game={game} currentUserId={currentUserId} />

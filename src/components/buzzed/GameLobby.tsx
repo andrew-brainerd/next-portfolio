@@ -162,7 +162,7 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
 
       <p className="text-center text-sm text-neutral-500">
         Playing on: {BUZZED_TARGET_LABELS[game.target]}
-        {game.settings.wrongPenalty > 0 && ` · wrong answers cost ${game.settings.wrongPenalty}`}
+        {` · ${game.settings.answerWindowMs / 1000}s to answer`}
       </p>
 
       {isHost ? (

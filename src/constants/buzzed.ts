@@ -3,26 +3,29 @@ import type { BuzzedSettings, BuzzedTarget } from '@/types/buzzed';
 export const buzzedChannelName = (gameId: string) => `buzzed-game-${gameId}`;
 
 export const BUZZED_GAME_UPDATED = 'buzzedGameUpdated';
-export const BUZZED_BUZZ_LOCKED = 'buzzedBuzzLocked';
-export const BUZZED_BUZZ_REOPENED = 'buzzedBuzzReopened';
-export const BUZZED_QUESTION_RESOLVED = 'buzzedQuestionResolved';
+export const BUZZED_RANG_IN = 'buzzedRangIn';
+export const BUZZED_WINDOW_CLOSED = 'buzzedWindowClosed';
+export const BUZZED_GRADED = 'buzzedGraded';
 export const BUZZED_PLAYBACK_UPDATED = 'buzzedPlaybackUpdated';
 
+// Points by position AMONG THE CORRECT — a wrong answer above you doesn't cost you a place.
+export const BUZZED_POINTS_BY_RANK = [3, 2, 1];
+
 export const DEFAULT_BUZZED_SETTINGS: BuzzedSettings = {
-  wrongPenalty: 0,
-  resumeDelayMs: 5_000,
-  disputeWindowMs: 20_000
+  answerWindowMs: 10_000
 };
 
+export const ANSWER_WINDOW_CHOICES = [5_000, 10_000, 15_000, 20_000];
+
 export const BUZZED_PLAYER_COLORS = [
-  '#dc2626', // red
-  '#ea580c', // orange
-  '#ca8a04', // gold
-  '#16a34a', // green
-  '#0891b2', // cyan
-  '#2563eb', // blue
-  '#7c3aed', // violet
-  '#db2777' // pink
+  '#dc2626',
+  '#ea580c',
+  '#ca8a04',
+  '#16a34a',
+  '#0891b2',
+  '#2563eb',
+  '#7c3aed',
+  '#db2777'
 ] as const;
 
 export const DEFAULT_BUZZER_COLOR = '#737373';

@@ -12,7 +12,8 @@ interface ScoreboardProps {
 
 export const Scoreboard = ({ game, currentUserId, final = false }: ScoreboardProps) => {
   const standings = computeStandings(game);
-  const rungIn = game.currentQuestion?.state === 'locked' ? game.currentQuestion.lockedBy : undefined;
+  // Anyone in the current ring-in queue gets highlighted, not just a single locker.
+  const rangIn = new Set(game.currentQuestion?.ringIns.map(r => r.userId) ?? []);
 
   return (
     <div className="rounded-lg border border-neutral-800 bg-neutral-900/60">
@@ -22,7 +23,7 @@ export const Scoreboard = ({ game, currentUserId, final = false }: ScoreboardPro
       <ul>
         {standings.map(row => {
           const isMe = row.userId === currentUserId;
-          const isRungIn = rungIn === row.userId;
+          const isRungIn = rangIn.has(row.userId);
 
           return (
             <li
@@ -47,7 +48,7 @@ export const Scoreboard = ({ game, currentUserId, final = false }: ScoreboardPro
                   {isMe && <span className="ml-1.5 text-xs text-neutral-500">(you)</span>}
                 </p>
                 <p className="text-xs text-neutral-500">
-                  {row.correct} correct · {row.wrong} wrong · {formatBuzzMs(row.avgBuzzMs)} avg
+                  {row.correct} correct · {row.ringIns} ring-ins · {formatBuzzMs(row.avgBuzzMs)} avg
                 </p>
               </div>
 

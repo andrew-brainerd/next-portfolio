@@ -1,10 +1,11 @@
+import { BUZZED_POINTS_BY_RANK } from '@/constants/buzzed';
 import type {
-  BuzzLockedPayload,
-  BuzzReopenedPayload,
   BuzzedGame,
   BuzzedQuestion,
   BuzzedStanding,
-  QuestionResolvedPayload
+  GradedPayload,
+  RangInPayload,
+  WindowClosedPayload
 } from '@/types/buzzed';
 
 const YOUTUBE_ID = /^[\w-]{11}$/;
@@ -37,13 +38,15 @@ export const parseYouTubeVideoId = (input: string): string | null => {
   if (param && YOUTUBE_ID.test(param)) return param;
 
   const [, prefix, id] = url.pathname.split('/');
-  if (['embed', 'shorts', 'live', 'v'].includes(prefix) && id && YOUTUBE_ID.test(id)) return id;
+  if (['embed', 'shorts', 'live', 'v'].includes(prefix ?? '') && id && YOUTUBE_ID.test(id)) return id;
 
   return null;
 };
 
-// Fire-and-forget save of where the video actually is. Used both for the periodic heartbeat and for the
-// moment the page goes away — sendBeacon survives unload, an ordinary fetch does not.
+export const youTubeThumbnail = (videoId: string) => `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+
+export const youTubeWatchUrl = (videoId: string) => `https://www.youtube.com/watch?v=${videoId}`;
+
 export const saveBuzzedPosition = (gameId: string, positionSec: number): void => {
   const url = `/api/buzzed/${gameId}/position`;
   const body = JSON.stringify({ positionSec });
@@ -61,66 +64,31 @@ export const saveBuzzedPosition = (gameId: string, positionSec: number): void =>
   }).catch(() => undefined);
 };
 
-export const youTubeThumbnail = (videoId: string) => `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
-
-export const youTubeWatchUrl = (videoId: string) => `https://www.youtube.com/watch?v=${videoId}`;
-
-// The Pusher payloads carry everything needed to react instantly. Waiting for a refetch before pausing
-// the video puts a whole extra round-trip between the ring-in and the pause, which is exactly the lag you
-// feel. These apply the event optimistically; the refetch that follows reconciles against the server.
-export const applyBuzzLocked = (game: BuzzedGame, payload: BuzzLockedPayload): BuzzedGame => {
-  const question = game.currentQuestion;
-  // Ignore an event for a question we have already moved past.
-  if (!question || question.index !== payload.questionIndex || question.state !== 'armed') return game;
-
-  return {
-    ...game,
-    currentQuestion: {
-      ...question,
-      state: 'locked',
-      lockedBy: payload.userId,
-      lockedAt: payload.lockedAt
-    },
-    // positionSec is deliberately untouched: the client that owns the video is the only authority on it.
-    playback: { ...game.playback, playing: false, updatedAt: payload.lockedAt, resumeAt: undefined }
-  };
-};
-
-export const applyQuestionResolved = (game: BuzzedGame, payload: QuestionResolvedPayload): BuzzedGame => ({
-  ...game,
-  scores: payload.scores ?? game.scores,
-  playback: { ...game.playback, playing: false, resumeAt: payload.resumeAt }
-});
-
-export const applyBuzzReopened = (game: BuzzedGame, payload: BuzzReopenedPayload): BuzzedGame => {
-  const question = game.currentQuestion;
-  if (!question) return game;
-
-  const { lockedBy, lockedAt, ...rest } = question;
-
-  return {
-    ...game,
-    scores: payload.scores ?? game.scores,
-    currentQuestion: {
-      ...rest,
-      state: 'armed',
-      rearmedAt: payload.resumeAt ?? question.rearmedAt
-    },
-    playback: { ...game.playback, playing: false, resumeAt: payload.resumeAt }
-  };
-};
-
 export const isOnRoster = (game: BuzzedGame, userId: string): boolean =>
   game.players.some(p => p.userId === userId);
 
-// Mirrors the server's atomic filter, so the button is never lit when the server would reject the buzz.
+export const hasRungIn = (question: BuzzedQuestion | null, userId: string): boolean =>
+  !!question?.ringIns.some(r => r.userId === userId);
+
+export const ringInPosition = (question: BuzzedQuestion | null, userId: string): number | null => {
+  const index = question?.ringIns.findIndex(r => r.userId === userId) ?? -1;
+  return index < 0 ? null : index + 1;
+};
+
+// Mirrors the server's atomic filter, so the button is never lit when the server would reject the ring-in.
+// Note you can ring in during the ANSWERING window too — that's the whole point of the new flow.
 export const canBuzz = (game: BuzzedGame, userId: string, now: number): boolean => {
   if (game.status !== 'active') return false;
   if (!isOnRoster(game, userId)) return false;
 
   const question = game.currentQuestion;
-  if (!question || question.state !== 'armed') return false;
+  if (!question) return false;
+  if (question.state !== 'armed' && question.state !== 'answering') return false;
   if (now < question.rearmedAt) return false;
+  // One ring-in each.
+  if (hasRungIn(question, userId)) return false;
+  // The window closed but nobody has advanced it yet.
+  if (question.answerCloseAt != null && now >= question.answerCloseAt) return false;
 
   return true;
 };
@@ -132,53 +100,60 @@ export const buzzBlockedReason = (game: BuzzedGame, userId: string, now: number)
 
   const question = game.currentQuestion;
   if (!question) return 'No question in play';
-  if (question.state === 'locked') {
-    const who = game.players.find(p => p.userId === question.lockedBy);
-    return question.lockedBy === userId ? 'You rang in!' : `${who?.displayName ?? 'Someone'} rang in`;
-  }
-  if (now < question.rearmedAt) return 'Get ready…';
 
-  return 'Not your turn';
+  const position = ringInPosition(question, userId);
+  if (position) return position === 1 ? 'You rang in first!' : `You rang in #${position}`;
+  if (question.answerCloseAt != null && now >= question.answerCloseAt) return 'Time’s up';
+
+  return 'Waiting…';
 };
 
-export const countdownSeconds = (resumeAt: number | undefined, now: number): number => {
-  if (!resumeAt || resumeAt <= now) return 0;
-  return Math.ceil((resumeAt - now) / 1000);
+// Seconds left in the answering window.
+export const answerSecondsLeft = (game: BuzzedGame, now: number): number => {
+  const closeAt = game.currentQuestion?.answerCloseAt;
+  if (!closeAt || closeAt <= now) return 0;
+  return Math.ceil((closeAt - now) / 1000);
 };
 
-export const isDisputable = (game: BuzzedGame, userId: string, now: number): boolean => {
-  const last = game.history[game.history.length - 1];
-  if (!last || last.state !== 'resolved' || !last.correct || !last.resolvedBy) return false;
-  if (last.resolvedBy === userId) return false;
-  if (now - (last.resolvedAt ?? 0) > game.settings.disputeWindowMs) return false;
-  if (game.currentQuestion && game.currentQuestion.state !== 'armed') return false;
-
-  return true;
+// True once the window has elapsed but nobody has closed it yet. Whichever client notices calls /advance;
+// it's idempotent, so a race is harmless.
+export const needsAdvance = (game: BuzzedGame, now: number): boolean => {
+  const question = game.currentQuestion;
+  return (
+    game.status === 'active' &&
+    question?.state === 'answering' &&
+    question.answerCloseAt != null &&
+    now >= question.answerCloseAt
+  );
 };
 
-const allAttempts = (game: BuzzedGame) => {
-  const questions: BuzzedQuestion[] = [...game.history];
-  if (game.currentQuestion) questions.push(game.currentQuestion);
-  return questions.flatMap(q => q.attempts ?? []);
+// The questions this player rang in on and hasn't yet given a thumb to. Grading happens on ARCHIVED
+// questions, in parallel with a new one already being live.
+export const pendingGrades = (game: BuzzedGame, userId: string): BuzzedQuestion[] =>
+  game.history.filter(q => q.ringIns.some(r => r.userId === userId && r.grade === undefined));
+
+export const scoreQuestion = (question: BuzzedQuestion): number[] => {
+  let rank = 0;
+  return question.ringIns.map(ringIn => {
+    if (ringIn.grade !== 'correct') return 0;
+    const points = BUZZED_POINTS_BY_RANK[rank] ?? 0;
+    rank += 1;
+    return points;
+  });
 };
 
 export const computeStandings = (game: BuzzedGame): BuzzedStanding[] => {
-  const attempts = allAttempts(game);
-
   const rows = game.players.map(player => {
-    const mine = attempts.filter(a => a.userId === player.userId);
-    const hits = mine.filter(a => a.correct && !a.overturned);
-    const misses = mine.filter(a => !a.correct || a.overturned);
-    const buzzTimes = mine.map(a => a.buzzMs);
+    const mine = game.history.flatMap(q => q.ringIns.filter(r => r.userId === player.userId));
+    const buzzTimes = mine.map(r => r.buzzMs);
 
     return {
       userId: player.userId,
       displayName: player.displayName,
-      photoURL: player.photoURL,
       color: player.color,
       score: game.scores[player.userId] ?? 0,
-      correct: hits.length,
-      wrong: misses.length,
+      correct: mine.filter(r => r.grade === 'correct').length,
+      ringIns: mine.length,
       avgBuzzMs: buzzTimes.length
         ? Math.round(buzzTimes.reduce((sum, ms) => sum + ms, 0) / buzzTimes.length)
         : null,
@@ -210,6 +185,9 @@ export const computeStandings = (game: BuzzedGame): BuzzedStanding[] => {
 
 export const formatBuzzMs = (ms: number | null): string => (ms === null ? '—' : `${(ms / 1000).toFixed(2)}s`);
 
+export const medalForRank = (rank: number): string => (['🥇', '🥈', '🥉'][rank - 1] ?? '');
+
+// Shifts a hex colour toward black (amount < 1) or white (amount > 1).
 export const shadeColor = (hex: string, amount: number): string => {
   const raw = hex.replace('#', '');
   const full =
@@ -232,4 +210,56 @@ export const shadeColor = (hex: string, amount: number): string => {
   return `#${channels.join('')}`;
 };
 
-export const medalForRank = (rank: number): string => (['🥇', '🥈', '🥉'][rank - 1] ?? '');
+// The Pusher payloads carry everything needed to react instantly; the refetch behind them reconciles.
+export const applyRangIn = (game: BuzzedGame, payload: RangInPayload): BuzzedGame => {
+  const question = game.currentQuestion;
+  if (!question || question.index !== payload.questionIndex) return game;
+  // Idempotent: a duplicate event mustn't append a second ring-in.
+  if (question.ringIns.some(r => r.userId === payload.userId)) return game;
+
+  return {
+    ...game,
+    currentQuestion: {
+      ...question,
+      state: 'answering',
+      // The window is fixed from the FIRST ring-in — never extend it here.
+      answerCloseAt: question.answerCloseAt ?? payload.answerCloseAt,
+      ringIns: [...question.ringIns, { userId: payload.userId, ringAt: Date.now(), buzzMs: 0 }]
+    },
+    playback: { ...game.playback, playing: false, resumeAt: undefined }
+  };
+};
+
+export const applyWindowClosed = (game: BuzzedGame, payload: WindowClosedPayload): BuzzedGame => {
+  const question = game.currentQuestion;
+  if (!question || question.state !== 'answering') return game;
+
+  return {
+    ...game,
+    history: [...game.history, { ...question, state: 'grading', closedAt: Date.now() }],
+    currentQuestion: {
+      index: payload.nextQuestionIndex ?? question.index + 1,
+      state: 'armed',
+      videoId: game.videoId,
+      armedAt: Date.now(),
+      rearmedAt: payload.rearmedAt ?? Date.now(),
+      ringIns: []
+    },
+    playback: { ...game.playback, playing: true, resumeAt: undefined }
+  };
+};
+
+export const applyGraded = (game: BuzzedGame, payload: GradedPayload): BuzzedGame => ({
+  ...game,
+  scores: payload.scores ?? game.scores,
+  history: game.history.map(q =>
+    q.index === payload.questionIndex
+      ? {
+          ...q,
+          ringIns: q.ringIns.map(r =>
+            r.userId === payload.userId ? { ...r, grade: payload.grade, gradedAt: Date.now() } : r
+          )
+        }
+      : q
+  )
+});
