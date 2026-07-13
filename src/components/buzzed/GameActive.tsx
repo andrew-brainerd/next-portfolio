@@ -10,9 +10,9 @@ import {
   getBuzzedGame,
   overturnBuzzedQuestion,
   resolveBuzzedQuestion,
-  skipBuzzedQuestion
+  setBuzzedPlayback
 } from '@/api/buzzed';
-import { getChannel } from '@/utils/pusher';
+import { getChannel, leaveChannel } from '@/utils/pusher';
 import { useServerClock } from '@/hooks/useServerClock';
 import { isDisputable, isOnRoster } from '@/utils/buzzed';
 import {
@@ -23,6 +23,8 @@ import {
   buzzedChannelName
 } from '@/constants/buzzed';
 import { BuzzerButton } from '@/components/buzzed/BuzzerButton';
+import { HostVideo } from '@/components/buzzed/HostVideo';
+import { RosterToggle } from '@/components/buzzed/RosterToggle';
 import { Scoreboard } from '@/components/buzzed/Scoreboard';
 import { SpectatorPanel } from '@/components/buzzed/SpectatorPanel';
 import type { BuzzedGame } from '@/types/buzzed';
@@ -57,7 +59,8 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   }, [game.id, router]);
 
   useEffect(() => {
-    const channel = getChannel(buzzedChannelName(initialGame.id));
+    const name = buzzedChannelName(initialGame.id);
+    const channel = getChannel(name);
     const events = [
       BUZZED_GAME_UPDATED,
       BUZZED_BUZZ_LOCKED,
@@ -68,7 +71,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     events.forEach(event => channel.bind(event, refetch));
     return () => {
       events.forEach(event => channel.unbind(event, refetch));
-      channel.unsubscribe();
+      leaveChannel(name);
     };
   }, [initialGame.id, refetch]);
 
@@ -90,7 +93,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     setPending(true);
     setError(null);
     try {
-      const { game: fresh } = await buzzBuzzedGame(game.id, question.index, game.playback.positionSec);
+      const { game: fresh } = await buzzBuzzedGame(game.id, question.index);
       setGame(fresh);
     } catch {
       setError('That didn’t go through. Try again.');
@@ -99,15 +102,27 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     }
   };
 
+  const onPlaybackChange = useCallback(
+    async (isPlaying: boolean, positionSec: number) => {
+      const fresh = await setBuzzedPlayback(game.id, isPlaying, positionSec);
+      if (fresh) setGame(fresh);
+    },
+    [game.id]
+  );
+
   const onResolve = (correct: boolean) => run(() => resolveBuzzedQuestion(game.id, correct));
 
   const canDispute = isDisputable(game, currentUserId, now);
   const lastWinner = game.history[game.history.length - 1];
   const disputedName = game.players.find(p => p.userId === lastWinner?.resolvedBy)?.displayName;
 
+  const showVideo = game.target === 'host' && isHost;
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
       <div className="flex flex-col items-center gap-6">
+        {showVideo && <HostVideo game={game} now={now} onPlaybackChange={onPlaybackChange} />}
+
         {question?.state === 'locked' && !iRangIn && (
           <div className="w-full rounded-lg border border-brand-600/50 bg-brand-600/15 px-4 py-3 text-center">
             <p className="text-lg font-semibold text-white">{ringer?.displayName} rang in!</p>
@@ -149,7 +164,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
             onBuzz={onBuzz}
           />
         ) : (
-          <SpectatorPanel game={game} now={now} />
+          <SpectatorPanel game={game} now={now} isHost={isHost} />
         )}
 
         {!playing && isHost && question?.state === 'locked' && (
@@ -182,26 +197,18 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         {isHost && (
-          <div className="flex gap-2">
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={pending || !question}
-              onClick={() => run(() => skipBuzzedQuestion(game.id))}
-            >
-              Nobody got it
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              color="error"
-              disabled={pending}
-              onClick={() => run(() => completeBuzzedGame(game.id))}
-            >
-              End game
-            </Button>
-          </div>
+          <Button
+            variant="outlined"
+            size="small"
+            color="error"
+            disabled={pending}
+            onClick={() => run(() => completeBuzzedGame(game.id))}
+          >
+            End game
+          </Button>
         )}
+
+        {!iRangIn && <RosterToggle game={game} currentUserId={currentUserId} onChange={setGame} />}
       </div>
 
       <Scoreboard game={game} currentUserId={currentUserId} />

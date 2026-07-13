@@ -65,9 +65,6 @@ export const resolveBuzzedQuestion = async (
     answerText
   });
 
-export const skipBuzzedQuestion = async (gameId: string): Promise<BuzzedGame> =>
-  postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/skip`, {});
-
 export const overturnBuzzedQuestion = async (gameId: string): Promise<BuzzedGame> =>
   postRequest<object, BuzzedGame>(`/buzzed/games/${gameId}/overturn`, {});
 

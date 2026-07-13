@@ -4,23 +4,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 
-import {
-  getBuzzedGame,
-  joinBuzzedGame,
-  leaveBuzzedRoster,
-  setBuzzedVideo,
-  startBuzzedGame
-} from '@/api/buzzed';
-import { getChannel } from '@/utils/pusher';
+import { getBuzzedGame, setBuzzedVideo, startBuzzedGame } from '@/api/buzzed';
+import { getChannel, leaveChannel } from '@/utils/pusher';
 import { BUZZED_ROUTE } from '@/constants/routes';
-import { isOnRoster, parseYouTubeVideoId, youTubeThumbnail, youTubeWatchUrl } from '@/utils/buzzed';
+import { parseYouTubeVideoId, youTubeThumbnail, youTubeWatchUrl } from '@/utils/buzzed';
 import {
   BUZZED_GAME_UPDATED,
-  BUZZED_PLAYER_COLORS,
   BUZZED_TARGET_LABELS,
   DEFAULT_BUZZER_COLOR,
   buzzedChannelName
 } from '@/constants/buzzed';
+import { RosterToggle } from '@/components/buzzed/RosterToggle';
 import { VideoLinkInput } from '@/components/buzzed/VideoLinkInput';
 import type { BuzzedGame } from '@/types/buzzed';
 
@@ -43,9 +37,6 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
   const pendingVideoId = parseYouTubeVideoId(videoUrl);
   const enoughPlayers = game.players.length >= MIN_PLAYERS;
 
-  const onRoster = isOnRoster(game, currentUserId);
-  const takenColors = game.players.map(p => p.color).filter((c): c is string => !!c);
-
   const onSaveVideo = async () => {
     if (!pendingVideoId) return;
     setSavingVideo(true);
@@ -55,22 +46,6 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
       setVideoUrl('');
     } finally {
       setSavingVideo(false);
-    }
-  };
-
-  const onToggleRoster = async () => {
-    setPending(true);
-    try {
-      if (onRoster) {
-        await leaveBuzzedRoster(game.id);
-      } else {
-        const free = BUZZED_PLAYER_COLORS.find(c => !takenColors.includes(c)) ?? BUZZED_PLAYER_COLORS[0];
-        await joinBuzzedGame(game.id, free);
-      }
-      const fresh = await getBuzzedGame(game.id);
-      if (fresh) setGame(fresh);
-    } finally {
-      setPending(false);
     }
   };
 
@@ -85,11 +60,12 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
   }, [game.id, router]);
 
   useEffect(() => {
-    const channel = getChannel(buzzedChannelName(initialGame.id));
+    const name = buzzedChannelName(initialGame.id);
+    const channel = getChannel(name);
     channel.bind(BUZZED_GAME_UPDATED, refetch);
     return () => {
       channel.unbind(BUZZED_GAME_UPDATED, refetch);
-      channel.unsubscribe();
+      leaveChannel(name);
     };
   }, [initialGame.id, refetch]);
 
@@ -126,16 +102,7 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
             Players ({game.players.length})
             {!enoughPlayers && <span className="ml-2 text-xs text-neutral-500">need at least {MIN_PLAYERS}</span>}
           </h2>
-          {isHost && (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={onToggleRoster}
-              className="text-xs text-neutral-400 underline hover:text-white disabled:opacity-50"
-            >
-              {onRoster ? 'Sit out' : 'Join in'}
-            </button>
-          )}
+          <RosterToggle game={game} currentUserId={currentUserId} onChange={setGame} />
         </div>
 
         {game.players.length === 0 && (

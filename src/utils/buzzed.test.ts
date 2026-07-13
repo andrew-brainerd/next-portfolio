@@ -99,7 +99,7 @@ describe('canBuzz', () => {
 
     expect(g.participantUserIds).toContain('host');
     expect(canBuzz(g, 'host', NOW)).toBe(false);
-    expect(buzzBlockedReason(g, 'host', NOW)).toBe('You’re running the game');
+    expect(buzzBlockedReason(g, 'host', NOW)).toBe('You’re not playing');
     expect(canBuzz(g, 'alice', NOW)).toBe(true);
   });
 });

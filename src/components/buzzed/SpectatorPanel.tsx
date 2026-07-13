@@ -6,9 +6,10 @@ import type { BuzzedGame } from '@/types/buzzed';
 interface SpectatorPanelProps {
   game: BuzzedGame;
   now: number;
+  isHost: boolean;
 }
 
-export const SpectatorPanel = ({ game, now }: SpectatorPanelProps) => {
+export const SpectatorPanel = ({ game, now, isHost }: SpectatorPanelProps) => {
   const question = game.currentQuestion;
   const countdown = countdownSeconds(game.playback.resumeAt, now);
   const locked = question?.state === 'locked';
@@ -32,7 +33,7 @@ export const SpectatorPanel = ({ game, now }: SpectatorPanelProps) => {
       <div>
         <p className="text-lg font-semibold text-white">{status}</p>
         <p className="text-sm text-neutral-500">
-          You’re running the game — {game.players.length} playing
+          {isHost ? 'You’re running the game' : 'You’re sitting out'} — {game.players.length} playing
         </p>
       </div>
     </div>

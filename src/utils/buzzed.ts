@@ -57,7 +57,7 @@ export const canBuzz = (game: BuzzedGame, userId: string, now: number): boolean 
 
 export const buzzBlockedReason = (game: BuzzedGame, userId: string, now: number): string | null => {
   if (canBuzz(game, userId, now)) return null;
-  if (!isOnRoster(game, userId)) return 'You’re running the game';
+  if (!isOnRoster(game, userId)) return 'You’re not playing';
   if (game.status !== 'active') return 'The game isn’t running';
 
   const question = game.currentQuestion;

@@ -27,7 +27,12 @@ export const NewGameForm = () => {
   const [videoUrl, setVideoUrl] = useState('');
   const [wrongPenalty, setWrongPenalty] = useState(DEFAULT_BUZZED_SETTINGS.wrongPenalty);
   const [color, setColor] = useState<string>(BUZZED_PLAYER_COLORS[0]);
-  const [hostPlaying, setHostPlaying] = useState(true);
+  const [hostPlaying, setHostPlaying] = useState(false);
+
+  const onChangeTarget = (next: BuzzedTarget) => {
+    setTarget(next);
+    setHostPlaying(next !== 'host');
+  };
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,7 +95,7 @@ export const NewGameForm = () => {
                 name="target"
                 value={option}
                 checked={target === option}
-                onChange={() => setTarget(option)}
+                onChange={() => onChangeTarget(option)}
                 className="mt-1"
               />
               <span>

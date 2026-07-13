@@ -12,3 +12,5 @@ const getPusher = () => {
 };
 
 export const getChannel = (channel: string) => getPusher().subscribe(channel);
+
+export const leaveChannel = (channel: string) => getPusher().unsubscribe(channel);
