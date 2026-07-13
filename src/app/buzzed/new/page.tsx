@@ -19,7 +19,7 @@ export default async function NewBuzzedGamePage() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
+    <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-6">
       <div className="mb-4">
         <Link href={BUZZED_ROUTE} className="text-sm text-neutral-400 hover:text-white">
           ← Back to games

@@ -29,10 +29,14 @@ export const GameResults = ({ game, currentUserId }: GameResultsProps) => {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="rounded-lg border border-neutral-800 bg-neutral-900/60 p-8 text-center">
+        {/* A display name can be a full email address. Left to grow it blows the card out and shoves
+            everything below it down the page, so the name gets a fixed height and scrolls inside it. */}
         {outright ? (
           <>
             <p className="text-sm text-neutral-400">Winner</p>
-            <p className="mt-1 text-4xl font-bold text-white">🏆 {outright.displayName}</p>
+            <p className="mt-1 max-h-28 overflow-y-auto overflow-x-hidden break-words text-4xl font-bold text-white">
+              🏆 {outright.displayName}
+            </p>
             <p className="mt-2 text-neutral-400">
               {outright.score} {outright.score === 1 ? 'point' : 'points'}
             </p>
@@ -40,7 +44,9 @@ export const GameResults = ({ game, currentUserId }: GameResultsProps) => {
         ) : (
           <>
             <p className="text-3xl font-bold text-white">It’s a tie</p>
-            <p className="mt-2 text-neutral-400">{winners.map(w => w.displayName).join(' · ')}</p>
+            <p className="mt-2 max-h-28 overflow-y-auto overflow-x-hidden break-words text-neutral-400">
+              {winners.map(w => w.displayName).join(' · ')}
+            </p>
           </>
         )}
       </div>

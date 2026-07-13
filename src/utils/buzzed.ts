@@ -127,10 +127,18 @@ export const needsAdvance = (game: BuzzedGame, now: number): boolean => {
   );
 };
 
-// The questions this player rang in on and hasn't yet given a thumb to. Grading happens on ARCHIVED
-// questions, in parallel with a new one already being live.
-export const pendingGrades = (game: BuzzedGame, userId: string): BuzzedQuestion[] =>
-  game.history.filter(q => q.ringIns.some(r => r.userId === userId && r.grade === undefined));
+// The ONE question this player still owes a thumb on — never a stack of them. Grading happens on an
+// ARCHIVED question, in parallel with a new one already being live, so prompts would otherwise pile up:
+// miss a grade, ring in on the next intro, and you'd be staring at two "Did you get it right?" cards with
+// no way to tell which is which. So only the most recent ungraded question is offered, and ringing in on
+// the current question retires it — by then the answer is long off screen and it's too late to score.
+export const pendingGrade = (game: BuzzedGame, userId: string): BuzzedQuestion | undefined => {
+  if (hasRungIn(game.currentQuestion, userId)) return undefined;
+
+  return game.history
+    .filter(q => q.ringIns.some(r => r.userId === userId && r.grade === undefined))
+    .at(-1);
+};
 
 export const scoreQuestion = (question: BuzzedQuestion): number[] => {
   let rank = 0;

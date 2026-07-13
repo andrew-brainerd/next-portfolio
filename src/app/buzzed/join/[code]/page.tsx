@@ -29,7 +29,7 @@ export default async function JoinBuzzedGamePage({ params }: JoinBuzzedGamePageP
 
   if (!game) {
     return (
-      <div className="container mx-auto p-6 text-center">
+      <div className="mx-auto w-full max-w-5xl p-6 text-center">
         <p className="mb-2 text-white">That game code doesn’t exist.</p>
         <Link href={BUZZED_ROUTE} className="text-brand-400 underline hover:text-brand-300">
           Back to games
@@ -47,7 +47,7 @@ export default async function JoinBuzzedGamePage({ params }: JoinBuzzedGamePageP
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
+    <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-6">
       <JoinGame game={game} />
     </div>
   );

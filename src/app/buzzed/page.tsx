@@ -21,7 +21,7 @@ export default async function BuzzedPage() {
   const games = await listBuzzedGames();
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
+    <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-6">
       <h1 className="mb-1 text-2xl font-bold text-white sm:text-3xl">Buzzed</h1>
       <p className="mb-6 text-neutral-400">Ring in first. Name the anime.</p>
 

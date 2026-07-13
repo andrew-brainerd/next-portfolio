@@ -71,7 +71,7 @@ export const BuzzerButton = ({ game, currentUserId, now, pending, onBuzz }: Buzz
         </button>
       </div>
 
-      <p className="h-5 text-sm text-neutral-400">{live ? 'Ring in!' : reason}</p>
+      <p className="h-5 text-sm text-neutral-400">{live ? '' : reason}</p>
     </div>
   );
 };

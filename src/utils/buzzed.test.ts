@@ -11,7 +11,7 @@ import {
   isOnRoster,
   needsAdvance,
   parseYouTubeVideoId,
-  pendingGrades,
+  pendingGrade,
   ringInPosition,
   scoreQuestion,
   shadeColor
@@ -157,8 +157,8 @@ describe('ringInPosition + answerSecondsLeft + needsAdvance', () => {
   });
 });
 
-describe('pendingGrades', () => {
-  it('surfaces archived questions you rang in on but have not graded', () => {
+describe('pendingGrade', () => {
+  it('surfaces the archived question you rang in on but have not graded', () => {
     const g = game({
       history: [
         question({ index: 0, state: 'grading', ringIns: [ringIn('alice'), ringIn('bob', 'correct')] }),
@@ -166,10 +166,30 @@ describe('pendingGrades', () => {
       ]
     });
 
-    expect(pendingGrades(g, 'alice').map(q => q.index)).toEqual([0]);
+    expect(pendingGrade(g, 'alice')?.index).toBe(0);
     // Bob already graded question 0, and never rang in on 1.
-    expect(pendingGrades(g, 'bob')).toEqual([]);
-    expect(pendingGrades(g, 'carol')).toEqual([]);
+    expect(pendingGrade(g, 'bob')).toBeUndefined();
+    expect(pendingGrade(g, 'carol')).toBeUndefined();
+  });
+
+  it('offers only the MOST RECENT ungraded question, never a stack of them', () => {
+    const g = game({
+      history: [
+        question({ index: 0, state: 'grading', ringIns: [ringIn('alice')] }),
+        question({ index: 1, state: 'grading', ringIns: [ringIn('alice')] })
+      ]
+    });
+
+    expect(pendingGrade(g, 'alice')?.index).toBe(1);
+  });
+
+  it('retires the prompt once you ring in on the current question — too late to score by then', () => {
+    const g = game({
+      history: [question({ index: 0, state: 'grading', ringIns: [ringIn('alice')] })],
+      currentQuestion: question({ index: 1, state: 'answering', ringIns: [ringIn('alice')] })
+    });
+
+    expect(pendingGrade(g, 'alice')).toBeUndefined();
   });
 });
 

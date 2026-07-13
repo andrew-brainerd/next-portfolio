@@ -9,7 +9,7 @@ import { useBuzzedGameSync } from '@/hooks/useBuzzedGameSync';
 import { BUZZED_ROUTE } from '@/constants/routes';
 import { parseYouTubeVideoId, youTubeThumbnail, youTubeWatchUrl } from '@/utils/buzzed';
 import { BUZZED_TARGET_LABELS, DEFAULT_BUZZER_COLOR } from '@/constants/buzzed';
-import { RosterToggle } from '@/components/buzzed/RosterToggle';
+import { GameMenu } from '@/components/buzzed/GameMenu';
 import { VideoLinkInput } from '@/components/buzzed/VideoLinkInput';
 import type { BuzzedGame } from '@/types/buzzed';
 
@@ -71,6 +71,11 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="min-w-0 truncate text-2xl font-bold text-white sm:text-3xl">{game.name}</h1>
+        <GameMenu game={game} currentUserId={currentUserId} onChange={setGame} />
+      </div>
+
       <div className="rounded-lg border border-neutral-800 bg-neutral-900/60 p-5 text-center">
         <p className="mb-1 text-sm text-neutral-400">Share this to let people in</p>
         <p className="font-mono text-4xl font-bold tracking-[0.3em] text-white">{game.joinCode}</p>
@@ -85,7 +90,6 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
             Players ({game.players.length})
             {!enoughPlayers && <span className="ml-2 text-xs text-neutral-500">need at least {MIN_PLAYERS}</span>}
           </h2>
-          <RosterToggle game={game} currentUserId={currentUserId} onChange={setGame} />
         </div>
 
         {game.players.length === 0 && (

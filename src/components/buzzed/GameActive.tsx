@@ -16,15 +16,15 @@ import {
   answerSecondsLeft,
   isOnRoster,
   needsAdvance,
-  pendingGrades
+  pendingGrade
 } from '@/utils/buzzed';
 import { BUZZED_GRADED, BUZZED_RANG_IN, BUZZED_WINDOW_CLOSED } from '@/constants/buzzed';
 import { buzzedResultsRoute } from '@/constants/routes';
 import { BuzzerButton } from '@/components/buzzed/BuzzerButton';
 import { GradePrompt } from '@/components/buzzed/GradePrompt';
 import { HostVideo } from '@/components/buzzed/HostVideo';
+import { GameMenu } from '@/components/buzzed/GameMenu';
 import { RingInQueue } from '@/components/buzzed/RingInQueue';
-import { RosterToggle } from '@/components/buzzed/RosterToggle';
 import { Scoreboard } from '@/components/buzzed/Scoreboard';
 import { SpectatorPanel } from '@/components/buzzed/SpectatorPanel';
 import type {
@@ -134,78 +134,87 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   const onGrade = (questionIndex: number, grade: BuzzedGrade) =>
     run(() => gradeBuzzedRingIn(game.id, questionIndex, grade));
 
+  // Pause BEFORE completing. The results page is a different route, and unmounting the player is not the
+  // same as stopping it on the Roku — there the video keeps playing on the TV after the game is over.
+  // Writing playing:false first fans out a pause that whatever owns the video actually acts on.
+  const onEndGame = () =>
+    run(async () => {
+      await setBuzzedPlayback(game.id, false, game.playback.positionSec);
+      return completeBuzzedGame(game.id);
+    });
+
   const secondsLeft = answerSecondsLeft(game, now);
   const answering = question?.state === 'answering';
-  const toGrade = pendingGrades(game, currentUserId);
+  const toGrade = pendingGrade(game, currentUserId);
   const showVideo = game.target === 'host' && isHost;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-      <div className="flex min-w-0 flex-col items-center gap-4">
-        {showVideo && <HostVideo game={game} now={now} onPlaybackChange={onPlaybackChange} />}
-
-        {answering && (
-          <div className="w-full min-w-0 rounded-lg border border-brand-600/50 bg-brand-600/15 px-3 py-3 text-center">
-            <p className="text-3xl font-bold tabular-nums text-white">{secondsLeft}</p>
-            <p className="text-sm text-neutral-400">Answer now — anyone else can still ring in</p>
-
-            {isHost && (
-              <Button
-                variant="outlined"
-                size="small"
-                className="mt-2"
-                disabled={pending}
-                onClick={() => run(() => advanceNow(game.id))}
-              >
-                Resume now
-              </Button>
-            )}
-          </div>
-        )}
-
-        {question && question.ringIns.length > 0 && (
-          <RingInQueue game={game} question={question} currentUserId={currentUserId} />
-        )}
-
-        {playing ? (
-          <BuzzerButton
-            game={game}
-            currentUserId={currentUserId}
-            now={now}
-            pending={pending}
-            onBuzz={onBuzz}
-          />
-        ) : (
-          <SpectatorPanel game={game} now={now} isHost={isHost} />
-        )}
-
-        {toGrade.map(pendingQuestion => (
-          <GradePrompt
-            key={pendingQuestion.index}
-            question={pendingQuestion}
-            pending={pending}
-            onGrade={onGrade}
-          />
-        ))}
-
-        {error && <p className="text-sm text-red-400">{error}</p>}
-
-        {isHost && (
-          <Button
-            variant="outlined"
-            size="small"
-            color="error"
-            disabled={pending}
-            onClick={() => run(() => completeBuzzedGame(game.id))}
-          >
-            End game
-          </Button>
-        )}
-
-        <RosterToggle game={game} currentUserId={currentUserId} onChange={setGame} />
+    <>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h1 className="min-w-0 truncate text-2xl font-bold text-white sm:text-3xl">{game.name}</h1>
+        <GameMenu game={game} currentUserId={currentUserId} onChange={setGame} />
       </div>
 
-      <Scoreboard game={game} currentUserId={currentUserId} />
-    </div>
+      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
+        <div className="flex min-w-0 flex-col items-center gap-4">
+          {showVideo && <HostVideo game={game} now={now} onPlaybackChange={onPlaybackChange} />}
+
+          {answering && (
+            <div className="w-full min-w-0 rounded-lg border border-brand-600/50 bg-brand-600/15 px-3 py-3 text-center">
+              <p className="text-3xl font-bold tabular-nums text-white">{secondsLeft}</p>
+              <p className="text-sm text-neutral-400">Answer now — anyone else can still ring in</p>
+
+              {isHost && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  className="mt-2"
+                  disabled={pending}
+                  onClick={() => run(() => advanceNow(game.id))}
+                >
+                  Resume now
+                </Button>
+              )}
+            </div>
+          )}
+
+          {question && question.ringIns.length > 0 && (
+            <RingInQueue game={game} question={question} currentUserId={currentUserId} />
+          )}
+
+          {playing ? (
+            <BuzzerButton
+              game={game}
+              currentUserId={currentUserId}
+              now={now}
+              pending={pending}
+              onBuzz={onBuzz}
+            />
+          ) : (
+            <SpectatorPanel game={game} now={now} isHost={isHost} />
+          )}
+
+          {toGrade && (
+            <GradePrompt question={toGrade} pending={pending} onGrade={onGrade} />
+          )}
+
+          {error && <p className="text-sm text-red-400">{error}</p>}
+
+          {isHost && (
+            <Button
+              variant="outlined"
+              size="small"
+              color="error"
+              disabled={pending}
+              onClick={onEndGame}
+            >
+              End game
+            </Button>
+          )}
+        </div>
+
+        <Scoreboard game={game} currentUserId={currentUserId} />
+      </div>
+    </>
   );
 };
