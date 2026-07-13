@@ -11,7 +11,6 @@ import {
 import { youTubeWatchUrl } from '@/utils/buzzed';
 import type { BuzzedGame } from '@/types/buzzed';
 
-const SEEK_THRESHOLD_SEC = 2;
 const AUTOPLAY_GRACE_MS = 1500;
 
 interface HostVideoProps {
@@ -24,7 +23,9 @@ export const HostVideo = ({ game, now, onPlaybackChange }: HostVideoProps) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const appliedRef = useRef<boolean | null>(null);
+  const seekAtRef = useRef<number | undefined>(undefined);
   const loadedVideoRef = useRef<string | undefined>(undefined);
+  const resumeFromRef = useRef(game.playback.positionSec);
 
   const [ready, setReady] = useState(false);
   const [blocked, setBlocked] = useState(false);
@@ -43,7 +44,15 @@ export const HostVideo = ({ game, now, onPlaybackChange }: HostVideoProps) => {
 
         playerRef.current = new YT.Player(mountRef.current, {
           videoId,
-          playerVars: { playsinline: 1, rel: 0, modestbranding: 1, controls: 1 },
+          // A fresh player has no idea where the game is. Pick up from the last reported position so a
+          // reload mid-game doesn't restart the compilation from the top.
+          playerVars: {
+            playsinline: 1,
+            rel: 0,
+            modestbranding: 1,
+            controls: 1,
+            start: Math.floor(resumeFromRef.current)
+          },
           events: {
             onReady: () => {
               loadedVideoRef.current = videoId;
@@ -79,11 +88,14 @@ export const HostVideo = ({ game, now, onPlaybackChange }: HostVideoProps) => {
     const player = playerRef.current;
     if (!ready || !player || game.status !== 'active') return;
 
-    const { playing, positionSec, resumeAt } = game.playback;
+    const { playing, resumeAt, seekToSec, seekAt } = game.playback;
     const shouldPlay = playing || (resumeAt != null && now >= resumeAt);
 
-    if (!shouldPlay && Math.abs(player.getCurrentTime() - positionSec) > SEEK_THRESHOLD_SEC) {
-      player.seekTo(positionSec, true);
+    // This player is the only one there is, so it owns the position. Never reconcile against the
+    // server's copy — obey an explicit rewind (an overturn) and nothing else.
+    if (seekAt != null && seekAt !== seekAtRef.current) {
+      seekAtRef.current = seekAt;
+      if (seekToSec != null) player.seekTo(seekToSec, true);
     }
 
     if (appliedRef.current === shouldPlay) return;
@@ -92,7 +104,12 @@ export const HostVideo = ({ game, now, onPlaybackChange }: HostVideoProps) => {
     if (shouldPlay) {
       player.playVideo();
       setTimeout(() => {
-        if (playerRef.current?.getPlayerState() !== YT_PLAYING) setNeedsGesture(true);
+        const current = playerRef.current;
+        if (!current) return;
+        // Confirm it actually started before telling the server it is playing — an unmuted autoplay
+        // without a recent gesture is silently refused, and reporting a lie would strand the game.
+        if (current.getPlayerState() === YT_PLAYING) onPlaybackChange(true, current.getCurrentTime());
+        else setNeedsGesture(true);
       }, AUTOPLAY_GRACE_MS);
     } else {
       player.pauseVideo();

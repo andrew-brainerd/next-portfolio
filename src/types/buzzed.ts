@@ -22,6 +22,8 @@ export interface BuzzedPlayback {
   positionSec: number;
   updatedAt: number;
   resumeAt?: number;
+  seekToSec?: number;
+  seekAt?: number;
 }
 
 export interface BuzzedAttempt {
