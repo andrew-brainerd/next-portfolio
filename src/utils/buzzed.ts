@@ -69,7 +69,6 @@ export const canBuzz = (game: BuzzedGame, userId: string, now: number): boolean 
   const question = game.currentQuestion;
   if (!question || question.state !== 'armed') return false;
   if (now < question.rearmedAt) return false;
-  if (question.lockedOutUserIds.includes(userId)) return false;
 
   return true;
 };
@@ -86,7 +85,6 @@ export const buzzBlockedReason = (game: BuzzedGame, userId: string, now: number)
     return question.lockedBy === userId ? 'You rang in!' : `${who?.displayName ?? 'Someone'} rang in`;
   }
   if (now < question.rearmedAt) return 'Get ready…';
-  if (question.lockedOutUserIds.includes(userId)) return 'You’re out on this one';
 
   return 'Not your turn';
 };

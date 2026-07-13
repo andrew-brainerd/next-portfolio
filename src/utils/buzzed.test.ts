@@ -28,7 +28,6 @@ const question = (overrides: Partial<BuzzedQuestion> = {}): BuzzedQuestion => ({
   state: 'armed',
   armedAt: 1_000,
   rearmedAt: 1_000,
-  lockedOutUserIds: [],
   attempts: [],
   ...overrides
 });
@@ -66,11 +65,16 @@ describe('canBuzz', () => {
     expect(buzzBlockedReason(g, 'alice', NOW)).toBe('Get ready…');
   });
 
-  it('locks out a player who already answered this question wrong', () => {
-    const g = game({ currentQuestion: question({ lockedOutUserIds: ['alice'] }) });
-    expect(canBuzz(g, 'alice', NOW)).toBe(false);
+  it('still lets a player ring in after they answered this question wrong', () => {
+    // A wrong answer costs the penalty and nothing else — they may be the only one who ever rings in.
+    const g = game({
+      currentQuestion: question({
+        attempts: [{ userId: 'alice', lockedAt: 1_500, buzzMs: 500, correct: false, resolvedAt: 2_000 }]
+      })
+    });
+
+    expect(canBuzz(g, 'alice', NOW)).toBe(true);
     expect(canBuzz(g, 'bob', NOW)).toBe(true);
-    expect(buzzBlockedReason(g, 'alice', NOW)).toBe('You’re out on this one');
   });
 
   it('closes once someone has rung in', () => {

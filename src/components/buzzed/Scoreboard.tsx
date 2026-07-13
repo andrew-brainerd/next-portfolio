@@ -12,7 +12,6 @@ interface ScoreboardProps {
 
 export const Scoreboard = ({ game, currentUserId, final = false }: ScoreboardProps) => {
   const standings = computeStandings(game);
-  const lockedOut = game.currentQuestion?.lockedOutUserIds ?? [];
   const rungIn = game.currentQuestion?.state === 'locked' ? game.currentQuestion.lockedBy : undefined;
 
   return (
@@ -23,7 +22,6 @@ export const Scoreboard = ({ game, currentUserId, final = false }: ScoreboardPro
       <ul>
         {standings.map(row => {
           const isMe = row.userId === currentUserId;
-          const isOut = lockedOut.includes(row.userId);
           const isRungIn = rungIn === row.userId;
 
           return (
@@ -44,7 +42,7 @@ export const Scoreboard = ({ game, currentUserId, final = false }: ScoreboardPro
               />
 
               <div className="min-w-0 flex-1">
-                <p className={`truncate text-sm ${isOut ? 'text-neutral-600 line-through' : 'text-white'}`}>
+                <p className="truncate text-sm text-white">
                   {row.displayName}
                   {isMe && <span className="ml-1.5 text-xs text-neutral-500">(you)</span>}
                 </p>

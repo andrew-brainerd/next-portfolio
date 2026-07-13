@@ -102,10 +102,13 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     }
   };
 
+  // Deliberately does NOT setGame from the response. The player fires this asynchronously (a pause on a
+  // ring-in), so it can be in flight while another player resolves — and its response, computed before that
+  // resolve landed, would clobber the fresh scores the Pusher refetch just wrote. The server fans out; the
+  // refetch is the only thing allowed to publish game state that this client did not itself just cause.
   const onPlaybackChange = useCallback(
-    async (isPlaying: boolean, positionSec: number) => {
-      const fresh = await setBuzzedPlayback(game.id, isPlaying, positionSec);
-      if (fresh) setGame(fresh);
+    (isPlaying: boolean, positionSec: number) => {
+      void setBuzzedPlayback(game.id, isPlaying, positionSec);
     },
     [game.id]
   );

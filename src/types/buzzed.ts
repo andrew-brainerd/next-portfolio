@@ -46,7 +46,6 @@ export interface BuzzedQuestion {
   lockedBy?: string;
   lockedAt?: number;
   lockedAtPositionSec?: number;
-  lockedOutUserIds: string[];
   controlClientId?: string;
   attempts: BuzzedAttempt[];
   resolvedBy?: string;
