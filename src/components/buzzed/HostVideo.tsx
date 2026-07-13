@@ -8,10 +8,11 @@ import {
   type YouTubePlayer,
   loadYouTubeIframeApi
 } from '@/utils/youtubeIframe';
-import { youTubeWatchUrl } from '@/utils/buzzed';
+import { saveBuzzedPosition, youTubeWatchUrl } from '@/utils/buzzed';
 import type { BuzzedGame } from '@/types/buzzed';
 
 const AUTOPLAY_GRACE_MS = 1500;
+const POSITION_SAVE_MS = 5000;
 
 interface HostVideoProps {
   game: BuzzedGame;
@@ -117,6 +118,39 @@ export const HostVideo = ({ game, now, onPlaybackChange }: HostVideoProps) => {
       onPlaybackChange(false, player.getCurrentTime());
     }
   }, [ready, game.status, game.playback, now, onPlaybackChange]);
+
+  // Keep the saved position close to reality so a reload resumes where the game actually is.
+  //
+  // The unload save alone is not enough: it races the next page's server render, which can read the old
+  // position, start the player there, and immediately overwrite the beacon. The heartbeat is what makes
+  // the saved position trustworthy; the beacon just narrows the last few seconds.
+  useEffect(() => {
+    if (!ready || game.status !== 'active') return;
+
+    const save = () => {
+      const player = playerRef.current;
+      const positionSec = player?.getCurrentTime() ?? 0;
+      if (positionSec > 0) saveBuzzedPosition(game.id, positionSec);
+    };
+
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') save();
+    };
+
+    const heartbeat = setInterval(() => {
+      if (playerRef.current?.getPlayerState() === YT_PLAYING) save();
+    }, POSITION_SAVE_MS);
+
+    window.addEventListener('pagehide', save);
+    document.addEventListener('visibilitychange', onHide);
+
+    return () => {
+      clearInterval(heartbeat);
+      window.removeEventListener('pagehide', save);
+      document.removeEventListener('visibilitychange', onHide);
+      save();
+    };
+  }, [ready, game.id, game.status]);
 
   const onTapToPlay = () => {
     playerRef.current?.playVideo();

@@ -35,6 +35,25 @@ export const parseYouTubeVideoId = (input: string): string | null => {
   return null;
 };
 
+// Fire-and-forget save of where the video actually is. Used both for the periodic heartbeat and for the
+// moment the page goes away — sendBeacon survives unload, an ordinary fetch does not.
+export const saveBuzzedPosition = (gameId: string, positionSec: number): void => {
+  const url = `/api/buzzed/${gameId}/position`;
+  const body = JSON.stringify({ positionSec });
+
+  if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+    navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
+    return;
+  }
+
+  void fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+    keepalive: true
+  }).catch(() => undefined);
+};
+
 export const youTubeThumbnail = (videoId: string) => `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
 
 export const youTubeWatchUrl = (videoId: string) => `https://www.youtube.com/watch?v=${videoId}`;
