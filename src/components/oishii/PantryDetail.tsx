@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { getPantry } from '@/api/oishii';
 import { PANTRY_UPDATED_EVENT, pantryChannelName } from '@/constants/oishii';
-import { getChannel } from '@/utils/pusher';
+import { getChannel, leaveChannel } from '@/utils/pusher';
 import { AddItemForm } from '@/components/oishii/AddItemForm';
 import { ItemGrid } from '@/components/oishii/ItemGrid';
 import { MembersPanel } from '@/components/oishii/MembersPanel';
@@ -33,14 +33,15 @@ export const PantryDetail = ({ initialPantry, currentUserId, gmailConnected }: P
   // Realtime: any member's change pings the pantry channel; re-fetch on it so
   // this session stays in sync with the shared pantry (O-E-1).
   useEffect(() => {
-    const channel = getChannel(pantryChannelName(pantry.id));
+    const channelName = pantryChannelName(pantry.id);
+    const channel = getChannel(channelName);
     const onUpdate = () => {
       refresh();
     };
     channel.bind(PANTRY_UPDATED_EVENT, onUpdate);
     return () => {
       channel.unbind(PANTRY_UPDATED_EVENT, onUpdate);
-      channel.unsubscribe();
+      leaveChannel(channelName);
     };
   }, [pantry.id, refresh]);
 

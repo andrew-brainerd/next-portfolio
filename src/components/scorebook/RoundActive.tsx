@@ -17,7 +17,7 @@ import {
   setFrisbeeGolfCurrentHole,
   setFrisbeeGolfScore
 } from '@/api/scorebook';
-import { getChannel } from '@/utils/pusher';
+import { getChannel, leaveChannel } from '@/utils/pusher';
 import { brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
@@ -53,7 +53,8 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
     }`;
 
   useEffect(() => {
-    const channel = getChannel(initialRound.id);
+    const channelName = initialRound.id;
+    const channel = getChannel(channelName);
     const refetch = async () => {
       const fresh = await getFrisbeeGolfRound(initialRound.id);
       if (!fresh) return;
@@ -69,7 +70,7 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
     channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
     return () => {
       channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-      channel.unsubscribe();
+      leaveChannel(channelName);
     };
   }, [initialRound.id, router, currentUserId]);
 

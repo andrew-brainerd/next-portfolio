@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
 import { getFrisbeeGolfRound, setFrisbeeGolfDisqualified } from '@/api/scorebook';
-import { getChannel } from '@/utils/pusher';
+import { getChannel, leaveChannel } from '@/utils/pusher';
 import { Modal } from '@/components/peapod/Modal';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
@@ -24,7 +24,8 @@ export const RoundCompleted = ({ round: initialRound, canControl }: RoundComplet
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
 
   useEffect(() => {
-    const channel = getChannel(initialRound.id);
+    const channelName = initialRound.id;
+    const channel = getChannel(channelName);
     const refetch = async () => {
       const fresh = await getFrisbeeGolfRound(initialRound.id);
       if (fresh) setRound(fresh);
@@ -32,7 +33,7 @@ export const RoundCompleted = ({ round: initialRound, canControl }: RoundComplet
     channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
     return () => {
       channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-      channel.unsubscribe();
+      leaveChannel(channelName);
     };
   }, [initialRound.id]);
 

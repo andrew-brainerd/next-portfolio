@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { useRollWithMeStore } from '@/hooks/useRollWithMeStore';
 import { getGame } from '@/api/rollWithMe';
-import { getChannel } from '@/utils/pusher';
+import { getChannel, leaveChannel } from '@/utils/pusher';
 import { ROLL_WITH_ME_ROUTE } from '@/constants/routes';
 import { playGameOver, playJoin } from '@/utils/rollWithMeSound';
 import { getTotal } from '@/utils/rollWithMeScoring';
@@ -73,7 +73,8 @@ export const Game = ({ gameId }: GameProps) => {
 
   useEffect(() => {
     if (!ready || !user) return;
-    const channel = getChannel(gameId);
+    const channelName = gameId;
+    const channel = getChannel(channelName);
     const refetch = async () => {
       const g = await getGame(gameId);
       if (g) setGame(g);
@@ -85,7 +86,7 @@ export const Game = ({ gameId }: GameProps) => {
       channel.unbind(GAME_UPDATED, refetch);
       channel.unbind(PLAYER_JOINED, refetch);
       channel.unbind(GAME_OVER, refetch);
-      channel.unsubscribe();
+      leaveChannel(channelName);
     };
   }, [gameId, ready, user, setGame]);
 

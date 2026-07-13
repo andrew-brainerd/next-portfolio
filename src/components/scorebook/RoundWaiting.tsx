@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { getFrisbeeGolfRound } from '@/api/scorebook';
-import { getChannel } from '@/utils/pusher';
+import { getChannel, leaveChannel } from '@/utils/pusher';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
 
@@ -19,7 +19,8 @@ export const RoundWaiting = ({ initialRound }: RoundWaitingProps) => {
   const [round, setRound] = useState(initialRound);
 
   useEffect(() => {
-    const channel = getChannel(initialRound.id);
+    const channelName = initialRound.id;
+    const channel = getChannel(channelName);
     const refetch = async () => {
       const fresh = await getFrisbeeGolfRound(initialRound.id);
       if (!fresh) return;
@@ -34,7 +35,7 @@ export const RoundWaiting = ({ initialRound }: RoundWaitingProps) => {
     channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
     return () => {
       channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-      channel.unsubscribe();
+      leaveChannel(channelName);
     };
   }, [initialRound.id, router]);
 
