@@ -17,7 +17,7 @@ import {
   setFrisbeeGolfCurrentHole,
   setFrisbeeGolfScore
 } from '@/api/scorebook';
-import { getChannel, leaveChannel } from '@/utils/pusher';
+import { useFrisbeeGolfRoundSync } from '@/hooks/useFrisbeeGolfRoundSync';
 import { brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
@@ -25,8 +25,6 @@ import { PlayerScoreEntry } from '@/components/scorebook/PlayerScoreEntry';
 import { ScorecardGrid } from '@/components/scorebook/ScorecardGrid';
 import { RoundControlsModal } from '@/components/scorebook/RoundControlsModal';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
-
-const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
 
 interface RoundActiveProps {
   initialRound: FrisbeeGolfRound;
@@ -52,27 +50,16 @@ export const RoundActive = ({ initialRound, isOwner, currentUserId }: RoundActiv
       active ? 'bg-brand-600 font-medium text-white' : 'text-neutral-300 hover:text-white'
     }`;
 
-  useEffect(() => {
-    const channelName = initialRound.id;
-    const channel = getChannel(channelName);
-    const refetch = async () => {
-      const fresh = await getFrisbeeGolfRound(initialRound.id);
-      if (!fresh) return;
-      // Status change (completed) or losing control (gamemaster reassigned) re-routes via the server.
-      const stillControls =
-        fresh.ownerUserId === currentUserId || (fresh.gamemasterUserId ?? fresh.ownerUserId) === currentUserId;
-      if (fresh.status !== 'active' || !stillControls) {
-        router.refresh();
-        return;
-      }
-      setRound(fresh);
-    };
-    channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-    return () => {
-      channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-      leaveChannel(channelName);
-    };
-  }, [initialRound.id, router, currentUserId]);
+  useFrisbeeGolfRoundSync(initialRound.id, fresh => {
+    // Status change (completed) or losing control (gamemaster reassigned) re-routes via the server.
+    const stillControls =
+      fresh.ownerUserId === currentUserId || (fresh.gamemasterUserId ?? fresh.ownerUserId) === currentUserId;
+    if (fresh.status !== 'active' || !stillControls) {
+      router.refresh();
+      return;
+    }
+    setRound(fresh);
+  });
 
   const leaderboard = useMemo(() => computeLeaderboard(round), [round]);
 

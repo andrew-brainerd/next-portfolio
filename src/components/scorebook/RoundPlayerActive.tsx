@@ -4,12 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { getFrisbeeGolfRound } from '@/api/scorebook';
-import { getChannel, leaveChannel } from '@/utils/pusher';
+import { useFrisbeeGolfRoundSync } from '@/hooks/useFrisbeeGolfRoundSync';
 import { PlayerScoreEntry } from '@/components/scorebook/PlayerScoreEntry';
 import { ScorecardGrid } from '@/components/scorebook/ScorecardGrid';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
-
-const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
 
 interface RoundPlayerActiveProps {
   initialRound: FrisbeeGolfRound;
@@ -26,27 +24,16 @@ export const RoundPlayerActive = ({ initialRound, currentUserId }: RoundPlayerAc
 
   const myPlayer = round.players.find(p => p.kind === 'user' && p.userId === currentUserId);
 
-  useEffect(() => {
-    const channelName = initialRound.id;
-    const channel = getChannel(channelName);
-    const refetch = async () => {
-      const fresh = await getFrisbeeGolfRound(initialRound.id);
-      if (!fresh) return;
-      // Status change, or being promoted to owner/gamemaster, re-routes via the server.
-      const nowControls =
-        fresh.ownerUserId === currentUserId || (fresh.gamemasterUserId ?? fresh.ownerUserId) === currentUserId;
-      if (fresh.status !== 'active' || nowControls) {
-        router.refresh();
-        return;
-      }
-      setRound(fresh);
-    };
-    channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-    return () => {
-      channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-      leaveChannel(channelName);
-    };
-  }, [initialRound.id, router, currentUserId]);
+  useFrisbeeGolfRoundSync(initialRound.id, fresh => {
+    // Status change, or being promoted to owner/gamemaster, re-routes via the server.
+    const nowControls =
+      fresh.ownerUserId === currentUserId || (fresh.gamemasterUserId ?? fresh.ownerUserId) === currentUserId;
+    if (fresh.status !== 'active' || nowControls) {
+      router.refresh();
+      return;
+    }
+    setRound(fresh);
+  });
 
   const tabClass = (active: boolean) =>
     `rounded-md px-4 py-1.5 transition-colors ${

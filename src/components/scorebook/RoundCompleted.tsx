@@ -4,12 +4,10 @@ import { useEffect, useState } from 'react';
 
 import { computeLeaderboard, formatOverUnder, medalForRank } from '@/utils/frisbeeGolfLeaderboard';
 import { getFrisbeeGolfRound, setFrisbeeGolfDisqualified } from '@/api/scorebook';
-import { getChannel, leaveChannel } from '@/utils/pusher';
+import { useFrisbeeGolfRoundSync } from '@/hooks/useFrisbeeGolfRoundSync';
 import { Modal } from '@/components/peapod/Modal';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
-
-const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
 
 interface RoundCompletedProps {
   round: FrisbeeGolfRound;
@@ -23,19 +21,7 @@ export const RoundCompleted = ({ round: initialRound, canControl }: RoundComplet
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
 
-  useEffect(() => {
-    const channelName = initialRound.id;
-    const channel = getChannel(channelName);
-    const refetch = async () => {
-      const fresh = await getFrisbeeGolfRound(initialRound.id);
-      if (fresh) setRound(fresh);
-    };
-    channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-    return () => {
-      channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-      leaveChannel(channelName);
-    };
-  }, [initialRound.id]);
+  useFrisbeeGolfRoundSync(initialRound.id, setRound);
 
   const leaderboard = computeLeaderboard(round);
   const completedDate = round.completedAt ? new Date(round.completedAt).toLocaleDateString() : null;

@@ -18,14 +18,12 @@ import {
   updateFrisbeeGolfHoles,
   updateFrisbeeGolfRoundName
 } from '@/api/scorebook';
+import { useFrisbeeGolfRoundSync } from '@/hooks/useFrisbeeGolfRoundSync';
 import { SCOREBOOK_FRISBEE_GOLF_ROUTE } from 'constants/routes';
-import { getChannel, leaveChannel } from '@/utils/pusher';
 import { lightFieldSx, brandButtonSx, brandContainedButtonSx } from '@/components/scorebook/fieldStyles';
 import { NumberInput } from '@/components/scorebook/NumberInput';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import type { FrisbeeGolfFamilyMember, FrisbeeGolfRound } from '@/types/scorebook';
-
-const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
 
 interface RoundSetupProps {
   initialRound: FrisbeeGolfRound;
@@ -78,19 +76,7 @@ export const RoundSetup = ({ initialRound }: RoundSetupProps) => {
   }, [round.id, round.joinCode]);
 
   // Live-refresh the roster as people join via the invite link.
-  useEffect(() => {
-    const channelName = initialRound.id;
-    const channel = getChannel(channelName);
-    const refetch = async () => {
-      const fresh = await getFrisbeeGolfRound(initialRound.id);
-      if (fresh) setRound(fresh);
-    };
-    channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-    return () => {
-      channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-      leaveChannel(channelName);
-    };
-  }, [initialRound.id]);
+  useFrisbeeGolfRoundSync(initialRound.id, setRound);
 
   const handleCopyInvite = async () => {
     try {

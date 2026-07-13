@@ -4,11 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { getFrisbeeGolfRound } from '@/api/scorebook';
-import { getChannel, leaveChannel } from '@/utils/pusher';
+import { useFrisbeeGolfRoundSync } from '@/hooks/useFrisbeeGolfRoundSync';
 import { PlayerAvatar } from '@/components/scorebook/PlayerAvatar';
 import type { FrisbeeGolfRound } from '@/types/scorebook';
-
-const FRISBEE_GOLF_ROUND_UPDATED = 'frisbeeGolfRoundUpdated';
 
 interface RoundWaitingProps {
   initialRound: FrisbeeGolfRound;
@@ -18,26 +16,15 @@ export const RoundWaiting = ({ initialRound }: RoundWaitingProps) => {
   const router = useRouter();
   const [round, setRound] = useState(initialRound);
 
-  useEffect(() => {
-    const channelName = initialRound.id;
-    const channel = getChannel(channelName);
-    const refetch = async () => {
-      const fresh = await getFrisbeeGolfRound(initialRound.id);
-      if (!fresh) return;
-      // Once the gamemaster starts (or the round otherwise leaves setup), re-route
-      // via the server so this player lands on the score-entry view.
-      if (fresh.status !== 'setup') {
-        router.refresh();
-        return;
-      }
-      setRound(fresh);
-    };
-    channel.bind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-    return () => {
-      channel.unbind(FRISBEE_GOLF_ROUND_UPDATED, refetch);
-      leaveChannel(channelName);
-    };
-  }, [initialRound.id, router]);
+  useFrisbeeGolfRoundSync(initialRound.id, fresh => {
+    // Once the gamemaster starts (or the round otherwise leaves setup), re-route
+    // via the server so this player lands on the score-entry view.
+    if (fresh.status !== 'setup') {
+      router.refresh();
+      return;
+    }
+    setRound(fresh);
+  });
 
   return (
     <>

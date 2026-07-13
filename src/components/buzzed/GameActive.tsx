@@ -4,13 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 
-import {
-  buzzBuzzedGame,
-  completeBuzzedGame,
-  overturnBuzzedQuestion,
-  resolveBuzzedQuestion,
-  setBuzzedPlayback
-} from '@/api/buzzed';
+import { completeBuzzedGame, overturnBuzzedQuestion, setBuzzedPlayback } from '@/api/buzzed';
+import { buzzNow, resolveNow } from '@/api/buzzedClient';
 import { useBuzzedGameSync } from '@/hooks/useBuzzedGameSync';
 import { useServerClock } from '@/hooks/useServerClock';
 import {
@@ -102,7 +97,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     setPending(true);
     setError(null);
     try {
-      const { game: fresh } = await buzzBuzzedGame(game.id, question.index);
+      const { game: fresh } = await buzzNow(game.id, question.index);
       setGame(fresh);
     } catch {
       setError('That didn’t go through. Try again.');
@@ -122,7 +117,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     [game.id]
   );
 
-  const onResolve = (correct: boolean) => run(() => resolveBuzzedQuestion(game.id, correct));
+  const onResolve = (correct: boolean) => run(() => resolveNow(game.id, correct));
 
   const canDispute = isDisputable(game, currentUserId, now);
   const lastWinner = game.history[game.history.length - 1];
