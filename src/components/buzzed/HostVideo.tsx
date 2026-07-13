@@ -87,7 +87,14 @@ export const HostVideo = ({ game, now, onPlaybackChange }: HostVideoProps) => {
 
   useEffect(() => {
     const player = playerRef.current;
-    if (!ready || !player || game.status !== 'active') return;
+    if (!ready || !player) return;
+
+    // The game is over — stop the video rather than leaving it playing behind the results.
+    if (game.status !== 'active') {
+      player.pauseVideo();
+      appliedRef.current = false;
+      return;
+    }
 
     const { playing, resumeAt, seekToSec, seekAt } = game.playback;
     const shouldPlay = playing || (resumeAt != null && now >= resumeAt);

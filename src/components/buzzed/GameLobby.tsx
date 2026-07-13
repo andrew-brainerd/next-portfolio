@@ -4,16 +4,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 
-import { getBuzzedGame, setBuzzedVideo, startBuzzedGame } from '@/api/buzzed';
-import { getChannel, leaveChannel } from '@/utils/pusher';
+import { setBuzzedVideo, startBuzzedGame } from '@/api/buzzed';
+import { useBuzzedGameSync } from '@/hooks/useBuzzedGameSync';
 import { BUZZED_ROUTE } from '@/constants/routes';
 import { parseYouTubeVideoId, youTubeThumbnail, youTubeWatchUrl } from '@/utils/buzzed';
-import {
-  BUZZED_GAME_UPDATED,
-  BUZZED_TARGET_LABELS,
-  DEFAULT_BUZZER_COLOR,
-  buzzedChannelName
-} from '@/constants/buzzed';
+import { BUZZED_TARGET_LABELS, DEFAULT_BUZZER_COLOR } from '@/constants/buzzed';
 import { RosterToggle } from '@/components/buzzed/RosterToggle';
 import { VideoLinkInput } from '@/components/buzzed/VideoLinkInput';
 import type { BuzzedGame } from '@/types/buzzed';
@@ -49,25 +44,13 @@ export const GameLobby = ({ initialGame, currentUserId }: GameLobbyProps) => {
     }
   };
 
-  const refetch = useCallback(async () => {
-    const fresh = await getBuzzedGame(game.id);
-    if (!fresh) return;
+  useBuzzedGameSync(initialGame.id, fresh => {
     if (fresh.status !== 'lobby') {
       router.refresh();
       return;
     }
     setGame(fresh);
-  }, [game.id, router]);
-
-  useEffect(() => {
-    const name = buzzedChannelName(initialGame.id);
-    const channel = getChannel(name);
-    channel.bind(BUZZED_GAME_UPDATED, refetch);
-    return () => {
-      channel.unbind(BUZZED_GAME_UPDATED, refetch);
-      leaveChannel(name);
-    };
-  }, [initialGame.id, refetch]);
+  });
 
   const onStart = async () => {
     setPending(true);

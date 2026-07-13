@@ -4,9 +4,8 @@ import { redirect } from 'next/navigation';
 
 import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
 import { getBuzzedGame } from '@/api/buzzed';
-import { BUZZED_ROUTE, LOGIN_ROUTE } from '@/constants/routes';
+import { BUZZED_ROUTE, LOGIN_ROUTE, buzzedResultsRoute } from '@/constants/routes';
 import { GameActive } from '@/components/buzzed/GameActive';
-import { GameCompleted } from '@/components/buzzed/GameCompleted';
 import { GameLobby } from '@/components/buzzed/GameLobby';
 
 export const metadata = {
@@ -28,6 +27,11 @@ export default async function BuzzedGamePage({ params }: BuzzedGamePageProps) {
   }
 
   const game = await getBuzzedGame(gameId);
+
+  // A finished game only has results — never the play surface, and never a still-running video.
+  if (game?.status === 'completed') {
+    redirect(buzzedResultsRoute(gameId));
+  }
 
   if (!game) {
     return (
@@ -51,10 +55,8 @@ export default async function BuzzedGamePage({ params }: BuzzedGamePageProps) {
 
       {game.status === 'lobby' ? (
         <GameLobby initialGame={game} currentUserId={userId ?? ''} />
-      ) : game.status === 'active' ? (
-        <GameActive initialGame={game} currentUserId={userId ?? ''} />
       ) : (
-        <GameCompleted game={game} currentUserId={userId ?? ''} />
+        <GameActive initialGame={game} currentUserId={userId ?? ''} />
       )}
     </div>
   );

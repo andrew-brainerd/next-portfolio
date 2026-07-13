@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 
 import { joinBuzzedGameByCode } from '@/api/buzzed';
-import { BUZZED_NEW_ROUTE, BUZZED_ROUTE } from '@/constants/routes';
+import { BUZZED_NEW_ROUTE, BUZZED_ROUTE, buzzedGameRoute, buzzedResultsRoute } from '@/constants/routes';
 import { BUZZED_PLAYER_COLORS, BUZZED_TARGET_LABELS } from '@/constants/buzzed';
 import { ColorPicker } from '@/components/buzzed/ColorPicker';
 import type { BuzzedGame } from '@/types/buzzed';
@@ -42,7 +42,7 @@ export const GamesList = ({ games }: GamesListProps) => {
   const renderGame = (game: BuzzedGame) => (
     <li key={game.id}>
       <Link
-        href={`${BUZZED_ROUTE}/${game.id}`}
+        href={game.status === 'completed' ? buzzedResultsRoute(game.id) : buzzedGameRoute(game.id)}
         className="flex items-center gap-3 border-b border-neutral-800/60 px-4 py-3 transition-colors hover:bg-neutral-800/40"
       >
         <div className="min-w-0 flex-1">

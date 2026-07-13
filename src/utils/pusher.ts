@@ -14,3 +14,9 @@ const getPusher = () => {
 export const getChannel = (channel: string) => getPusher().subscribe(channel);
 
 export const leaveChannel = (channel: string) => getPusher().unsubscribe(channel);
+
+export const onPusherReconnect = (handler: () => void) => {
+  const pusher = getPusher();
+  pusher.connection.bind('connected', handler);
+  return () => pusher.connection.unbind('connected', handler);
+};

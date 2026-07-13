@@ -7,21 +7,14 @@ import Button from '@mui/material/Button';
 import {
   buzzBuzzedGame,
   completeBuzzedGame,
-  getBuzzedGame,
   overturnBuzzedQuestion,
   resolveBuzzedQuestion,
   setBuzzedPlayback
 } from '@/api/buzzed';
-import { getChannel, leaveChannel } from '@/utils/pusher';
+import { useBuzzedGameSync } from '@/hooks/useBuzzedGameSync';
 import { useServerClock } from '@/hooks/useServerClock';
 import { isDisputable, isOnRoster } from '@/utils/buzzed';
-import {
-  BUZZED_BUZZ_LOCKED,
-  BUZZED_BUZZ_REOPENED,
-  BUZZED_GAME_UPDATED,
-  BUZZED_QUESTION_RESOLVED,
-  buzzedChannelName
-} from '@/constants/buzzed';
+import { buzzedResultsRoute } from '@/constants/routes';
 import { BuzzerButton } from '@/components/buzzed/BuzzerButton';
 import { HostVideo } from '@/components/buzzed/HostVideo';
 import { RosterToggle } from '@/components/buzzed/RosterToggle';
@@ -48,32 +41,18 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   const ringer = game.players.find(p => p.userId === question?.lockedBy);
   const now = serverNow();
 
-  const refetch = useCallback(async () => {
-    const fresh = await getBuzzedGame(game.id);
-    if (!fresh) return;
+  // The host ending the game takes everyone to the results, not just the person who clicked it.
+  useBuzzedGameSync(initialGame.id, fresh => {
+    if (fresh.status === 'completed') {
+      router.replace(buzzedResultsRoute(fresh.id));
+      return;
+    }
     if (fresh.status !== 'active') {
       router.refresh();
       return;
     }
     setGame(fresh);
-  }, [game.id, router]);
-
-  useEffect(() => {
-    const name = buzzedChannelName(initialGame.id);
-    const channel = getChannel(name);
-    const events = [
-      BUZZED_GAME_UPDATED,
-      BUZZED_BUZZ_LOCKED,
-      BUZZED_BUZZ_REOPENED,
-      BUZZED_QUESTION_RESOLVED
-    ];
-
-    events.forEach(event => channel.bind(event, refetch));
-    return () => {
-      events.forEach(event => channel.unbind(event, refetch));
-      leaveChannel(name);
-    };
-  }, [initialGame.id, refetch]);
+  });
 
   const run = async (action: () => Promise<BuzzedGame | void>) => {
     setPending(true);
