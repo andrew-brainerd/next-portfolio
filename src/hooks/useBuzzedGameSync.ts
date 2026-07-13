@@ -27,6 +27,7 @@ const EVENTS = [
 // Realtime is treated here as an optimisation, never as the thing correctness depends on — a reconnect,
 // a re-focus, and a slow poll all reconcile against the server independently.
 const RECONCILE_MS = 10_000;
+const RECONCILE_DEBOUNCE_MS = 250;
 
 export const useBuzzedGameSync = (
   gameId: string,
@@ -44,19 +45,40 @@ export const useBuzzedGameSync = (
     onEventRef.current = onEvent;
   }, [onGame, onEvent]);
 
+  // Refetches race. One issued BEFORE a ring-in can return AFTER it, carrying a snapshot with no lock in
+  // it — which un-pauses the video and wipes the ring-in until the next refetch puts it back. Pause,
+  // un-pause, pause. Sequence-stamping every request and dropping any response that a newer one has
+  // already superseded is what makes the reconcilers safe to run as often as we do.
+  const seqRef = useRef(0);
+  const appliedRef = useRef(0);
+
   const refetch = useCallback(async () => {
+    const seq = (seqRef.current += 1);
     const fresh = await getBuzzedGame(gameId);
-    if (fresh) onGameRef.current(fresh);
+    if (!fresh) return;
+    if (seq <= appliedRef.current) return;
+
+    appliedRef.current = seq;
+    onGameRef.current(fresh);
   }, [gameId]);
 
   useEffect(() => {
     const name = buzzedChannelName(gameId);
     const channel = getChannel(name);
 
+    // A ring-in fans out several events at once. The payloads have already been applied instantly; the
+    // refetch behind them is only reconciliation, so collapse a burst into one request instead of racing
+    // half a dozen round-trips against each other.
+    let pending: ReturnType<typeof setTimeout> | undefined;
+    const reconcileSoon = () => {
+      clearTimeout(pending);
+      pending = setTimeout(refetch, RECONCILE_DEBOUNCE_MS);
+    };
+
     const handlers = EVENTS.map(event => {
       const handler = (payload: unknown) => {
         onEventRef.current?.(event, payload);
-        void refetch();
+        reconcileSoon();
       };
       channel.bind(event, handler);
       return { event, handler };
@@ -74,6 +96,7 @@ export const useBuzzedGameSync = (
 
     return () => {
       handlers.forEach(({ event, handler }) => channel.unbind(event, handler));
+      clearTimeout(pending);
       offReconnect();
       document.removeEventListener('visibilitychange', onVisible);
       clearInterval(reconcile);

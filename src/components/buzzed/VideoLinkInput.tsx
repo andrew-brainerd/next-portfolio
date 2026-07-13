@@ -22,7 +22,7 @@ export const VideoLinkInput = ({ value, onChange, id = 'video' }: VideoLinkInput
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder="https://youtube.com/watch?v=…"
-        className={`w-full rounded-md border bg-neutral-900 px-3 py-2 text-white placeholder:text-neutral-600 focus:outline-none ${
+        className={`w-full rounded-md border bg-neutral-900 px-3 py-2 text-base text-white placeholder:text-neutral-600 focus:outline-none ${
           invalid ? 'border-red-600 focus:border-red-500' : 'border-neutral-700 focus:border-brand-500'
         }`}
       />

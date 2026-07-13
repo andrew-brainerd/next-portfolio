@@ -74,7 +74,7 @@ export const NewGameForm = () => {
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="Anime quiz night"
-          className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-white placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
+          className="text-base w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-white placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
         />
       </div>
 
@@ -118,7 +118,7 @@ export const NewGameForm = () => {
             value={rokuDeviceIp}
             onChange={e => setRokuDeviceIp(e.target.value)}
             placeholder="192.168.4.61"
-            className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 font-mono text-white placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
+            className="text-base w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 font-mono text-white placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
           />
           <p className="mt-1 text-xs text-neutral-500">
             Someone in the room needs the Buzzed app running to control the TV.

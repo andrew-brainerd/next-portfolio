@@ -30,8 +30,13 @@ export const BuzzerButton = ({ game, currentUserId, now, pending, onBuzz }: Buzz
   const release = () => setPressed(false);
 
   return (
-    <div className="flex w-full flex-col items-center gap-6 py-8">
-      <div className="w-full max-w-sm" style={{ paddingBottom: TRAVEL }}>
+    <div className="flex w-full flex-col items-center gap-4 py-4 sm:gap-6 sm:py-8">
+      {/* Caps at the smaller of the container width and the viewport height, so the buzzer is always
+          fully visible and thumb-reachable — never taller than the screen on a short phone in landscape. */}
+      <div
+        className="w-full max-w-[min(20rem,60vh)]"
+        style={{ paddingBottom: TRAVEL, WebkitTapHighlightColor: 'transparent' }}
+      >
         <button
           type="button"
           onClick={onBuzz}
@@ -49,11 +54,12 @@ export const BuzzerButton = ({ game, currentUserId, now, pending, onBuzz }: Buzz
                     ? `0 0 0 0 ${rim}, 0 0 40px -14px ${color}`
                     : `0 ${TRAVEL}px 0 0 ${rim}, 0 0 90px -12px ${color}`,
                   transform: `translateY(${down ? TRAVEL : 0}px)`,
-                  transitionDuration: down ? '60ms' : '180ms'
+                  transitionDuration: down ? '60ms' : '180ms',
+                  WebkitTapHighlightColor: 'transparent'
                 }
-              : { boxShadow: `0 ${TRAVEL}px 0 0 #262626` }
+              : { boxShadow: `0 ${TRAVEL}px 0 0 #262626`, WebkitTapHighlightColor: 'transparent' }
           }
-          className={`flex aspect-square w-full items-center justify-center rounded-full p-12 text-4xl font-bold tracking-wider uppercase transition-all ease-out select-none ${
+          className={`flex aspect-square w-full touch-manipulation items-center justify-center rounded-full p-8 text-3xl font-bold tracking-wider uppercase transition-all ease-out select-none sm:p-12 sm:text-4xl ${
             live
               ? 'cursor-pointer text-white active:brightness-95'
               : 'cursor-not-allowed bg-neutral-800 text-neutral-600'
