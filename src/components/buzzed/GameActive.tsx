@@ -13,14 +13,30 @@ import {
 } from '@/api/buzzed';
 import { useBuzzedGameSync } from '@/hooks/useBuzzedGameSync';
 import { useServerClock } from '@/hooks/useServerClock';
-import { isDisputable, isOnRoster } from '@/utils/buzzed';
+import {
+  applyBuzzLocked,
+  applyBuzzReopened,
+  applyQuestionResolved,
+  isDisputable,
+  isOnRoster
+} from '@/utils/buzzed';
+import {
+  BUZZED_BUZZ_LOCKED,
+  BUZZED_BUZZ_REOPENED,
+  BUZZED_QUESTION_RESOLVED
+} from '@/constants/buzzed';
 import { buzzedResultsRoute } from '@/constants/routes';
 import { BuzzerButton } from '@/components/buzzed/BuzzerButton';
 import { HostVideo } from '@/components/buzzed/HostVideo';
 import { RosterToggle } from '@/components/buzzed/RosterToggle';
 import { Scoreboard } from '@/components/buzzed/Scoreboard';
 import { SpectatorPanel } from '@/components/buzzed/SpectatorPanel';
-import type { BuzzedGame } from '@/types/buzzed';
+import type {
+  BuzzLockedPayload,
+  BuzzReopenedPayload,
+  BuzzedGame,
+  QuestionResolvedPayload
+} from '@/types/buzzed';
 
 interface GameActiveProps {
   initialGame: BuzzedGame;
@@ -42,17 +58,31 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   const now = serverNow();
 
   // The host ending the game takes everyone to the results, not just the person who clicked it.
-  useBuzzedGameSync(initialGame.id, fresh => {
-    if (fresh.status === 'completed') {
-      router.replace(buzzedResultsRoute(fresh.id));
-      return;
+  useBuzzedGameSync(
+    initialGame.id,
+    fresh => {
+      if (fresh.status === 'completed') {
+        router.replace(buzzedResultsRoute(fresh.id));
+        return;
+      }
+      if (fresh.status !== 'active') {
+        router.refresh();
+        return;
+      }
+      setGame(fresh);
+    },
+    // Act on the payload the instant it lands. Waiting for the refetch that follows would put a whole
+    // round-trip between the ring-in and the video pausing — that delay is the lag you feel in the room.
+    (event, payload) => {
+      if (event === BUZZED_BUZZ_LOCKED) {
+        setGame(g => applyBuzzLocked(g, payload as BuzzLockedPayload));
+      } else if (event === BUZZED_QUESTION_RESOLVED) {
+        setGame(g => applyQuestionResolved(g, payload as QuestionResolvedPayload));
+      } else if (event === BUZZED_BUZZ_REOPENED) {
+        setGame(g => applyBuzzReopened(g, payload as BuzzReopenedPayload));
+      }
     }
-    if (fresh.status !== 'active') {
-      router.refresh();
-      return;
-    }
-    setGame(fresh);
-  });
+  );
 
   const run = async (action: () => Promise<BuzzedGame | void>) => {
     setPending(true);

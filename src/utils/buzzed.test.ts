@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  applyBuzzLocked,
+  applyBuzzReopened,
+  applyQuestionResolved,
   buzzBlockedReason,
   canBuzz,
   computeStandings,
@@ -164,6 +167,89 @@ describe('isDisputable', () => {
   it('has nothing to dispute on a skipped question', () => {
     const g = disputable({ history: [resolved({ state: 'skipped', correct: undefined })] });
     expect(isDisputable(g, 'bob', NOW)).toBe(false);
+  });
+});
+
+describe('optimistic event appliers', () => {
+  describe('applyBuzzLocked', () => {
+    it('locks the question and pauses playback straight from the payload', () => {
+      const next = applyBuzzLocked(game(), {
+        questionIndex: 3,
+        userId: 'bob',
+        displayName: 'Bob',
+        lockedAt: 5_000
+      });
+
+      expect(next.currentQuestion?.state).toBe('locked');
+      expect(next.currentQuestion?.lockedBy).toBe('bob');
+      expect(next.playback.playing).toBe(false);
+      expect(next.playback.resumeAt).toBeUndefined();
+    });
+
+    it('never touches positionSec — the client that owns the video is the only authority on it', () => {
+      const g = game();
+      const next = applyBuzzLocked(g, {
+        questionIndex: 3,
+        userId: 'bob',
+        displayName: 'Bob',
+        lockedAt: 5_000
+      });
+
+      expect(next.playback.positionSec).toBe(g.playback.positionSec);
+    });
+
+    it('ignores an event for a question we have already moved past', () => {
+      const g = game();
+      const stale = applyBuzzLocked(g, {
+        questionIndex: 1,
+        userId: 'bob',
+        displayName: 'Bob',
+        lockedAt: 5_000
+      });
+
+      expect(stale).toBe(g);
+    });
+
+    it('ignores a second lock on an already-locked question', () => {
+      const g = game({ currentQuestion: question({ state: 'locked', lockedBy: 'alice' }) });
+      const next = applyBuzzLocked(g, {
+        questionIndex: 3,
+        userId: 'bob',
+        displayName: 'Bob',
+        lockedAt: 5_000
+      });
+
+      expect(next.currentQuestion?.lockedBy).toBe('alice');
+    });
+  });
+
+  it('applyQuestionResolved patches the scores and starts the countdown', () => {
+    const next = applyQuestionResolved(game(), {
+      questionIndex: 3,
+      userId: 'alice',
+      correct: true,
+      scores: { host: 0, alice: 1, bob: 0 },
+      resumeAt: NOW + 5_000
+    });
+
+    expect(next.scores.alice).toBe(1);
+    expect(next.playback.resumeAt).toBe(NOW + 5_000);
+    expect(next.playback.playing).toBe(false);
+  });
+
+  it('applyBuzzReopened re-arms the question behind the countdown and clears the ring-in', () => {
+    const g = game({ currentQuestion: question({ state: 'locked', lockedBy: 'alice', lockedAt: 1_800 }) });
+
+    const next = applyBuzzReopened(g, {
+      questionIndex: 3,
+      scores: { host: 0, alice: -1, bob: 0 },
+      resumeAt: NOW + 5_000
+    });
+
+    expect(next.currentQuestion?.state).toBe('armed');
+    expect(next.currentQuestion?.lockedBy).toBeUndefined();
+    expect(next.currentQuestion?.rearmedAt).toBe(NOW + 5_000);
+    expect(next.scores.alice).toBe(-1);
   });
 });
 

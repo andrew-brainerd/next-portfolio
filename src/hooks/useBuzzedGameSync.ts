@@ -28,13 +28,21 @@ const EVENTS = [
 // a re-focus, and a slow poll all reconcile against the server independently.
 const RECONCILE_MS = 10_000;
 
-export const useBuzzedGameSync = (gameId: string, onGame: (game: BuzzedGame) => void) => {
-  // Held in a ref so callers can pass an inline callback without re-subscribing on every render.
+export const useBuzzedGameSync = (
+  gameId: string,
+  onGame: (game: BuzzedGame) => void,
+  // Fires the instant an event lands, with its payload — before any network round-trip. This is what
+  // makes the pause feel immediate instead of waiting on a refetch.
+  onEvent?: (event: string, payload: unknown) => void
+) => {
+  // Held in refs so callers can pass inline callbacks without re-subscribing on every render.
   const onGameRef = useRef(onGame);
+  const onEventRef = useRef(onEvent);
 
   useEffect(() => {
     onGameRef.current = onGame;
-  }, [onGame]);
+    onEventRef.current = onEvent;
+  }, [onGame, onEvent]);
 
   const refetch = useCallback(async () => {
     const fresh = await getBuzzedGame(gameId);
@@ -45,7 +53,14 @@ export const useBuzzedGameSync = (gameId: string, onGame: (game: BuzzedGame) => 
     const name = buzzedChannelName(gameId);
     const channel = getChannel(name);
 
-    EVENTS.forEach(event => channel.bind(event, refetch));
+    const handlers = EVENTS.map(event => {
+      const handler = (payload: unknown) => {
+        onEventRef.current?.(event, payload);
+        void refetch();
+      };
+      channel.bind(event, handler);
+      return { event, handler };
+    });
 
     // A reconnect means we were deaf for a while with no idea what we missed.
     const offReconnect = onPusherReconnect(refetch);
@@ -58,7 +73,7 @@ export const useBuzzedGameSync = (gameId: string, onGame: (game: BuzzedGame) => 
     const reconcile = setInterval(refetch, RECONCILE_MS);
 
     return () => {
-      EVENTS.forEach(event => channel.unbind(event, refetch));
+      handlers.forEach(({ event, handler }) => channel.unbind(event, handler));
       offReconnect();
       document.removeEventListener('visibilitychange', onVisible);
       clearInterval(reconcile);

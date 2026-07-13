@@ -1,4 +1,11 @@
-import type { BuzzedGame, BuzzedQuestion, BuzzedStanding } from '@/types/buzzed';
+import type {
+  BuzzLockedPayload,
+  BuzzReopenedPayload,
+  BuzzedGame,
+  BuzzedQuestion,
+  BuzzedStanding,
+  QuestionResolvedPayload
+} from '@/types/buzzed';
 
 const YOUTUBE_ID = /^[\w-]{11}$/;
 const YOUTUBE_HOSTS = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'];
@@ -57,6 +64,51 @@ export const saveBuzzedPosition = (gameId: string, positionSec: number): void =>
 export const youTubeThumbnail = (videoId: string) => `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
 
 export const youTubeWatchUrl = (videoId: string) => `https://www.youtube.com/watch?v=${videoId}`;
+
+// The Pusher payloads carry everything needed to react instantly. Waiting for a refetch before pausing
+// the video puts a whole extra round-trip between the ring-in and the pause, which is exactly the lag you
+// feel. These apply the event optimistically; the refetch that follows reconciles against the server.
+export const applyBuzzLocked = (game: BuzzedGame, payload: BuzzLockedPayload): BuzzedGame => {
+  const question = game.currentQuestion;
+  // Ignore an event for a question we have already moved past.
+  if (!question || question.index !== payload.questionIndex || question.state !== 'armed') return game;
+
+  return {
+    ...game,
+    currentQuestion: {
+      ...question,
+      state: 'locked',
+      lockedBy: payload.userId,
+      lockedAt: payload.lockedAt
+    },
+    // positionSec is deliberately untouched: the client that owns the video is the only authority on it.
+    playback: { ...game.playback, playing: false, updatedAt: payload.lockedAt, resumeAt: undefined }
+  };
+};
+
+export const applyQuestionResolved = (game: BuzzedGame, payload: QuestionResolvedPayload): BuzzedGame => ({
+  ...game,
+  scores: payload.scores ?? game.scores,
+  playback: { ...game.playback, playing: false, resumeAt: payload.resumeAt }
+});
+
+export const applyBuzzReopened = (game: BuzzedGame, payload: BuzzReopenedPayload): BuzzedGame => {
+  const question = game.currentQuestion;
+  if (!question) return game;
+
+  const { lockedBy, lockedAt, ...rest } = question;
+
+  return {
+    ...game,
+    scores: payload.scores ?? game.scores,
+    currentQuestion: {
+      ...rest,
+      state: 'armed',
+      rearmedAt: payload.resumeAt ?? question.rearmedAt
+    },
+    playback: { ...game.playback, playing: false, resumeAt: payload.resumeAt }
+  };
+};
 
 export const isOnRoster = (game: BuzzedGame, userId: string): boolean =>
   game.players.some(p => p.userId === userId);

@@ -95,6 +95,29 @@ export interface BuzzResponse {
   game: BuzzedGame;
 }
 
+export interface BuzzLockedPayload {
+  questionIndex: number;
+  userId: string;
+  displayName: string;
+  lockedAt: number;
+  positionSec?: number;
+  controlClientId?: string;
+}
+
+export interface QuestionResolvedPayload {
+  questionIndex: number;
+  userId?: string;
+  correct: boolean;
+  scores?: Record<string, number>;
+  resumeAt?: number;
+}
+
+export interface BuzzReopenedPayload {
+  questionIndex?: number;
+  scores?: Record<string, number>;
+  resumeAt?: number;
+}
+
 export interface BuzzedStanding {
   userId: string;
   displayName: string;
