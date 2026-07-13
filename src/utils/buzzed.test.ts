@@ -184,13 +184,15 @@ describe('pendingGrade', () => {
     expect(pendingGrade(g, 'alice')?.index).toBe(1);
   });
 
-  it('retires the prompt once you ring in on the current question — too late to score by then', () => {
+  it('still offers the prompt while you ring in on the NEXT question — the server retires it, not us', () => {
+    // Hiding it client-side would leave the ring-in ungraded on the server, so devices would disagree
+    // about a question still open for grading. The server auto-misses it when the next one archives.
     const g = game({
       history: [question({ index: 0, state: 'grading', ringIns: [ringIn('alice')] })],
       currentQuestion: question({ index: 1, state: 'answering', ringIns: [ringIn('alice')] })
     });
 
-    expect(pendingGrade(g, 'alice')).toBeUndefined();
+    expect(pendingGrade(g, 'alice')?.index).toBe(0);
   });
 });
 

@@ -140,17 +140,15 @@ export const needsAdvance = (game: BuzzedGame, now: number): boolean => {
 };
 
 // The ONE question this player still owes a thumb on — never a stack of them. Grading happens on an
-// ARCHIVED question, in parallel with a new one already being live, so prompts would otherwise pile up:
-// miss a grade, ring in on the next intro, and you'd be staring at two "Did you get it right?" cards with
-// no way to tell which is which. So only the most recent ungraded question is offered, and ringing in on
-// the current question retires it — by then the answer is long off screen and it's too late to score.
-export const pendingGrade = (game: BuzzedGame, userId: string): BuzzedQuestion | undefined => {
-  if (hasRungIn(game.currentQuestion, userId)) return undefined;
-
-  return game.history
-    .filter(q => q.ringIns.some(r => r.userId === userId && r.grade === undefined))
-    .at(-1);
-};
+// ARCHIVED question while a new one is already live, so prompts would otherwise pile up and you'd be
+// staring at two identical "Did you get it right?" cards with no way to tell them apart.
+//
+// The SERVER guarantees there's at most one: archiving a question auto-marks any older ungraded ring-in
+// as `missed` (see retireStaleGrades). This just reads that state — it deliberately does NOT hide the
+// prompt on its own, because a client-side hide would leave the ring-in ungraded on the server and the
+// devices would quietly disagree.
+export const pendingGrade = (game: BuzzedGame, userId: string): BuzzedQuestion | undefined =>
+  game.history.filter(q => q.ringIns.some(r => r.userId === userId && r.grade === undefined)).at(-1);
 
 export const scoreQuestion = (question: BuzzedQuestion): number[] => {
   let rank = 0;
