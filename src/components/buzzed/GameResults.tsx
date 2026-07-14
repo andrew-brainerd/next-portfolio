@@ -33,7 +33,7 @@ export const GameResults = ({ game, currentUserId }: GameResultsProps) => {
         {outright ? (
           <>
             <p className="text-sm text-neutral-400">Winner</p>
-            <p className="mt-1 max-h-28 overflow-y-auto overflow-x-hidden break-words text-4xl font-bold text-white">
+            <p className="no-scrollbar mt-1 max-h-28 overflow-y-auto overflow-x-hidden break-words text-3xl font-bold text-white sm:text-4xl">
               🏆 {outright.displayName}
             </p>
             <p className="mt-2 text-neutral-400">
@@ -43,7 +43,7 @@ export const GameResults = ({ game, currentUserId }: GameResultsProps) => {
         ) : (
           <>
             <p className="text-3xl font-bold text-white">It’s a tie</p>
-            <p className="mt-2 max-h-28 overflow-y-auto overflow-x-hidden break-words text-neutral-400">
+            <p className="no-scrollbar mt-2 max-h-28 overflow-y-auto overflow-x-hidden break-words text-neutral-400">
               {winners.map(w => w.displayName).join(' · ')}
             </p>
           </>

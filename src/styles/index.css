@@ -1,6 +1,15 @@
 @import 'tailwindcss';
 @import './win95.css';
 
+/* Keeps the scroll, drops the scrollbar chrome. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   min-height: 100vh;
   background-image: radial-gradient(
