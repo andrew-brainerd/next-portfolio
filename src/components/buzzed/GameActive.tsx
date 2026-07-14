@@ -55,8 +55,6 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // A buzzer is the one screen you stare at without touching for minutes and then must react to in under
-  // a second. A sleeping phone loses you the ring-in.
   useWakeLock(game.status === 'active');
 
   const isHost = game.ownerUserId === currentUserId;
@@ -77,7 +75,6 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
       }
       setGame(fresh);
     },
-    // Act on the payload the instant it lands; the refetch behind it reconciles.
     (event, payload) => {
       if (event === BUZZED_RANG_IN) {
         setGame(g => applyRangIn(g, payload as RangInPayload));
@@ -89,9 +86,8 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
     }
   );
 
-  // The answering window elapsed but nobody has closed it. Whichever client notices fires /advance —
-  // it's idempotent server-side, so a race between clients is harmless. Guarded by a ref so a re-render
-  // (this component re-renders every 200ms off the clock) can't spam it.
+  // /advance is idempotent, so racing clients are harmless. The ref stops the 200ms clock re-render
+  // from spamming it.
   const advancingRef = useRef<number | null>(null);
   useEffect(() => {
     if (!needsAdvance(game, now)) return;
@@ -142,9 +138,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
   const onGrade = (questionIndex: number, grade: BuzzedGrade) =>
     run(() => gradeBuzzedRingIn(game.id, questionIndex, grade));
 
-  // Pause BEFORE completing. The results page is a different route, and unmounting the player is not the
-  // same as stopping it on the Roku — there the video keeps playing on the TV after the game is over.
-  // Writing playing:false first fans out a pause that whatever owns the video actually acts on.
+  // Pause before completing: unmounting the player doesn't stop a Roku, so the TV would keep playing.
   const onEndGame = () =>
     run(async () => {
       await setBuzzedPlayback(game.id, false, game.playback.positionSec);
@@ -169,8 +163,7 @@ export const GameActive = ({ initialGame, currentUserId }: GameActiveProps) => {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="flex min-w-0 flex-col items-center gap-4">
-          {/* Kept mounted through a pause: tearing the YouTube player down would lose the playhead, and
-              `playback.playing: false` already stops it. Players (no video) just get the panel. */}
+          {/* Kept mounted through a pause — unmounting would lose the playhead. */}
           {showVideo && <HostVideo game={game} now={now} onPlaybackChange={onPlaybackChange} />}
 
           {paused && <PausedPanel isHost={isHost} pending={pending} onResume={onResume} />}

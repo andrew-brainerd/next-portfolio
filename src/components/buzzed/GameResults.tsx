@@ -29,8 +29,7 @@ export const GameResults = ({ game, currentUserId }: GameResultsProps) => {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="rounded-lg border border-neutral-800 bg-neutral-900/60 p-8 text-center">
-        {/* A display name can be a full email address. Left to grow it blows the card out and shoves
-            everything below it down the page, so the name gets a fixed height and scrolls inside it. */}
+        {/* A display name can be a full email address — fixed height so it can't blow the card out. */}
         {outright ? (
           <>
             <p className="text-sm text-neutral-400">Winner</p>

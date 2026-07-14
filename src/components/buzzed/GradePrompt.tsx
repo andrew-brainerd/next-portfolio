@@ -10,9 +10,6 @@ interface GradePromptProps {
   onGrade: (questionIndex: number, grade: BuzzedGrade) => void;
 }
 
-// Appears once the window closes and the video reveals the answer. It sits on an ARCHIVED question while a
-// new one is already live, so it never blocks the buzzer — you can ring in on the next intro with this
-// still open.
 export const GradePrompt = ({ question, pending, onGrade }: GradePromptProps) => (
   <div className="w-full min-w-0 rounded-lg border border-neutral-700 bg-neutral-900 p-4 text-center">
     <p className="font-semibold text-white">Did you get it right?</p>

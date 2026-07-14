@@ -8,8 +8,6 @@ interface PausedPanelProps {
   onResume: () => void;
 }
 
-// What players see while the host has the game paused: no buzzer, no video, no countdown. The scoreboard
-// stays up beside it — that's the one thing worth staring at while nothing is happening.
 export const PausedPanel = ({ isHost, pending, onResume }: PausedPanelProps) => (
   <div className="flex w-full min-w-0 flex-col items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-10 text-center">
     <p className="text-4xl" aria-hidden>

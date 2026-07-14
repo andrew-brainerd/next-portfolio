@@ -9,8 +9,6 @@ interface RingInQueueProps {
   currentUserId: string;
 }
 
-// Who rang in, in order. The order is the whole point now: points go to the first CORRECT answers, so
-// position is worth showing even before anyone has graded themselves.
 export const RingInQueue = ({ game, question, currentUserId }: RingInQueueProps) => (
   <ol className="flex w-full min-w-0 flex-col gap-1.5">
     {question.ringIns.map((ringIn, i) => {

@@ -8,11 +8,9 @@ import { VideoLinkInput } from '@/components/buzzed/VideoLinkInput';
 import type { YoutubePlaylist, YoutubePlaylistItem } from '@/types/watch';
 
 interface VideoPickerProps {
-  // The raw link field. Picking from a playlist writes the chosen video's URL into it, so the caller
-  // keeps one source of truth and doesn't care which route the host took.
+  // Picking from a playlist writes the video's URL here too, so there's one source of truth.
   value: string;
   onChange: (value: string) => void;
-  // Where to come back to after the Google consent screen.
   returnPath: string;
   id?: string;
 }
@@ -59,8 +57,7 @@ export const VideoPicker = ({ value, onChange, returnPath, id }: VideoPickerProp
     }
   };
 
-  // A top-level browser navigation, not an XHR — the callback identifies the user by the brainerd session
-  // cookie. `from` rides through Google as the OAuth `state` so we land back here and not on /watch.
+  // A top-level navigation, not an XHR — the callback identifies the user by the session cookie.
   const connectHref = `${process.env.NEXT_PUBLIC_BRAINERD_API_URL}/watch/youtube/auth?from=${encodeURIComponent(returnPath)}`;
 
   return (

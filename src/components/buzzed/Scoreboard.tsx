@@ -12,7 +12,6 @@ interface ScoreboardProps {
 
 export const Scoreboard = ({ game, currentUserId, final = false }: ScoreboardProps) => {
   const standings = computeStandings(game);
-  // Anyone in the current ring-in queue gets highlighted, not just a single locker.
   const rangIn = new Set(game.currentQuestion?.ringIns.map(r => r.userId) ?? []);
 
   return (

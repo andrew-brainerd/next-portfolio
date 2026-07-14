@@ -64,8 +64,7 @@ export const saveBuzzedPosition = (gameId: string, positionSec: number): void =>
   }).catch(() => undefined);
 };
 
-// The name a new game gets when the host doesn't bother typing one — which is most of the time.
-// Locale-independent (en-CA gives YYYY-MM-DD) so games sort sensibly and read the same on every device.
+// en-CA gives YYYY-MM-DD, so it's locale-independent and sortable.
 export const defaultBuzzedGameName = (now: Date): string =>
   `Anime Quiz ${now.toLocaleDateString('en-CA')}`;
 
@@ -83,7 +82,6 @@ export const ringInPosition = (question: BuzzedQuestion | null, userId: string):
 };
 
 // Mirrors the server's atomic filter, so the button is never lit when the server would reject the ring-in.
-// Note you can ring in during the ANSWERING window too — that's the whole point of the new flow.
 export const canBuzz = (game: BuzzedGame, userId: string, now: number): boolean => {
   if (game.status !== 'active') return false;
   if (isPaused(game)) return false;
@@ -93,9 +91,7 @@ export const canBuzz = (game: BuzzedGame, userId: string, now: number): boolean 
   if (!question) return false;
   if (question.state !== 'armed' && question.state !== 'answering') return false;
   if (now < question.rearmedAt) return false;
-  // One ring-in each.
   if (hasRungIn(question, userId)) return false;
-  // The window closed but nobody has advanced it yet.
   if (question.answerCloseAt != null && now >= question.answerCloseAt) return false;
 
   return true;
@@ -117,21 +113,18 @@ export const buzzBlockedReason = (game: BuzzedGame, userId: string, now: number)
   return 'Waiting…';
 };
 
-// Seconds left in the answering window.
 export const answerSecondsLeft = (game: BuzzedGame, now: number): number => {
   const closeAt = game.currentQuestion?.answerCloseAt;
   if (!closeAt || closeAt <= now) return 0;
   return Math.ceil((closeAt - now) / 1000);
 };
 
-// True once the window has elapsed but nobody has closed it yet. Whichever client notices calls /advance;
-// it's idempotent, so a race is harmless.
+// Whichever client notices calls /advance; it's idempotent, so a race is harmless.
 export const needsAdvance = (game: BuzzedGame, now: number): boolean => {
   const question = game.currentQuestion;
   return (
     game.status === 'active' &&
-    // Advancing RESUMES the video, so a paused game must never trigger it. The server refuses too, but
-    // without this every client would keep firing /advance at it for as long as the pause lasts.
+    // Advancing resumes the video, so a paused game must never trigger it.
     !isPaused(game) &&
     question?.state === 'answering' &&
     question.answerCloseAt != null &&
@@ -139,14 +132,8 @@ export const needsAdvance = (game: BuzzedGame, now: number): boolean => {
   );
 };
 
-// The ONE question this player still owes a thumb on — never a stack of them. Grading happens on an
-// ARCHIVED question while a new one is already live, so prompts would otherwise pile up and you'd be
-// staring at two identical "Did you get it right?" cards with no way to tell them apart.
-//
-// The SERVER guarantees there's at most one: archiving a question auto-marks any older ungraded ring-in
-// as `missed` (see retireStaleGrades). This just reads that state — it deliberately does NOT hide the
-// prompt on its own, because a client-side hide would leave the ring-in ungraded on the server and the
-// devices would quietly disagree.
+// The server guarantees at most one is ungraded (see retireStaleGrades). Deliberately doesn't hide the
+// prompt itself — a client-side hide would leave the ring-in ungraded on the server and devices disagree.
 export const pendingGrade = (game: BuzzedGame, userId: string): BuzzedQuestion | undefined =>
   game.history.filter(q => q.ringIns.some(r => r.userId === userId && r.grade === undefined)).at(-1);
 
@@ -228,11 +215,9 @@ export const shadeColor = (hex: string, amount: number): string => {
   return `#${channels.join('')}`;
 };
 
-// The Pusher payloads carry everything needed to react instantly; the refetch behind them reconciles.
 export const applyRangIn = (game: BuzzedGame, payload: RangInPayload): BuzzedGame => {
   const question = game.currentQuestion;
   if (!question || question.index !== payload.questionIndex) return game;
-  // Idempotent: a duplicate event mustn't append a second ring-in.
   if (question.ringIns.some(r => r.userId === payload.userId)) return game;
 
   return {
@@ -240,7 +225,7 @@ export const applyRangIn = (game: BuzzedGame, payload: RangInPayload): BuzzedGam
     currentQuestion: {
       ...question,
       state: 'answering',
-      // The window is fixed from the FIRST ring-in — never extend it here.
+      // Fixed from the first ring-in — never extended here.
       answerCloseAt: question.answerCloseAt ?? payload.answerCloseAt,
       ringIns: [...question.ringIns, { userId: payload.userId, ringAt: Date.now(), buzzMs: 0 }]
     },

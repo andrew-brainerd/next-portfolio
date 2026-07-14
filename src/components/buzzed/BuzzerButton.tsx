@@ -21,8 +21,6 @@ export const BuzzerButton = ({ game, currentUserId, now, pending, onBuzz }: Buzz
 
   const live = canBuzz(game, currentUserId, now) && !pending;
   const reason = buzzBlockedReason(game, currentUserId, now);
-  // Once you've rung in, the button shows your position in the order rather than a countdown — that's the
-  // number that decides your points now.
   const position = ringInPosition(game.currentQuestion, currentUserId);
 
   const color = game.players.find(p => p.userId === currentUserId)?.color ?? DEFAULT_BUZZER_COLOR;

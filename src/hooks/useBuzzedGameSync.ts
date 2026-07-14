@@ -22,21 +22,18 @@ const EVENTS = [
   BUZZED_PLAYBACK_UPDATED
 ];
 
-// Pusher misses are silent: `getRequest` swallows a failed refetch and returns undefined, so one dropped
-// socket, one slept laptop, or one expired session leaves the UI permanently stale with no signal at all.
-// Realtime is treated here as an optimisation, never as the thing correctness depends on — a reconnect,
-// a re-focus, and a slow poll all reconcile against the server independently.
+// Pusher misses are silent, so realtime is an optimisation and never what correctness depends on: a
+// reconnect, a re-focus, and a slow poll each reconcile against the server independently.
 const RECONCILE_MS = 10_000;
 const RECONCILE_DEBOUNCE_MS = 250;
 
 export const useBuzzedGameSync = (
   gameId: string,
   onGame: (game: BuzzedGame) => void,
-  // Fires the instant an event lands, with its payload — before any network round-trip. This is what
-  // makes the pause feel immediate instead of waiting on a refetch.
+  // Fires the instant an event lands, before any network round-trip.
   onEvent?: (event: string, payload: unknown) => void
 ) => {
-  // Held in refs so callers can pass inline callbacks without re-subscribing on every render.
+  // Refs so callers can pass inline callbacks without re-subscribing every render.
   const onGameRef = useRef(onGame);
   const onEventRef = useRef(onEvent);
 
@@ -45,10 +42,8 @@ export const useBuzzedGameSync = (
     onEventRef.current = onEvent;
   }, [onGame, onEvent]);
 
-  // Refetches race. One issued BEFORE a ring-in can return AFTER it, carrying a snapshot with no lock in
-  // it — which un-pauses the video and wipes the ring-in until the next refetch puts it back. Pause,
-  // un-pause, pause. Sequence-stamping every request and dropping any response that a newer one has
-  // already superseded is what makes the reconcilers safe to run as often as we do.
+  // Refetches race: one issued before a ring-in can return after it and wipe it. Sequence-stamp every
+  // request and drop any response a newer one has superseded.
   const seqRef = useRef(0);
   const appliedRef = useRef(0);
 
@@ -66,9 +61,7 @@ export const useBuzzedGameSync = (
     const name = buzzedChannelName(gameId);
     const channel = getChannel(name);
 
-    // A ring-in fans out several events at once. The payloads have already been applied instantly; the
-    // refetch behind them is only reconciliation, so collapse a burst into one request instead of racing
-    // half a dozen round-trips against each other.
+    // A ring-in fans out several events at once; collapse the burst into one reconciling request.
     let pending: ReturnType<typeof setTimeout> | undefined;
     const reconcileSoon = () => {
       clearTimeout(pending);
@@ -84,7 +77,6 @@ export const useBuzzedGameSync = (
       return { event, handler };
     });
 
-    // A reconnect means we were deaf for a while with no idea what we missed.
     const offReconnect = onPusherReconnect(refetch);
 
     const onVisible = () => {
@@ -100,9 +92,8 @@ export const useBuzzedGameSync = (
       offReconnect();
       document.removeEventListener('visibilitychange', onVisible);
       clearInterval(reconcile);
-      // Must be the Pusher instance method, never `channel.unsubscribe()`. The channel method leaves the
-      // subscription pending-but-uncancelled, so the next subscribe() sends nothing and the client sits
-      // silently deaf. React StrictMode tears effects down mid-subscription, hitting exactly that path.
+      // Must be the Pusher instance method: `channel.unsubscribe()` leaves a pending subscription
+      // uncancelled, so the next subscribe() sends nothing and the client goes silently deaf.
       leaveChannel(name);
     };
   }, [gameId, refetch]);
