@@ -132,3 +132,8 @@ export interface YoutubePlaylistItem {
   channelTitle?: string;
   thumbnail?: string;
 }
+
+export interface YoutubeSearchPage {
+  items: YoutubePlaylistItem[];
+  nextPageToken?: string;
+}

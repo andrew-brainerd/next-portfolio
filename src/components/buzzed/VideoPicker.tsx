@@ -1,29 +1,55 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Button from '@mui/material/Button';
 
-import { getYoutubeConnection, getYoutubePlaylists, getYoutubePlaylistItems } from '@/api/youtube';
+import {
+  getYoutubeConnection,
+  getYoutubePlaylists,
+  getYoutubePlaylistItems,
+  searchYoutubeVideos
+} from '@/api/youtube';
+import { parseYouTubeVideoId, youTubeWatchUrl } from '@/utils/buzzed';
 import { VideoLinkInput } from '@/components/buzzed/VideoLinkInput';
+import { VideoResultList } from '@/components/buzzed/VideoResultList';
 import type { YoutubePlaylist, YoutubePlaylistItem } from '@/types/watch';
 
 interface VideoPickerProps {
-  // Picking from a playlist writes the video's URL here too, so there's one source of truth.
+  // Picking from a playlist or a search result writes the video's URL here too, so there's one source of truth.
   value: string;
   onChange: (value: string) => void;
   returnPath: string;
   id?: string;
 }
 
-type Mode = 'link' | 'playlist';
+type Mode = 'link' | 'playlist' | 'search';
+
+const MODE_LABELS: Record<Mode, string> = {
+  link: 'Paste a link',
+  playlist: 'Playlist',
+  search: 'Search'
+};
 
 export const VideoPicker = ({ value, onChange, returnPath, id }: VideoPickerProps) => {
   const [mode, setMode] = useState<Mode>('link');
   const [connected, setConnected] = useState<boolean | null>(null);
+
   const [playlists, setPlaylists] = useState<YoutubePlaylist[]>([]);
   const [playlistId, setPlaylistId] = useState('');
   const [items, setItems] = useState<YoutubePlaylistItem[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<YoutubePlaylistItem[]>([]);
+  const [nextPageToken, setNextPageToken] = useState<string | undefined>();
+  const [searched, setSearched] = useState(false);
+  const [searching, setSearching] = useState(false);
+
+  // The in-flight guard has to be a ref: the observer can fire again before a `searching` state update
+  // has rendered, which would fetch the same page twice.
+  const fetchingRef = useRef(false);
+
+  const selectedVideoId = parseYouTubeVideoId(value);
 
   useEffect(() => {
     void getYoutubeConnection()
@@ -44,26 +70,63 @@ export const VideoPicker = ({ value, onChange, returnPath, id }: VideoPickerProp
     if (mode === 'playlist' && connected) void loadPlaylists();
   }, [mode, connected, loadPlaylists]);
 
-  const onPickPlaylist = async (id: string) => {
-    setPlaylistId(id);
+  const onPickPlaylist = async (nextId: string) => {
+    setPlaylistId(nextId);
     setItems([]);
-    if (!id) return;
+    if (!nextId) return;
 
     setLoading(true);
     try {
-      setItems(await getYoutubePlaylistItems(id));
+      setItems(await getYoutubePlaylistItems(nextId));
     } finally {
       setLoading(false);
     }
   };
 
-  // A top-level navigation, not an XHR — the callback identifies the user by the session cookie.
+  // Only ever on an explicit submit: search.list costs 100 quota units a call against a 10k/day pool,
+  // so a search-as-you-type would exhaust the day in minutes.
+  const onSearch = async () => {
+    const trimmed = query.trim();
+    if (!trimmed || fetchingRef.current) return;
+
+    fetchingRef.current = true;
+    setSearching(true);
+    setSearched(true);
+    try {
+      const page = await searchYoutubeVideos(trimmed);
+      setResults(page.items);
+      setNextPageToken(page.nextPageToken);
+    } finally {
+      fetchingRef.current = false;
+      setSearching(false);
+    }
+  };
+
+  const loadMore = useCallback(async () => {
+    if (!nextPageToken || fetchingRef.current) return;
+
+    fetchingRef.current = true;
+    setSearching(true);
+    try {
+      const page = await searchYoutubeVideos(query.trim(), nextPageToken);
+      setResults(current => [...current, ...page.items]);
+      setNextPageToken(page.nextPageToken);
+    } finally {
+      fetchingRef.current = false;
+      setSearching(false);
+    }
+  }, [nextPageToken, query]);
+
+  const onPick = (videoId: string) => onChange(youTubeWatchUrl(videoId));
+
   const connectHref = `${process.env.NEXT_PUBLIC_BRAINERD_API_URL}/watch/youtube/auth?from=${encodeURIComponent(returnPath)}`;
+
+  const needsConnection = (mode === 'playlist' || mode === 'search') && connected === false;
 
   return (
     <div className="space-y-3">
       <div className="flex gap-2">
-        {(['link', 'playlist'] as Mode[]).map(option => (
+        {(Object.keys(MODE_LABELS) as Mode[]).map(option => (
           <button
             key={option}
             type="button"
@@ -74,17 +137,17 @@ export const VideoPicker = ({ value, onChange, returnPath, id }: VideoPickerProp
                 : 'border-neutral-700 text-neutral-400 hover:text-white'
             }`}
           >
-            {option === 'link' ? 'Paste a link' : 'From a playlist'}
+            {MODE_LABELS[option]}
           </button>
         ))}
       </div>
 
       {mode === 'link' && <VideoLinkInput value={value} onChange={onChange} id={id} />}
 
-      {mode === 'playlist' && connected === false && (
+      {needsConnection && (
         <div className="rounded-md border border-neutral-800 bg-neutral-900/60 p-4 text-center">
-          <p className="text-sm text-neutral-300">Connect YouTube to pick from your playlists.</p>
-          <p className="mt-1 text-xs text-neutral-500">Read-only — Buzzed only lists your playlists.</p>
+          <p className="text-sm text-neutral-300">Connect YouTube to browse or search.</p>
+          <p className="mt-1 text-xs text-neutral-500">Read-only.</p>
           <Button variant="contained" size="small" className="mt-3" href={connectHref}>
             Connect YouTube
           </Button>
@@ -113,40 +176,44 @@ export const VideoPicker = ({ value, onChange, returnPath, id }: VideoPickerProp
           )}
 
           {items.length > 0 && (
-            <ul className="max-h-72 space-y-1 overflow-y-auto">
-              {items.map(item => {
-                const url = `https://www.youtube.com/watch?v=${item.videoId}`;
-                const selected = value.includes(item.videoId);
+            <VideoResultList items={items} selectedVideoId={selectedVideoId} onPick={onPick} />
+          )}
+        </div>
+      )}
 
-                return (
-                  <li key={item.videoId}>
-                    <button
-                      type="button"
-                      onClick={() => onChange(url)}
-                      className={`flex w-full items-center gap-3 rounded-md border p-2 text-left ${
-                        selected
-                          ? 'border-brand-500 bg-brand-600/15'
-                          : 'border-transparent hover:bg-neutral-800/60'
-                      }`}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.thumbnail}
-                        alt=""
-                        className="h-12 w-20 shrink-0 rounded object-cover"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm text-white">{item.title}</p>
-                        {item.channelTitle && (
-                          <p className="truncate text-xs text-neutral-500">{item.channelTitle}</p>
-                        )}
-                      </div>
-                      {selected && <span className="shrink-0 text-xs text-brand-400">Selected</span>}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+      {mode === 'search' && connected && (
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  void onSearch();
+                }
+              }}
+              placeholder="anime opening quiz"
+              className="min-w-0 flex-1 rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-base text-white placeholder:text-neutral-600 focus:border-brand-500 focus:outline-none"
+            />
+            <Button variant="outlined" disabled={!query.trim() || searching} onClick={() => void onSearch()}>
+              Search
+            </Button>
+          </div>
+
+          {searched && !searching && results.length === 0 && (
+            <p className="text-sm text-neutral-500">Nothing found.</p>
+          )}
+
+          {results.length > 0 && (
+            <VideoResultList
+              items={results}
+              selectedVideoId={selectedVideoId}
+              onPick={onPick}
+              onEndReached={nextPageToken ? loadMore : undefined}
+              loading={searching}
+            />
           )}
         </div>
       )}

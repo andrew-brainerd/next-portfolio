@@ -1,4 +1,4 @@
-import type { YoutubePlaylist, YoutubePlaylistItem } from 'types/watch';
+import type { YoutubePlaylist, YoutubePlaylistItem, YoutubeSearchPage } from 'types/watch';
 import { deleteRequest, getRequest, postRequest } from 'api/client';
 
 export interface YoutubeImportResult {
@@ -31,6 +31,14 @@ export const getYoutubePlaylists = async (): Promise<YoutubePlaylist[]> => {
 export const getYoutubePlaylistItems = async (playlistId: string): Promise<YoutubePlaylistItem[]> => {
   const response = await getRequest<{ items: YoutubePlaylistItem[] }>(`/watch/youtube/playlists/${playlistId}/items`);
   return response?.items ?? [];
+};
+
+export const searchYoutubeVideos = async (query: string, pageToken?: string): Promise<YoutubeSearchPage> => {
+  const params = new URLSearchParams({ q: query });
+  if (pageToken) params.set('pageToken', pageToken);
+
+  const response = await getRequest<YoutubeSearchPage>(`/watch/youtube/search?${params}`);
+  return response ?? { items: [] };
 };
 
 export const importYoutubeVideos = async (videoIds: string[]): Promise<YoutubeImportResult> => {
