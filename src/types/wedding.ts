@@ -28,3 +28,75 @@ export interface Venue {
   imageUrls?: string[];
   features: string[];
 }
+
+// --- Storybook wedding config (mirrors brainerd-api src/types/wedding.ts) ---
+
+export interface EventBlock {
+  venueName: string;
+  address?: string;
+  mapUrl?: string; // Google Maps link
+  date?: string; // ISO; omitted on ceremony/reception if same as weddingDate
+  startTime?: string; // "4:30 PM"
+  endTime?: string;
+  notes?: string;
+}
+
+export interface Hotel {
+  name: string;
+  address?: string;
+  url?: string;
+  bookingCode?: string;
+  rate?: string;
+  notes?: string;
+}
+
+export interface ScheduleItem {
+  time: string;
+  title: string;
+  description?: string;
+}
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface RegistryLink {
+  label: string;
+  url: string;
+}
+
+export interface WeddingConfig {
+  // Guest access — OWNER-ONLY, stripped from the public GET response
+  guestPasscode: string;
+
+  // Headline
+  coupleNames: { partnerA: string; partnerB: string };
+  weddingDate: string; // ISO date, e.g. "2028-06-24"
+  tagline?: string;
+
+  // Ceremony & reception
+  ceremony: EventBlock;
+  reception: EventBlock;
+  rehearsalDinner?: EventBlock & { invited?: string };
+
+  // Lodging
+  hotels: Hotel[];
+
+  // Guest guidance
+  schedule: ScheduleItem[];
+  travel?: { parking?: string; airports?: string; directions?: string; notes?: string };
+  dressCode?: { title: string; description: string };
+  faq: FaqItem[];
+  announcements?: string[];
+
+  // Registry
+  registry: RegistryLink[];
+  honeymoonFund?: { title: string; description?: string; url?: string };
+
+  // RSVP
+  rsvp: { enabled: boolean; deadline?: string; message?: string };
+}
+
+// Public shape = WeddingConfig without the passcode.
+export type PublicWeddingConfig = Omit<WeddingConfig, 'guestPasscode'>;
