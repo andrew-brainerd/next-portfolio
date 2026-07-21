@@ -7,6 +7,7 @@ export const KALSHME_ROUTE = '/kalshme';
 export const PEAPOD_ROUTE = '/peapod';
 export const ROLL_WITH_ME_ROUTE = '/roll-with-me';
 export const WEDDING_ROUTE = '/wedding';
+export const WEDDING_PLANNING_ROUTE = '/wedding/planning';
 export const WATCH_ROUTE = '/watch';
 export const WATCH_USAGE_ROUTE = '/watch/usage';
 export const RSVP_ROUTE = '/rsvp';
