@@ -193,6 +193,17 @@ html[data-theme='ocean'] {
   position: relative;
 }
 
+/* Rococo wall behind the desktop flip book (generated, Appendix-B palette).
+   Ornament lives at the edges with a calm lit center, so any crop from
+   `cover` keeps the book's surroundings quiet. Cream fallback while loading. */
+.storybook-backdrop {
+  background-color: var(--sb-cream);
+  background-image: url('/wedding/backdrop.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
 /* Subtle Ken Burns float on full-bleed page art (§6 "subtle parallax/float").
    Scale keeps the image edge-to-edge while it drifts; off for reduced motion. */
 @media (prefers-reduced-motion: no-preference) {

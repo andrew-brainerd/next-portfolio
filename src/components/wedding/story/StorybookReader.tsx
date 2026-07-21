@@ -44,9 +44,10 @@ const FlipBook = ({ pages }: FlipBookProps) => {
       // Portrait 2:3 page fit to the viewport (Appendix B aspect ratio).
       // StPageFlip sizes its internal block to the viewport and centers the
       // book in it, so the container is a full-viewport layer and the
-      // controls float above it (see layout below). 0.78 leaves the bottom
-      // margin the controls row sits in.
-      const height = Math.round(Math.min(window.innerHeight * 0.78, 860));
+      // controls float above it (see layout below). 0.84 leaves the bottom
+      // margin the controls row sits in; the innerWidth term keeps the
+      // two-page spread (4/3 × height) within 92vw on narrow windows.
+      const height = Math.round(Math.min(window.innerHeight * 0.84, 980, window.innerWidth * 0.69));
       const width = Math.round((height * 2) / 3);
 
       flip = new PageFlip(bookRef.current, {
@@ -121,7 +122,7 @@ const FlipBook = ({ pages }: FlipBookProps) => {
   }, []);
 
   return (
-    <div className="relative h-dvh overflow-hidden bg-[var(--sb-cream)]">
+    <div className="storybook-backdrop relative h-dvh overflow-hidden">
       {/* Outer layer centers the book; the lib rewrites styles on its own
           container (bookRef), so that one stays inside, pinned to book size */}
       <div
