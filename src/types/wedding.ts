@@ -100,3 +100,17 @@ export interface WeddingConfig {
 
 // Public shape = WeddingConfig without the passcode.
 export type PublicWeddingConfig = Omit<WeddingConfig, 'guestPasscode'>;
+
+// Per-chapter mood hook — drives placeholder washes now, art prompts later (spec §4.2)
+export type StoryTheme = 'dawn' | 'forest' | 'night' | 'festival';
+
+// One authored story chapter (spec §4.2). Lives in src/content/wedding/story.ts,
+// edited via PR — deliberately NOT in the CMS, for full design control per page.
+export interface StoryChapter {
+  id: string; // stable, e.g. "how-we-met"
+  title: string; // "The Meeting"
+  art?: string; // illustration asset path; absent → themed placeholder frame
+  artAlt?: string; // alt text once real art lands (§6 a11y)
+  paragraphs: string[]; // storybook prose
+  theme?: StoryTheme;
+}

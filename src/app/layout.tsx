@@ -1,4 +1,4 @@
-import { Oswald, Pacifico, Roboto_Mono } from 'next/font/google';
+import { EB_Garamond, Oswald, Pacifico, Roboto_Mono } from 'next/font/google';
 import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 import { GoogleAnalytics } from '@next/third-parties/google';
@@ -47,6 +47,8 @@ const themeScript = `
 const oswald = Oswald({ subsets: ['latin'], display: 'swap', variable: '--font-oswald' });
 const pacifico = Pacifico({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-pacifico' });
 const roboto = Roboto_Mono({ subsets: ['latin'], display: 'swap', variable: '--font-roboto' });
+// Storybook serif (wedding guest book — spec §6 "serif display + readable body")
+const garamond = EB_Garamond({ subsets: ['latin'], display: 'swap', variable: '--font-garamond' });
 
 export const metadata: Metadata = {
   title: {
@@ -108,7 +110,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang="en"
       data-theme={randomTheme}
-      className={`${roboto.variable} ${oswald.variable} ${pacifico.variable}`}
+      className={`${roboto.variable} ${oswald.variable} ${pacifico.variable} ${garamond.variable}`}
       suppressHydrationWarning
     >
       <head>

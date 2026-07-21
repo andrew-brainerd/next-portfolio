@@ -7,11 +7,11 @@ interface ErrorProps {
 
 const RouteError = ({ reset }: ErrorProps) => {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-[#ede6e1] p-6">
-      <p className="text-lg text-[#000000]">Something went wrong.</p>
+    <div className="storybook flex min-h-dvh flex-col items-center justify-center gap-3 bg-[var(--sb-cream)] p-6">
+      <p className="font-garamond text-lg text-[var(--sb-ink)]">Something went wrong.</p>
       <button
         onClick={reset}
-        className="rounded-lg bg-[#d4a770] px-4 py-2 text-[#000000] transition-colors hover:bg-[#c99755] cursor-pointer"
+        className="rounded-lg bg-[var(--sb-gold)] px-4 py-2 text-[var(--sb-ink)] transition-colors hover:bg-[var(--sb-gold-deep)] cursor-pointer"
         type="button"
       >
         Try again

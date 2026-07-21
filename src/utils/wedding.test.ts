@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { WeddingConfig } from '@/types/wedding';
-import { prepareWeddingConfigForSave, withEditableWeddingDefaults } from './wedding';
+import { chapterLabel, formatWeddingDate, prepareWeddingConfigForSave, withEditableWeddingDefaults } from './wedding';
 
 const baseConfig = (): WeddingConfig => ({
   guestPasscode: ' secret ',
@@ -142,5 +142,28 @@ describe('withEditableWeddingDefaults', () => {
     expect(prepared.honeymoonFund).toBeUndefined();
     expect(prepared.announcements).toBeUndefined();
     expect(prepared.tagline).toBeUndefined();
+  });
+});
+
+describe('formatWeddingDate', () => {
+  it('formats an ISO date long-form', () => {
+    expect(formatWeddingDate('2028-06-24')).toBe('June 24, 2028');
+  });
+
+  it('returns empty for unset or garbage input', () => {
+    expect(formatWeddingDate('')).toBe('');
+    expect(formatWeddingDate('not-a-date')).toBe('');
+  });
+});
+
+describe('chapterLabel', () => {
+  it('spells out the first chapters', () => {
+    expect(chapterLabel(0)).toBe('Chapter One');
+    expect(chapterLabel(3)).toBe('Chapter Four');
+    expect(chapterLabel(11)).toBe('Chapter Twelve');
+  });
+
+  it('falls back to digits past twelve', () => {
+    expect(chapterLabel(12)).toBe('Chapter 13');
   });
 });

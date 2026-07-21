@@ -4,7 +4,8 @@ import type { Metadata } from 'next';
 import { WEDDING_UNLOCK_COOKIE } from '@/constants/authentication';
 import { getPublicWeddingConfig, verifyWeddingPasscode } from '@/api/wedding';
 import { PasscodeGate } from '@/components/wedding/story/PasscodeGate';
-import { StorybookCover } from '@/components/wedding/story/StorybookCover';
+import { StorybookReader } from '@/components/wedding/story/StorybookReader';
+import { buildStorybook } from '@/components/wedding/story/buildStorybook';
 
 export const metadata: Metadata = {
   title: 'Our Wedding',
@@ -26,11 +27,13 @@ export default async function WeddingPage() {
   const config = await getPublicWeddingConfig();
   if (!config) {
     return (
-      <main className="flex min-h-dvh items-center justify-center bg-[#ede6e1] p-6">
-        <p className="text-neutral-700">The storybook is unavailable right now — try again in a moment.</p>
+      <main className="storybook flex min-h-dvh items-center justify-center bg-[var(--sb-cream)] p-6">
+        <p className="font-garamond text-[var(--sb-ink)]/70">
+          The storybook is unavailable right now — try again in a moment.
+        </p>
       </main>
     );
   }
 
-  return <StorybookCover config={config} />;
+  return <StorybookReader pages={buildStorybook(config)} />;
 }

@@ -2,6 +2,33 @@ import type { EventBlock, WeddingConfig } from '@/types/wedding';
 
 const trimmed = (value?: string): string => (value ?? '').trim();
 
+/** "2028-06-24" → "June 24, 2028". Empty string when unset/unparseable. */
+export const formatWeddingDate = (isoDate: string): string => {
+  if (!isoDate) return '';
+  const parsed = new Date(`${isoDate}T12:00:00`);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const CHAPTER_WORDS = [
+  'One',
+  'Two',
+  'Three',
+  'Four',
+  'Five',
+  'Six',
+  'Seven',
+  'Eight',
+  'Nine',
+  'Ten',
+  'Eleven',
+  'Twelve'
+];
+
+/** 0-based index → "Chapter One" … falls back to digits past twelve. */
+export const chapterLabel = (index: number): string =>
+  `Chapter ${CHAPTER_WORDS[index] ?? String(index + 1)}`;
+
 // Optional string fields: trimmed value, or undefined when empty (dropped from JSON)
 const optional = (value?: string): string | undefined => {
   const clean = trimmed(value);

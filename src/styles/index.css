@@ -81,6 +81,7 @@ body {
   --font-oswald: oswald, sans-serif;
   --font-pacifico: pacifico, cursive;
   --font-roboto: 'Roboto Mono', sans-serif;
+  --font-garamond: garamond, serif;
   --animate-fade: fade-in-scale 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --animate-fade-in-up: fade-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   --animate-celebrate-pop: celebrate-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -172,4 +173,22 @@ html[data-theme='ocean'] {
   --color-hero-via: #1e58b4;
   --color-hero-to: #2563eb;
   --color-hero-text: #dbeafe;
+}
+
+/* Wedding storybook palette (spec Appendix B) — scoped so the guest storybook
+   never reacts to the site's per-session random theme. Use via var(--sb-*). */
+.storybook {
+  --sb-white: #fafafa;
+  --sb-cream: #ede6e1;
+  --sb-gold: #d4a770;
+  --sb-gold-deep: #c99755;
+  --sb-crimson: #8c0707;
+  --sb-ink: #000000;
+}
+
+/* StPageFlip's .stf__block is absolute w/h 100%, but its injected CSS leaves
+   .stf__wrapper static — so the block anchors to our viewport container
+   instead of the book. Positioning the wrapper pins the book to its own box. */
+.storybook .stf__wrapper {
+  position: relative;
 }

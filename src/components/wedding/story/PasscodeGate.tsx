@@ -3,8 +3,8 @@
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
-// The storybook's locked cover. Palette is the storybook's own (cream/gold/
-// crimson/ink — spec Appendix B), deliberately independent of the site theme.
+// The storybook's locked cover. Palette comes from the `.storybook` token scope
+// (spec Appendix B) — deliberately independent of the site theme.
 export const PasscodeGate = () => {
   const router = useRouter();
   const [code, setCode] = useState('');
@@ -38,12 +38,12 @@ export const PasscodeGate = () => {
   };
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-[#ede6e1] p-6">
-      <div className="w-full max-w-md rounded-2xl border-4 border-[#d4a770] bg-[#8c0707] p-8 text-center shadow-2xl sm:p-12">
-        <div className="rounded-lg border border-[#d4a770]/60 px-4 py-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-[#d4a770]">A storybook for</p>
-          <h1 className="mt-4 font-pacifico text-4xl text-[#fafafa]">Our Wedding</h1>
-          <p className="mt-6 text-sm text-[#ede6e1]/80">
+    <main className="storybook flex min-h-dvh items-center justify-center bg-[var(--sb-cream)] p-6">
+      <div className="w-full max-w-md rounded-2xl border-4 border-[var(--sb-gold)] bg-[var(--sb-crimson)] p-8 text-center shadow-2xl sm:p-12">
+        <div className="rounded-lg border border-[var(--sb-gold)]/60 px-4 py-10">
+          <p className="font-garamond text-xs uppercase tracking-[0.3em] text-[var(--sb-gold)]">A storybook for</p>
+          <h1 className="mt-4 font-pacifico text-4xl text-[var(--sb-white)]">Our Wedding</h1>
+          <p className="mt-6 font-garamond text-base text-[var(--sb-cream)]/80">
             This book opens with the passcode from your invitation.
           </p>
 
@@ -63,18 +63,18 @@ export const PasscodeGate = () => {
               autoCapitalize="none"
               maxLength={64}
               placeholder="Passcode"
-              className="w-full rounded-lg border border-[#d4a770]/70 bg-[#fafafa] px-4 py-2.5 text-center text-lg tracking-widest text-[#000000] placeholder:text-neutral-400 focus:border-[#d4a770] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--sb-gold)]/70 bg-[var(--sb-white)] px-4 py-2.5 text-center text-lg tracking-widest text-[var(--sb-ink)] placeholder:text-neutral-400 focus:border-[var(--sb-gold)] focus:outline-none"
             />
             <button
               type="submit"
               disabled={checking || code.trim().length === 0}
-              className="mt-4 w-full rounded-lg bg-[#d4a770] px-6 py-2.5 font-semibold text-[#000000] transition-colors hover:bg-[#c99755] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 w-full rounded-lg bg-[var(--sb-gold)] px-6 py-2.5 font-semibold text-[var(--sb-ink)] transition-colors hover:bg-[var(--sb-gold-deep)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {checking ? 'Opening…' : 'Open the book'}
             </button>
           </form>
 
-          <p aria-live="polite" className="mt-4 min-h-5 text-sm text-[#fafafa]">
+          <p aria-live="polite" className="mt-4 min-h-5 font-garamond text-sm text-[var(--sb-white)]">
             {failed && "That's not it — check your invitation and try again."}
           </p>
         </div>
