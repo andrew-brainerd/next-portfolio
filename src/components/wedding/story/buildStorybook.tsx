@@ -18,7 +18,19 @@ import { VenuePage } from './pages/VenuePage';
  * in Phase W-F.
  */
 export const buildStorybook = (config: PublicWeddingConfig): StorybookPageDef[] => {
-  const pages: StorybookPageDef[] = [{ id: 'cover', hard: true, node: <StorybookCover config={config} /> }];
+  const pages: StorybookPageDef[] = [
+    {
+      id: 'cover',
+      hard: true,
+      node: (
+        <StorybookCover
+          config={config}
+          art="/wedding/cover.jpg"
+          artAlt="Illustrated cover portrait of Andrew and Hayley framed in gold flourishes on deep crimson"
+        />
+      )
+    }
+  ];
 
   STORY_CHAPTERS.forEach((chapter, index) => {
     pages.push({
@@ -42,7 +54,13 @@ export const buildStorybook = (config: PublicWeddingConfig): StorybookPageDef[] 
   pages.push({
     id: 'plan-divider',
     node: (
-      <StoryPage chapterLabel="Part Two" title="The Plan" theme="festival">
+      <StoryPage
+        chapterLabel="Part Two"
+        title="The Plan"
+        theme="festival"
+        art="/wedding/plan-divider.jpg"
+        artAlt="Illustration of Andrew and Hayley wedding-planning together over a planner, venue photos, and fabric swatches"
+      >
         <p>The storybook part you can put in your calendar.</p>
       </StoryPage>
     )
