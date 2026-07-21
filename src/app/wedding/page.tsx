@@ -1,41 +1,36 @@
-import Link from 'next/link';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 
-import { TOKEN_COOKIE } from '@/constants/authentication';
-import { LOGIN_ROUTE, WEDDING_ROUTE, WEDDING_PLANNING_ROUTE } from '@/constants/routes';
+import { WEDDING_UNLOCK_COOKIE } from '@/constants/authentication';
+import { getPublicWeddingConfig, verifyWeddingPasscode } from '@/api/wedding';
+import { PasscodeGate } from '@/components/wedding/story/PasscodeGate';
+import { StorybookCover } from '@/components/wedding/story/StorybookCover';
 
 export const metadata: Metadata = {
-  title: 'Wedding',
+  title: 'Our Wedding',
   robots: { index: false, follow: false }
 };
 
+// The guest storybook. Public — the shared passcode is the gate, not a login.
+// The cookie holds the code itself and is re-verified against brainerd-api on
+// every render, so rotating the passcode in the CMS re-locks old cookies.
 export default async function WeddingPage() {
   const cookieJar = await cookies();
-  const token = cookieJar.get(TOKEN_COOKIE)?.value;
+  const code = cookieJar.get(WEDDING_UNLOCK_COOKIE)?.value;
 
-  if (!token) {
-    redirect(`${LOGIN_ROUTE}?from=${encodeURIComponent(WEDDING_ROUTE)}`);
+  const unlocked = code ? await verifyWeddingPasscode(code) : false;
+  if (!unlocked) {
+    return <PasscodeGate />;
   }
 
-  return (
-    <div className="container mx-auto p-6">
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold mb-1">Our Wedding</h1>
-        <p className="text-sm text-neutral-400">Everything about the day we&apos;re planning.</p>
-      </header>
+  const config = await getPublicWeddingConfig();
+  if (!config) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center bg-[#ede6e1] p-6">
+        <p className="text-neutral-700">The storybook is unavailable right now — try again in a moment.</p>
+      </main>
+    );
+  }
 
-      <div className="rounded-lg border border-neutral-700 bg-neutral-900/50 p-6">
-        <p className="text-neutral-400">More coming soon.</p>
-      </div>
-
-      <Link
-        href={WEDDING_PLANNING_ROUTE}
-        className="mt-6 inline-block text-sm text-neutral-400 hover:text-neutral-200 transition-colors underline underline-offset-4"
-      >
-        Venue comparison →
-      </Link>
-    </div>
-  );
+  return <StorybookCover config={config} />;
 }

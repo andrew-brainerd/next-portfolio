@@ -19,6 +19,27 @@ export const getPublicWeddingConfig = (): Promise<PublicWeddingConfig | undefine
 };
 
 /**
+ * Check a guest passcode against the stored one. Public endpoint, plain
+ * unauthenticated fetch (guests have no accounts) — mirrors `submitRsvp`.
+ * Used by the unlock route handler AND by the /wedding server page to
+ * re-verify the cookie's code on every render.
+ */
+export const verifyWeddingPasscode = async (code: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BRAINERD_API_URL}/wedding/unlock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Failed to verify wedding passcode', error);
+    return false;
+  }
+};
+
+/**
  * Owner-only: full wedding config including the guest passcode — feeds the
  * CMS form. The backend 403s anyone but the configured wedding owner, so a
  * non-owner just gets `undefined` here.
