@@ -192,3 +192,21 @@ html[data-theme='ocean'] {
 .storybook .stf__wrapper {
   position: relative;
 }
+
+/* Subtle Ken Burns float on full-bleed page art (§6 "subtle parallax/float").
+   Scale keeps the image edge-to-edge while it drifts; off for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .storybook .storybook-art-float {
+    animation: sb-art-float 26s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes sb-art-float {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.05) translateY(-1%);
+  }
+}

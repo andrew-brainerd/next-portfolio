@@ -33,7 +33,7 @@ export const StoryPage = ({ art, artAlt, chapterLabel, title, theme = 'dawn', ch
         alt={artAlt ?? ''}
         width={1600}
         height={2400}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="storybook-art-float absolute inset-0 h-full w-full object-cover"
       />
     ) : (
       <div className={`absolute inset-0 ${PLACEHOLDER_THEMES[theme]}`} aria-hidden>

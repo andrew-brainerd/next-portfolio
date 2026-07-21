@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { PageFlip } from 'page-flip';
 
+import { getWeddingSoundMuted, playPageTurn, primeWeddingAudio, setWeddingSoundMuted } from '@/utils/weddingSound';
+
 export interface StorybookPageDef {
   id: string;
   node: ReactNode;
@@ -27,8 +29,11 @@ const FlipBook = ({ pages }: FlipBookProps) => {
   const [ready, setReady] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageCount, setPageCount] = useState(pages.length);
+  const [soundMuted, setSoundMuted] = useState(false);
 
   useEffect(() => {
+    setSoundMuted(getWeddingSoundMuted());
+
     let cancelled = false;
     let flip: PageFlip | undefined;
 
@@ -75,6 +80,10 @@ const FlipBook = ({ pages }: FlipBookProps) => {
       bookRef.current.style.height = `${height}px`;
 
       flip.on('flip', event => setPageIndex(event.data as number));
+      // 'flipping' = the turn animation starting (button, key, or corner drag)
+      flip.on('changeState', event => {
+        if (event.data === 'flipping') playPageTurn();
+      });
       flipRef.current = flip;
       setPageCount(flip.getPageCount());
       setReady(true);
@@ -99,9 +108,11 @@ const FlipBook = ({ pages }: FlipBookProps) => {
       }
       if (event.key === 'ArrowRight' || event.key === ' ' || event.key === 'PageDown') {
         event.preventDefault();
+        primeWeddingAudio();
         flipRef.current?.flipNext();
       } else if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
         event.preventDefault();
+        primeWeddingAudio();
         flipRef.current?.flipPrev();
       }
     };
@@ -128,7 +139,10 @@ const FlipBook = ({ pages }: FlipBookProps) => {
       <div className="absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-4">
         <button
           type="button"
-          onClick={() => flipRef.current?.flipPrev()}
+          onClick={() => {
+            primeWeddingAudio();
+            flipRef.current?.flipPrev();
+          }}
           aria-label="Previous page"
           className="rounded-full border border-[var(--sb-gold)] bg-[var(--sb-white)] px-4 py-1.5 text-[var(--sb-ink)] transition-colors hover:bg-[var(--sb-gold)]/30"
         >
@@ -139,11 +153,35 @@ const FlipBook = ({ pages }: FlipBookProps) => {
         </p>
         <button
           type="button"
-          onClick={() => flipRef.current?.flipNext()}
+          onClick={() => {
+            primeWeddingAudio();
+            flipRef.current?.flipNext();
+          }}
           aria-label="Next page"
           className="rounded-full border border-[var(--sb-gold)] bg-[var(--sb-white)] px-4 py-1.5 text-[var(--sb-ink)] transition-colors hover:bg-[var(--sb-gold)]/30"
         >
           ›
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            primeWeddingAudio();
+            const next = !soundMuted;
+            setSoundMuted(next);
+            setWeddingSoundMuted(next);
+          }}
+          aria-label={soundMuted ? 'Unmute page-turn sound' : 'Mute page-turn sound'}
+          aria-pressed={!soundMuted}
+          className="rounded-full border border-[var(--sb-gold)] bg-[var(--sb-white)] p-2 text-[var(--sb-ink)] transition-colors hover:bg-[var(--sb-gold)]/30"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+            <path d="M3 6.5H6L10 3.5V12.5L6 9.5H3Z" fill="currentColor" stroke="none" />
+            {soundMuted ? (
+              <path d="M11.5 6 L14.5 10 M14.5 6 L11.5 10" strokeLinecap="round" />
+            ) : (
+              <path d="M11.5 5.5A3.5 3.5 0 0 1 11.5 10.5" strokeLinecap="round" />
+            )}
+          </svg>
         </button>
       </div>
     </div>
