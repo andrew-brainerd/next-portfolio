@@ -29,6 +29,17 @@ const CHAPTER_WORDS = [
 export const chapterLabel = (index: number): string =>
   `Chapter ${CHAPTER_WORDS[index] ?? String(index + 1)}`;
 
+/**
+ * RSVPs close at the END of the deadline day (guests get the whole day).
+ * No deadline (or an unparseable one) means RSVPs stay open.
+ */
+export const isRsvpClosed = (deadline: string | undefined, now: Date = new Date()): boolean => {
+  if (!deadline) return false;
+  const endOfDeadlineDay = new Date(`${deadline}T23:59:59.999`);
+  if (Number.isNaN(endOfDeadlineDay.getTime())) return false;
+  return now > endOfDeadlineDay;
+};
+
 // Optional string fields: trimmed value, or undefined when empty (dropped from JSON)
 const optional = (value?: string): string | undefined => {
   const clean = trimmed(value);

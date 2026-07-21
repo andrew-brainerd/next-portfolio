@@ -89,6 +89,14 @@ const FlipBook = ({ pages }: FlipBookProps) => {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      // Never hijack keys while the guest is typing in a form (e.g. the RSVP page)
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)
+      ) {
+        return;
+      }
       if (event.key === 'ArrowRight' || event.key === ' ' || event.key === 'PageDown') {
         event.preventDefault();
         flipRef.current?.flipNext();

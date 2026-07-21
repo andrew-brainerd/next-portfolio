@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { WeddingConfig } from '@/types/wedding';
-import { chapterLabel, formatWeddingDate, prepareWeddingConfigForSave, withEditableWeddingDefaults } from './wedding';
+import { chapterLabel, formatWeddingDate, isRsvpClosed, prepareWeddingConfigForSave, withEditableWeddingDefaults } from './wedding';
 
 const baseConfig = (): WeddingConfig => ({
   guestPasscode: ' secret ',
@@ -165,5 +165,21 @@ describe('chapterLabel', () => {
 
   it('falls back to digits past twelve', () => {
     expect(chapterLabel(12)).toBe('Chapter 13');
+  });
+});
+
+describe('isRsvpClosed', () => {
+  it('stays open with no deadline or a garbage deadline', () => {
+    expect(isRsvpClosed(undefined)).toBe(false);
+    expect(isRsvpClosed('')).toBe(false);
+    expect(isRsvpClosed('not-a-date')).toBe(false);
+  });
+
+  it('stays open through the end of the deadline day', () => {
+    expect(isRsvpClosed('2028-05-01', new Date('2028-05-01T22:00:00'))).toBe(false);
+  });
+
+  it('closes after the deadline day ends', () => {
+    expect(isRsvpClosed('2028-05-01', new Date('2028-05-02T00:00:01'))).toBe(true);
   });
 });

@@ -1,4 +1,11 @@
-import type { PublicWeddingConfig, Venue, WeddingConfig } from '@/types/wedding';
+import type {
+  PublicWeddingConfig,
+  Venue,
+  WeddingConfig,
+  WeddingRsvp,
+  WeddingRsvpBreakdown,
+  WeddingRsvpInput
+} from '@/types/wedding';
 import { getRequest, putRequest } from '@/api/client';
 
 /**
@@ -54,4 +61,37 @@ export const getFullWeddingConfig = (): Promise<WeddingConfig | undefined> => {
  */
 export const updateWeddingConfig = (config: WeddingConfig): Promise<WeddingConfig> => {
   return putRequest<WeddingConfig, WeddingConfig>('/wedding/config', config);
+};
+
+/**
+ * Create or update the guest's wedding RSVP (upsert by clientId). Public
+ * endpoint — plain unauthenticated fetch, guests have no accounts (mirrors
+ * the engagement-dinner `submitRsvp`).
+ */
+export const submitWeddingRsvp = async (input: WeddingRsvpInput): Promise<WeddingRsvp | undefined> => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BRAINERD_API_URL}/wedding/rsvp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input)
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to submit wedding RSVP: ${response.status}`);
+      return undefined;
+    }
+
+    return (await response.json()) as WeddingRsvp;
+  } catch (error) {
+    console.error('Failed to submit wedding RSVP', error);
+    return undefined;
+  }
+};
+
+/**
+ * Owner-only full RSVP breakdown for the settings page. The backend 403s
+ * anyone but the configured wedding owner, so non-owners get `undefined`.
+ */
+export const getWeddingRsvps = (): Promise<WeddingRsvpBreakdown | undefined> => {
+  return getRequest<WeddingRsvpBreakdown>('/wedding/rsvp/all');
 };

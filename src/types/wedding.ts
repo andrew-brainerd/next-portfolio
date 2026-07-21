@@ -104,6 +104,33 @@ export type PublicWeddingConfig = Omit<WeddingConfig, 'guestPasscode'>;
 // Per-chapter mood hook — drives placeholder washes now, art prompts later (spec §4.2)
 export type StoryTheme = 'dawn' | 'forest' | 'night' | 'festival';
 
+// --- Guest RSVP (mirrors brainerd-api; separate from the engagement-dinner RSVP) ---
+
+export type WeddingRsvpStatus = 'going' | 'maybe' | 'no';
+
+export interface WeddingRsvpInput {
+  clientId: string; // anon client id (localStorage)
+  name: string;
+  status: WeddingRsvpStatus;
+  guestCount: number; // plus-ones beyond the named guest
+  guestNames: string[]; // one per plus-one
+  note?: string; // dietary restrictions / message
+}
+
+export interface WeddingRsvp extends WeddingRsvpInput {
+  id?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface WeddingRsvpBreakdown {
+  going: WeddingRsvp[];
+  maybe: WeddingRsvp[];
+  no: WeddingRsvp[];
+  counts: { going: number; maybe: number; no: number };
+  headcount: number;
+}
+
 // One authored story chapter (spec §4.2). Lives in src/content/wedding/story.ts,
 // edited via PR — deliberately NOT in the CMS, for full design control per page.
 export interface StoryChapter {
