@@ -45,6 +45,17 @@ export const STORY_CHAPTERS: StoryChapter[] = [
     ]
   },
   {
+    id: 'chilling',
+    title: 'The Chilling',
+    theme: 'night',
+    art: '/wedding/chilling.jpg',
+    artAlt: 'Illustration of Andrew and Hayley playing video games together on the couch under a blanket',
+    paragraphs: [
+      'Not every chapter is an adventure. Some of the best ones are two controllers, one blanket, and a rematch that absolutely was not going to be the last.',
+      'Placeholder — replace with the real couch-gaming lore (the games, who wins, the trash talk).'
+    ]
+  },
+  {
     id: 'the-proposal',
     title: 'The Question',
     theme: 'night',
