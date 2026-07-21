@@ -56,6 +56,17 @@ export const STORY_CHAPTERS: StoryChapter[] = [
     ]
   },
   {
+    id: 'the-migration',
+    title: 'The Migration',
+    theme: 'dawn',
+    art: '/wedding/the-migration.jpg',
+    artAlt: 'Illustration of Andrew and Hayley beside their packed car on a desert highway, the Las Vegas skyline glowing ahead',
+    paragraphs: [
+      'Then came the biggest adventure yet: everything we owned in one car, Michigan in the rearview, and a glowing desert skyline up ahead.',
+      'Placeholder — replace with the real moving story (the drive, the goodbyes, the first Vegas sunset).'
+    ]
+  },
+  {
     id: 'the-proposal',
     title: 'The Question',
     theme: 'night',
