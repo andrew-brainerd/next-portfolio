@@ -18,18 +18,29 @@ interface StorybookReaderProps {
 
 interface FlipBookProps {
   pages: StorybookPageDef[];
+  // Page to open on (the reader remounts the book to resize it — see below)
+  startPage?: number;
+  onPageChange?: (index: number) => void;
 }
 
 // Desktop book: StPageFlip two-page spread, dynamic-imported so it never ships
 // to mobile. Init once per mount — the lib takes over the page elements' DOM,
 // so `pages` must be stable after mount (they are: server-rendered props).
-const FlipBook = ({ pages }: FlipBookProps) => {
+// Resizing is handled by the parent remounting us with a fresh `key`.
+const FlipBook = ({ pages, startPage = 0, onPageChange }: FlipBookProps) => {
   const bookRef = useRef<HTMLDivElement>(null);
   const flipRef = useRef<PageFlip | null>(null);
   const [ready, setReady] = useState(false);
-  const [pageIndex, setPageIndex] = useState(0);
+  const [pageIndex, setPageIndex] = useState(startPage);
   const [pageCount, setPageCount] = useState(pages.length);
   const [soundMuted, setSoundMuted] = useState(false);
+  // Refs keep the props out of the once-per-mount init effect's dependencies
+  const startPageRef = useRef(startPage);
+  const onPageChangeRef = useRef(onPageChange);
+
+  useEffect(() => {
+    onPageChangeRef.current = onPageChange;
+  }, [onPageChange]);
 
   useEffect(() => {
     setSoundMuted(getWeddingSoundMuted());
@@ -54,6 +65,7 @@ const FlipBook = ({ pages }: FlipBookProps) => {
         width,
         height,
         size: 'fixed',
+        startPage: startPageRef.current,
         showCover: true,
         usePortrait: false,
         maxShadowOpacity: 0.35,
@@ -80,7 +92,11 @@ const FlipBook = ({ pages }: FlipBookProps) => {
       bookRef.current.style.width = `${width * 2}px`;
       bookRef.current.style.height = `${height}px`;
 
-      flip.on('flip', event => setPageIndex(event.data as number));
+      flip.on('flip', event => {
+        const index = event.data as number;
+        setPageIndex(index);
+        onPageChangeRef.current?.(index);
+      });
       // 'flipping' = the turn animation starting (button, key, or corner drag)
       flip.on('changeState', event => {
         if (event.data === 'flipping') playPageTurn();
@@ -197,6 +213,11 @@ const FlipBook = ({ pages }: FlipBookProps) => {
 export const StorybookReader = ({ pages }: StorybookReaderProps) => {
   // Pre-mount (and SSR) renders the scroll book — works without JS
   const [mode, setMode] = useState<'scroll' | 'flip'>('scroll');
+  // StPageFlip is fixed-size once initialized, so a real window resize rebuilds
+  // the book: bump this epoch to remount FlipBook at the recomputed dimensions,
+  // reopening on the page the guest was reading.
+  const [sizeEpoch, setSizeEpoch] = useState(0);
+  const [lastIndex, setLastIndex] = useState(0);
 
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 768px)');
@@ -211,10 +232,30 @@ export const StorybookReader = ({ pages }: StorybookReaderProps) => {
     };
   }, []);
 
+  useEffect(() => {
+    // FlipBook's init dispatches a synthetic `resize` for the lib's own layout,
+    // so only react to events where the viewport dimensions actually changed.
+    let lastWidth = window.innerWidth;
+    let lastHeight = window.innerHeight;
+    let timer: number | undefined;
+    const onResize = () => {
+      if (window.innerWidth === lastWidth && window.innerHeight === lastHeight) return;
+      lastWidth = window.innerWidth;
+      lastHeight = window.innerHeight;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setSizeEpoch(epoch => epoch + 1), 250);
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
   if (mode === 'flip') {
     return (
       <main className="storybook">
-        <FlipBook pages={pages} />
+        <FlipBook key={sizeEpoch} pages={pages} startPage={lastIndex} onPageChange={setLastIndex} />
       </main>
     );
   }
