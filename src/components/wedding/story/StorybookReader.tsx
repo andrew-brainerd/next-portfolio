@@ -23,6 +23,15 @@ interface FlipBookProps {
   onPageChange?: (index: number) => void;
 }
 
+// Portrait 2:3 page fit to the viewport (Appendix B aspect ratio). 0.84 leaves
+// the bottom margin the controls row sits in; the innerWidth term keeps the
+// two-page spread (4/3 × height) within 92vw on narrow windows. Client-only —
+// FlipBook never renders during SSR (the reader starts in scroll mode).
+const computeBookSize = () => {
+  const height = Math.round(Math.min(window.innerHeight * 0.84, 980, window.innerWidth * 0.69));
+  return { width: Math.round((height * 2) / 3), height };
+};
+
 // Desktop book: StPageFlip two-page spread, dynamic-imported so it never ships
 // to mobile. Init once per mount — the lib takes over the page elements' DOM,
 // so `pages` must be stable after mount (they are: server-rendered props).
@@ -34,6 +43,9 @@ const FlipBook = ({ pages, startPage = 0, onPageChange }: FlipBookProps) => {
   const [pageIndex, setPageIndex] = useState(startPage);
   const [pageCount, setPageCount] = useState(pages.length);
   const [soundMuted, setSoundMuted] = useState(false);
+  // Fixed for this mount (a resize remounts us); also drives the closed-book
+  // centering shift from the very first paint.
+  const [size] = useState(computeBookSize);
   // Refs keep the props out of the once-per-mount init effect's dependencies
   const startPageRef = useRef(startPage);
   const onPageChangeRef = useRef(onPageChange);
@@ -52,14 +64,10 @@ const FlipBook = ({ pages, startPage = 0, onPageChange }: FlipBookProps) => {
       const { PageFlip } = await import('page-flip');
       if (cancelled || !bookRef.current) return;
 
-      // Portrait 2:3 page fit to the viewport (Appendix B aspect ratio).
       // StPageFlip sizes its internal block to the viewport and centers the
       // book in it, so the container is a full-viewport layer and the
-      // controls float above it (see layout below). 0.84 leaves the bottom
-      // margin the controls row sits in; the innerWidth term keeps the
-      // two-page spread (4/3 × height) within 92vw on narrow windows.
-      const height = Math.round(Math.min(window.innerHeight * 0.84, 980, window.innerWidth * 0.69));
-      const width = Math.round((height * 2) / 3);
+      // controls float above it (see layout below).
+      const { width, height } = size;
 
       flip = new PageFlip(bookRef.current, {
         width,
@@ -111,7 +119,7 @@ const FlipBook = ({ pages, startPage = 0, onPageChange }: FlipBookProps) => {
       flip?.destroy();
       flipRef.current = null;
     };
-  }, []);
+  }, [size]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -137,6 +145,13 @@ const FlipBook = ({ pages, startPage = 0, onPageChange }: FlipBookProps) => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  // Closed covers render in one half of the spread area (front → right half,
+  // back → left half), so shift the book to center the visible cover; the
+  // transform transition matches flippingTime, sliding the book into its
+  // spread position as the cover turns.
+  const atBackCover = ready && pageIndex >= pageCount - 1;
+  const coverShift = pageIndex === 0 ? -size.width / 2 : atBackCover ? size.width / 2 : 0;
+
   return (
     <div className="storybook-backdrop relative h-dvh overflow-hidden">
       {/* Outer layer centers the book; the lib rewrites styles on its own
@@ -144,12 +159,14 @@ const FlipBook = ({ pages, startPage = 0, onPageChange }: FlipBookProps) => {
       <div
         className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ${ready ? 'opacity-100' : 'opacity-0'}`}
       >
-        <div ref={bookRef}>
-          {pages.map(page => (
-            <div key={page.id} className="storybook-page" data-density={page.hard ? 'hard' : 'soft'}>
-              {page.node}
-            </div>
-          ))}
+        <div className="transition-transform duration-700 ease-in-out" style={{ transform: `translateX(${coverShift}px)` }}>
+          <div ref={bookRef}>
+            {pages.map(page => (
+              <div key={page.id} className="storybook-page" data-density={page.hard ? 'hard' : 'soft'}>
+                {page.node}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
