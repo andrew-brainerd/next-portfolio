@@ -69,5 +69,7 @@ export const COMPLETED_GAMES: string[] = [
   '3240220', // Grand Theft Auto V Enhanced
   '397540', // Borderlands 3
   '1903340', // Clair Obscur Expedition 33
-  '220440' // DmC Devil May Cry
+  '220440', // DmC Devil May Cry
+  '3375780', // Trails in the Sky 1st Chapter
+  '3947040' // Pegfinity
 ];
