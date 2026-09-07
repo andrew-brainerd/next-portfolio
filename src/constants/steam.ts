@@ -71,5 +71,6 @@ export const COMPLETED_GAMES: string[] = [
   '1903340', // Clair Obscur Expedition 33
   '220440', // DmC Devil May Cry
   '3375780', // Trails in the Sky 1st Chapter
-  '3947040' // Pegfinity
+  '3947040', // Pegfinity
+  '3228590' // Deadzone: Rogue
 ];
