@@ -10,11 +10,8 @@ export const COMPLETED_GAMES: string[] = [
   '648800', // Raft
   '21130', // LEGO Harry Potter: Years 1-4
   '1817070', // Marvel's Spider-Man Remastered
-  '648800', // Raft
   '1003590', // Tetris Effect: Connected
   '218060', // BIT.TRIP Runner2: Future Legend of Rhythm Alien,
-  '21130', // LEGO Harry Potter: Years 1-4
-  '1817070', // Marvel’s Spider-Man Remastered
   '241930', // Middle-earth: Shadow of Mordor
   '578330', // LEGO City Undercover
   '1593500', // God of War
@@ -72,5 +69,6 @@ export const COMPLETED_GAMES: string[] = [
   '220440', // DmC Devil May Cry
   '3375780', // Trails in the Sky 1st Chapter
   '3947040', // Pegfinity
-  '3228590' // Deadzone: Rogue
+  '3228590', // Deadzone: Rogue
+  '2163330' // Yet Another Zombie Survivors
 ];
