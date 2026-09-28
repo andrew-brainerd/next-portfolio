@@ -2,12 +2,18 @@
 
 import { useState } from 'react';
 
-import type { Hotel, ScheduleItem, WeddingConfig } from '@/types/wedding';
+import { REGISTRY_LINK_KINDS } from '@/constants/wedding';
+import type { Hotel, RegistryLink, ScheduleItem, WeddingConfig, WeddingGuideConfig } from '@/types/wedding';
 import { updateWeddingConfig } from '@/api/wedding';
 import { prepareWeddingConfigForSave, withEditableWeddingDefaults } from '@/utils/wedding';
-import { CheckboxField, SectionCard, TextArea, TextField } from './FormFields';
+import { CheckboxField, SectionCard, SelectField, TextArea, TextField } from './FormFields';
 import { EventBlockFields } from './EventBlockFields';
+import { GuideAccessFields } from './GuideAccessFields';
 import { ListEditor } from './ListEditor';
+import { MenuEditor } from './MenuEditor';
+import { QuizEditor } from './QuizEditor';
+import { SeatingEditor } from './SeatingEditor';
+import { VenueEditor } from './VenueEditor';
 
 type SaveStatus = 'idle' | 'saved' | 'error';
 
@@ -23,6 +29,11 @@ export const WeddingSettingsForm = ({ initialConfig }: WeddingSettingsFormProps)
   const patch = (partial: Partial<WeddingConfig>) => {
     setStatus('idle');
     setConfig(current => ({ ...current, ...partial }));
+  };
+
+  const patchGuide = (partial: Partial<WeddingGuideConfig>) => {
+    setStatus('idle');
+    setConfig(current => ({ ...current, guide: { ...current.guide, ...partial } }));
   };
 
   const onSave = async () => {
@@ -167,8 +178,15 @@ export const WeddingSettingsForm = ({ initialConfig }: WeddingSettingsFormProps)
                   placeholder="4:30 PM"
                   maxLength={40}
                 />
-                <TextField label="Title" value={item.title} onChange={title => update({ ...item, title })} maxLength={120} />
+                <TextField
+                  label="Ends (optional)"
+                  value={item.endTime ?? ''}
+                  onChange={endTime => update({ ...item, endTime })}
+                  placeholder="5:00 PM"
+                  maxLength={40}
+                />
               </div>
+              <TextField label="Title" value={item.title} onChange={title => update({ ...item, title })} maxLength={120} />
               <TextField
                 label="Description"
                 value={item.description ?? ''}
@@ -261,13 +279,19 @@ export const WeddingSettingsForm = ({ initialConfig }: WeddingSettingsFormProps)
         <ListEditor
           items={config.registry}
           onChange={registry => patch({ registry })}
-          makeItem={() => ({ label: '', url: '' })}
+          makeItem={(): RegistryLink => ({ label: '', url: '' })}
           addLabel="Add registry link"
           itemLabel={index => `Link ${index + 1}`}
           renderItem={(link, update) => (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <TextField label="Label" value={link.label} onChange={label => update({ ...link, label })} maxLength={120} />
               <TextField label="URL" value={link.url} onChange={url => update({ ...link, url })} maxLength={500} />
+              <SelectField
+                label="Type"
+                value={link.kind ?? 'registry'}
+                onChange={kind => update({ ...link, kind })}
+                options={REGISTRY_LINK_KINDS}
+              />
             </div>
           )}
         />
@@ -315,6 +339,46 @@ export const WeddingSettingsForm = ({ initialConfig }: WeddingSettingsFormProps)
           placeholder="We can't wait to celebrate with you!"
           maxLength={500}
         />
+      </SectionCard>
+
+      <h2 className="pt-4 text-2xl font-bold text-neutral-100">Day-of guidebook</h2>
+
+      <SectionCard
+        title="Guidebook access"
+        description="What guests see at /wedding/guide after scanning a QR code or tapping an NFC tag."
+      >
+        <GuideAccessFields
+          guide={config.guide}
+          guideKey={config.guideKey}
+          onGuideChange={guide => patch({ guide })}
+          onGuideKeyChange={guideKey => patch({ guideKey })}
+        />
+      </SectionCard>
+
+      <SectionCard
+        title="Seating"
+        description="Guests search their name to find their table. Blurbs show next to each tablemate."
+      >
+        <SeatingEditor tables={config.guide.seating} onChange={seating => patchGuide({ seating })} />
+      </SectionCard>
+
+      <SectionCard title="Menu">
+        <MenuEditor menu={config.guide.menu} onChange={menu => patchGuide({ menu })} />
+      </SectionCard>
+
+      <SectionCard title="The venue">
+        <VenueEditor
+          venue={config.guide.venue}
+          schedule={config.schedule}
+          onChange={venue => patchGuide({ venue })}
+        />
+      </SectionCard>
+
+      <SectionCard
+        title="Couple quiz"
+        description="Three choices per question. Answers are checked on the server and only revealed on a guest's official attempt."
+      >
+        <QuizEditor quiz={config.guide.quiz} timeZone={config.guide.timeZone} onChange={quiz => patchGuide({ quiz })} />
       </SectionCard>
 
       <div className="sticky bottom-0 -mx-1 flex items-center gap-4 border-t border-neutral-800 bg-neutral-950/90 px-1 py-4 backdrop-blur">

@@ -4,9 +4,13 @@ import type { Metadata } from 'next';
 
 import { TOKEN_COOKIE } from '@/constants/authentication';
 import { LOGIN_ROUTE, WEDDING_SETTINGS_ROUTE } from '@/constants/routes';
-import { getFullWeddingConfig, getWeddingRsvps } from '@/api/wedding';
+import { getFullWeddingConfig, getWeddingMessages, getWeddingQuizEntries, getWeddingRsvps } from '@/api/wedding';
+import { MessagesInbox } from '@/components/wedding/settings/MessagesInbox';
+import { QuizEntriesAdmin } from '@/components/wedding/settings/QuizEntriesAdmin';
 import { RsvpAdminList } from '@/components/wedding/settings/RsvpAdminList';
+import { TagLinks } from '@/components/wedding/settings/TagLinks';
 import { WeddingSettingsForm } from '@/components/wedding/settings/WeddingSettingsForm';
+import { buildGuideTagLinks } from '@/utils/weddingQr';
 
 export const metadata: Metadata = {
   title: 'Wedding Settings',
@@ -23,13 +27,21 @@ export default async function WeddingSettingsPage() {
 
   // Owner check is behavioral: the backend 403s anyone but the configured
   // wedding owner, so a non-owner (or a down API) just gets nothing here.
-  const [config, rsvps] = await Promise.all([getFullWeddingConfig(), getWeddingRsvps()]);
+  const [config, rsvps, messages, quizEntries] = await Promise.all([
+    getFullWeddingConfig(),
+    getWeddingRsvps(),
+    getWeddingMessages(),
+    getWeddingQuizEntries()
+  ]);
+  const tagLinks = config ? await buildGuideTagLinks(config.guideKey, config.guide.seating) : [];
 
   return (
     <div className="container mx-auto max-w-3xl p-6">
       <header className="mb-6">
         <h1 className="text-3xl font-bold mb-1">Wedding Settings</h1>
-        <p className="text-sm text-neutral-400">Everything the storybook shows guests, editable in one place.</p>
+        <p className="text-sm text-neutral-400">
+          Everything the storybook and the day-of guidebook show guests, editable in one place.
+        </p>
       </header>
 
       {!config ? (
@@ -40,7 +52,10 @@ export default async function WeddingSettingsPage() {
         </div>
       ) : (
         <div className="space-y-5">
+          {messages && <MessagesInbox initialMessages={messages} />}
           {rsvps && <RsvpAdminList breakdown={rsvps} />}
+          {quizEntries && <QuizEntriesAdmin initialEntries={quizEntries} />}
+          <TagLinks links={tagLinks} />
           <WeddingSettingsForm initialConfig={config} />
         </div>
       )}

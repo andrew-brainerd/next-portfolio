@@ -52,6 +52,7 @@ export interface Hotel {
 
 export interface ScheduleItem {
   time: string;
+  endTime?: string; // lets "now" end before the next item starts
   title: string;
   description?: string;
 }
@@ -61,14 +62,18 @@ export interface FaqItem {
   answer: string;
 }
 
+export type RegistryLinkKind = 'registry' | 'paypal' | 'venmo' | 'cashapp' | 'fund' | 'other';
+
 export interface RegistryLink {
   label: string;
   url: string;
+  kind?: RegistryLinkKind; // absent = 'registry'
 }
 
 export interface WeddingConfig {
   // Guest access — OWNER-ONLY, stripped from the public GET response
   guestPasscode: string;
+  guideKey: string; // day-of guidebook tag/QR key; also accepted by /unlock
 
   // Headline
   coupleNames: { partnerA: string; partnerB: string };
@@ -96,10 +101,156 @@ export interface WeddingConfig {
 
   // RSVP
   rsvp: { enabled: boolean; deadline?: string; message?: string };
+
+  // Day-of guidebook (/wedding/guide)
+  guide: WeddingGuideConfig;
 }
 
-// Public shape = WeddingConfig without the passcode.
-export type PublicWeddingConfig = Omit<WeddingConfig, 'guestPasscode'>;
+// --- Day-of guidebook (spec wedding-guide.md §4) ---
+
+export interface WeddingGuideConfig {
+  enabled: boolean;
+  timeZone: string; // IANA, drives now/next
+  welcome?: string;
+  seating: SeatingTable[];
+  menu: { courses: MenuCourse[]; bar: MenuCourse[]; note?: string };
+  venue: { history?: string; funFacts: string[]; maps: VenueMap[]; practical: PracticalItem[] };
+  quiz: WeddingQuizConfig;
+  messages: { enabled: boolean; prompt?: string };
+}
+
+export interface SeatingTable {
+  id: string; // short, URL-safe, stable — used in tag URLs
+  name: string;
+  description?: string;
+  guests: SeatedGuest[];
+}
+
+// Either a named guest or an unnamed plus-one ("Guest of <guestOf>")
+export interface SeatedGuest {
+  name?: string;
+  guestOf?: string;
+  blurb?: string;
+}
+
+export type DietaryTag = 'V' | 'VG' | 'GF' | 'DF' | 'NF' | 'contains-nuts' | 'spicy';
+
+export interface MenuItem {
+  name: string;
+  description?: string;
+  tags: DietaryTag[];
+}
+
+export interface MenuCourse {
+  title: string;
+  items: MenuItem[];
+}
+
+export interface VenueMap {
+  label: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  activeFrom?: string; // schedule item title after which this layout is the default
+}
+
+export interface PracticalItem {
+  label: string;
+  value: string;
+}
+
+export type QuizLeaderboardMode = 'after-close' | 'live' | 'hidden';
+
+export interface WeddingQuizConfig {
+  enabled: boolean;
+  open: boolean; // manual override — false closes regardless of closesAt
+  countsFrom?: string; // ISO with offset; earlier submissions are practice runs
+  closesAt?: string; // ISO with offset; server-enforced
+  leaderboard: QuizLeaderboardMode;
+  title?: string;
+  intro?: string;
+  questions: QuizQuestion[];
+}
+
+export interface QuizQuestion {
+  id: string;
+  prompt: string;
+  choices: string[]; // exactly 3
+  answerIndex: number; // OWNER-ONLY
+  reveal?: string; // OWNER-ONLY until submission
+}
+
+export type PublicQuizQuestion = Omit<QuizQuestion, 'answerIndex' | 'reveal'>;
+
+export type PublicWeddingGuideConfig = Omit<WeddingGuideConfig, 'quiz'> & {
+  quiz: Omit<WeddingQuizConfig, 'questions'> & { questions: PublicQuizQuestion[] };
+};
+
+// Public shape strips the passcode, the guide key and the quiz answer key.
+export type PublicWeddingConfig = Omit<WeddingConfig, 'guestPasscode' | 'guideKey' | 'guide'> & {
+  guide: PublicWeddingGuideConfig;
+};
+
+export type QuizAnswers = Record<string, number>;
+
+export interface WeddingQuizEntry {
+  id?: string;
+  clientId: string;
+  name: string;
+  answers: QuizAnswers;
+  score: number;
+  total: number;
+  submittedAt: number;
+  eligible: boolean; // false = practice run before countsFrom
+}
+
+export interface QuizQuestionResult {
+  id: string;
+  correct: boolean;
+  answerIndex: number;
+  reveal?: string;
+}
+
+export interface QuizResult {
+  score: number;
+  total: number;
+  practice?: boolean;
+  rank?: number;
+  results: QuizQuestionResult[];
+}
+
+export interface QuizLeaderboardEntry {
+  name: string;
+  score: number;
+  total: number;
+  submittedAt: number;
+}
+
+export interface QuizLeaderboard {
+  visible: boolean;
+  closesAt?: string;
+  entries: QuizLeaderboardEntry[];
+  me?: { rank: number; of: number };
+}
+
+// A tag/QR entry link with its server-rendered QR SVG
+export interface GuideTagLink {
+  label: string;
+  tableId?: string;
+  url: string;
+  svg: string;
+}
+
+export interface WeddingMessage {
+  id?: string;
+  clientId: string;
+  name: string;
+  message: string;
+  table?: string;
+  createdAt: number;
+  read?: boolean;
+}
 
 // Per-chapter mood hook — drives placeholder washes now, art prompts later (spec §4.2)
 export type StoryTheme = 'dawn' | 'forest' | 'night' | 'festival';

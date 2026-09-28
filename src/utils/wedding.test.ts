@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { DEFAULT_WEDDING_GUIDE } from '@/constants/wedding';
 import type { WeddingConfig } from '@/types/wedding';
 import { chapterLabel, formatWeddingDate, isRsvpClosed, prepareWeddingConfigForSave, withEditableWeddingDefaults } from './wedding';
 
@@ -13,7 +14,9 @@ const baseConfig = (): WeddingConfig => ({
   schedule: [],
   faq: [],
   registry: [],
-  rsvp: { enabled: false }
+  rsvp: { enabled: false },
+  guideKey: ' tag-key ',
+  guide: DEFAULT_WEDDING_GUIDE
 });
 
 describe('prepareWeddingConfigForSave', () => {

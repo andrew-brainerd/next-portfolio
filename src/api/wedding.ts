@@ -2,11 +2,13 @@ import type {
   PublicWeddingConfig,
   Venue,
   WeddingConfig,
+  WeddingMessage,
+  WeddingQuizEntry,
   WeddingRsvp,
   WeddingRsvpBreakdown,
   WeddingRsvpInput
 } from '@/types/wedding';
-import { getRequest, putRequest } from '@/api/client';
+import { deleteRequest, getRequest, patchRequest, putRequest } from '@/api/client';
 
 /**
  * Get all wedding venue candidates (with images + coords) from brainerd-api.
@@ -94,4 +96,27 @@ export const submitWeddingRsvp = async (input: WeddingRsvpInput): Promise<Weddin
  */
 export const getWeddingRsvps = (): Promise<WeddingRsvpBreakdown | undefined> => {
   return getRequest<WeddingRsvpBreakdown>('/wedding/rsvp/all');
+};
+
+/** Owner-only: every quiz entry (practice runs flagged), ranked. */
+export const getWeddingQuizEntries = (): Promise<WeddingQuizEntry[] | undefined> => {
+  return getRequest<WeddingQuizEntry[]>('/wedding/quiz/entries');
+};
+
+/** Owner-only: remove a quiz entry, e.g. one with an inappropriate name. */
+export const deleteWeddingQuizEntry = (id: string): Promise<void> => {
+  return deleteRequest(`/wedding/quiz/entries/${encodeURIComponent(id)}`);
+};
+
+/** Owner-only: every guest message, newest first. */
+export const getWeddingMessages = (): Promise<WeddingMessage[] | undefined> => {
+  return getRequest<WeddingMessage[]>('/wedding/messages');
+};
+
+/** Owner-only: mark a guest message read or unread. */
+export const setWeddingMessageRead = (id: string, read: boolean): Promise<WeddingMessage | undefined> => {
+  return patchRequest<{ read: boolean }, WeddingMessage | undefined>(
+    `/wedding/messages/${encodeURIComponent(id)}`,
+    { read }
+  );
 };

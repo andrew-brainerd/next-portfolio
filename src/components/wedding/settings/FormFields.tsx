@@ -9,7 +9,7 @@ interface TextFieldProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  type?: 'text' | 'date' | 'url';
+  type?: 'text' | 'date' | 'url' | 'number' | 'datetime-local';
   placeholder?: string;
   maxLength?: number;
   hint?: string;
@@ -63,6 +63,34 @@ export const TextArea = ({ label, value, onChange, placeholder, rows = 3, maxLen
         maxLength={maxLength}
         className={INPUT_CLASS}
       />
+    </div>
+  );
+};
+
+interface SelectFieldProps<T extends string> {
+  label: string;
+  value: T;
+  onChange: (value: T) => void;
+  options: { value: T; label: string }[];
+  hint?: string;
+}
+
+export const SelectField = <T extends string>({ label, value, onChange, options, hint }: SelectFieldProps<T>) => {
+  const id = useId();
+
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm text-neutral-300">
+        {label}
+      </label>
+      <select id={id} value={value} onChange={event => onChange(event.target.value as T)} className={INPUT_CLASS}>
+        {options.map(option => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {hint && <p className="mt-1 text-xs text-neutral-500">{hint}</p>}
     </div>
   );
 };

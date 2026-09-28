@@ -52,6 +52,7 @@
     "page-flip": "^2.0.7",
     "postcss": "^8.5.15",
     "pusher-js": "^8.5.0",
+    "qrcode": "^1.5.4",
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "react-easy-crop": "^6.0.2",
@@ -63,6 +64,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.0",
+    "@types/qrcode": "^1.5.6",
     "lint-staged": "^17.0.5",
     "postcss-html": "^1.8.0",
     "stylelint": "^17.12.0",

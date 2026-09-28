@@ -1,4 +1,5 @@
 import type { EventBlock, WeddingConfig } from '@/types/wedding';
+import { prepareGuideForSave, withEditableGuideDefaults } from '@/utils/weddingGuide';
 
 const trimmed = (value?: string): string => (value ?? '').trim();
 
@@ -76,7 +77,9 @@ export const withEditableWeddingDefaults = (config: WeddingConfig): WeddingConfi
   dressCode: { title: '', description: '', ...config.dressCode },
   announcements: config.announcements ?? [],
   honeymoonFund: { title: '', description: '', url: '', ...config.honeymoonFund },
-  rsvp: { deadline: '', message: '', ...config.rsvp }
+  rsvp: { deadline: '', message: '', ...config.rsvp },
+  guideKey: config.guideKey ?? '',
+  guide: withEditableGuideDefaults(config.guide)
 });
 
 /**
@@ -115,6 +118,7 @@ export const prepareWeddingConfigForSave = (config: WeddingConfig): WeddingConfi
 
   return {
     guestPasscode: trimmed(config.guestPasscode),
+    guideKey: trimmed(config.guideKey),
     coupleNames: {
       partnerA: trimmed(config.coupleNames.partnerA),
       partnerB: trimmed(config.coupleNames.partnerB)
@@ -137,6 +141,7 @@ export const prepareWeddingConfigForSave = (config: WeddingConfig): WeddingConfi
     schedule: config.schedule
       .map(item => ({
         time: trimmed(item.time),
+        endTime: optional(item.endTime),
         title: trimmed(item.title),
         description: optional(item.description)
       }))
@@ -148,13 +153,14 @@ export const prepareWeddingConfigForSave = (config: WeddingConfig): WeddingConfi
       .filter(item => item.question.length > 0 && item.answer.length > 0),
     announcements: announcements.length > 0 ? announcements : undefined,
     registry: config.registry
-      .map(link => ({ label: trimmed(link.label), url: trimmed(link.url) }))
+      .map(link => ({ label: trimmed(link.label), url: trimmed(link.url), kind: link.kind }))
       .filter(link => link.label.length > 0 && link.url.length > 0),
     honeymoonFund: honeymoonFund && honeymoonFund.title.length > 0 ? honeymoonFund : undefined,
     rsvp: {
       enabled: config.rsvp.enabled,
       deadline: optional(config.rsvp.deadline),
       message: optional(config.rsvp.message)
-    }
+    },
+    guide: prepareGuideForSave(config.guide)
   };
 };
