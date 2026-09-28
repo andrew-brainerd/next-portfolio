@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_WEDDING_GUIDE } from '@/constants/wedding';
-import type { WeddingGuideConfig } from '@/types/wedding';
+import type { PublicWeddingConfig, WeddingGuideConfig } from '@/types/wedding';
 import {
   findDuplicateGuests,
   generateGuideKey,
+  getGuideSections,
   guideEntryUrls,
   isoToZonedLocal,
   parseGuestLines,
@@ -144,5 +145,42 @@ describe('guideEntryUrls', () => {
 
   it('returns nothing without a key', () => {
     expect(guideEntryUrls('https://example.com', '', [])).toEqual([]);
+  });
+});
+
+describe('getGuideSections', () => {
+  const publicConfig = (): PublicWeddingConfig => ({
+    coupleNames: { partnerA: 'Andrew', partnerB: 'Hayley' },
+    weddingDate: '2027-11-19',
+    ceremony: { venueName: 'Colony Club' },
+    reception: { venueName: 'Colony Club' },
+    hotels: [],
+    schedule: [],
+    faq: [],
+    registry: [],
+    rsvp: { enabled: false },
+    guide: structuredClone(DEFAULT_WEDDING_GUIDE)
+  });
+
+  it('drops every empty section', () => {
+    expect(getGuideSections(publicConfig())).toEqual([]);
+  });
+
+  it('keeps sections with content in page order', () => {
+    const config = publicConfig();
+    config.hotels = [{ name: 'Shinola' }];
+    config.schedule = [{ time: '4:30 PM', title: 'Ceremony' }];
+    config.honeymoonFund = { title: 'Honeymoon' };
+    config.guide.messages.enabled = true;
+    config.guide.quiz = { ...config.guide.quiz, enabled: true, questions: [{ id: 'q1', prompt: '?', choices: ['a', 'b', 'c'] }] };
+
+    expect(getGuideSections(config).map(section => section.id)).toEqual(['timeline', 'quiz', 'messages', 'registry', 'hotels']);
+  });
+
+  it('hides a quiz that is disabled even with questions', () => {
+    const config = publicConfig();
+    config.guide.quiz = { ...config.guide.quiz, questions: [{ id: 'q1', prompt: '?', choices: ['a', 'b', 'c'] }] };
+
+    expect(getGuideSections(config)).toEqual([]);
   });
 });

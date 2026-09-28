@@ -3,9 +3,22 @@
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface PasscodeGateProps {
+  kicker?: string;
+  title?: string;
+  prompt?: string;
+  buttonLabel?: string;
+}
+
 // The storybook's locked cover. Palette comes from the `.storybook` token scope
-// (spec Appendix B) — deliberately independent of the site theme.
-export const PasscodeGate = () => {
+// (spec Appendix B) — deliberately independent of the site theme. The day-of
+// guidebook reuses it with its own copy; refresh keeps any ?table= in the URL.
+export const PasscodeGate = ({
+  kicker = 'A storybook for',
+  title = 'Our Wedding',
+  prompt = 'This book opens with the passcode from your invitation.',
+  buttonLabel = 'Open the book'
+}: PasscodeGateProps) => {
   const router = useRouter();
   const [code, setCode] = useState('');
   const [checking, setChecking] = useState(false);
@@ -41,10 +54,10 @@ export const PasscodeGate = () => {
     <main className="storybook flex min-h-dvh items-center justify-center bg-[var(--sb-cream)] p-6">
       <div className="w-full max-w-md rounded-2xl border-4 border-[var(--sb-gold)] bg-[var(--sb-crimson)] p-8 text-center shadow-2xl sm:p-12">
         <div className="rounded-lg border border-[var(--sb-gold)]/60 px-4 py-10">
-          <p className="font-garamond text-xs uppercase tracking-[0.3em] text-[var(--sb-gold)]">A storybook for</p>
-          <h1 className="mt-4 font-pacifico text-4xl text-[var(--sb-white)]">Our Wedding</h1>
+          <p className="font-garamond text-xs uppercase tracking-[0.3em] text-[var(--sb-gold)]">{kicker}</p>
+          <h1 className="mt-4 font-pacifico text-4xl text-[var(--sb-white)]">{title}</h1>
           <p className="mt-6 font-garamond text-base text-[var(--sb-cream)]/80">
-            This book opens with the passcode from your invitation.
+            {prompt}
           </p>
 
           <form onSubmit={onSubmit} className="mt-6">
@@ -70,7 +83,7 @@ export const PasscodeGate = () => {
               disabled={checking || code.trim().length === 0}
               className="mt-4 w-full rounded-lg bg-[var(--sb-gold)] px-6 py-2.5 font-semibold text-[var(--sb-ink)] transition-colors hover:bg-[var(--sb-gold-deep)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {checking ? 'Opening…' : 'Open the book'}
+              {checking ? 'Opening…' : buttonLabel}
             </button>
           </form>
 

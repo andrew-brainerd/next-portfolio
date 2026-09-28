@@ -234,6 +234,13 @@ export interface QuizLeaderboard {
   me?: { rank: number; of: number };
 }
 
+export type GuideSectionId = 'seating' | 'timeline' | 'menu' | 'venue' | 'quiz' | 'messages' | 'registry' | 'hotels';
+
+export interface GuideSection {
+  id: GuideSectionId;
+  label: string;
+}
+
 // A tag/QR entry link with its server-rendered QR SVG
 export interface GuideTagLink {
   label: string;

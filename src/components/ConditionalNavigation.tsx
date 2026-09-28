@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { WEDDING_CARDS_ROUTE, WEDDING_ROUTE } from '@/constants/routes';
+import { WEDDING_CARDS_ROUTE, WEDDING_GUIDE_ROUTE, WEDDING_ROUTE } from '@/constants/routes';
 import { Navigation } from '@/components/Navigation';
 
 interface ConditionalNavigationProps {
@@ -14,7 +14,7 @@ export const ConditionalNavigation = ({ isLoggedIn }: ConditionalNavigationProps
   const isUsPage = pathname === '/us';
   // The wedding storybook is an immersive guest page — exact match only, so
   // /wedding/settings and /wedding/planning keep the normal site chrome.
-  const isWeddingStorybook = pathname === WEDDING_ROUTE;
+  const isWeddingStorybook = pathname === WEDDING_ROUTE || pathname === WEDDING_GUIDE_ROUTE;
   // Printable table cards — no chrome on the page or the printout
   const isWeddingCards = pathname === WEDDING_CARDS_ROUTE;
 

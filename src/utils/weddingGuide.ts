@@ -1,6 +1,14 @@
 import { WEDDING_ENTER_ROUTE } from '@/constants/routes';
 import { DEFAULT_WEDDING_GUIDE, QUIZ_CHOICE_COUNT } from '@/constants/wedding';
-import type { MenuCourse, QuizQuestion, SeatedGuest, SeatingTable, WeddingGuideConfig } from '@/types/wedding';
+import type {
+  GuideSection,
+  MenuCourse,
+  PublicWeddingConfig,
+  QuizQuestion,
+  SeatedGuest,
+  SeatingTable,
+  WeddingGuideConfig
+} from '@/types/wedding';
 
 const trimmed = (value?: string): string => (value ?? '').trim();
 
@@ -209,4 +217,28 @@ export const guideEntryUrls = (
     { label: 'Welcome sign', url: base },
     ...tables.map(table => ({ label: table.name, tableId: table.id, url: `${base}&table=${encodeURIComponent(table.id)}` }))
   ];
+};
+
+/** Guide sections with content, in page order — empty ones are dropped along with their nav chips. */
+export const getGuideSections = (config: PublicWeddingConfig): GuideSection[] => {
+  const { guide } = config;
+  const candidates: (GuideSection & { show: boolean })[] = [
+    { id: 'seating', label: 'Your seat', show: guide.seating.length > 0 },
+    { id: 'timeline', label: 'Timeline', show: config.schedule.length > 0 },
+    { id: 'menu', label: 'Menu', show: guide.menu.courses.length > 0 || guide.menu.bar.length > 0 },
+    {
+      id: 'venue',
+      label: 'The venue',
+      show:
+        !!guide.venue.history ||
+        guide.venue.funFacts.length > 0 ||
+        guide.venue.maps.length > 0 ||
+        guide.venue.practical.length > 0
+    },
+    { id: 'quiz', label: 'Quiz', show: guide.quiz.enabled && guide.quiz.questions.length > 0 },
+    { id: 'messages', label: 'Message us', show: guide.messages.enabled },
+    { id: 'registry', label: 'Registry', show: config.registry.length > 0 || !!config.honeymoonFund?.title },
+    { id: 'hotels', label: 'Hotels', show: config.hotels.length > 0 }
+  ];
+  return candidates.filter(section => section.show).map(({ id, label }) => ({ id, label }));
 };
