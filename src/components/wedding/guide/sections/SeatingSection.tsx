@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { useGuideMe } from '@/hooks/useGuideMe';
 import type { SeatMatch, SeatingTable } from '@/types/wedding';
@@ -45,12 +45,23 @@ interface SeatingSectionProps {
 
 export const SeatingSection = ({ tables, initialTableId }: SeatingSectionProps) => {
   const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [me, setMe] = useGuideMe();
   const [query, setQuery] = useState('');
   const [picked, setPicked] = useState<SeatMatch | undefined>();
   const [openTableId, setOpenTableId] = useState(
     tables.some(table => table.id === initialTableId) ? initialTableId : undefined
   );
+
+  // On a slow venue connection guests can type before hydration; adopt that text
+  // (the DOM keeps it, but React never saw an onChange for it)
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const typed = inputRef.current?.value ?? '';
+      if (typed) setQuery(typed);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   // A table-card tag lands here via ?table= — bring the section into view
   useEffect(() => {
@@ -76,6 +87,7 @@ export const SeatingSection = ({ tables, initialTableId }: SeatingSectionProps) 
         Find your name
       </label>
       <input
+        ref={inputRef}
         id={inputId}
         type="search"
         value={query}
