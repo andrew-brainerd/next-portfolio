@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ScheduleItem } from '@/types/wedding';
-import { formatZonedTime, getNowNext, parseScheduleTime, zonedDate } from './scheduleTime';
+import type { ScheduleItem, VenueMap } from '@/types/wedding';
+import { formatZonedTime, getNowNext, parseScheduleTime, pickDefaultMapIndex, zonedDate } from './scheduleTime';
 
 const TZ = 'America/Detroit';
 const DATE = '2027-11-19';
@@ -88,5 +88,25 @@ describe('getNowNext', () => {
 describe('formatZonedTime', () => {
   it('formats in the venue zone', () => {
     expect(formatZonedTime(at('2027-11-19T18:30:00'), TZ)).toBe('6:30 PM');
+  });
+});
+
+describe('pickDefaultMapIndex', () => {
+  const map = (label: string, activeFrom?: string): VenueMap => ({ label, src: '/x.jpg', alt: label, width: 1, height: 1, activeFrom });
+  const maps = [map('Ceremony'), map('Reception', 'Cocktail hour')];
+
+  it('shows the ceremony layout until the reception item starts', () => {
+    expect(pickDefaultMapIndex(maps, schedule, DATE, TZ, at('2027-11-12T12:00:00'))).toBe(0);
+    expect(pickDefaultMapIndex(maps, schedule, DATE, TZ, at('2027-11-19T16:45:00'))).toBe(0);
+  });
+
+  it('switches once the activeFrom item has started, and stays switched after the day', () => {
+    expect(pickDefaultMapIndex(maps, schedule, DATE, TZ, at('2027-11-19T17:20:00'))).toBe(1);
+    expect(pickDefaultMapIndex(maps, schedule, DATE, TZ, at('2027-11-21T12:00:00'))).toBe(1);
+  });
+
+  it('handles no maps and unknown activeFrom titles', () => {
+    expect(pickDefaultMapIndex([], schedule, DATE, TZ, Date.now())).toBe(-1);
+    expect(pickDefaultMapIndex([map('Only', 'Nope')], schedule, DATE, TZ, at('2027-11-19T20:00:00'))).toBe(0);
   });
 });

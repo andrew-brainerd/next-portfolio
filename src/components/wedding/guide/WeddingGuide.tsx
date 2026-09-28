@@ -5,7 +5,13 @@ import { formatWeddingDate } from '@/utils/wedding';
 import { getGuideSections } from '@/utils/weddingGuide';
 import { NowNextCard } from './NowNextCard';
 import { SectionNav } from './SectionNav';
+import { YourTableCard } from './YourTableCard';
+import { HotelsSection } from './sections/HotelsSection';
+import { MenuSection } from './sections/MenuSection';
+import { RegistrySection } from './sections/RegistrySection';
+import { SeatingSection } from './sections/SeatingSection';
 import { TimelineSection } from './sections/TimelineSection';
+import { VenueSection } from './sections/VenueSection';
 
 interface WeddingGuideProps {
   config: PublicWeddingConfig;
@@ -14,11 +20,12 @@ interface WeddingGuideProps {
 }
 
 // The day-of guidebook: header, pinned cards, sticky section chips, then one card per section
-export const WeddingGuide = ({ config, initialNow }: WeddingGuideProps) => {
+export const WeddingGuide = ({ config, initialNow, tableId }: WeddingGuideProps) => {
   const { guide } = config;
   const { partnerA, partnerB } = config.coupleNames;
 
   const renderers: Partial<Record<GuideSectionId, ReactNode>> = {
+    seating: <SeatingSection tables={guide.seating} initialTableId={tableId} />,
     timeline: (
       <TimelineSection
         schedule={config.schedule}
@@ -26,7 +33,20 @@ export const WeddingGuide = ({ config, initialNow }: WeddingGuideProps) => {
         timeZone={guide.timeZone}
         initialNow={initialNow}
       />
-    )
+    ),
+    menu: <MenuSection menu={guide.menu} />,
+    venue: (
+      <VenueSection
+        venue={guide.venue}
+        venueName={config.reception.venueName}
+        schedule={config.schedule}
+        weddingDate={config.weddingDate}
+        timeZone={guide.timeZone}
+        initialNow={initialNow}
+      />
+    ),
+    registry: <RegistrySection config={config} />,
+    hotels: <HotelsSection hotels={config.hotels} />
   };
   const sections = getGuideSections(config).filter(section => renderers[section.id]);
 
@@ -53,6 +73,7 @@ export const WeddingGuide = ({ config, initialNow }: WeddingGuideProps) => {
           initialNow={initialNow}
           showMessageLink={guide.messages.enabled}
         />
+        <YourTableCard tables={guide.seating} />
         {sections.map(section => (
           <div key={section.id}>{renderers[section.id]}</div>
         ))}

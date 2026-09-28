@@ -241,6 +241,19 @@ export interface GuideSection {
   label: string;
 }
 
+export interface SeatMatch {
+  tableId: string;
+  tableName: string;
+  guestIndex: number;
+  label: string; // name, or "Guest of <host>"
+}
+
+// Remembered on the guest's device after "This is me"
+export interface GuideMe {
+  tableId: string;
+  name: string;
+}
+
 // A tag/QR entry link with its server-rendered QR SVG
 export interface GuideTagLink {
   label: string;

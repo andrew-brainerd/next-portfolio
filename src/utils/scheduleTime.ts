@@ -1,4 +1,4 @@
-import type { ScheduleItem } from '@/types/wedding';
+import type { ScheduleItem, VenueMap } from '@/types/wedding';
 import { isoToZonedLocal, zonedLocalToIso } from '@/utils/weddingGuide';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -94,4 +94,38 @@ export const formatZonedTime = (instant: number, timeZone: string): string =>
   new Date(instant)
     .toLocaleTimeString('en-US', { timeZone, hour: 'numeric', minute: '2-digit' })
     // Newer ICU uses a narrow no-break space before AM/PM; keep server and browser output identical
-    .replace(/ /g, ' ');
+    .replace(/\u202f/g, ' ');
+
+/**
+ * Which map layout to show first: the one whose `activeFrom` schedule item started
+ * most recently on the wedding day, else the first map without `activeFrom`.
+ */
+export const pickDefaultMapIndex = (
+  maps: VenueMap[],
+  schedule: ScheduleItem[],
+  weddingDate: string,
+  timeZone: string,
+  now: number
+): number => {
+  if (maps.length === 0) return -1;
+  const onTheDay = /^\d{4}-\d{2}-\d{2}$/.test(weddingDate) && zonedDate(now, timeZone) >= weddingDate;
+
+  let best = -1;
+  let bestStart = -Infinity;
+  if (onTheDay) {
+    maps.forEach((map, index) => {
+      const item = schedule.find(entry => entry.title === map.activeFrom);
+      const minutes = parseScheduleTime(item?.time);
+      if (minutes === null) return;
+      const start = toInstant(weddingDate, minutes, timeZone);
+      if (start <= now && start > bestStart) {
+        best = index;
+        bestStart = start;
+      }
+    });
+  }
+
+  if (best >= 0) return best;
+  const fallback = maps.findIndex(map => !map.activeFrom);
+  return fallback >= 0 ? fallback : 0;
+};
