@@ -262,6 +262,19 @@ export interface GuideTagLink {
   svg: string;
 }
 
+export type QuizSubmitOutcome =
+  | { status: 'ok'; result: QuizResult }
+  | { status: 'closed' }
+  | { status: 'error' };
+
+export type MessageSendOutcome = 'sent' | 'closed' | 'error';
+
+// The guest's quiz result, remembered on this device
+export interface StoredQuizResult {
+  name: string;
+  result: QuizResult;
+}
+
 export interface WeddingMessage {
   id?: string;
   clientId: string;

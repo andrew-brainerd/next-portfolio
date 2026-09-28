@@ -1,5 +1,10 @@
 import type {
+  MessageSendOutcome,
   PublicWeddingConfig,
+  QuizAnswers,
+  QuizLeaderboard,
+  QuizResult,
+  QuizSubmitOutcome,
   Venue,
   WeddingConfig,
   WeddingMessage,
@@ -119,4 +124,62 @@ export const setWeddingMessageRead = (id: string, read: boolean): Promise<Weddin
     `/wedding/messages/${encodeURIComponent(id)}`,
     { read }
   );
+};
+
+const brainerdApiUrl = (path: string) => `${process.env.NEXT_PUBLIC_BRAINERD_API_URL}${path}`;
+
+/** Submit the couple quiz. Public — plain fetch. The server scores it; 403 means closed. */
+export const submitWeddingQuiz = async (input: {
+  clientId: string;
+  name: string;
+  answers: QuizAnswers;
+}): Promise<QuizSubmitOutcome> => {
+  try {
+    const response = await fetch(brainerdApiUrl('/wedding/quiz'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input)
+    });
+
+    if (response.status === 403) return { status: 'closed' };
+    if (!response.ok) return { status: 'error' };
+    return { status: 'ok', result: (await response.json()) as QuizResult };
+  } catch (error) {
+    console.error('Failed to submit wedding quiz', error);
+    return { status: 'error' };
+  }
+};
+
+/** Public leaderboard; empty with `visible: false` until the reveal. */
+export const getWeddingQuizLeaderboard = async (clientId?: string): Promise<QuizLeaderboard | undefined> => {
+  try {
+    const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : '';
+    const response = await fetch(brainerdApiUrl(`/wedding/quiz/leaderboard${query}`), { cache: 'no-store' });
+    return response.ok ? ((await response.json()) as QuizLeaderboard) : undefined;
+  } catch (error) {
+    console.error('Failed to fetch wedding quiz leaderboard', error);
+    return undefined;
+  }
+};
+
+/** Send the couple a private message. Public — plain fetch. */
+export const sendWeddingMessage = async (input: {
+  clientId: string;
+  name: string;
+  message: string;
+  table?: string;
+}): Promise<MessageSendOutcome> => {
+  try {
+    const response = await fetch(brainerdApiUrl('/wedding/messages'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input)
+    });
+
+    if (response.status === 403) return 'closed';
+    return response.ok ? 'sent' : 'error';
+  } catch (error) {
+    console.error('Failed to send wedding message', error);
+    return 'error';
+  }
 };

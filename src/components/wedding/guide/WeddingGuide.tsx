@@ -8,6 +8,8 @@ import { SectionNav } from './SectionNav';
 import { YourTableCard } from './YourTableCard';
 import { HotelsSection } from './sections/HotelsSection';
 import { MenuSection } from './sections/MenuSection';
+import { MessageSection } from './sections/MessageSection';
+import { QuizSection } from './sections/QuizSection';
 import { RegistrySection } from './sections/RegistrySection';
 import { SeatingSection } from './sections/SeatingSection';
 import { TimelineSection } from './sections/TimelineSection';
@@ -45,6 +47,8 @@ export const WeddingGuide = ({ config, initialNow, tableId }: WeddingGuideProps)
         initialNow={initialNow}
       />
     ),
+    quiz: <QuizSection quiz={guide.quiz} timeZone={guide.timeZone} initialNow={initialNow} />,
+    messages: <MessageSection prompt={guide.messages.prompt} />,
     registry: <RegistrySection config={config} />,
     hotels: <HotelsSection hotels={config.hotels} />
   };
