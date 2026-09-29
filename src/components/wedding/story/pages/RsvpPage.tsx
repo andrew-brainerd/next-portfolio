@@ -33,6 +33,7 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
   const [guestCount, setGuestCount] = useState(0);
   const [guestNames, setGuestNames] = useState<string[]>([]);
   const [note, setNote] = useState('');
+  const [email, setEmail] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +57,7 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
         setGuestCount(rsvp.guestCount ?? 0);
         setGuestNames(resizeNames(rsvp.guestNames ?? [], rsvp.guestCount ?? 0));
         setNote(rsvp.note ?? '');
+        setEmail(rsvp.email ?? '');
       } catch {
         // Malformed saved RSVP — start fresh
       }
@@ -93,7 +95,8 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
       status,
       guestCount: status === 'going' ? guestCount : 0,
       guestNames: status === 'going' ? guestNames.map(n => n.trim()) : [],
-      note: note.trim() || undefined
+      note: note.trim() || undefined,
+      email: email.trim() || undefined
     };
 
     const saved = await submitWeddingRsvp(input);
@@ -112,6 +115,11 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
     return (
       <LogisticsPage kicker="Kindly Reply" title="RSVP">
         <p className="text-center text-lg">{CONFIRMATION[status]}</p>
+        {email.trim() && (
+          <p className="text-center text-sm">
+            We sent a confirmation to <span className="font-semibold">{email.trim()}</span>.
+          </p>
+        )}
         <p className="text-center">
           <button
             type="button"
@@ -152,6 +160,22 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
               required
               maxLength={80}
               placeholder="First and last name"
+              className={INPUT_CLASS}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="wedding-rsvp-email" className="block text-sm">
+              Email <span className="text-[var(--sb-ink)]/60">(optional)</span>
+            </label>
+            <input
+              id="wedding-rsvp-email"
+              type="email"
+              value={email}
+              onChange={event => setEmail(event.target.value)}
+              maxLength={254}
+              autoComplete="email"
+              placeholder="We'll send you a confirmation"
               className={INPUT_CLASS}
             />
           </div>

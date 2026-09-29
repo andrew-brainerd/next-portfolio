@@ -24,6 +24,7 @@ const RsvpGroup = ({ title, rsvps }: RsvpGroupProps) => (
         {rsvps.map(rsvp => (
           <li key={rsvp.id ?? rsvp.clientId} className="text-sm text-neutral-200">
             {formatGuestLine(rsvp)}
+            {rsvp.email && <span className="ml-2 text-neutral-500">{rsvp.email}</span>}
             {rsvp.note && <span className="ml-2 text-neutral-400">— {rsvp.note}</span>}
           </li>
         ))}

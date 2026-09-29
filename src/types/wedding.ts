@@ -271,6 +271,7 @@ export interface WeddingRsvpInput {
   guestCount: number; // plus-ones beyond the named guest
   guestNames: string[]; // one per plus-one
   note?: string; // dietary restrictions / message
+  email?: string; // optional; the backend emails a confirmation on every submit
 }
 
 export interface WeddingRsvp extends WeddingRsvpInput {
