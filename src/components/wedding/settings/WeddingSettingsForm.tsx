@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { REGISTRY_LINK_KINDS } from '@/constants/wedding';
 import type { Hotel, RegistryLink, ScheduleItem, WeddingConfig, WeddingGuideConfig } from '@/types/wedding';
@@ -20,9 +21,12 @@ type SaveStatus = 'idle' | 'saved' | 'error';
 
 interface WeddingSettingsFormProps {
   initialConfig: WeddingConfig;
+  origin: string; // this request's origin, for full share-link URLs
 }
 
-export const WeddingSettingsForm = ({ initialConfig }: WeddingSettingsFormProps) => {
+export const WeddingSettingsForm = ({ initialConfig, origin }: WeddingSettingsFormProps) => {
+  const router = useRouter();
+  const [savedShareKey, setSavedShareKey] = useState(initialConfig.shareKey ?? '');
   const [config, setConfig] = useState<WeddingConfig>(() => withEditableWeddingDefaults(initialConfig));
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<SaveStatus>('idle');
@@ -43,7 +47,10 @@ export const WeddingSettingsForm = ({ initialConfig }: WeddingSettingsFormProps)
     try {
       const saved = await updateWeddingConfig(prepareWeddingConfigForSave(config));
       setConfig(withEditableWeddingDefaults(saved));
+      setSavedShareKey(saved.shareKey ?? '');
       setStatus('saved');
+      // Re-renders the server-built share and tag links from the new keys
+      router.refresh();
     } catch {
       setStatus('error');
     } finally {
@@ -63,7 +70,12 @@ export const WeddingSettingsForm = ({ initialConfig }: WeddingSettingsFormProps)
           onChange={guestPasscode => patch({ guestPasscode })}
           maxLength={64}
         />
-        <ShareKeyField shareKey={config.shareKey} onChange={shareKey => patch({ shareKey })} />
+        <ShareKeyField
+          shareKey={config.shareKey}
+          savedShareKey={savedShareKey}
+          origin={origin}
+          onChange={shareKey => patch({ shareKey })}
+        />
       </SectionCard>
 
       <SectionCard title="The basics">
