@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 
-import type { PublicWeddingConfig, WeddingRsvpInput, WeddingRsvpStatus } from '@/types/wedding';
+import type { PublicWeddingConfig, RsvpEditChannel, WeddingRsvpInput, WeddingRsvpStatus } from '@/types/wedding';
 import { WEDDING_RSVP_CLIENT_ID_KEY, WEDDING_RSVP_SAVED_KEY, WEDDING_RSVP_STATUSES } from '@/constants/wedding';
 import { WEDDING_RSVP_FIND_ROUTE } from '@/constants/routes';
 import { submitWeddingRsvp } from '@/api/wedding';
@@ -19,6 +19,11 @@ const CONFIRMATION: Record<WeddingRsvpStatus, string> = {
   maybe: "Thanks for letting us know — update this page whenever you're sure.",
   no: "We'll miss you! Thank you for telling us — you can change this later if plans shift."
 };
+
+const CONTACT_METHODS: { value: RsvpEditChannel; label: string }[] = [
+  { value: 'email', label: 'Email' },
+  { value: 'sms', label: 'Text' }
+];
 
 const resizeNames = (names: string[], count: number): string[] =>
   Array.from({ length: count }, (_, i) => names[i] ?? '');
@@ -38,6 +43,8 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
   const [note, setNote] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  // The one contact we keep (and require): where edit links go, and email gets confirmations
+  const [contactMethod, setContactMethod] = useState<RsvpEditChannel>('email');
   const [isSaving, setIsSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +71,7 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
         setNote(rsvp.note ?? '');
         setEmail(rsvp.email ?? '');
         setPhone(rsvp.phone ?? '');
+        if (rsvp.phone && !rsvp.email) setContactMethod('sms');
       } catch {
         // Malformed saved RSVP — start fresh
       }
@@ -91,8 +99,8 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
     event.preventDefault();
     const trimmedName = name.trim();
     if (!trimmedName || isSaving) return;
-    if (phone.trim() && !normalizePhone(phone)) {
-      setError('Enter a 10-digit US phone number, or leave it blank.');
+    if (contactMethod === 'sms' && !normalizePhone(phone)) {
+      setError('Enter a 10-digit US phone number.');
       return;
     }
 
@@ -106,8 +114,9 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
       guestCount: status === 'going' ? guestCount : 0,
       guestNames: status === 'going' ? guestNames.map(n => n.trim()) : [],
       note: note.trim() || undefined,
-      email: email.trim() || undefined,
-      phone: phone.trim() || undefined
+      // Only the chosen contact is kept; the other is cleared
+      email: contactMethod === 'email' ? email.trim() : undefined,
+      phone: contactMethod === 'sms' ? phone.trim() : undefined
     };
 
     const saved = await submitWeddingRsvp(input);
@@ -126,7 +135,7 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
     return (
       <LogisticsPage kicker="Kindly Reply" title="RSVP">
         <p className="text-center text-lg">{CONFIRMATION[status]}</p>
-        {email.trim() && (
+        {contactMethod === 'email' && email.trim() && (
           <p className="text-center text-sm">
             We sent a confirmation to <span className="font-semibold">{email.trim()}</span>.
           </p>
@@ -175,38 +184,63 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
             />
           </div>
 
-          <div>
-            <label htmlFor="wedding-rsvp-email" className="block text-sm">
-              Email <span className="text-[var(--sb-ink)]/60">(optional)</span>
-            </label>
-            <input
-              id="wedding-rsvp-email"
-              type="email"
-              value={email}
-              onChange={event => setEmail(event.target.value)}
-              maxLength={254}
-              autoComplete="email"
-              placeholder="We'll send you a confirmation"
-              className={INPUT_CLASS}
-            />
-          </div>
+          <fieldset>
+            <legend className="text-sm">How should we reach you?</legend>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {CONTACT_METHODS.map(option => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setContactMethod(option.value)}
+                  aria-pressed={contactMethod === option.value}
+                  className={`rounded-lg border px-2 py-2 text-sm transition-colors ${
+                    contactMethod === option.value
+                      ? 'border-[var(--sb-crimson)] bg-[var(--sb-crimson)] text-[var(--sb-white)]'
+                      : 'border-[var(--sb-gold)]/60 bg-[var(--sb-white)] text-[var(--sb-ink)] hover:border-[var(--sb-gold)]'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
 
-          <div>
-            <label htmlFor="wedding-rsvp-phone" className="block text-sm">
-              Phone <span className="text-[var(--sb-ink)]/60">(optional, US)</span>
-            </label>
-            <input
-              id="wedding-rsvp-phone"
-              type="tel"
-              value={phone}
-              onChange={event => setPhone(event.target.value)}
-              maxLength={20}
-              autoComplete="tel"
-              inputMode="tel"
-              placeholder="To find your RSVP later by text"
-              className={INPUT_CLASS}
-            />
-          </div>
+          {contactMethod === 'email' ? (
+            <div>
+              <label htmlFor="wedding-rsvp-email" className="block text-sm">
+                Email <span aria-hidden="true" className="text-[var(--sb-crimson)]">*</span>
+              </label>
+              <input
+                id="wedding-rsvp-email"
+                type="email"
+                value={email}
+                onChange={event => setEmail(event.target.value)}
+                required
+                maxLength={254}
+                autoComplete="email"
+                placeholder="We'll send you a confirmation"
+                className={INPUT_CLASS}
+              />
+            </div>
+          ) : (
+            <div>
+              <label htmlFor="wedding-rsvp-phone" className="block text-sm">
+                Phone (US) <span aria-hidden="true" className="text-[var(--sb-crimson)]">*</span>
+              </label>
+              <input
+                id="wedding-rsvp-phone"
+                type="tel"
+                value={phone}
+                onChange={event => setPhone(event.target.value)}
+                required
+                maxLength={20}
+                autoComplete="tel"
+                inputMode="tel"
+                placeholder="To find your RSVP later by text"
+                className={INPUT_CLASS}
+              />
+            </div>
+          )}
 
           <fieldset>
             <legend className="text-sm">Will you be there?</legend>
