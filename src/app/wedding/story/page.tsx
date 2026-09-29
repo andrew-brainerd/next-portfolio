@@ -26,7 +26,7 @@ export default async function WeddingStoryPage() {
     <WeddingClockProvider offsetMs={clockOffset}>
       <StorybookReader pages={buildStorybook(config)} />
       <WeddingHomeLink />
-      {isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} />}
+      {isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} weddingDate={config.weddingDate} />}
     </WeddingClockProvider>
   );
 }

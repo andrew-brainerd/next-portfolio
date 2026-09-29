@@ -25,7 +25,7 @@ export default async function WeddingDetailsPage() {
     <WeddingClockProvider offsetMs={clockOffset}>
       <WeddingDetails config={config} />
       <WeddingHomeLink />
-      {isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} />}
+      {isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} weddingDate={config.weddingDate} />}
     </WeddingClockProvider>
   );
 }

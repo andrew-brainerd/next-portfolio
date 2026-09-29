@@ -21,10 +21,11 @@ const ClockIcon = () => (
 interface WeddingDevClockProps {
   timeZone: string;
   initialNow: number;
+  weddingDate: string; // "2027-11-19"; enables the Wedding day shortcut
 }
 
 // WEDDING_ADMINS only: pick a future date the storybook, guide and quiz API treat as "now"
-export const WeddingDevClock = ({ timeZone, initialNow }: WeddingDevClockProps) => {
+export const WeddingDevClock = ({ timeZone, initialNow, weddingDate }: WeddingDevClockProps) => {
   const router = useRouter();
   const inputId = useId();
   const clockOffset = useWeddingClockOffset();
@@ -44,8 +45,11 @@ export const WeddingDevClock = ({ timeZone, initialNow }: WeddingDevClockProps) 
     router.refresh();
   };
 
-  const apply = () => {
-    const offset = Date.parse(zonedLocalToIso(local, timeZone)) - Date.now();
+  // Noon on the wedding day, venue time: the guide is open and the day's schedule is under way
+  const weddingDayLocal = /^\d{4}-\d{2}-\d{2}$/.test(weddingDate) ? `${weddingDate}T12:00` : undefined;
+
+  const apply = (target = local) => {
+    const offset = Date.parse(zonedLocalToIso(target, timeZone)) - Date.now();
     if (!(offset > 0)) {
       setError('Pick a future date and time.');
       return;
@@ -71,8 +75,20 @@ export const WeddingDevClock = ({ timeZone, initialNow }: WeddingDevClockProps) 
             className="mt-1 w-full rounded border border-neutral-600 bg-neutral-800 px-2 py-1.5 text-white [color-scheme:dark]"
           />
           {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+          {weddingDayLocal && (
+            <button
+              type="button"
+              onClick={() => {
+                setLocal(weddingDayLocal);
+                apply(weddingDayLocal);
+              }}
+              className="mt-3 w-full rounded border border-amber-400/70 px-3 py-1.5 text-amber-300 hover:bg-amber-400/10"
+            >
+              Wedding day (noon)
+            </button>
+          )}
           <div className="mt-3 flex gap-2">
-            <button type="button" onClick={apply} className="flex-1 rounded bg-white px-3 py-1.5 font-medium text-neutral-900">
+            <button type="button" onClick={() => apply()} className="flex-1 rounded bg-white px-3 py-1.5 font-medium text-neutral-900">
               Set
             </button>
             {mocked && (

@@ -32,7 +32,7 @@ export default async function WeddingRsvpPage() {
         </div>
       </main>
       <WeddingHomeLink />
-      {isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} />}
+      {isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} weddingDate={config.weddingDate} />}
     </WeddingClockProvider>
   );
 }

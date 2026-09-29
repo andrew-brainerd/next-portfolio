@@ -33,7 +33,7 @@ export default async function WeddingPage() {
   return (
     <WeddingClockProvider offsetMs={clockOffset}>
       <WeddingHub config={config} features={features} now={requestTime} />
-      {isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} />}
+      {isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} weddingDate={config.weddingDate} />}
     </WeddingClockProvider>
   );
 }

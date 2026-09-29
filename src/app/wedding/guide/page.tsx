@@ -42,7 +42,7 @@ export default async function WeddingGuidePage({ searchParams }: WeddingGuidePag
     return <GuideMessage>The guide is unavailable right now — try again in a moment.</GuideMessage>;
   }
 
-  const devClock = isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} />;
+  const devClock = isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} weddingDate={config.weddingDate} />;
   if (!features.guide) {
     return (
       <WeddingClockProvider offsetMs={clockOffset}>
