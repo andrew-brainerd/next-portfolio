@@ -26,6 +26,9 @@ const randomToken = (length: number): string => {
 /** Tag/QR key — short enough for a compact QR, URL-safe, no look-alike characters. */
 export const generateGuideKey = (): string => randomToken(16);
 
+/** Share-link key — same shape as the tag key. */
+export const generateShareKey = (): string => randomToken(16);
+
 export const newQuizQuestionId = (): string => `q-${randomToken(6).toLowerCase()}`;
 
 /** "Table 7 — The Michigan Crew" → "table-7-the-michigan-crew" (≤24 chars, the backend limit). */

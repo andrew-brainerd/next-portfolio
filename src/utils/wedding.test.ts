@@ -24,6 +24,7 @@ const baseConfig = (): WeddingConfig => ({
   registry: [],
   rsvp: { enabled: false },
   guideKey: ' tag-key ',
+  shareKey: ' share-key ',
   guide: DEFAULT_WEDDING_GUIDE
 });
 
@@ -31,6 +32,8 @@ describe('prepareWeddingConfigForSave', () => {
   it('trims top-level strings', () => {
     const result = prepareWeddingConfigForSave(baseConfig());
     expect(result.guestPasscode).toBe('secret');
+    expect(result.guideKey).toBe('tag-key');
+    expect(result.shareKey).toBe('share-key');
     expect(result.coupleNames.partnerA).toBe('Andrew');
     expect(result.ceremony.venueName).toBe('Ivy House');
   });

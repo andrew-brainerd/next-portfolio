@@ -1,8 +1,9 @@
 import { headers } from 'next/headers';
 import QRCode from 'qrcode';
 
-import type { GuideTagLink, SeatingTable } from '@/types/wedding';
+import type { GuideTagLink, SeatingTable, ShareLinkOption } from '@/types/wedding';
 import { guideEntryUrls } from '@/utils/weddingGuide';
+import { shareLinkUrls } from '@/utils/weddingShare';
 
 // Server-only: keeps the QR library out of client bundles.
 
@@ -18,6 +19,16 @@ export const buildGuideTagLinks = async (guideKey: string, tables: SeatingTable[
   const origin = await getRequestOrigin();
   return Promise.all(
     guideEntryUrls(origin, guideKey, tables).map(async link => ({
+      ...link,
+      svg: await QRCode.toString(link.url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' })
+    }))
+  );
+};
+
+export const buildShareLinks = async (shareKey: string): Promise<ShareLinkOption[]> => {
+  const origin = await getRequestOrigin();
+  return Promise.all(
+    shareLinkUrls(origin, shareKey).map(async link => ({
       ...link,
       svg: await QRCode.toString(link.url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' })
     }))

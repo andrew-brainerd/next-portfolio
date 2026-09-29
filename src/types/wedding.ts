@@ -45,6 +45,7 @@ export interface WeddingConfig {
   // Guest access — OWNER-ONLY, stripped from the public GET response
   guestPasscode: string;
   guideKey: string; // day-of guidebook tag/QR key; also accepted by /unlock
+  shareKey: string; // shareable-link key (/wedding/enter?k=…&to=…); also accepted by /unlock
 
   // Headline
   coupleNames: { partnerA: string; partnerB: string };
@@ -158,8 +159,8 @@ export type PublicWeddingGuideConfig = Omit<WeddingGuideConfig, 'quiz'> & {
   quiz: Omit<WeddingQuizConfig, 'questions'> & { questions: PublicQuizQuestion[] };
 };
 
-// Public shape strips the passcode, the guide key and the quiz answer key.
-export type PublicWeddingConfig = Omit<WeddingConfig, 'guestPasscode' | 'guideKey' | 'guide'> & {
+// Public shape strips the passcode, the guide and share keys and the quiz answer key.
+export type PublicWeddingConfig = Omit<WeddingConfig, 'guestPasscode' | 'guideKey' | 'shareKey' | 'guide'> & {
   guide: PublicWeddingGuideConfig;
 };
 
@@ -325,4 +326,15 @@ export interface WeddingHubTile {
   title: string;
   blurb: string;
   icon: ReactNode;
+}
+
+/** Where a share link lands (spec wedding.md §3 "Share link"). */
+export type ShareDestination = 'hub' | 'story' | 'details' | 'rsvp' | 'guide';
+
+/** One share-link option in the CMS, with its QR code. */
+export interface ShareLinkOption {
+  to: ShareDestination;
+  label: string;
+  url: string;
+  svg: string;
 }

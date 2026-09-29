@@ -102,6 +102,7 @@ export const withEditableWeddingDefaults = (config: WeddingConfig): WeddingConfi
   honeymoonFund: { title: '', description: '', url: '', ...config.honeymoonFund },
   rsvp: { deadline: '', message: '', ...config.rsvp },
   guideKey: config.guideKey ?? '',
+  shareKey: config.shareKey ?? '',
   guide: withEditableGuideDefaults(config.guide)
 });
 
@@ -142,6 +143,7 @@ export const prepareWeddingConfigForSave = (config: WeddingConfig): WeddingConfi
   return {
     guestPasscode: trimmed(config.guestPasscode),
     guideKey: trimmed(config.guideKey),
+    shareKey: trimmed(config.shareKey),
     coupleNames: {
       partnerA: trimmed(config.coupleNames.partnerA),
       partnerB: trimmed(config.coupleNames.partnerB)

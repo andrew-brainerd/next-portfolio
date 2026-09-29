@@ -9,6 +9,7 @@ import { prepareWeddingConfigForSave, withEditableWeddingDefaults } from '@/util
 import { CheckboxField, SectionCard, SelectField, TextArea, TextField } from './FormFields';
 import { EventBlockFields } from './EventBlockFields';
 import { GuideAccessFields } from './GuideAccessFields';
+import { ShareKeyField } from './ShareKeyField';
 import { ListEditor } from './ListEditor';
 import { MenuEditor } from './MenuEditor';
 import { QuizEditor } from './QuizEditor';
@@ -62,6 +63,7 @@ export const WeddingSettingsForm = ({ initialConfig }: WeddingSettingsFormProps)
           onChange={guestPasscode => patch({ guestPasscode })}
           maxLength={64}
         />
+        <ShareKeyField shareKey={config.shareKey} onChange={shareKey => patch({ shareKey })} />
       </SectionCard>
 
       <SectionCard title="The basics">

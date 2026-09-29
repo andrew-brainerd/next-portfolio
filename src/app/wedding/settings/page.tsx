@@ -8,9 +8,10 @@ import { getFullWeddingConfig, getWeddingMessages, getWeddingQuizEntries, getWed
 import { MessagesInbox } from '@/components/wedding/settings/MessagesInbox';
 import { QuizEntriesAdmin } from '@/components/wedding/settings/QuizEntriesAdmin';
 import { RsvpAdminList } from '@/components/wedding/settings/RsvpAdminList';
+import { ShareLinkPanel } from '@/components/wedding/settings/ShareLinkPanel';
 import { TagLinks } from '@/components/wedding/settings/TagLinks';
 import { WeddingSettingsForm } from '@/components/wedding/settings/WeddingSettingsForm';
-import { buildGuideTagLinks } from '@/utils/weddingQr';
+import { buildGuideTagLinks, buildShareLinks } from '@/utils/weddingQr';
 
 export const metadata: Metadata = {
   title: 'Wedding Settings',
@@ -34,6 +35,7 @@ export default async function WeddingSettingsPage() {
     getWeddingQuizEntries()
   ]);
   const tagLinks = config ? await buildGuideTagLinks(config.guideKey, config.guide.seating) : [];
+  const shareLinks = config ? await buildShareLinks(config.shareKey) : [];
 
   return (
     <div className="container mx-auto max-w-3xl p-6">
@@ -55,6 +57,7 @@ export default async function WeddingSettingsPage() {
           {messages && <MessagesInbox initialMessages={messages} />}
           {rsvps && <RsvpAdminList breakdown={rsvps} />}
           {quizEntries && <QuizEntriesAdmin initialEntries={quizEntries} />}
+          <ShareLinkPanel links={shareLinks} />
           <TagLinks links={tagLinks} />
           <WeddingSettingsForm initialConfig={config} />
         </div>

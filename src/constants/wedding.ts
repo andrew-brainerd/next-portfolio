@@ -2,6 +2,7 @@ import type {
   DietaryTag,
   QuizLeaderboardMode,
   RegistryLinkKind,
+  ShareDestination,
   WeddingGuideConfig,
   WeddingRsvpStatus
 } from '@/types/wedding';
@@ -68,3 +69,11 @@ export const QUIZ_CHOICE_COUNT = 3;
 // Release windows, in calendar months before weddingDate (spec wedding.md §3)
 export const STORYBOOK_OPENS_MONTHS_BEFORE = 6;
 export const RSVP_OPENS_MONTHS_BEFORE = 3;
+
+export const SHARE_DESTINATIONS: { value: ShareDestination; label: string }[] = [
+  { value: 'hub', label: 'Wedding home' },
+  { value: 'story', label: 'Our Story' },
+  { value: 'details', label: 'Venue & Hotels' },
+  { value: 'rsvp', label: 'RSVP' },
+  { value: 'guide', label: 'Wedding Day Guide' }
+];
