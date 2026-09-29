@@ -1,4 +1,6 @@
-import { WEDDING_RSVP_CLIENT_ID_KEY } from '@/constants/wedding';
+import { WEDDING_RSVP_CLIENT_ID_KEY, WEDDING_RSVP_SAVED_KEY } from '@/constants/wedding';
+import type { WeddingRsvp } from '@/types/wedding';
+import { toWeddingRsvpInput } from '@/utils/wedding';
 
 let fallbackId: string | undefined;
 
@@ -19,4 +21,14 @@ export const getWeddingClientId = (): string => {
     fallbackId ??= crypto.randomUUID();
     return fallbackId;
   }
+};
+
+/**
+ * Makes a found RSVP this device's own: the RSVP page then restores it into the form,
+ * and saving upserts the same document (same clientId).
+ */
+export const saveRsvpToThisDevice = (rsvp: WeddingRsvp): void => {
+  const input = toWeddingRsvpInput(rsvp);
+  window.localStorage.setItem(WEDDING_RSVP_CLIENT_ID_KEY, input.clientId);
+  window.localStorage.setItem(WEDDING_RSVP_SAVED_KEY, JSON.stringify(input));
 };

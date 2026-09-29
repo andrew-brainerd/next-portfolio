@@ -8,6 +8,7 @@ import {
   formatWindowOpening,
   isRsvpClosed,
   prepareWeddingConfigForSave,
+  toWeddingRsvpInput,
   weddingWindowOpensAt,
   withEditableWeddingDefaults
 } from './wedding';
@@ -226,5 +227,32 @@ describe('weddingWindowOpensAt', () => {
 describe('formatWindowOpening', () => {
   it('formats the opening day in the venue zone', () => {
     expect(formatWindowOpening(Date.parse('2027-05-19T00:00:00-04:00'), 'America/Detroit')).toBe('May 19, 2027');
+  });
+});
+
+describe('toWeddingRsvpInput', () => {
+  const rsvp = {
+    id: 'abc',
+    clientId: 'client-1',
+    name: 'Jo',
+    status: 'going' as const,
+    guestCount: 1,
+    guestNames: ['Sam'],
+    note: '',
+    email: 'jo@example.com',
+    createdAt: 1,
+    updatedAt: 2
+  };
+
+  it('keeps the form fields and the clientId, dropping server-only ones', () => {
+    expect(toWeddingRsvpInput(rsvp)).toEqual({
+      clientId: 'client-1',
+      name: 'Jo',
+      status: 'going',
+      guestCount: 1,
+      guestNames: ['Sam'],
+      note: undefined,
+      email: 'jo@example.com'
+    });
   });
 });

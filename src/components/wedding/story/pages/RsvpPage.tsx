@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
+import Link from 'next/link';
 
 import type { PublicWeddingConfig, WeddingRsvpInput, WeddingRsvpStatus } from '@/types/wedding';
 import { WEDDING_RSVP_CLIENT_ID_KEY, WEDDING_RSVP_SAVED_KEY, WEDDING_RSVP_STATUSES } from '@/constants/wedding';
+import { WEDDING_RSVP_FIND_ROUTE } from '@/constants/routes';
 import { submitWeddingRsvp } from '@/api/wedding';
 import { useWeddingClockOffset } from '@/components/wedding/WeddingClock';
 import { formatWeddingDate, isRsvpClosed } from '@/utils/wedding';
@@ -23,11 +25,12 @@ const resizeNames = (names: string[], count: number): string[] =>
 
 interface RsvpPageProps {
   config: PublicWeddingConfig;
+  closesAt?: number; // RSVP changes stop here (1 month before the wedding); brainerd-api enforces it too
 }
 
 // The RSVP page (W-F), served at /wedding/rsvp. Client component: clientId lives
 // in localStorage so a returning guest edits their RSVP instead of duplicating it.
-export const RsvpPage = ({ config }: RsvpPageProps) => {
+export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
   const [name, setName] = useState('');
   const [status, setStatus] = useState<WeddingRsvpStatus>('going');
   const [guestCount, setGuestCount] = useState(0);
@@ -39,9 +42,10 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
   const [error, setError] = useState<string | null>(null);
 
   const clockOffset = useWeddingClockOffset();
-  // Same clock read as isRsvpClosed's default, shifted by the admin mock clock
+  // Same clock read as isRsvpClosed's default, shifted by the mock clock
   // eslint-disable-next-line react-hooks/purity
-  const closed = isRsvpClosed(config.rsvp.deadline, new Date(Date.now() + clockOffset));
+  const now = Date.now() + clockOffset;
+  const closed = isRsvpClosed(config.rsvp.deadline, new Date(now)) || (closesAt !== undefined && now >= closesAt);
   const deadline = config.rsvp.deadline ? formatWeddingDate(config.rsvp.deadline) : '';
 
   useEffect(() => {
@@ -264,6 +268,17 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
             {isSaving ? 'Sending…' : 'Send RSVP'}
           </button>
         </form>
+      )}
+      {!closed && (
+        <p className="text-center text-sm">
+          Already RSVP&apos;d on another device?{' '}
+          <Link
+            href={WEDDING_RSVP_FIND_ROUTE}
+            className="text-[var(--sb-crimson)] underline underline-offset-4 hover:text-[var(--sb-gold-deep)]"
+          >
+            Find your RSVP
+          </Link>
+        </p>
       )}
     </LogisticsPage>
   );

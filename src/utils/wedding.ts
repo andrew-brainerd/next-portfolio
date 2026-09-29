@@ -1,4 +1,4 @@
-import type { EventBlock, WeddingConfig } from '@/types/wedding';
+import type { EventBlock, WeddingConfig, WeddingRsvp, WeddingRsvpInput } from '@/types/wedding';
 import { prepareGuideForSave, withEditableGuideDefaults, zonedLocalToIso } from '@/utils/weddingGuide';
 
 const trimmed = (value?: string): string => (value ?? '').trim();
@@ -189,3 +189,14 @@ export const prepareWeddingConfigForSave = (config: WeddingConfig): WeddingConfi
     guide: prepareGuideForSave(config.guide)
   };
 };
+
+/** The form fields of a found RSVP, as the RSVP page restores them from localStorage. */
+export const toWeddingRsvpInput = (rsvp: WeddingRsvp): WeddingRsvpInput => ({
+  clientId: rsvp.clientId,
+  name: rsvp.name,
+  status: rsvp.status,
+  guestCount: rsvp.guestCount,
+  guestNames: rsvp.guestNames,
+  note: rsvp.note || undefined,
+  email: rsvp.email || undefined
+});

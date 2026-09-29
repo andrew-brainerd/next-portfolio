@@ -339,3 +339,20 @@ export interface ShareLinkOption {
   url: string;
   svg: string;
 }
+
+/** A find-your-RSVP search result: only what the screen shows (spec wedding.md W-F6). */
+export interface WeddingRsvpMatch {
+  id: string;
+  name: string;
+  partySize: number;
+  hasEmail: boolean;
+}
+
+export type RsvpLookupOutcome = { status: 'ok'; matches: WeddingRsvpMatch[] } | { status: 'closed' | 'error' };
+
+export type RsvpEditStartOutcome =
+  | { status: 'sent'; maskedEmail: string }
+  | { status: 'direct'; rsvp: WeddingRsvp }
+  | { status: 'closed' | 'missing' | 'error' };
+
+export type RsvpEditLinkOutcome = { status: 'ok'; rsvp: WeddingRsvp; code: string } | { status: 'closed' | 'missing' | 'error' };

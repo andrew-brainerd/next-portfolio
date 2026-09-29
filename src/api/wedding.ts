@@ -1,6 +1,9 @@
 import type {
   MessageSendOutcome,
   PublicWeddingConfig,
+  RsvpEditLinkOutcome,
+  RsvpEditStartOutcome,
+  RsvpLookupOutcome,
   QuizAnswers,
   QuizLeaderboard,
   QuizResult,
@@ -10,7 +13,8 @@ import type {
   WeddingQuizEntry,
   WeddingRsvp,
   WeddingRsvpBreakdown,
-  WeddingRsvpInput
+  WeddingRsvpInput,
+  WeddingRsvpMatch
 } from '@/types/wedding';
 import { deleteRequest, getRequest, patchRequest, putRequest } from '@/api/client';
 
@@ -189,5 +193,57 @@ export const sendWeddingMessage = async (input: {
   } catch (error) {
     console.error('Failed to send wedding message', error);
     return 'error';
+  }
+};
+
+// Find-and-edit RSVP calls: public, plain fetch like submitWeddingRsvp. 403 means RSVPs have closed.
+const rsvpFetch = (path: string, init?: RequestInit) =>
+  fetch(brainerdApiUrl(`/wedding/rsvp${path}`), {
+    ...init,
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store'
+  });
+
+/** Search RSVPs by name or email (3+ characters). */
+export const lookupWeddingRsvps = async (query: string): Promise<RsvpLookupOutcome> => {
+  try {
+    const response = await rsvpFetch('/lookup', { method: 'POST', body: JSON.stringify({ query }) });
+    if (response.status === 403) return { status: 'closed' };
+    if (!response.ok) return { status: 'error' };
+    return { status: 'ok', matches: (await response.json()) as WeddingRsvpMatch[] };
+  } catch (error) {
+    console.error('Failed to look up wedding RSVPs', error);
+    return { status: 'error' };
+  }
+};
+
+/** Start editing a found RSVP: emails an edit link when it has an email, else returns it directly. */
+export const requestWeddingRsvpEdit = async (id: string): Promise<RsvpEditStartOutcome> => {
+  try {
+    const response = await rsvpFetch(`/${encodeURIComponent(id)}/edit-link`, { method: 'POST' });
+    if (response.status === 403) return { status: 'closed' };
+    if (response.status === 404) return { status: 'missing' };
+    if (!response.ok) return { status: 'error' };
+    const body = (await response.json()) as { sent?: true; maskedEmail?: string; rsvp?: WeddingRsvp };
+    if (body.rsvp) return { status: 'direct', rsvp: body.rsvp };
+    return { status: 'sent', maskedEmail: body.maskedEmail ?? '' };
+  } catch (error) {
+    console.error('Failed to start a wedding RSVP edit', error);
+    return { status: 'error' };
+  }
+};
+
+/** Open an emailed edit link: the RSVP plus the guest passcode that unlocks this device. */
+export const openWeddingRsvpEditLink = async (token: string): Promise<RsvpEditLinkOutcome> => {
+  try {
+    const response = await rsvpFetch(`/edit/${encodeURIComponent(token)}`);
+    if (response.status === 403) return { status: 'closed' };
+    if (response.status === 404) return { status: 'missing' };
+    if (!response.ok) return { status: 'error' };
+    const { rsvp, code } = (await response.json()) as { rsvp: WeddingRsvp; code: string };
+    return { status: 'ok', rsvp, code };
+  } catch (error) {
+    console.error('Failed to open a wedding RSVP edit link', error);
+    return { status: 'error' };
   }
 };
