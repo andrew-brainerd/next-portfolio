@@ -1,6 +1,7 @@
 import type {
   MessageSendOutcome,
   PublicWeddingConfig,
+  RsvpEditChannel,
   RsvpEditLinkOutcome,
   RsvpEditStartOutcome,
   RsvpLookupOutcome,
@@ -204,7 +205,7 @@ const rsvpFetch = (path: string, init?: RequestInit) =>
     cache: 'no-store'
   });
 
-/** Search RSVPs by name or email (3+ characters). */
+/** Search RSVPs by name, email or US phone (3+ characters). */
 export const lookupWeddingRsvps = async (query: string): Promise<RsvpLookupOutcome> => {
   try {
     const response = await rsvpFetch('/lookup', { method: 'POST', body: JSON.stringify({ query }) });
@@ -217,16 +218,23 @@ export const lookupWeddingRsvps = async (query: string): Promise<RsvpLookupOutco
   }
 };
 
-/** Start editing a found RSVP: emails an edit link when it has an email, else returns it directly. */
-export const requestWeddingRsvpEdit = async (id: string): Promise<RsvpEditStartOutcome> => {
+/**
+ * Start editing a found RSVP: sends an edit link by email or text, or returns the RSVP directly
+ * when it has neither. 400 means it has no contact for that channel.
+ */
+export const requestWeddingRsvpEdit = async (id: string, channel: RsvpEditChannel): Promise<RsvpEditStartOutcome> => {
   try {
-    const response = await rsvpFetch(`/${encodeURIComponent(id)}/edit-link`, { method: 'POST' });
+    const response = await rsvpFetch(`/${encodeURIComponent(id)}/edit-link`, {
+      method: 'POST',
+      body: JSON.stringify({ channel })
+    });
     if (response.status === 403) return { status: 'closed' };
     if (response.status === 404) return { status: 'missing' };
+    if (response.status === 400) return { status: 'unavailable' };
     if (!response.ok) return { status: 'error' };
-    const body = (await response.json()) as { sent?: true; maskedEmail?: string; rsvp?: WeddingRsvp };
+    const body = (await response.json()) as { channel?: RsvpEditChannel; maskedTo?: string; rsvp?: WeddingRsvp };
     if (body.rsvp) return { status: 'direct', rsvp: body.rsvp };
-    return { status: 'sent', maskedEmail: body.maskedEmail ?? '' };
+    return { status: 'sent', channel: body.channel ?? channel, maskedTo: body.maskedTo ?? '' };
   } catch (error) {
     console.error('Failed to start a wedding RSVP edit', error);
     return { status: 'error' };

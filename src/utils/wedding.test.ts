@@ -8,6 +8,7 @@ import {
   formatWindowOpening,
   isRsvpClosed,
   prepareWeddingConfigForSave,
+  normalizePhone,
   toWeddingRsvpInput,
   weddingWindowOpensAt,
   withEditableWeddingDefaults
@@ -240,6 +241,7 @@ describe('toWeddingRsvpInput', () => {
     guestNames: ['Sam'],
     note: '',
     email: 'jo@example.com',
+    phone: '',
     createdAt: 1,
     updatedAt: 2
   };
@@ -252,7 +254,20 @@ describe('toWeddingRsvpInput', () => {
       guestCount: 1,
       guestNames: ['Sam'],
       note: undefined,
-      email: 'jo@example.com'
+      email: 'jo@example.com',
+      phone: undefined
     });
+  });
+});
+
+describe('normalizePhone', () => {
+  it('reduces US numbers to 10 digits', () => {
+    expect(normalizePhone('(313) 555-1234')).toBe('3135551234');
+    expect(normalizePhone('+1 313.555.1234')).toBe('3135551234');
+  });
+
+  it('rejects anything that is not a US number', () => {
+    expect(normalizePhone('555-1234')).toBeUndefined();
+    expect(normalizePhone('+44 20 7946 0958')).toBeUndefined();
   });
 });

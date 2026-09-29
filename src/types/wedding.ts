@@ -272,6 +272,7 @@ export interface WeddingRsvpInput {
   guestNames: string[]; // one per plus-one
   note?: string; // dietary restrictions / message
   email?: string; // optional; the backend emails a confirmation on every submit
+  phone?: string; // optional US number; used to find the RSVP and text an edit link
 }
 
 export interface WeddingRsvp extends WeddingRsvpInput {
@@ -346,13 +347,16 @@ export interface WeddingRsvpMatch {
   name: string;
   partySize: number;
   hasEmail: boolean;
+  hasPhone: boolean;
 }
 
 export type RsvpLookupOutcome = { status: 'ok'; matches: WeddingRsvpMatch[] } | { status: 'closed' | 'error' };
 
+export type RsvpEditChannel = 'email' | 'sms';
+
 export type RsvpEditStartOutcome =
-  | { status: 'sent'; maskedEmail: string }
+  | { status: 'sent'; channel: RsvpEditChannel; maskedTo: string }
   | { status: 'direct'; rsvp: WeddingRsvp }
-  | { status: 'closed' | 'missing' | 'error' };
+  | { status: 'closed' | 'missing' | 'unavailable' | 'error' };
 
 export type RsvpEditLinkOutcome = { status: 'ok'; rsvp: WeddingRsvp; code: string } | { status: 'closed' | 'missing' | 'error' };

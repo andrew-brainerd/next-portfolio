@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { WEDDING_RSVP_ROUTE } from '@/constants/routes';
 import { lookupWeddingRsvps, requestWeddingRsvpEdit } from '@/api/wedding';
-import type { WeddingRsvpMatch } from '@/types/wedding';
+import type { RsvpEditChannel, WeddingRsvpMatch } from '@/types/wedding';
 import { saveRsvpToThisDevice } from '@/utils/weddingClient';
 import { LogisticsPage } from '@/components/wedding/story/pages/LogisticsPage';
 
@@ -14,13 +14,21 @@ const INPUT_CLASS =
 
 const CLOSED_MESSAGE = 'RSVPs are closed now. If your plans changed, reach out to us directly.';
 
-// Find-your-RSVP (W-F6): search by name or email, then edit via an emailed link (or directly
-// when the RSVP has no email). Editing reuses the RSVP page by adopting the RSVP on this device.
+// How the guest proves it's their RSVP: a link by email and/or text, or straight in when it has neither
+const editChoices = (match: WeddingRsvpMatch): { channel: RsvpEditChannel; label: string }[] => {
+  const choices: { channel: RsvpEditChannel; label: string }[] = [];
+  if (match.hasEmail) choices.push({ channel: 'email', label: 'Email me a link' });
+  if (match.hasPhone) choices.push({ channel: 'sms', label: 'Text me a link' });
+  return choices.length > 0 ? choices : [{ channel: 'email', label: "That's me" }];
+};
+
+// Find-your-RSVP (W-F6, W-F7): search by name, email or phone, then edit via a link sent by email
+// or text (or directly when the RSVP has neither). Editing reuses the RSVP page by adopting the RSVP on this device.
 export const RsvpFinder = () => {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [matches, setMatches] = useState<WeddingRsvpMatch[] | undefined>();
-  const [busyId, setBusyId] = useState<string | undefined>();
+  const [busy, setBusy] = useState<string | undefined>(); // "<id>:<channel>" while a request is in flight
   const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState<string | undefined>();
 
@@ -36,19 +44,22 @@ export const RsvpFinder = () => {
     else setMessage(outcome.status === 'closed' ? CLOSED_MESSAGE : "Couldn't search right now — please try again.");
   };
 
-  const edit = async (match: WeddingRsvpMatch) => {
-    setBusyId(match.id);
+  const edit = async (match: WeddingRsvpMatch, channel: RsvpEditChannel) => {
+    setBusy(`${match.id}:${channel}`);
     setMessage(undefined);
-    const outcome = await requestWeddingRsvpEdit(match.id);
-    setBusyId(undefined);
+    const outcome = await requestWeddingRsvpEdit(match.id, channel);
+    setBusy(undefined);
 
     if (outcome.status === 'direct') {
       saveRsvpToThisDevice(outcome.rsvp);
       router.push(WEDDING_RSVP_ROUTE);
     } else if (outcome.status === 'sent') {
-      setMessage(`We emailed a link to ${outcome.maskedEmail}. Open it to change your RSVP (it works for 24 hours).`);
+      const how = outcome.channel === 'sms' ? 'texted' : 'emailed';
+      setMessage(`We ${how} a link to ${outcome.maskedTo}. Open it to change your RSVP (it works for 24 hours).`);
     } else if (outcome.status === 'closed') {
       setMessage(CLOSED_MESSAGE);
+    } else if (outcome.status === 'unavailable') {
+      setMessage("That contact isn't on this RSVP — try the other option.");
     } else {
       setMessage("Couldn't open that RSVP — please search again.");
     }
@@ -59,7 +70,7 @@ export const RsvpFinder = () => {
       <form onSubmit={search} className="space-y-3">
         <div>
           <label htmlFor="wedding-rsvp-find" className="block text-sm">
-            Your name or email
+            Your name, email or phone
           </label>
           <input
             id="wedding-rsvp-find"
@@ -69,7 +80,7 @@ export const RsvpFinder = () => {
             minLength={3}
             maxLength={254}
             required
-            placeholder="The name or email you RSVP'd with"
+            placeholder="The name, email or phone you RSVP'd with"
             className={INPUT_CLASS}
           />
         </div>
@@ -94,19 +105,21 @@ export const RsvpFinder = () => {
             >
               <span>
                 <span className="font-semibold">{match.name}</span>
-                <span className="block text-sm text-[var(--sb-ink)]/70">
-                  Party of {match.partySize}
-                  {match.hasEmail ? ' · we\u2019ll email you a link' : ''}
-                </span>
+                <span className="block text-sm text-[var(--sb-ink)]/70">Party of {match.partySize}</span>
               </span>
-              <button
-                type="button"
-                onClick={() => edit(match)}
-                disabled={busyId !== undefined}
-                className="shrink-0 rounded-lg border border-[var(--sb-crimson)] px-3 py-1.5 text-sm text-[var(--sb-crimson)] transition-colors hover:bg-[var(--sb-crimson)] hover:text-[var(--sb-white)] disabled:opacity-60"
-              >
-                {busyId === match.id ? 'One moment…' : "That's me"}
-              </button>
+              <span className="flex shrink-0 flex-col gap-1.5 sm:flex-row">
+                {editChoices(match).map(({ channel, label }) => (
+                  <button
+                    key={channel}
+                    type="button"
+                    onClick={() => edit(match, channel)}
+                    disabled={busy !== undefined}
+                    className="rounded-lg border border-[var(--sb-crimson)] px-3 py-1.5 text-sm text-[var(--sb-crimson)] transition-colors hover:bg-[var(--sb-crimson)] hover:text-[var(--sb-white)] disabled:opacity-60"
+                  >
+                    {busy === `${match.id}:${channel}` ? 'One moment…' : label}
+                  </button>
+                ))}
+              </span>
             </li>
           ))}
         </ul>

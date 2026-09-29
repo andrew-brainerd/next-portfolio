@@ -198,5 +198,13 @@ export const toWeddingRsvpInput = (rsvp: WeddingRsvp): WeddingRsvpInput => ({
   guestCount: rsvp.guestCount,
   guestNames: rsvp.guestNames,
   note: rsvp.note || undefined,
-  email: rsvp.email || undefined
+  email: rsvp.email || undefined,
+  phone: rsvp.phone || undefined
 });
+
+/** US phone → 10 digits, mirroring brainerd-api; undefined when it isn't a US number. */
+export const normalizePhone = (value: string): string | undefined => {
+  const digits = value.replace(/\D/g, '');
+  const national = digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits;
+  return national.length === 10 ? national : undefined;
+};

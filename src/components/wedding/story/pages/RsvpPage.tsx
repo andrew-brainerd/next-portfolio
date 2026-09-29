@@ -8,7 +8,7 @@ import { WEDDING_RSVP_CLIENT_ID_KEY, WEDDING_RSVP_SAVED_KEY, WEDDING_RSVP_STATUS
 import { WEDDING_RSVP_FIND_ROUTE } from '@/constants/routes';
 import { submitWeddingRsvp } from '@/api/wedding';
 import { useWeddingClockOffset } from '@/components/wedding/WeddingClock';
-import { formatWeddingDate, isRsvpClosed } from '@/utils/wedding';
+import { formatWeddingDate, isRsvpClosed, normalizePhone } from '@/utils/wedding';
 import { LogisticsPage } from './LogisticsPage';
 
 const INPUT_CLASS =
@@ -37,6 +37,7 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
   const [guestNames, setGuestNames] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +63,7 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
         setGuestNames(resizeNames(rsvp.guestNames ?? [], rsvp.guestCount ?? 0));
         setNote(rsvp.note ?? '');
         setEmail(rsvp.email ?? '');
+        setPhone(rsvp.phone ?? '');
       } catch {
         // Malformed saved RSVP — start fresh
       }
@@ -89,6 +91,10 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
     event.preventDefault();
     const trimmedName = name.trim();
     if (!trimmedName || isSaving) return;
+    if (phone.trim() && !normalizePhone(phone)) {
+      setError('Enter a 10-digit US phone number, or leave it blank.');
+      return;
+    }
 
     setIsSaving(true);
     setError(null);
@@ -100,7 +106,8 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
       guestCount: status === 'going' ? guestCount : 0,
       guestNames: status === 'going' ? guestNames.map(n => n.trim()) : [],
       note: note.trim() || undefined,
-      email: email.trim() || undefined
+      email: email.trim() || undefined,
+      phone: phone.trim() || undefined
     };
 
     const saved = await submitWeddingRsvp(input);
@@ -180,6 +187,23 @@ export const RsvpPage = ({ config, closesAt }: RsvpPageProps) => {
               maxLength={254}
               autoComplete="email"
               placeholder="We'll send you a confirmation"
+              className={INPUT_CLASS}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="wedding-rsvp-phone" className="block text-sm">
+              Phone <span className="text-[var(--sb-ink)]/60">(optional, US)</span>
+            </label>
+            <input
+              id="wedding-rsvp-phone"
+              type="tel"
+              value={phone}
+              onChange={event => setPhone(event.target.value)}
+              maxLength={20}
+              autoComplete="tel"
+              inputMode="tel"
+              placeholder="To find your RSVP later by text"
               className={INPUT_CLASS}
             />
           </div>
