@@ -7,7 +7,7 @@ import { shareLinkUrls } from '@/utils/weddingShare';
 
 // Server-only: keeps the QR library out of client bundles.
 
-const toQrSvg = (url: string): Promise<string> =>
+export const toQrSvg = (url: string): Promise<string> =>
   QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' });
 
 export const buildGuideTagLinks = async (guideKey: string, tables: SeatingTable[]): Promise<GuideTagLink[]> => {

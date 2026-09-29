@@ -58,7 +58,7 @@ export default async function WeddingSettingsPage() {
           {messages && <MessagesInbox initialMessages={messages} />}
           {rsvps && <RsvpAdminList breakdown={rsvps} />}
           {quizEntries && <QuizEntriesAdmin initialEntries={quizEntries} />}
-          <ShareLinkPanel links={shareLinks} />
+          <ShareLinkPanel links={shareLinks} timeZone={config.guide.timeZone} />
           <TagLinks links={tagLinks} />
           <WeddingSettingsForm initialConfig={config} enterUrl={await getWeddingEnterUrl()} />
         </div>

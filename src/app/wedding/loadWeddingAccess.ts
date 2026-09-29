@@ -9,7 +9,8 @@ import { getWeddingFeatures } from '@/utils/weddingFeatures';
 /**
  * Shared by every guest route: the unlock cookie is re-verified on each render (rotating a
  * code re-locks old cookies), WEDDING_ADMINS skip the gate, and the release windows follow the
- * admin mock clock when one is set. Admins on the real clock preview every page.
+ * mock clock when one is set (admin panel or a share link's preview date). Admins on the real
+ * clock preview every page.
  */
 export const loadWeddingAccess = async (): Promise<WeddingAccess> => {
   const cookieJar = await cookies();
@@ -21,7 +22,8 @@ export const loadWeddingAccess = async (): Promise<WeddingAccess> => {
   if (!unlocked) return { unlocked: false };
 
   const config = await getPublicWeddingConfig();
-  const clockOffset = isAdmin ? parseMockOffset(cookieJar.get(WEDDING_MOCK_OFFSET_COOKIE)?.value) : 0;
+  // Admins set it with the mock clock panel; guests get it from a share link's preview date
+  const clockOffset = parseMockOffset(cookieJar.get(WEDDING_MOCK_OFFSET_COOKIE)?.value);
   const requestTime = Date.now() + clockOffset;
   const features = config ? getWeddingFeatures(config, requestTime, !isAdmin || clockOffset > 0) : undefined;
 

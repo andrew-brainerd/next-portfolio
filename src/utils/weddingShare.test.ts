@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolveEnterDestination, shareLinkUrls, toWeddingSitePath } from './weddingShare';
+import { parsePreviewAt, resolveEnterDestination, shareLinkUrls, toWeddingSitePath, withPreviewAt } from './weddingShare';
 
 describe('resolveEnterDestination', () => {
   it('sends share links to their destination', () => {
@@ -50,5 +50,32 @@ describe('toWeddingSitePath', () => {
 
   it('leaves other paths alone', () => {
     expect(toWeddingSitePath('/weddings')).toBe('/weddings');
+  });
+});
+
+describe('parsePreviewAt', () => {
+  it('reads an epoch-ms preview date', () => {
+    expect(parsePreviewAt('1826470800000')).toBe(1826470800000);
+  });
+
+  it('ignores missing or malformed dates', () => {
+    expect(parsePreviewAt(null)).toBeUndefined();
+    expect(parsePreviewAt('')).toBeUndefined();
+    expect(parsePreviewAt('0')).toBeUndefined();
+    expect(parsePreviewAt('-5')).toBeUndefined();
+    expect(parsePreviewAt('2027-10-01')).toBeUndefined();
+    expect(parsePreviewAt('99999999999999999999')).toBeUndefined();
+  });
+});
+
+describe('withPreviewAt', () => {
+  const url = 'https://brainerd.wedding/enter?k=Ab3_x&to=rsvp';
+
+  it('appends the preview date', () => {
+    expect(withPreviewAt(url, 1826470800000)).toBe(`${url}&at=1826470800000`);
+  });
+
+  it('leaves the link alone without one', () => {
+    expect(withPreviewAt(url, undefined)).toBe(url);
   });
 });

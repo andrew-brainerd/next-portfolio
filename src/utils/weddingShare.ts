@@ -48,3 +48,12 @@ export const toWeddingSitePath = (route: string): string => {
   if (route === WEDDING_ROUTE) return '/';
   return route.startsWith(`${WEDDING_ROUTE}/`) ? route.slice(WEDDING_ROUTE.length) : route;
 };
+
+/** A share link's `at` preview date (epoch ms), or undefined when absent or not a positive integer. */
+export const parsePreviewAt = (value: string | null): number | undefined => {
+  const at = value && /^\d+$/.test(value) ? Number(value) : NaN;
+  return Number.isSafeInteger(at) && at > 0 ? at : undefined;
+};
+
+/** Adds a preview date to a share link; the link is unchanged without one. */
+export const withPreviewAt = (url: string, at: number | undefined): string => (at ? `${url}&at=${at}` : url);
