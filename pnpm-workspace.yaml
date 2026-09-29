@@ -4,9 +4,9 @@ overrides:
   '@types/react': 19.2.15
   '@types/react-dom': 19.2.3
 
-onlyBuiltDependencies:
-  - '@firebase/util'
-  - '@parcel/watcher'
-  - '@tailwindcss/oxide'
-  - sharp
-  - unrs-resolver
+allowBuilds:
+  '@firebase/util': true
+  '@parcel/watcher': true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
