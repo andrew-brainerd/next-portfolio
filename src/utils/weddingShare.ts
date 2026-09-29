@@ -1,6 +1,5 @@
 import {
   WEDDING_DETAILS_ROUTE,
-  WEDDING_ENTER_ROUTE,
   WEDDING_GUIDE_ROUTE,
   WEDDING_ROUTE,
   WEDDING_RSVP_ROUTE,
@@ -34,12 +33,18 @@ export const resolveEnterDestination = (
   return { pathname: WEDDING_GUIDE_ROUTE, search: table && TABLE_ID.test(table) ? `?table=${table}` : '' };
 };
 
-/** Share-link URLs for every destination; empty until a share key is saved. */
+/** Share-link URLs on `enterUrl` for every destination; empty until a share key is saved. */
 export const shareLinkUrls = (
-  origin: string,
+  enterUrl: string,
   shareKey: string
 ): { to: ShareDestination; label: string; url: string }[] => {
   if (!shareKey) return [];
-  const base = `${origin}${WEDDING_ENTER_ROUTE}?k=${encodeURIComponent(shareKey)}`;
+  const base = `${enterUrl}?k=${encodeURIComponent(shareKey)}`;
   return SHARE_DESTINATIONS.map(({ value, label }) => ({ to: value, label, url: `${base}&to=${value}` }));
+};
+
+/** A /wedding route on the wedding domain, which redirects back under /wedding: /wedding/enter → /enter. */
+export const toWeddingSitePath = (route: string): string => {
+  if (route === WEDDING_ROUTE) return '/';
+  return route.startsWith(`${WEDDING_ROUTE}/`) ? route.slice(WEDDING_ROUTE.length) : route;
 };

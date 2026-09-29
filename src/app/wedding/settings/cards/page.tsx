@@ -6,7 +6,8 @@ import { TOKEN_COOKIE } from '@/constants/authentication';
 import { LOGIN_ROUTE, WEDDING_CARDS_ROUTE, WEDDING_GUIDE_ROUTE } from '@/constants/routes';
 import { getFullWeddingConfig } from '@/api/wedding';
 import { TableCards } from '@/components/wedding/settings/TableCards';
-import { buildGuideTagLinks, getRequestOrigin } from '@/utils/weddingQr';
+import { buildGuideTagLinks } from '@/utils/weddingQr';
+import { getWeddingPageUrl } from '@/utils/weddingRequest';
 
 export const metadata: Metadata = {
   title: 'Wedding Table Cards',
@@ -31,6 +32,6 @@ export default async function WeddingCardsPage() {
     );
   }
 
-  const origin = await getRequestOrigin();
-  return <TableCards links={links} fallbackUrl={`${origin.replace(/^https?:\/\//, '')}${WEDDING_GUIDE_ROUTE}`} />;
+  const guideUrl = await getWeddingPageUrl(WEDDING_GUIDE_ROUTE);
+  return <TableCards links={links} fallbackUrl={guideUrl.replace(/^https?:\/\//, '')} />;
 }

@@ -7,13 +7,13 @@ import { CopyButton } from './CopyButton';
 interface ShareKeyFieldProps {
   shareKey: string;
   savedShareKey: string;
-  origin: string;
+  enterUrl: string;
   onChange: (shareKey: string) => void;
 }
 
-export const ShareKeyField = ({ shareKey, savedShareKey, origin, onChange }: ShareKeyFieldProps) => {
+export const ShareKeyField = ({ shareKey, savedShareKey, enterUrl, onChange }: ShareKeyFieldProps) => {
   // The first URL opens the wedding home page; the Share link section offers the other destinations
-  const homeUrl = shareLinkUrls(origin, shareKey)[0]?.url;
+  const homeUrl = shareLinkUrls(enterUrl, shareKey)[0]?.url;
   const unsaved = shareKey !== savedShareKey;
 
   const regenerate = () => {

@@ -135,7 +135,7 @@ describe('prepareGuideForSave', () => {
 
 describe('guideEntryUrls', () => {
   it('builds the welcome link plus one per table', () => {
-    const urls = guideEntryUrls('https://example.com', 'Key123', [{ id: 't7', name: 'Table 7', guests: [] }]);
+    const urls = guideEntryUrls('https://example.com/wedding/enter', 'Key123', [{ id: 't7', name: 'Table 7', guests: [] }]);
 
     expect(urls).toEqual([
       { label: 'Welcome sign', url: 'https://example.com/wedding/enter?k=Key123' },

@@ -77,3 +77,7 @@ export const SHARE_DESTINATIONS: { value: ShareDestination; label: string }[] = 
   { value: 'rsvp', label: 'RSVP' },
   { value: 'guide', label: 'Wedding Day Guide' }
 ];
+
+// Guest-facing wedding domain. It redirects to brainerd.dev/wedding, keeping the path and query
+// (spec wedding.md §3 "Wedding domain"), so brainerd.wedding/enter lands on /wedding/enter.
+export const WEDDING_SITE_ORIGIN = 'https://brainerd.wedding';

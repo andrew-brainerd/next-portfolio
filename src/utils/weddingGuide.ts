@@ -1,4 +1,3 @@
-import { WEDDING_ENTER_ROUTE } from '@/constants/routes';
 import { DEFAULT_WEDDING_GUIDE, QUIZ_CHOICE_COUNT } from '@/constants/wedding';
 import type {
   GuideSection,
@@ -208,14 +207,14 @@ export const prepareGuideForSave = (guide: WeddingGuideConfig): WeddingGuideConf
   messages: { enabled: guide.messages.enabled, prompt: optional(guide.messages.prompt) }
 });
 
-/** Tag/QR entry URLs: the welcome-sign link plus one per table. */
+/** Tag/QR entry URLs on `enterUrl` (e.g. https://brainerd.wedding/enter): the welcome-sign link plus one per table. */
 export const guideEntryUrls = (
-  origin: string,
+  enterUrl: string,
   guideKey: string,
   tables: SeatingTable[]
 ): { label: string; tableId?: string; url: string }[] => {
   if (!guideKey) return [];
-  const base = `${origin}${WEDDING_ENTER_ROUTE}?k=${encodeURIComponent(guideKey)}`;
+  const base = `${enterUrl}?k=${encodeURIComponent(guideKey)}`;
   return [
     { label: 'Welcome sign', url: base },
     ...tables.map(table => ({ label: table.name, tableId: table.id, url: `${base}&table=${encodeURIComponent(table.id)}` }))

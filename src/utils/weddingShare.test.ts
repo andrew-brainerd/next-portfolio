@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolveEnterDestination, shareLinkUrls } from './weddingShare';
+import { resolveEnterDestination, shareLinkUrls, toWeddingSitePath } from './weddingShare';
 
 describe('resolveEnterDestination', () => {
   it('sends share links to their destination', () => {
@@ -26,17 +26,29 @@ describe('resolveEnterDestination', () => {
 
 describe('shareLinkUrls', () => {
   it('builds one link per destination from the share key', () => {
-    const links = shareLinkUrls('https://brainerd.dev', 'Ab3_x');
+    const links = shareLinkUrls('https://brainerd.wedding/enter', 'Ab3_x');
 
     expect(links.map(link => link.to)).toEqual(['hub', 'story', 'details', 'rsvp', 'guide']);
     expect(links[0]).toEqual({
       to: 'hub',
       label: 'Wedding home',
-      url: 'https://brainerd.dev/wedding/enter?k=Ab3_x&to=hub'
+      url: 'https://brainerd.wedding/enter?k=Ab3_x&to=hub'
     });
   });
 
   it('is empty without a share key', () => {
-    expect(shareLinkUrls('https://brainerd.dev', '')).toEqual([]);
+    expect(shareLinkUrls('https://brainerd.wedding/enter', '')).toEqual([]);
+  });
+});
+
+describe('toWeddingSitePath', () => {
+  it('drops the /wedding prefix the domain redirect adds back', () => {
+    expect(toWeddingSitePath('/wedding')).toBe('/');
+    expect(toWeddingSitePath('/wedding/enter')).toBe('/enter');
+    expect(toWeddingSitePath('/wedding/guide')).toBe('/guide');
+  });
+
+  it('leaves other paths alone', () => {
+    expect(toWeddingSitePath('/weddings')).toBe('/weddings');
   });
 });

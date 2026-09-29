@@ -21,10 +21,10 @@ type SaveStatus = 'idle' | 'saved' | 'error';
 
 interface WeddingSettingsFormProps {
   initialConfig: WeddingConfig;
-  origin: string; // this request's origin, for full share-link URLs
+  enterUrl: string; // where share links point (brainerd.wedding/enter in production)
 }
 
-export const WeddingSettingsForm = ({ initialConfig, origin }: WeddingSettingsFormProps) => {
+export const WeddingSettingsForm = ({ initialConfig, enterUrl }: WeddingSettingsFormProps) => {
   const router = useRouter();
   const [savedShareKey, setSavedShareKey] = useState(initialConfig.shareKey ?? '');
   const [config, setConfig] = useState<WeddingConfig>(() => withEditableWeddingDefaults(initialConfig));
@@ -73,7 +73,7 @@ export const WeddingSettingsForm = ({ initialConfig, origin }: WeddingSettingsFo
         <ShareKeyField
           shareKey={config.shareKey}
           savedShareKey={savedShareKey}
-          origin={origin}
+          enterUrl={enterUrl}
           onChange={shareKey => patch({ shareKey })}
         />
       </SectionCard>

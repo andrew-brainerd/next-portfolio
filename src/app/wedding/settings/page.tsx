@@ -11,7 +11,8 @@ import { RsvpAdminList } from '@/components/wedding/settings/RsvpAdminList';
 import { ShareLinkPanel } from '@/components/wedding/settings/ShareLinkPanel';
 import { TagLinks } from '@/components/wedding/settings/TagLinks';
 import { WeddingSettingsForm } from '@/components/wedding/settings/WeddingSettingsForm';
-import { buildGuideTagLinks, buildShareLinks, getRequestOrigin } from '@/utils/weddingQr';
+import { buildGuideTagLinks, buildShareLinks } from '@/utils/weddingQr';
+import { getWeddingEnterUrl } from '@/utils/weddingRequest';
 
 export const metadata: Metadata = {
   title: 'Wedding Settings',
@@ -59,7 +60,7 @@ export default async function WeddingSettingsPage() {
           {quizEntries && <QuizEntriesAdmin initialEntries={quizEntries} />}
           <ShareLinkPanel links={shareLinks} />
           <TagLinks links={tagLinks} />
-          <WeddingSettingsForm initialConfig={config} origin={await getRequestOrigin()} />
+          <WeddingSettingsForm initialConfig={config} enterUrl={await getWeddingEnterUrl()} />
         </div>
       )}
     </div>
