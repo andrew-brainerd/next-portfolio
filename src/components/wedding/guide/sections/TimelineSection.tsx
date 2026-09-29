@@ -1,5 +1,6 @@
 'use client';
 
+import { useWeddingClockOffset } from '@/components/wedding/WeddingClock';
 import { useNow } from '@/hooks/useNow';
 import type { ScheduleItem } from '@/types/wedding';
 import { getNowNext } from '@/utils/scheduleTime';
@@ -13,7 +14,7 @@ interface TimelineSectionProps {
 }
 
 export const TimelineSection = ({ schedule, weddingDate, timeZone, initialNow }: TimelineSectionProps) => {
-  const now = useNow(initialNow);
+  const now = useNow(initialNow, useWeddingClockOffset());
   const state = getNowNext(schedule, weddingDate, timeZone, now);
   const current = state.phase === 'day' ? state.current : undefined;
 

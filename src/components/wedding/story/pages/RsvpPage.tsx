@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import type { PublicWeddingConfig, WeddingRsvpInput, WeddingRsvpStatus } from '@/types/wedding';
 import { WEDDING_RSVP_CLIENT_ID_KEY, WEDDING_RSVP_SAVED_KEY, WEDDING_RSVP_STATUSES } from '@/constants/wedding';
 import { submitWeddingRsvp } from '@/api/wedding';
+import { useWeddingClockOffset } from '@/components/wedding/WeddingClock';
 import { formatWeddingDate, isRsvpClosed } from '@/utils/wedding';
 import { LogisticsPage } from './LogisticsPage';
 
@@ -24,8 +25,8 @@ interface RsvpPageProps {
   config: PublicWeddingConfig;
 }
 
-// The book's RSVP page (W-F). Client component: clientId lives in localStorage
-// so a returning guest edits their RSVP instead of duplicating it.
+// The RSVP page (W-F), served at /wedding/rsvp. Client component: clientId lives
+// in localStorage so a returning guest edits their RSVP instead of duplicating it.
 export const RsvpPage = ({ config }: RsvpPageProps) => {
   const [name, setName] = useState('');
   const [status, setStatus] = useState<WeddingRsvpStatus>('going');
@@ -36,7 +37,10 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const closed = isRsvpClosed(config.rsvp.deadline);
+  const clockOffset = useWeddingClockOffset();
+  // Same clock read as isRsvpClosed's default, shifted by the admin mock clock
+  // eslint-disable-next-line react-hooks/purity
+  const closed = isRsvpClosed(config.rsvp.deadline, new Date(Date.now() + clockOffset));
   const deadline = config.rsvp.deadline ? formatWeddingDate(config.rsvp.deadline) : '';
 
   useEffect(() => {
@@ -106,7 +110,7 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
 
   if (submitted) {
     return (
-      <LogisticsPage kicker="One Last Thing" title="RSVP">
+      <LogisticsPage kicker="Kindly Reply" title="RSVP">
         <p className="text-center text-lg">{CONFIRMATION[status]}</p>
         <p className="text-center">
           <button
@@ -122,7 +126,7 @@ export const RsvpPage = ({ config }: RsvpPageProps) => {
   }
 
   return (
-    <LogisticsPage kicker="One Last Thing" title="RSVP">
+    <LogisticsPage kicker="Kindly Reply" title="RSVP">
       {config.rsvp.message && <p className="text-center italic">{config.rsvp.message}</p>}
       {deadline && (
         <p className="text-center text-sm">

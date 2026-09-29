@@ -64,3 +64,7 @@ export const QUIZ_LEADERBOARD_MODES: { value: QuizLeaderboardMode; label: string
 ];
 
 export const QUIZ_CHOICE_COUNT = 3;
+
+// Release windows, in calendar months before weddingDate (spec wedding.md §3)
+export const STORYBOOK_OPENS_MONTHS_BEFORE = 6;
+export const RSVP_OPENS_MONTHS_BEFORE = 3;

@@ -3,6 +3,8 @@
 import { useId, useState } from 'react';
 
 import { submitWeddingQuiz } from '@/api/wedding';
+import { submitWeddingQuizAtMockNow } from '@/api/weddingMockClock';
+import { useWeddingClockOffset } from '@/components/wedding/WeddingClock';
 import { useGuideMe } from '@/hooks/useGuideMe';
 import { useLocalJson } from '@/hooks/useLocalJson';
 import { useNow } from '@/hooks/useNow';
@@ -47,7 +49,8 @@ interface QuizSectionProps {
 
 export const QuizSection = ({ quiz, timeZone, initialNow }: QuizSectionProps) => {
   const nameId = useId();
-  const now = useNow(initialNow);
+  const clockOffset = useWeddingClockOffset();
+  const now = useNow(initialNow, clockOffset);
   const [me] = useGuideMe();
   const [stored, setStored] = useLocalJson<StoredQuizResult>('wedding:guide:quiz');
   const [name, setName] = useState<string | undefined>();
@@ -69,7 +72,8 @@ export const QuizSection = ({ quiz, timeZone, initialNow }: QuizSectionProps) =>
     if (!complete || submitting) return;
     setSubmitting(true);
     setError(undefined);
-    const outcome = await submitWeddingQuiz({ clientId: getWeddingClientId(), name: displayName.trim(), answers });
+    const submitQuiz = clockOffset ? submitWeddingQuizAtMockNow : submitWeddingQuiz;
+    const outcome = await submitQuiz({ clientId: getWeddingClientId(), name: displayName.trim(), answers });
     setSubmitting(false);
 
     if (outcome.status === 'ok') {

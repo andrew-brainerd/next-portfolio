@@ -2,7 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_WEDDING_GUIDE } from '@/constants/wedding';
 import type { WeddingConfig } from '@/types/wedding';
-import { chapterLabel, formatWeddingDate, isRsvpClosed, prepareWeddingConfigForSave, withEditableWeddingDefaults } from './wedding';
+import {
+  chapterLabel,
+  formatWeddingDate,
+  formatWindowOpening,
+  isRsvpClosed,
+  prepareWeddingConfigForSave,
+  weddingWindowOpensAt,
+  withEditableWeddingDefaults
+} from './wedding';
 
 const baseConfig = (): WeddingConfig => ({
   guestPasscode: ' secret ',
@@ -184,5 +192,36 @@ describe('isRsvpClosed', () => {
 
   it('closes after the deadline day ends', () => {
     expect(isRsvpClosed('2028-05-01', new Date('2028-05-02T00:00:01'))).toBe(true);
+  });
+});
+
+describe('weddingWindowOpensAt', () => {
+  const zone = 'America/Detroit';
+
+  it('opens at venue midnight N months before the wedding', () => {
+    // 2027-05-19 is EDT (UTC-4); 2027-08-19 too
+    expect(weddingWindowOpensAt('2027-11-19', 6, zone)).toBe(Date.parse('2027-05-19T00:00:00-04:00'));
+    expect(weddingWindowOpensAt('2027-11-19', 3, zone)).toBe(Date.parse('2027-08-19T00:00:00-04:00'));
+  });
+
+  it('uses standard time when the opening day is in winter', () => {
+    expect(weddingWindowOpensAt('2028-06-24', 6, zone)).toBe(Date.parse('2027-12-24T00:00:00-05:00'));
+  });
+
+  it('clamps to the end of a shorter month and crosses years', () => {
+    expect(weddingWindowOpensAt('2027-08-31', 6, zone)).toBe(Date.parse('2027-02-28T00:00:00-05:00'));
+    expect(weddingWindowOpensAt('2028-08-31', 6, zone)).toBe(Date.parse('2028-02-29T00:00:00-05:00'));
+    expect(weddingWindowOpensAt('2027-02-15', 3, zone)).toBe(Date.parse('2026-11-15T00:00:00-05:00'));
+  });
+
+  it('is always open without a valid wedding date', () => {
+    expect(weddingWindowOpensAt('', 6, zone)).toBeUndefined();
+    expect(weddingWindowOpensAt('someday', 6, zone)).toBeUndefined();
+  });
+});
+
+describe('formatWindowOpening', () => {
+  it('formats the opening day in the venue zone', () => {
+    expect(formatWindowOpening(Date.parse('2027-05-19T00:00:00-04:00'), 'America/Detroit')).toBe('May 19, 2027');
   });
 });

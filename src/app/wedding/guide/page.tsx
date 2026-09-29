@@ -1,10 +1,10 @@
-import { cookies } from 'next/headers';
 import type { Metadata } from 'next';
 
-import { WEDDING_UNLOCK_COOKIE } from '@/constants/authentication';
-import { getPublicWeddingConfig, verifyWeddingPasscode } from '@/api/wedding';
 import { WeddingGuide } from '@/components/wedding/guide/WeddingGuide';
 import { PasscodeGate } from '@/components/wedding/story/PasscodeGate';
+import { WeddingClockProvider } from '@/components/wedding/WeddingClock';
+import { WeddingDevClock } from '@/components/wedding/WeddingDevClock';
+import { loadWeddingAccess } from '../loadWeddingAccess';
 
 export const metadata: Metadata = {
   title: 'Wedding Guide',
@@ -21,15 +21,12 @@ const GuideMessage = ({ children }: { children: string }) => (
   </main>
 );
 
-// The day-of guidebook. Same gate as the storybook: the unlock cookie (set by
+// The day-of guidebook. Same gate as the hub: the unlock cookie (set by
 // /wedding/enter from a tag key, or by typing the invite passcode) is
-// re-verified on every render.
+// re-verified on every render. Opens on the wedding day, or earlier via guide.enabled.
 export default async function WeddingGuidePage({ searchParams }: WeddingGuidePageProps) {
-  const cookieJar = await cookies();
-  const code = cookieJar.get(WEDDING_UNLOCK_COOKIE)?.value;
-
-  const unlocked = code ? await verifyWeddingPasscode(code) : false;
-  if (!unlocked) {
+  const access = await loadWeddingAccess();
+  if (!access.unlocked) {
     return (
       <PasscodeGate
         kicker="Your guide to"
@@ -40,19 +37,26 @@ export default async function WeddingGuidePage({ searchParams }: WeddingGuidePag
     );
   }
 
-  const config = await getPublicWeddingConfig();
-  if (!config) {
+  const { config, features, clockOffset, requestTime, isAdmin } = access;
+  if (!config || !features) {
     return <GuideMessage>The guide is unavailable right now — try again in a moment.</GuideMessage>;
   }
 
-  if (!config.guide.enabled) {
-    return <GuideMessage>The wedding guide opens closer to the big day. Check back soon!</GuideMessage>;
+  const devClock = isAdmin && <WeddingDevClock timeZone={config.guide.timeZone} initialNow={requestTime} />;
+  if (!features.guide) {
+    return (
+      <WeddingClockProvider offsetMs={clockOffset}>
+        <GuideMessage>The wedding guide opens closer to the big day. Check back soon!</GuideMessage>
+        {devClock}
+      </WeddingClockProvider>
+    );
   }
 
   const { table } = await searchParams;
-  // Seeds the client clocks so now/next renders identically on server and client.
-  // A server component renders once per request, so reading the clock is safe here.
-  // eslint-disable-next-line react-hooks/purity
-  const requestTime = Date.now();
-  return <WeddingGuide config={config} initialNow={requestTime} tableId={table} />;
+  return (
+    <WeddingClockProvider offsetMs={clockOffset}>
+      <WeddingGuide config={config} initialNow={requestTime} tableId={table} />
+      {devClock}
+    </WeddingClockProvider>
+  );
 }

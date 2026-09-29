@@ -221,3 +221,74 @@ html[data-theme='ocean'] {
     transform: scale(1.05) translateY(-1%);
   }
 }
+
+/* /wedding hub: tiles rise in one after another, then lift, glow and shimmer on
+   hover/focus. `backwards` fill so the finished entrance never pins transform. */
+@media (prefers-reduced-motion: no-preference) {
+  .storybook .wedding-hub-rise {
+    animation: sb-hub-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+
+  .storybook .wedding-hub-tile {
+    animation: sb-hub-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 120ms + 250ms);
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .storybook .wedding-hub-tile:hover,
+  .storybook .wedding-hub-tile:focus-visible {
+    box-shadow:
+      0 18px 40px -12px rgb(140 7 7 / 0.45),
+      0 0 0 3px rgb(212 167 112 / 0.5);
+    transform: translateY(-4px) rotate(-0.4deg);
+  }
+
+  .storybook .wedding-hub-tile::after {
+    position: absolute;
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.55) 50%, transparent 70%);
+    transform: translateX(-120%);
+    pointer-events: none;
+    content: '';
+    inset: 0;
+  }
+
+  .storybook .wedding-hub-tile:hover::after,
+  .storybook .wedding-hub-tile:focus-visible::after {
+    transform: translateX(120%);
+    transition: transform 0.9s ease;
+  }
+
+  .storybook .wedding-hub-tile:hover .wedding-hub-icon,
+  .storybook .wedding-hub-tile:focus-visible .wedding-hub-icon {
+    animation: sb-hub-icon 0.6s ease;
+  }
+}
+
+@keyframes sb-hub-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sb-hub-icon {
+  0%,
+  100% {
+    transform: none;
+  }
+
+  30% {
+    transform: rotate(-10deg) scale(1.08);
+  }
+
+  60% {
+    transform: rotate(8deg);
+  }
+}

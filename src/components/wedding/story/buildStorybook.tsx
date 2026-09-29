@@ -4,18 +4,10 @@ import { chapterLabel } from '@/utils/wedding';
 import { StorybookCover } from './StorybookCover';
 import { StoryPage } from './StoryPage';
 import type { StorybookPageDef } from './StorybookReader';
-import { FaqPage } from './pages/FaqPage';
-import { HotelsPage } from './pages/HotelsPage';
-import { RegistryPage } from './pages/RegistryPage';
-import { RsvpPage } from './pages/RsvpPage';
-import { SchedulePage } from './pages/SchedulePage';
-import { TravelPage, hasTravelContent } from './pages/TravelPage';
-import { VenuePage } from './pages/VenuePage';
 
 /**
- * Assembles the whole book (spec §6 order): cover → authored story chapters →
- * "The Plan" divider → logistics pages (sections without content are simply
- * left out) → FAQ → RSVP (when enabled in the CMS) → back cover.
+ * Assembles the book: cover → authored story chapters → back cover. Logistics
+ * live at /wedding/details and RSVP at /wedding/rsvp (spec §3 "Release windows").
  */
 export const buildStorybook = (config: PublicWeddingConfig): StorybookPageDef[] => {
   const pages: StorybookPageDef[] = [
@@ -50,47 +42,6 @@ export const buildStorybook = (config: PublicWeddingConfig): StorybookPageDef[] 
       )
     });
   });
-
-  pages.push({
-    id: 'plan-divider',
-    node: (
-      <StoryPage
-        chapterLabel="Part Two"
-        title="The Plan"
-        theme="festival"
-        art="/wedding/plan-divider.jpg"
-        artAlt="Illustration of Andrew and Hayley wedding-planning together over a planner, venue photos, and fabric swatches"
-      >
-        <p>The storybook part you can put in your calendar.</p>
-      </StoryPage>
-    )
-  });
-
-  pages.push({ id: 'venue', node: <VenuePage config={config} /> });
-
-  if (config.schedule.length > 0) {
-    pages.push({ id: 'schedule', node: <SchedulePage schedule={config.schedule} /> });
-  }
-
-  if (config.hotels.length > 0) {
-    pages.push({ id: 'hotels', node: <HotelsPage hotels={config.hotels} /> });
-  }
-
-  if (hasTravelContent(config)) {
-    pages.push({ id: 'travel', node: <TravelPage config={config} /> });
-  }
-
-  if (config.registry.length > 0 || config.honeymoonFund) {
-    pages.push({ id: 'registry', node: <RegistryPage config={config} /> });
-  }
-
-  if (config.faq.length > 0) {
-    pages.push({ id: 'faq', node: <FaqPage faq={config.faq} /> });
-  }
-
-  if (config.rsvp.enabled) {
-    pages.push({ id: 'rsvp', node: <RsvpPage config={config} /> });
-  }
 
   pages.push({
     id: 'back-cover',

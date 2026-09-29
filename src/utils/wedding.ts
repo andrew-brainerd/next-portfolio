@@ -1,5 +1,5 @@
 import type { EventBlock, WeddingConfig } from '@/types/wedding';
-import { prepareGuideForSave, withEditableGuideDefaults } from '@/utils/weddingGuide';
+import { prepareGuideForSave, withEditableGuideDefaults, zonedLocalToIso } from '@/utils/weddingGuide';
 
 const trimmed = (value?: string): string => (value ?? '').trim();
 
@@ -40,6 +40,29 @@ export const isRsvpClosed = (deadline: string | undefined, now: Date = new Date(
   if (Number.isNaN(endOfDeadlineDay.getTime())) return false;
   return now > endOfDeadlineDay;
 };
+
+const pad2 = (value: number): string => String(value).padStart(2, '0');
+
+/**
+ * Midnight in `timeZone`, `monthsBefore` calendar months before the wedding date (day clamped to the
+ * month's end, so Aug 31 − 6 → Feb 28/29). Undefined without a valid wedding date: the window is always open.
+ */
+export const weddingWindowOpensAt = (weddingDate: string, monthsBefore: number, timeZone: string): number | undefined => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(weddingDate);
+  if (!match) return undefined;
+  const [year, month, day] = match.slice(1).map(Number);
+
+  const target = new Date(Date.UTC(year, month - 1 - monthsBefore, 1));
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+  const local = `${target.getUTCFullYear()}-${pad2(target.getUTCMonth() + 1)}-${pad2(Math.min(day, lastDay))}T00:00`;
+
+  const iso = zonedLocalToIso(local, timeZone);
+  return iso ? Date.parse(iso) : undefined;
+};
+
+/** A window's opening instant as "May 19, 2027" in the venue's zone. */
+export const formatWindowOpening = (opensAt: number, timeZone: string): string =>
+  new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone }).format(opensAt);
 
 // Optional string fields: trimmed value, or undefined when empty (dropped from JSON)
 const optional = (value?: string): string | undefined => {

@@ -5,7 +5,6 @@ import type {
   QuizLeaderboard,
   QuizResult,
   QuizSubmitOutcome,
-  Venue,
   WeddingConfig,
   WeddingMessage,
   WeddingQuizEntry,
@@ -14,15 +13,6 @@ import type {
   WeddingRsvpInput
 } from '@/types/wedding';
 import { deleteRequest, getRequest, patchRequest, putRequest } from '@/api/client';
-
-/**
- * Get all wedding venue candidates (with images + coords) from brainerd-api.
- * Data lives at `brainerd-api/data/wedding-venues.json` and is mutated by the
- * scrape/upload/geocode scripts in that repo.
- */
-export const getWeddingVenues = (): Promise<Venue[] | undefined> => {
-  return getRequest<Venue[]>('/wedding/venues');
-};
 
 /**
  * Public wedding config for the guest storybook. The backend strips the
@@ -51,6 +41,15 @@ export const verifyWeddingPasscode = async (code: string): Promise<boolean> => {
     console.error('Failed to verify wedding passcode', error);
     return false;
   }
+};
+
+/**
+ * Whether the signed-in user is a wedding admin (WEDDING_ADMINS in brainerd-api).
+ * Admins skip the passcode and see the guide before it opens. Signed-out → false.
+ */
+export const isWeddingAdmin = async (): Promise<boolean> => {
+  const access = await getRequest<{ admin: boolean }>('/wedding/access');
+  return access?.admin ?? false;
 };
 
 /**
@@ -128,16 +127,22 @@ export const setWeddingMessageRead = (id: string, read: boolean): Promise<Weddin
 
 const brainerdApiUrl = (path: string) => `${process.env.NEXT_PUBLIC_BRAINERD_API_URL}${path}`;
 
-/** Submit the couple quiz. Public — plain fetch. The server scores it; 403 means closed. */
-export const submitWeddingQuiz = async (input: {
-  clientId: string;
-  name: string;
-  answers: QuizAnswers;
-}): Promise<QuizSubmitOutcome> => {
+/**
+ * Submit the couple quiz. Public — plain fetch. The server scores it; 403 means closed.
+ * `headers` carries the admin mock clock (see `weddingMockClock.ts`).
+ */
+export const submitWeddingQuiz = async (
+  input: {
+    clientId: string;
+    name: string;
+    answers: QuizAnswers;
+  },
+  headers: Record<string, string> = {}
+): Promise<QuizSubmitOutcome> => {
   try {
     const response = await fetch(brainerdApiUrl('/wedding/quiz'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify(input)
     });
 
@@ -151,10 +156,13 @@ export const submitWeddingQuiz = async (input: {
 };
 
 /** Public leaderboard; empty with `visible: false` until the reveal. */
-export const getWeddingQuizLeaderboard = async (clientId?: string): Promise<QuizLeaderboard | undefined> => {
+export const getWeddingQuizLeaderboard = async (
+  clientId?: string,
+  headers: Record<string, string> = {}
+): Promise<QuizLeaderboard | undefined> => {
   try {
     const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : '';
-    const response = await fetch(brainerdApiUrl(`/wedding/quiz/leaderboard${query}`), { cache: 'no-store' });
+    const response = await fetch(brainerdApiUrl(`/wedding/quiz/leaderboard${query}`), { cache: 'no-store', headers });
     return response.ok ? ((await response.json()) as QuizLeaderboard) : undefined;
   } catch (error) {
     console.error('Failed to fetch wedding quiz leaderboard', error);

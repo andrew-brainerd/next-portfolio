@@ -1,33 +1,4 @@
-export type VenueCategory = 'greenhouse' | 'glass-nature' | 'urban-loft' | 'historic-ballroom';
-export type VenueRegion = 'west-michigan' | 'detroit-metro' | 'other';
-
-export interface VenueCoords {
-  lat: number;
-  lng: number;
-}
-
-export interface VenueCapacity {
-  min?: number;
-  max: number;
-}
-
-export interface Venue {
-  slug: string;
-  name: string;
-  city: string;
-  region: VenueRegion;
-  category: VenueCategory;
-  description: string;
-  url: string;
-  priceRange: string;
-  priceMidpoint: number;
-  capacity: VenueCapacity;
-  // Geocoded once and committed to venues.json; null until B-2 fills them in.
-  coords: VenueCoords | null;
-  // Added in Phase D; optional during A–C.
-  imageUrls?: string[];
-  features: string[];
-}
+import type { ReactNode } from 'react';
 
 // --- Storybook wedding config (mirrors brainerd-api src/types/wedding.ts) ---
 
@@ -324,4 +295,34 @@ export interface StoryChapter {
   artAlt?: string; // alt text once real art lands (§6 a11y)
   paragraphs: string[]; // storybook prose
   theme?: StoryTheme;
+}
+
+/** Which guest pages are open right now (spec wedding.md §3 "Release windows"). */
+export interface WeddingFeatures {
+  story: boolean;
+  details: boolean;
+  rsvp: boolean;
+  guide: boolean;
+  storyOpensAt?: number; // start of the story window, for the hub's "opens on …" note
+  weddingStartsAt?: number; // midnight on the wedding day, venue time
+}
+
+/** Server-side view of a guest request: gate, admin preview, mock clock and open features. */
+export type WeddingAccess =
+  | { unlocked: false }
+  | {
+      unlocked: true;
+      isAdmin: boolean;
+      clockOffset: number;
+      requestTime: number;
+      config: PublicWeddingConfig | undefined;
+      features: WeddingFeatures | undefined;
+    };
+
+/** One /wedding hub tile. */
+export interface WeddingHubTile {
+  href: string;
+  title: string;
+  blurb: string;
+  icon: ReactNode;
 }

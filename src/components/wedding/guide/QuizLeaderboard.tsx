@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 
 import { getWeddingQuizLeaderboard } from '@/api/wedding';
+import { getWeddingQuizLeaderboardAtMockNow } from '@/api/weddingMockClock';
+import { useWeddingClockOffset } from '@/components/wedding/WeddingClock';
 import type { QuizLeaderboard as Leaderboard } from '@/types/wedding';
 import { formatZonedTime } from '@/utils/scheduleTime';
 import { getWeddingClientId } from '@/utils/weddingClient';
@@ -17,17 +19,19 @@ interface QuizLeaderboardProps {
 
 export const QuizLeaderboard = ({ closesAt, timeZone }: QuizLeaderboardProps) => {
   const [leaderboard, setLeaderboard] = useState<Leaderboard | undefined>();
+  const clockOffset = useWeddingClockOffset();
 
   // Load now, then again right at the close so the reveal appears without a refresh
   useEffect(() => {
     let cancelled = false;
+    const getLeaderboard = clockOffset ? getWeddingQuizLeaderboardAtMockNow : getWeddingQuizLeaderboard;
     const load = () =>
-      getWeddingQuizLeaderboard(getWeddingClientId()).then(result => {
+      getLeaderboard(getWeddingClientId()).then(result => {
         if (!cancelled && result) setLeaderboard(result);
       });
 
     load();
-    const untilClose = closesAt ? Date.parse(closesAt) - Date.now() : NaN;
+    const untilClose = closesAt ? Date.parse(closesAt) - (Date.now() + clockOffset) : NaN;
     const timer =
       untilClose > 0 && untilClose < MAX_TIMEOUT_MS ? setTimeout(load, untilClose + 2000) : undefined;
 
@@ -35,7 +39,7 @@ export const QuizLeaderboard = ({ closesAt, timeZone }: QuizLeaderboardProps) =>
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [closesAt]);
+  }, [closesAt, clockOffset]);
 
   if (!leaderboard) return null;
 

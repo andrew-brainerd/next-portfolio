@@ -1,5 +1,6 @@
 'use client';
 
+import { useWeddingClockOffset } from '@/components/wedding/WeddingClock';
 import { useNow } from '@/hooks/useNow';
 import type { ScheduleItem } from '@/types/wedding';
 import { formatZonedTime, getNowNext } from '@/utils/scheduleTime';
@@ -13,7 +14,7 @@ interface NowNextCardProps {
 }
 
 export const NowNextCard = ({ schedule, weddingDate, timeZone, initialNow, showMessageLink }: NowNextCardProps) => {
-  const now = useNow(initialNow);
+  const now = useNow(initialNow, useWeddingClockOffset());
   const state = getNowNext(schedule, weddingDate, timeZone, now);
 
   if (state.phase === 'unknown') return null;
