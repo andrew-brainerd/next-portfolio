@@ -193,15 +193,31 @@ html[data-theme='ocean'] {
   position: relative;
 }
 
-/* Rococo wall behind the desktop flip book (generated, Appendix-B palette).
+/* Rococo wall behind the guest pages (generated, Appendix-B palette).
    Ornament lives at the edges with a calm lit center, so any crop from
-   `cover` keeps the book's surroundings quiet. Cream fallback while loading. */
+   `cover` keeps the surroundings quiet. Cream fallback while loading.
+   Painted on a fixed, viewport-sized layer so it only re-scales with the
+   window, never with the content (e.g. the RSVP form growing when a guest
+   picks Going). 100lvh keeps it still as mobile toolbars show and hide. */
 .storybook-backdrop {
+  position: relative;
+  isolation: isolate;
+}
+
+.storybook-backdrop::before {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100lvh;
   background-color: var(--sb-cream);
   background-image: url('/wedding/backdrop.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+  pointer-events: none;
+  content: '';
 }
 
 /* Subtle Ken Burns float on full-bleed page art (§6 "subtle parallax/float").
