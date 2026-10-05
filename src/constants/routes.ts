@@ -21,6 +21,7 @@ export const WATCH_USAGE_ROUTE = '/watch/usage';
 export const RSVP_ROUTE = '/rsvp';
 export const SETTINGS_ROUTE = '/settings';
 export const APPS_ROUTE = '/apps';
+export const ADDONS_ROUTE = '/addons';
 export const APPS_CONDENSATE_ROUTE = '/apps/condensate';
 export const OISHII_ROUTE = '/oishii';
 export const BOARD_ROUTE = '/board';

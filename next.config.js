@@ -26,6 +26,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'photos.zillowstatic.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.forgecdn.net'
       }
     ]
   }

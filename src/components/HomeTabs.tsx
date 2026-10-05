@@ -10,7 +10,8 @@ import { SteamIcon } from 'components/icons/SteamIcon';
 import { RollWithMeIcon } from 'components/icons/RollWithMeIcon';
 import { CondensateIcon } from 'components/icons/CondensateIcon';
 import { ScorebookIcon } from 'components/icons/ScorebookIcon';
-import { SCOREBOOK_ROUTE } from 'constants/routes';
+import { AddonsIcon } from 'components/icons/AddonsIcon';
+import { ADDONS_ROUTE, SCOREBOOK_ROUTE } from 'constants/routes';
 
 const TABS = [
   { id: 'work', label: 'Work', description: 'Connect with me professionally and explore my work' },
@@ -18,7 +19,7 @@ const TABS = [
   {
     id: 'play',
     label: 'Play',
-    description: 'Explore my gaming stats, music pods, and an async multiplayer dice game'
+    description: 'Explore my gaming stats, music pods, WoW addons, and an async multiplayer dice game'
   }
 ] as const;
 
@@ -61,6 +62,9 @@ function linksFor(id: TabId, isLoggedIn: boolean): ReactNode {
       </HomeLink>
       <HomeLink name="Roll With Me" path="/roll-with-me" openNewTab={false}>
         <RollWithMeIcon className={ICON_CLASS} aria-hidden="true" />
+      </HomeLink>
+      <HomeLink name="WoW Addons" path={ADDONS_ROUTE} openNewTab={false}>
+        <AddonsIcon className={ICON_CLASS} aria-hidden="true" />
       </HomeLink>
       {isLoggedIn && (
         <HomeLink name="Scorebook" path={SCOREBOOK_ROUTE} openNewTab={false}>

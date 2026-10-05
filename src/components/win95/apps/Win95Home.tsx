@@ -7,6 +7,7 @@ import { SteamIcon } from '@/components/icons/SteamIcon';
 import { PeapodIcon } from '@/components/icons/PeapodIcon';
 import { RollWithMeIcon } from '@/components/icons/RollWithMeIcon';
 import { CondensateIcon } from '@/components/icons/CondensateIcon';
+import { AddonsIcon } from '@/components/icons/AddonsIcon';
 
 type IconComponent = ComponentType<SVGAttributes<SVGElement>>;
 
@@ -45,7 +46,8 @@ const GROUPS: ShortcutGroup[] = [
     items: [
       { name: 'Steam', path: '/steam', external: false, Icon: SteamIcon },
       { name: 'Peapod', path: '/peapod', external: false, Icon: PeapodIcon },
-      { name: 'Roll With Me', path: '/roll-with-me', external: false, Icon: RollWithMeIcon }
+      { name: 'Roll With Me', path: '/roll-with-me', external: false, Icon: RollWithMeIcon },
+      { name: 'WoW Addons', path: '/addons', external: false, Icon: AddonsIcon }
     ]
   }
 ];
