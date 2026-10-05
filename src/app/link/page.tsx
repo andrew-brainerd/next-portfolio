@@ -20,7 +20,8 @@ export default async function LinkPage() {
     <div className="container mx-auto max-w-md p-6">
       <h1 className="mb-1 text-3xl font-bold text-white">Link a device</h1>
       <p className="mb-6 text-sm text-neutral-400">
-        Pairing a TV or app (like the Board for Roku). Enter the code it&rsquo;s showing.
+        Pairing a TV or app, like the Board for Roku or the Charter Forever companion app. Enter the code it&rsquo;s
+        showing.
       </p>
       <LinkDeviceForm />
     </div>

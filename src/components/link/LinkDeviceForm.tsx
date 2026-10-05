@@ -1,8 +1,11 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { approveDevice } from '@/api/device';
+import { LINK_ROUTE, LOGIN_ROUTE } from 'constants/routes';
+import { linkErrorMessage, linkSuccessMessage, needsSignIn } from 'utils/linkDevice';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -10,26 +13,29 @@ export const LinkDeviceForm = () => {
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
+  const [signIn, setSignIn] = useState(false);
 
   const submit = async () => {
     if (!code.trim() || status === 'submitting') return;
     setStatus('submitting');
     setMessage('');
-    try {
-      await approveDevice(code);
+    setSignIn(false);
+    const result = await approveDevice(code).catch(() => ({ ok: false as const, status: 0 }));
+    if (result.ok) {
       setStatus('success');
-      setMessage('Device linked! Your TV should continue in a few seconds.');
+      setMessage(linkSuccessMessage(result.kind));
       setCode('');
-    } catch {
-      setStatus('error');
-      setMessage('That code is invalid or expired. Check the code on your TV and try again.');
+      return;
     }
+    setStatus('error');
+    setMessage(linkErrorMessage(result));
+    setSignIn(needsSignIn(result));
   };
 
   return (
     <div className="flex flex-col gap-4">
       <label htmlFor="device-code" className="text-sm text-neutral-300">
-        Enter the code shown on your TV
+        Enter the code shown on your device or app
       </label>
       <input
         id="device-code"
@@ -53,6 +59,14 @@ export const LinkDeviceForm = () => {
       {message && (
         <p className={`text-sm ${status === 'success' ? 'text-green-400' : 'text-red-400'}`} role="status">
           {message}
+          {signIn && (
+            <>
+              {' '}
+              <Link href={`${LOGIN_ROUTE}?from=${encodeURIComponent(LINK_ROUTE)}`} className="underline">
+                Sign in
+              </Link>
+            </>
+          )}
         </p>
       )}
     </div>
