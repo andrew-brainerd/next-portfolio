@@ -4,6 +4,17 @@ const nextConfig = {
   // Automatically optimizes component rendering and reduces need for manual memoization
   reactCompiler: true,
 
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: '(www\\.)?brainerd\\.wedding' }],
+        destination: 'https://brainerd.dev/wedding',
+        permanent: true
+      }
+    ];
+  },
+
   images: {
     unoptimized: true,
     remotePatterns: [
