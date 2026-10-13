@@ -6,6 +6,9 @@ import type { AppPlatform, ReleaseDownload, ReleaseManifest } from '@/types/apps
 export const releaseManifestUrl = (slug: string): string =>
   `${APPS_S3_BASE}/apps/${slug}/latest.json`;
 
+/** URL of an app's newest-beta release manifest in the S3 bucket. */
+export const betaManifestUrl = (slug: string): string => `${APPS_S3_BASE}/apps/${slug}/beta.json`;
+
 const PLATFORMS: AppPlatform[] = ['macos', 'windows'];
 
 const PLATFORM_LABELS: Record<AppPlatform, string> = {
@@ -24,8 +27,9 @@ function normalizeDownload(raw: unknown): ReleaseDownload | null {
   if (!isPlatform(raw.platform)) return null;
   if (typeof raw.url !== 'string' || raw.url.length === 0) return null;
 
+  // macOS builds are universal, so the manifest's architecture label is dropped
   const label =
-    typeof raw.label === 'string' && raw.label.trim().length > 0
+    raw.platform !== 'macos' && typeof raw.label === 'string' && raw.label.trim().length > 0
       ? raw.label.trim()
       : PLATFORM_LABELS[raw.platform];
   const sizeBytes =

@@ -4,6 +4,7 @@ import {
   formatBytes,
   formatReleaseDate,
   normalizeReleaseManifest,
+  betaManifestUrl,
   releaseManifestUrl
 } from './apps';
 
@@ -11,6 +12,14 @@ describe('releaseManifestUrl', () => {
   it('builds the S3 manifest URL from a slug', () => {
     expect(releaseManifestUrl('condensate')).toBe(
       'https://brainerd.s3.us-east-1.amazonaws.com/apps/condensate/latest.json'
+    );
+  });
+});
+
+describe('betaManifestUrl', () => {
+  it('builds the S3 beta manifest URL from a slug', () => {
+    expect(betaManifestUrl('condensate')).toBe(
+      'https://brainerd.s3.us-east-1.amazonaws.com/apps/condensate/beta.json'
     );
   });
 });
@@ -40,7 +49,7 @@ describe('normalizeReleaseManifest', () => {
       downloads: [
         {
           platform: 'macos',
-          label: 'macOS — Apple Silicon & Intel',
+          label: 'macOS',
           url: 'https://example.com/Condensate_0.4.1_universal.dmg',
           sizeBytes: 12_582_912
         },
@@ -59,6 +68,16 @@ describe('normalizeReleaseManifest', () => {
       downloads: [{ platform: 'macos', url: 'https://example.com/app.dmg' }]
     });
     expect(result?.downloads[0].label).toBe('macOS');
+  });
+
+  it('keeps a custom Windows label', () => {
+    const result = normalizeReleaseManifest({
+      version: '1.0.0',
+      downloads: [
+        { platform: 'windows', label: 'Windows 10/11 (x64)', url: 'https://example.com/app.exe' }
+      ]
+    });
+    expect(result?.downloads[0].label).toBe('Windows 10/11 (x64)');
   });
 
   it('drops downloads with unknown platforms or missing urls', () => {

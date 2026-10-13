@@ -1,4 +1,4 @@
-import { normalizeReleaseManifest, releaseManifestUrl } from '@/utils/apps';
+import { betaManifestUrl, normalizeReleaseManifest, releaseManifestUrl } from '@/utils/apps';
 import type { ReleaseManifest } from '@/types/apps';
 
 /**
@@ -7,11 +7,18 @@ import type { ReleaseManifest } from '@/types/apps';
  * a graceful "not yet published" state rather than crashing the page.
  * Revalidated hourly so a new release surfaces without a redeploy.
  */
-export async function getReleaseManifest(slug: string): Promise<ReleaseManifest | null> {
+export function getReleaseManifest(slug: string): Promise<ReleaseManifest | null> {
+  return fetchManifest(releaseManifestUrl(slug), 3600);
+}
+
+/** Newest beta build's manifest. Revalidated every 5 minutes since betas ship per push. */
+export function getBetaManifest(slug: string): Promise<ReleaseManifest | null> {
+  return fetchManifest(betaManifestUrl(slug), 300);
+}
+
+async function fetchManifest(url: string, revalidate: number): Promise<ReleaseManifest | null> {
   try {
-    const response = await fetch(releaseManifestUrl(slug), {
-      next: { revalidate: 3600 }
-    });
+    const response = await fetch(url, { next: { revalidate } });
     if (!response.ok) return null;
     const raw: unknown = await response.json();
     return normalizeReleaseManifest(raw);

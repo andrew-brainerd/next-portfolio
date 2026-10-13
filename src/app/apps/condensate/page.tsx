@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { getReleaseManifest } from '@/api/apps';
+import { getBetaManifest, getReleaseManifest } from '@/api/apps';
 import { CondensateIcon } from '@/components/icons/CondensateIcon';
 import { DownloadButtons } from '@/components/apps/DownloadButtons';
 import { ScreenshotGallery } from '@/components/apps/ScreenshotGallery';
 import { CONDENSATE } from '@/constants/apps';
+import { USER_COOKIE } from '@/constants/authentication';
 import { APPS_ROUTE } from '@/constants/routes';
 import { formatReleaseDate } from '@/utils/apps';
 import type { AppScreenshot } from '@/types/apps';
@@ -104,8 +106,14 @@ function SectionHeading({ id, children }: { id: string; children: React.ReactNod
 }
 
 export default async function CondensatePage() {
-  const manifest = await getReleaseManifest(CONDENSATE.slug);
+  const userId = (await cookies()).get(USER_COOKIE)?.value;
+  const isBetaTester = !!userId && userId === process.env.APPS_BETA_UID;
+  const [manifest, betaManifest] = await Promise.all([
+    getReleaseManifest(CONDENSATE.slug),
+    isBetaTester ? getBetaManifest(CONDENSATE.slug) : null
+  ]);
   const releasedAt = formatReleaseDate(manifest?.releasedAt);
+  const betaReleasedAt = formatReleaseDate(betaManifest?.releasedAt);
 
   return (
     <main className="min-h-screen pb-16">
@@ -157,6 +165,21 @@ export default async function CondensatePage() {
               <p className="mt-1 text-sm text-[var(--color-hero-text)]/70">{manifest.notes}</p>
             )}
           </div>
+
+          {betaManifest && (
+            <div className="mt-8 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-5">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-amber-300">
+                Latest beta · {betaManifest.version}
+                {betaReleasedAt ? ` · ${betaReleasedAt}` : ''}
+              </h2>
+              <DownloadButtons
+                manifest={betaManifest}
+                platforms={CONDENSATE.platforms}
+                appName={`${CONDENSATE.name} beta`}
+                compact
+              />
+            </div>
+          )}
         </div>
       </header>
 
