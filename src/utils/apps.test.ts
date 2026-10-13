@@ -4,7 +4,6 @@ import {
   formatBytes,
   formatReleaseDate,
   normalizeReleaseManifest,
-  betaManifestUrl,
   releaseManifestUrl
 } from './apps';
 
@@ -12,14 +11,6 @@ describe('releaseManifestUrl', () => {
   it('builds the S3 manifest URL from a slug', () => {
     expect(releaseManifestUrl('condensate')).toBe(
       'https://brainerd.s3.us-east-1.amazonaws.com/apps/condensate/latest.json'
-    );
-  });
-});
-
-describe('betaManifestUrl', () => {
-  it('builds the S3 beta manifest URL from a slug', () => {
-    expect(betaManifestUrl('condensate')).toBe(
-      'https://brainerd.s3.us-east-1.amazonaws.com/apps/condensate/beta.json'
     );
   });
 });

@@ -45,3 +45,9 @@ export interface ReleaseManifest {
   notes?: string;
   downloads: ReleaseDownload[];
 }
+
+/** What brainerd-api says to show on a product page: stable, plus the newest beta for site admins. */
+export interface AppDownloads {
+  stable: ReleaseManifest | null;
+  beta: ReleaseManifest | null;
+}

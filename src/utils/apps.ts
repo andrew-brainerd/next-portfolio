@@ -6,9 +6,6 @@ import type { AppPlatform, ReleaseDownload, ReleaseManifest } from '@/types/apps
 export const releaseManifestUrl = (slug: string): string =>
   `${APPS_S3_BASE}/apps/${slug}/latest.json`;
 
-/** URL of an app's newest-beta release manifest in the S3 bucket. */
-export const betaManifestUrl = (slug: string): string => `${APPS_S3_BASE}/apps/${slug}/beta.json`;
-
 const PLATFORMS: AppPlatform[] = ['macos', 'windows'];
 
 const PLATFORM_LABELS: Record<AppPlatform, string> = {

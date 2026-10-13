@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { getBetaManifest, getReleaseManifest } from '@/api/apps';
+import { getCondensateDownloads, getReleaseManifest } from '@/api/apps';
 import { CondensateIcon } from '@/components/icons/CondensateIcon';
 import { DownloadButtons } from '@/components/apps/DownloadButtons';
 import { ScreenshotGallery } from '@/components/apps/ScreenshotGallery';
 import { CONDENSATE } from '@/constants/apps';
-import { USER_COOKIE } from '@/constants/authentication';
 import { APPS_ROUTE } from '@/constants/routes';
 import { formatReleaseDate } from '@/utils/apps';
 import type { AppScreenshot } from '@/types/apps';
@@ -106,12 +104,9 @@ function SectionHeading({ id, children }: { id: string; children: React.ReactNod
 }
 
 export default async function CondensatePage() {
-  const userId = (await cookies()).get(USER_COOKIE)?.value;
-  const isBetaTester = !!userId && userId === process.env.APPS_BETA_UID;
-  const [manifest, betaManifest] = await Promise.all([
-    getReleaseManifest(CONDENSATE.slug),
-    isBetaTester ? getBetaManifest(CONDENSATE.slug) : null
-  ]);
+  const { stable, beta: betaManifest } = await getCondensateDownloads();
+  // S3 manifest keeps the page downloadable if brainerd-api is unreachable
+  const manifest = stable ?? (await getReleaseManifest(CONDENSATE.slug));
   const releasedAt = formatReleaseDate(manifest?.releasedAt);
   const betaReleasedAt = formatReleaseDate(betaManifest?.releasedAt);
 
