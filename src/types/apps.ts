@@ -14,6 +14,8 @@ export interface NativeApp {
   platforms: AppPlatform[];
   /** false → listed but no download yet (renders a "coming soon" card). */
   available: boolean;
+  /** Route download links through brainerd-api's /apps/:slug/download counter. */
+  countDownloads?: boolean;
 }
 
 /** A product-page screenshot. `src` is a path under /public. */

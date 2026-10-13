@@ -1,4 +1,4 @@
-import { APPS_CONDENSATE_ROUTE } from '@/constants/routes';
+import { APPS_CONDENSATE_ROUTE, APPS_DOWNLOAD_ALL_ROUTE } from '@/constants/routes';
 import type { NativeApp } from '@/types/apps';
 
 /**
@@ -22,5 +22,18 @@ export const CONDENSATE: NativeApp = {
   available: true
 };
 
+export const DOWNLOAD_ALL: NativeApp = {
+  slug: 'download-all',
+  name: 'Download All for Steam',
+  tagline: 'Start every pending game update with one click',
+  summary:
+    'Adds a Download All button to the Steam Downloads page that starts every scheduled and queued update at once, instead of clicking through them one game at a time.',
+  route: APPS_DOWNLOAD_ALL_ROUTE,
+  repoUrl: 'https://github.com/andrew-brainerd/steam-download-all',
+  platforms: ['windows'],
+  available: true,
+  countDownloads: true
+};
+
 /** Every native app surfaced on /apps. Add new apps here. */
-export const NATIVE_APPS: NativeApp[] = [CONDENSATE];
+export const NATIVE_APPS: NativeApp[] = [CONDENSATE, DOWNLOAD_ALL];

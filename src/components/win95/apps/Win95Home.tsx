@@ -7,6 +7,7 @@ import { SteamIcon } from '@/components/icons/SteamIcon';
 import { PeapodIcon } from '@/components/icons/PeapodIcon';
 import { RollWithMeIcon } from '@/components/icons/RollWithMeIcon';
 import { CondensateIcon } from '@/components/icons/CondensateIcon';
+import { DownloadAllIcon } from '@/components/icons/DownloadAllIcon';
 import { AddonsIcon } from '@/components/icons/AddonsIcon';
 
 type IconComponent = ComponentType<SVGAttributes<SVGElement>>;
@@ -39,7 +40,10 @@ const GROUPS: ShortcutGroup[] = [
   },
   {
     label: 'Apps',
-    items: [{ name: 'Condensate', path: '/apps/condensate', external: false, Icon: CondensateIcon }]
+    items: [
+      { name: 'Condensate', path: '/apps/condensate', external: false, Icon: CondensateIcon },
+      { name: 'Download All', path: '/apps/download-all', external: false, Icon: DownloadAllIcon }
+    ]
   },
   {
     label: 'Play',

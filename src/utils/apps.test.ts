@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   downloadFor,
+  downloadHref,
   formatBytes,
   formatReleaseDate,
   normalizeReleaseManifest,
@@ -157,5 +158,27 @@ describe('formatReleaseDate', () => {
   it('returns null for missing or invalid dates', () => {
     expect(formatReleaseDate(undefined)).toBeNull();
     expect(formatReleaseDate('not-a-date')).toBeNull();
+  });
+});
+
+describe('downloadHref', () => {
+  const download = {
+    platform: 'windows' as const,
+    label: 'Windows 10 & 11',
+    url: 'https://brainerd.s3.us-east-1.amazonaws.com/apps/download-all/0.1.0/download-all-installer-0.1.0.exe'
+  };
+
+  it('routes counted apps through the brainerd-api download counter', () => {
+    expect(downloadHref(download, 'download-all', true, 'https://api.brainerd.dev/')).toBe(
+      'https://api.brainerd.dev/apps/download-all/download?platform=windows'
+    );
+  });
+
+  it('links straight to S3 when counting is off', () => {
+    expect(downloadHref(download, 'condensate', false, 'https://api.brainerd.dev')).toBe(download.url);
+  });
+
+  it('falls back to S3 when no API base URL is configured', () => {
+    expect(downloadHref(download, 'download-all', true, undefined)).toBe(download.url);
   });
 });

@@ -35,6 +35,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7
     },
     {
+      url: `${baseUrl}/apps/download-all`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7
+    },
+    {
       url: `${baseUrl}/addons`,
       lastModified: new Date(),
       changeFrequency: 'weekly',

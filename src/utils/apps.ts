@@ -97,3 +97,19 @@ export function formatReleaseDate(iso?: string): string | null {
   const date = dayjs(iso);
   return date.isValid() ? date.format('MMMM D, YYYY') : null;
 }
+
+/**
+ * Where a download button should point. Apps with `countDownloads` go through
+ * brainerd-api, which records the download and redirects to the same S3 file;
+ * without an API base URL the S3 link is used directly.
+ */
+export function downloadHref(
+  download: ReleaseDownload,
+  slug: string,
+  countDownloads: boolean | undefined,
+  apiBaseUrl: string | undefined
+): string {
+  if (!countDownloads || !apiBaseUrl) return download.url;
+  const base = apiBaseUrl.replace(/\/+$/, '');
+  return `${base}/apps/${encodeURIComponent(slug)}/download?platform=${download.platform}`;
+}

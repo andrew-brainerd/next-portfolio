@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { CondensateIcon } from '@/components/icons/CondensateIcon';
+import { DownloadAllIcon } from '@/components/icons/DownloadAllIcon';
 import { AppsIcon } from '@/components/icons/AppsIcon';
 import { DownloadButtons } from '@/components/apps/DownloadButtons';
 import type { NativeApp, ReleaseManifest } from '@/types/apps';
@@ -19,6 +20,13 @@ function AppMark({ slug }: { slug: string }) {
     return (
       <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-[#0EA5E9] to-[#0C4A6E] shadow-lg">
         <CondensateIcon className="h-10 w-10 fill-white" aria-hidden="true" />
+      </div>
+    );
+  }
+  if (slug === 'download-all') {
+    return (
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-[#2A2D32] to-[#111214] shadow-lg">
+        <DownloadAllIcon className="h-10 w-10 fill-white" aria-hidden="true" />
       </div>
     );
   }
@@ -61,7 +69,14 @@ export const AppCard = ({ app, manifest }: AppCardProps) => {
       </div>
 
       {app.available && (
-        <DownloadButtons manifest={manifest} platforms={app.platforms} appName={app.name} compact />
+        <DownloadButtons
+          manifest={manifest}
+          platforms={app.platforms}
+          appName={app.name}
+          slug={app.slug}
+          countDownloads={app.countDownloads}
+          compact
+        />
       )}
 
       <Link

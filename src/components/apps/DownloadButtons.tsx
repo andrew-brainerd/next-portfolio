@@ -1,6 +1,6 @@
 import { AppleIcon } from '@/components/icons/AppleIcon';
 import { WindowsIcon } from '@/components/icons/WindowsIcon';
-import { downloadFor, formatBytes } from '@/utils/apps';
+import { downloadFor, downloadHref, formatBytes } from '@/utils/apps';
 import type { AppPlatform, ReleaseManifest } from '@/types/apps';
 
 interface DownloadButtonsProps {
@@ -9,6 +9,9 @@ interface DownloadButtonsProps {
   appName: string;
   /** Smaller buttons for the /apps index card. */
   compact?: boolean;
+  /** With `countDownloads`, sends clicks through the brainerd-api download counter. */
+  slug?: string;
+  countDownloads?: boolean;
 }
 
 const PLATFORM_ICON: Record<AppPlatform, typeof AppleIcon> = {
@@ -20,7 +23,9 @@ export const DownloadButtons = ({
   manifest,
   platforms,
   appName,
-  compact = false
+  compact = false,
+  slug,
+  countDownloads
 }: DownloadButtonsProps) => {
   if (!manifest) {
     return (
@@ -28,7 +33,7 @@ export const DownloadButtons = ({
         className={`text-neutral-300 ${compact ? 'text-sm' : 'text-base'}`}
         role="status"
       >
-        Builds for {appName} aren&apos;t published yet — check back soon.
+        {`Builds for ${appName} aren’t published yet — check back soon.`}
       </p>
     );
   }
@@ -47,7 +52,11 @@ export const DownloadButtons = ({
         return (
           <a
             key={platform}
-            href={download.url}
+            href={
+              slug
+                ? downloadHref(download, slug, countDownloads, process.env.NEXT_PUBLIC_BRAINERD_API_URL)
+                : download.url
+            }
             download
             className={`group inline-flex items-center ${sizeClasses} rounded-xl bg-brand-600 text-white font-semibold shadow-lg shadow-brand-600/20 transition-all duration-300 hover:bg-brand-700 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-neutral-800`}
             aria-label={`Download ${appName} for ${download.label}${size ? `, ${size}` : ''}`}

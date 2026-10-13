@@ -9,6 +9,7 @@ import { MailIcon } from 'components/icons/MailIcon';
 import { SteamIcon } from 'components/icons/SteamIcon';
 import { RollWithMeIcon } from 'components/icons/RollWithMeIcon';
 import { CondensateIcon } from 'components/icons/CondensateIcon';
+import { DownloadAllIcon } from 'components/icons/DownloadAllIcon';
 import { ScorebookIcon } from 'components/icons/ScorebookIcon';
 import { AddonsIcon } from 'components/icons/AddonsIcon';
 import { ADDONS_ROUTE, SCOREBOOK_ROUTE } from 'constants/routes';
@@ -46,9 +47,14 @@ function linksFor(id: TabId, isLoggedIn: boolean): ReactNode {
 
   if (id === 'apps') {
     return (
-      <HomeLink name="Condensate" path="/apps/condensate" openNewTab={false}>
-        <CondensateIcon className={ICON_CLASS} aria-hidden="true" />
-      </HomeLink>
+      <>
+        <HomeLink name="Condensate" path="/apps/condensate" openNewTab={false}>
+          <CondensateIcon className={ICON_CLASS} aria-hidden="true" />
+        </HomeLink>
+        <HomeLink name="Download All" path="/apps/download-all" openNewTab={false}>
+          <DownloadAllIcon className={ICON_CLASS} aria-hidden="true" />
+        </HomeLink>
+      </>
     );
   }
 
