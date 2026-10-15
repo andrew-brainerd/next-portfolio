@@ -21,7 +21,6 @@ export const COMPLETED_GAMES: string[] = [
   '742420', // Saints Row
   '1599020', // Tinykin
   '607080', // Psychonauts 2
-  '225540', // Just Cause 3
   '1088850', // Marvel's Guardians of the Galaxy
   '1599660', // Sackboy: A Big Adventure
   '1426210', // It Takes Two3540
@@ -71,5 +70,6 @@ export const COMPLETED_GAMES: string[] = [
   '3947040', // Pegfinity
   '3228590', // Deadzone: Rogue
   '2163330', // Yet Another Zombie Survivors
-  '4078430' // STAR WARS Galactic Racer
+  '4078430', // STAR WARS Galactic Racer
+  '225540' // Just Cause 3
 ];
