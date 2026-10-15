@@ -70,5 +70,6 @@ export const COMPLETED_GAMES: string[] = [
   '3375780', // Trails in the Sky 1st Chapter
   '3947040', // Pegfinity
   '3228590', // Deadzone: Rogue
-  '2163330' // Yet Another Zombie Survivors
+  '2163330', // Yet Another Zombie Survivors
+  '4078430' // STAR WARS Galactic Racer
 ];
