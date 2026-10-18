@@ -71,5 +71,6 @@ export const COMPLETED_GAMES: string[] = [
   '3228590', // Deadzone: Rogue
   '2163330', // Yet Another Zombie Survivors
   '4078430', // STAR WARS Galactic Racer
-  '225540' // Just Cause 3
+  '225540', // Just Cause 3
+  '3483510' // The Adventures of Elliot: The Millennium Tales
 ];
