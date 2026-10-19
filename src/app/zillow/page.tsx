@@ -23,7 +23,7 @@ export default async function ZillowPage() {
   const token = cookieJar.get(TOKEN_COOKIE)?.value;
   const isLoggedIn = !!token;
 
-  const properties = await getZillowProperties();
+  const properties = (await getZillowProperties())?.filter(property => property.monthlyRent);
 
   if (!properties || properties.length === 0) {
     return (
