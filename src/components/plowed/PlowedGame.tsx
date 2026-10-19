@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getPlowedScores, submitPlowedScore } from '@/api/plowedClient';
+import { usePlowedAudioStore } from '@/hooks/usePlowedAudioStore';
 import type { PlowedDirection, PlowedHud, PlowedScoreEntry, PlowedSprites, PlowedState } from '@/types/plowed';
 import {
   COMBO_GRACE_MS,
@@ -15,6 +16,7 @@ import {
   togglePause
 } from '@/utils/plowed';
 import { LEADERBOARD_SIZE, ordinal, qualifiesForLeaderboard } from '@/utils/plowedLeaderboard';
+import { playPlowedEvent, primePlowedAudio } from '@/utils/plowedSound';
 import { PlowedInitialsEntry } from './PlowedInitialsEntry';
 import { PlowedLeaderboard } from './PlowedLeaderboard';
 import { TILE, loadPlowedSprites, renderPlowed } from './renderPlowed';
@@ -70,6 +72,20 @@ const sameHud = (a: PlowedHud, b: PlowedHud) =>
   a.shielded === b.shielded &&
   a.piles === b.piles;
 
+const SpeakerIcon = ({ muted }: { muted: boolean }) => (
+  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+    <path d="M11 5 6 9H2v6h4l5 4V5z" strokeLinejoin="round" strokeLinecap="round" />
+    {muted ? (
+      <path d="M22 9l-6 6M16 9l6 6" strokeLinecap="round" />
+    ) : (
+      <>
+        <path d="M15.5 8.5a5 5 0 0 1 0 7" strokeLinecap="round" />
+        <path d="M18.5 6a9 9 0 0 1 0 12" strokeLinecap="round" />
+      </>
+    )}
+  </svg>
+);
+
 export const PlowedGame = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -86,6 +102,13 @@ export const PlowedGame = () => {
   const [scoresFailed, setScoresFailed] = useState(false);
   const [rank, setRank] = useState<number | null>(null);
   const [skipped, setSkipped] = useState(false);
+  const sfxMuted = usePlowedAudioStore(store => store.sfxMuted);
+  const toggleSfx = usePlowedAudioStore(store => store.toggleSfx);
+  const hydrateAudio = usePlowedAudioStore(store => store.hydrate);
+
+  useEffect(() => {
+    hydrateAudio();
+  }, [hydrateAudio]);
 
   const loadScores = useCallback(() => {
     getPlowedScores(LEADERBOARD_SIZE)
@@ -105,6 +128,7 @@ export const PlowedGame = () => {
     if (!state || (state.phase !== 'title' && state.phase !== 'gameOver')) return;
     setRank(null);
     setSkipped(false);
+    primePlowedAudio();
     startGame(state);
   }, []);
 
@@ -150,6 +174,7 @@ export const PlowedGame = () => {
       while (accumulator >= STEP_MS) {
         step(state, STEP_MS);
         accumulator -= STEP_MS;
+        for (const event of state.events) playPlowedEvent(event, multiplierFor(state.streak));
         if (state.events.includes('gameOver') && state.score > readBest()) {
           writeBest(state.score);
           setBest(state.score);
@@ -221,6 +246,9 @@ export const PlowedGame = () => {
       if (event.key === 'p' || event.key === 'P' || event.key === 'Escape') {
         togglePause(state);
       }
+      if (event.key === 'm' || event.key === 'M') {
+        usePlowedAudioStore.getState().toggleSfx();
+      }
     };
 
     const pauseIfActive = () => {
@@ -291,8 +319,19 @@ export const PlowedGame = () => {
           <div className="text-xs uppercase tracking-widest text-neutral-400">
             Lvl {hud?.level ?? 1} · Best {Math.max(best, 0).toLocaleString()}
           </div>
-          <div className="text-xl tracking-widest text-red-400" aria-label={`${hud?.lives ?? 0} lives`}>
-            {'♥'.repeat(Math.max(0, hud?.lives ?? 0))}
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={toggleSfx}
+              className="text-neutral-400 hover:text-white"
+              aria-label={sfxMuted ? 'Unmute sound effects' : 'Mute sound effects'}
+              title={sfxMuted ? 'Sound effects off (M)' : 'Sound effects on (M)'}
+            >
+              <SpeakerIcon muted={sfxMuted} />
+            </button>
+            <div className="text-xl tracking-widest text-red-400" aria-label={`${hud?.lives ?? 0} lives`}>
+              {'♥'.repeat(Math.max(0, hud?.lives ?? 0))}
+            </div>
           </div>
         </div>
       </div>
@@ -337,7 +376,7 @@ export const PlowedGame = () => {
                   >
                     Start
                   </button>
-                  <p className="text-xs text-neutral-400">Arrows / WASD or swipe · P to pause</p>
+                  <p className="text-xs text-neutral-400">Arrows / WASD or swipe · P to pause · M to mute</p>
                   <PlowedLeaderboard scores={scores} failed={scoresFailed} />
                 </div>
               )}
