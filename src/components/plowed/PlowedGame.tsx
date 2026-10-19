@@ -1,9 +1,11 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getPlowedScores, submitPlowedScore } from '@/api/plowedClient';
 import { usePlowedAudioStore } from '@/hooks/usePlowedAudioStore';
+import { useTouchInput } from '@/hooks/useTouchInput';
 import type { PlowedDirection, PlowedHud, PlowedScoreEntry, PlowedSprites, PlowedState } from '@/types/plowed';
 import {
   COMBO_GRACE_MS,
@@ -17,6 +19,7 @@ import {
 } from '@/utils/plowed';
 import { LEADERBOARD_SIZE, ordinal, qualifiesForLeaderboard } from '@/utils/plowedLeaderboard';
 import { playPlowedEvent, primePlowedAudio } from '@/utils/plowedSound';
+import { PlowedDpad } from './PlowedDpad';
 import { PlowedInitialsEntry } from './PlowedInitialsEntry';
 import { PlowedLeaderboard } from './PlowedLeaderboard';
 import { TILE, loadPlowedSprites, renderPlowed } from './renderPlowed';
@@ -24,6 +27,8 @@ import { TILE, loadPlowedSprites, renderPlowed } from './renderPlowed';
 const STEP_MS = 1000 / 120;
 const MAX_FRAME_MS = 250;
 const SWIPE_MIN_PX = 24;
+// Room below the board for the d-pad (3 × 56 px buttons + gaps + spacing).
+const DPAD_RESERVE_PX = 196;
 const BEST_KEY = 'plowed:best';
 
 const KEY_DIRECTIONS: Record<string, PlowedDirection> = {
@@ -106,6 +111,7 @@ export const PlowedGame = () => {
   const sfxMuted = usePlowedAudioStore(store => store.sfxMuted);
   const toggleSfx = usePlowedAudioStore(store => store.toggleSfx);
   const hydrateAudio = usePlowedAudioStore(store => store.hydrate);
+  const isTouch = useTouchInput();
 
   useEffect(() => {
     hydrateAudio();
@@ -217,19 +223,22 @@ export const PlowedGame = () => {
     if (!container || !size.width) return;
     const fit = () => {
       const top = container.getBoundingClientRect().top + window.scrollY;
-      const availableHeight = window.innerHeight - top - 16;
+      const availableHeight = window.innerHeight - top - 16 - (isTouch ? DPAD_RESERVE_PX : 0);
       const available = Math.min(container.clientWidth, (availableHeight * size.width) / size.height);
       setDisplayWidth(fitPixelWidth(available, size.width, window.devicePixelRatio || 1));
     };
     fit();
+    // The site nav hides in touch mode, which moves the board up after this render.
+    const frame = requestAnimationFrame(fit);
     const observer = new ResizeObserver(fit);
     observer.observe(container);
     window.addEventListener('resize', fit);
     return () => {
+      cancelAnimationFrame(frame);
       observer.disconnect();
       window.removeEventListener('resize', fit);
     };
-  }, [size]);
+  }, [size, isTouch]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -303,7 +312,14 @@ export const PlowedGame = () => {
         style={{ maxWidth: displayWidth ?? undefined }}
       >
         <div>
-          <div className="text-xs uppercase tracking-widest text-neutral-400">Score</div>
+          <div className="text-xs uppercase tracking-widest text-neutral-400">
+            {isTouch && (
+              <Link href="/" className="mr-2 text-neutral-300 hover:text-white" aria-label="Home">
+                ←
+              </Link>
+            )}
+            Score
+          </div>
           <div className="text-2xl font-bold tabular-nums text-white">{(hud?.score ?? 0).toLocaleString()}</div>
         </div>
         <div className="text-center">
@@ -388,7 +404,9 @@ export const PlowedGame = () => {
                     >
                       Start
                     </button>
-                    <p className="text-xs text-neutral-400">Arrows / WASD or swipe · P to pause · M to mute</p>
+                    <p className="text-xs text-neutral-400">
+                      {isTouch ? 'Swipe or use the pad' : 'Arrows / WASD or swipe · P to pause · M to mute'}
+                    </p>
                     <PlowedLeaderboard scores={scores} failed={scoresFailed} />
                   </div>
                 )}
@@ -437,6 +455,13 @@ export const PlowedGame = () => {
           )}
         </div>
       </div>
+
+      {isTouch && (
+        <PlowedDpad
+          onDirection={dir => stateRef.current && queueDirection(stateRef.current, dir)}
+          onPause={() => stateRef.current && togglePause(stateRef.current)}
+        />
+      )}
     </div>
   );
 };
