@@ -104,3 +104,23 @@ export interface PlowedSprites {
   yeti: HTMLImageElement;
   items: HTMLImageElement;
 }
+
+export interface PlowedScoreEntry {
+  initials: string;
+  score: number;
+  level: number;
+  createdAt: string;
+}
+
+export interface PlowedScoreSubmission {
+  initials: string;
+  score: number;
+  level: number;
+  piles: number;
+  durationMs: number;
+}
+
+export interface PlowedScoreResult {
+  entry: PlowedScoreEntry;
+  rank: number;
+}

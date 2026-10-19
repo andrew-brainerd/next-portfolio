@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { PlowedDirection, PlowedHud, PlowedSprites, PlowedState } from '@/types/plowed';
+import { getPlowedScores, submitPlowedScore } from '@/api/plowedClient';
+import type { PlowedDirection, PlowedHud, PlowedScoreEntry, PlowedSprites, PlowedState } from '@/types/plowed';
 import {
   COMBO_GRACE_MS,
   createGame,
@@ -13,6 +14,9 @@ import {
   step,
   togglePause
 } from '@/utils/plowed';
+import { LEADERBOARD_SIZE, ordinal, qualifiesForLeaderboard } from '@/utils/plowedLeaderboard';
+import { PlowedInitialsEntry } from './PlowedInitialsEntry';
+import { PlowedLeaderboard } from './PlowedLeaderboard';
 import { TILE, loadPlowedSprites, renderPlowed } from './renderPlowed';
 
 const STEP_MS = 1000 / 120;
@@ -78,10 +82,48 @@ export const PlowedGame = () => {
   const [best, setBest] = useState(0);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [displayWidth, setDisplayWidth] = useState<number | null>(null);
+  const [scores, setScores] = useState<PlowedScoreEntry[] | null>(null);
+  const [scoresFailed, setScoresFailed] = useState(false);
+  const [rank, setRank] = useState<number | null>(null);
+  const [skipped, setSkipped] = useState(false);
+
+  const loadScores = useCallback(() => {
+    getPlowedScores(LEADERBOARD_SIZE)
+      .then(loaded => {
+        setScores(loaded);
+        setScoresFailed(false);
+      })
+      .catch(() => setScoresFailed(true));
+  }, []);
+
+  useEffect(() => {
+    loadScores();
+  }, [loadScores]);
 
   const start = useCallback(() => {
-    if (stateRef.current) startGame(stateRef.current);
+    const state = stateRef.current;
+    if (!state || (state.phase !== 'title' && state.phase !== 'gameOver')) return;
+    setRank(null);
+    setSkipped(false);
+    startGame(state);
   }, []);
+
+  const submitScore = useCallback(
+    async (initials: string) => {
+      const state = stateRef.current;
+      if (!state) return;
+      const result = await submitPlowedScore({
+        initials,
+        score: state.score,
+        level: state.level,
+        piles: state.piles,
+        durationMs: Math.round(state.elapsedMs)
+      });
+      setRank(result.rank);
+      loadScores();
+    },
+    [loadScores]
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -163,7 +205,7 @@ export const PlowedGame = () => {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const state = stateRef.current;
-      if (!state) return;
+      if (!state || event.target instanceof HTMLInputElement) return;
       const dir = KEY_DIRECTIONS[event.key] ?? KEY_DIRECTIONS[event.key.toLowerCase()];
       if (dir) {
         event.preventDefault();
@@ -173,7 +215,7 @@ export const PlowedGame = () => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         if (state.phase === 'paused') togglePause(state);
-        else startGame(state);
+        else start();
         return;
       }
       if (event.key === 'p' || event.key === 'P' || event.key === 'Escape') {
@@ -197,7 +239,7 @@ export const PlowedGame = () => {
       window.removeEventListener('blur', pauseIfActive);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, []);
+  }, [start]);
 
   const onTouchStart = (event: React.TouchEvent) => {
     const touch = event.touches[0];
@@ -218,6 +260,9 @@ export const PlowedGame = () => {
   };
 
   const phase = hud?.phase ?? 'title';
+  const finalScore = hud?.score ?? 0;
+  const enteringInitials =
+    phase === 'gameOver' && rank === null && !skipped && !!scores && qualifiesForLeaderboard(scores, finalScore);
 
   return (
     <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-3 px-4 py-4 select-none">
@@ -270,7 +315,7 @@ export const PlowedGame = () => {
 
           {phase !== 'playing' && (
             <div
-              className={`absolute inset-0 flex items-center justify-center rounded-md p-6 text-center ${
+              className={`absolute inset-0 flex items-center justify-center overflow-y-auto rounded-md p-6 text-center ${
                 phase === 'ready' || phase === 'levelClear' ? 'pointer-events-none' : 'bg-black/55'
               }`}
             >
@@ -293,6 +338,7 @@ export const PlowedGame = () => {
                     Start
                   </button>
                   <p className="text-xs text-neutral-400">Arrows / WASD or swipe · P to pause</p>
+                  <PlowedLeaderboard scores={scores} failed={scoresFailed} />
                 </div>
               )}
               {phase === 'ready' && <p className="font-mono text-3xl font-bold text-amber-300">READY!</p>}
@@ -316,13 +362,23 @@ export const PlowedGame = () => {
                     {(hud?.score ?? 0).toLocaleString()} pts · level {hud?.level} · {hud?.piles} piles
                   </p>
                   <p className="text-sm text-neutral-300">Best {best.toLocaleString()}</p>
-                  <button
-                    type="button"
-                    onClick={start}
-                    className="mt-2 rounded bg-sky-500 px-6 py-2 font-mono font-bold text-white hover:bg-sky-400"
-                  >
-                    Shovel again
-                  </button>
+                  {enteringInitials ? (
+                    <PlowedInitialsEntry onSubmit={submitScore} onSkip={() => setSkipped(true)} />
+                  ) : (
+                    <>
+                      {rank !== null && (
+                        <p className="font-mono text-amber-300">You placed {ordinal(rank)} on the leaderboard!</p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={start}
+                        className="mt-2 rounded bg-sky-500 px-6 py-2 font-mono font-bold text-white hover:bg-sky-400"
+                      >
+                        Shovel again
+                      </button>
+                      <PlowedLeaderboard scores={scores} failed={scoresFailed} highlightRank={rank} />
+                    </>
+                  )}
                 </div>
               )}
             </div>
