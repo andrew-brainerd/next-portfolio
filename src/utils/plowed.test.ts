@@ -162,9 +162,12 @@ describe('plowed movement and scoring', () => {
     run(state, TILE_MS * 5 + 5);
     expect(state.streak).toBe(5);
 
+    expect(state.onClearedTile).toBe(false);
+
     queueDirection(state, 'left');
     run(state, COMBO_GRACE_MS - 100);
     expect(state.streak).toBe(5);
+    expect(state.onClearedTile).toBe(true);
 
     run(state, 200);
     expect(state.streak).toBe(0);

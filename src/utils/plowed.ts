@@ -182,6 +182,7 @@ const resetPositions = (state: PlowedState) => {
   };
   state.streak = 0;
   state.comboMs = 0;
+  state.onClearedTile = false;
   state.shieldMs = 0;
   state.beer = null;
   state.nextBeerMs = randomBeerInterval(state);
@@ -214,6 +215,7 @@ export const createGame = ({ maps = PLOWED_MAPS, rng = Math.random }: CreateGame
     score: 0,
     streak: 0,
     comboMs: 0,
+    onClearedTile: false,
     piles: 0,
     elapsedMs: 0,
     map,
@@ -336,6 +338,7 @@ const onPlayerEnter = (state: PlowedState) => {
   const { x, y } = state.player;
   const index = tileIndex(state, x, y);
 
+  state.onClearedTile = state.tiles[index] !== 'snow';
   if (state.tiles[index] === 'snow') {
     const multiplier = multiplierFor(state.streak);
     state.score += SNOW_POINTS * multiplier;

@@ -74,6 +74,7 @@ export interface PlowedState {
   score: number;
   streak: number;
   comboMs: number;
+  onClearedTile: boolean;
   piles: number;
   elapsedMs: number;
   map: PlowedLevelMap;

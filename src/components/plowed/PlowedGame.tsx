@@ -90,6 +90,7 @@ export const PlowedGame = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const comboBarRef = useRef<HTMLDivElement>(null);
+  const comboTrackRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef<PlowedState | null>(null);
   const facingRef = useRef<PlowedDirection>('down');
   const hudRef = useRef<PlowedHud | null>(null);
@@ -186,6 +187,9 @@ export const PlowedGame = () => {
       if (comboBarRef.current) {
         const fraction = state.streak > 0 ? state.comboMs / COMBO_GRACE_MS : 0;
         comboBarRef.current.style.transform = `scaleX(${fraction})`;
+      }
+      if (comboTrackRef.current) {
+        comboTrackRef.current.style.opacity = state.streak > 0 && state.onClearedTile ? '1' : '0';
       }
 
       const next = hudFrom(state);
@@ -307,7 +311,10 @@ export const PlowedGame = () => {
           <div className={`text-2xl font-bold tabular-nums ${hud?.shielded ? 'text-amber-300' : 'text-sky-300'}`}>
             {hud?.multiplier ?? 1}×{hud?.shielded && <span className="ml-1 text-sm">🍺</span>}
           </div>
-          <div className="mx-auto mt-1 h-1 w-20 overflow-hidden rounded-full bg-neutral-700">
+          <div
+            ref={comboTrackRef}
+            className="mx-auto mt-1 h-1 w-20 overflow-hidden rounded-full bg-neutral-700 opacity-0 transition-opacity duration-150"
+          >
             <div
               ref={comboBarRef}
               className={`h-full w-full origin-left ${hud?.shielded ? 'bg-amber-300' : 'bg-sky-300'}`}
@@ -354,72 +361,78 @@ export const PlowedGame = () => {
 
           {phase !== 'playing' && (
             <div
-              className={`absolute inset-0 flex items-center justify-center overflow-y-auto rounded-md p-6 text-center ${
-                phase === 'ready' || phase === 'levelClear' ? 'pointer-events-none' : 'bg-black/55'
+              className={`absolute inset-0 flex overflow-y-auto rounded-md p-4 text-center ${
+                phase === 'ready' || phase === 'levelClear' ? 'pointer-events-none' : 'bg-black/40'
               }`}
             >
-              {phase === 'title' && (
-                <div className="flex max-w-sm flex-col items-center gap-3">
-                  <h1 className="font-mono text-5xl font-black tracking-widest text-white">PLOWED</h1>
-                  <p className="text-sm text-neutral-200">
-                    Shovel every pile in the neighborhood. Keep shoveling to build up to an 8× multiplier, but go too long
-                    without a fresh pile and you lose it.
-                  </p>
-                  <p className="text-sm text-neutral-300">
-                    <span className="text-amber-300">Cheese curds</span> lure the Yeti into a cage.{' '}
-                    <span className="text-amber-300">Beer</span> freezes the multiplier timer for a bit.
-                  </p>
+              <div
+                className={`m-auto rounded-lg border border-neutral-700 bg-neutral-950/90 shadow-xl backdrop-blur-sm ${
+                  phase === 'ready' || phase === 'levelClear' ? 'px-5 py-2' : 'px-6 py-5'
+                }`}
+              >
+                {phase === 'title' && (
+                  <div className="flex max-w-sm flex-col items-center gap-3">
+                    <h1 className="font-mono text-5xl font-black tracking-widest text-white">PLOWED</h1>
+                    <p className="text-sm text-neutral-200">
+                      Shovel every pile in the neighborhood. Keep shoveling to build up to an 8× multiplier, but go too
+                      long without a fresh pile and you lose it.
+                    </p>
+                    <p className="text-sm text-neutral-300">
+                      <span className="text-amber-300">Cheese curds</span> lure the Yeti into a cage.{' '}
+                      <span className="text-amber-300">Beer</span> freezes the multiplier timer for a bit.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={start}
+                      className="mt-2 rounded bg-sky-500 px-6 py-2 font-mono font-bold text-white hover:bg-sky-400"
+                    >
+                      Start
+                    </button>
+                    <p className="text-xs text-neutral-400">Arrows / WASD or swipe · P to pause · M to mute</p>
+                    <PlowedLeaderboard scores={scores} failed={scoresFailed} />
+                  </div>
+                )}
+                {phase === 'ready' && <p className="font-mono text-3xl font-bold text-amber-300">READY!</p>}
+                {phase === 'paused' && (
                   <button
                     type="button"
-                    onClick={start}
-                    className="mt-2 rounded bg-sky-500 px-6 py-2 font-mono font-bold text-white hover:bg-sky-400"
+                    onClick={() => stateRef.current && togglePause(stateRef.current)}
+                    className="font-mono text-3xl font-bold text-white"
                   >
-                    Start
+                    PAUSED
+                    <span className="block text-sm font-normal text-neutral-300">Tap or press P to resume</span>
                   </button>
-                  <p className="text-xs text-neutral-400">Arrows / WASD or swipe · P to pause · M to mute</p>
-                  <PlowedLeaderboard scores={scores} failed={scoresFailed} />
-                </div>
-              )}
-              {phase === 'ready' && <p className="font-mono text-3xl font-bold text-amber-300">READY!</p>}
-              {phase === 'paused' && (
-                <button
-                  type="button"
-                  onClick={() => stateRef.current && togglePause(stateRef.current)}
-                  className="font-mono text-3xl font-bold text-white"
-                >
-                  PAUSED
-                  <span className="block text-sm font-normal text-neutral-300">Tap or press P to resume</span>
-                </button>
-              )}
-              {phase === 'levelClear' && (
-                <p className="font-mono text-3xl font-bold text-sky-300">Level {hud?.level} plowed!</p>
-              )}
-              {phase === 'gameOver' && (
-                <div className="flex flex-col items-center gap-2">
-                  <p className="font-mono text-4xl font-black text-red-400">GAME OVER</p>
-                  <p className="font-mono text-white">
-                    {(hud?.score ?? 0).toLocaleString()} pts · level {hud?.level} · {hud?.piles} piles
-                  </p>
-                  <p className="text-sm text-neutral-300">Best {best.toLocaleString()}</p>
-                  {enteringInitials ? (
-                    <PlowedInitialsEntry onSubmit={submitScore} onSkip={() => setSkipped(true)} />
-                  ) : (
-                    <>
-                      {rank !== null && (
-                        <p className="font-mono text-amber-300">You placed {ordinal(rank)} on the leaderboard!</p>
-                      )}
-                      <button
-                        type="button"
-                        onClick={start}
-                        className="mt-2 rounded bg-sky-500 px-6 py-2 font-mono font-bold text-white hover:bg-sky-400"
-                      >
-                        Shovel again
-                      </button>
-                      <PlowedLeaderboard scores={scores} failed={scoresFailed} highlightRank={rank} />
-                    </>
-                  )}
-                </div>
-              )}
+                )}
+                {phase === 'levelClear' && (
+                  <p className="font-mono text-3xl font-bold text-sky-300">Level {hud?.level} plowed!</p>
+                )}
+                {phase === 'gameOver' && (
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="font-mono text-4xl font-black text-red-400">GAME OVER</p>
+                    <p className="font-mono text-white">
+                      {(hud?.score ?? 0).toLocaleString()} pts · level {hud?.level} · {hud?.piles} piles
+                    </p>
+                    <p className="text-sm text-neutral-300">Best {best.toLocaleString()}</p>
+                    {enteringInitials ? (
+                      <PlowedInitialsEntry onSubmit={submitScore} onSkip={() => setSkipped(true)} />
+                    ) : (
+                      <>
+                        {rank !== null && (
+                          <p className="font-mono text-amber-300">You placed {ordinal(rank)} on the leaderboard!</p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={start}
+                          className="mt-2 rounded bg-sky-500 px-6 py-2 font-mono font-bold text-white hover:bg-sky-400"
+                        >
+                          Shovel again
+                        </button>
+                        <PlowedLeaderboard scores={scores} failed={scoresFailed} highlightRank={rank} />
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
