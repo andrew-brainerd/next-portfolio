@@ -32,6 +32,7 @@ export const BUZZED_NEW_ROUTE = '/buzzed/new';
 export const BUZZED_STATS_ROUTE = '/buzzed/stats';
 export const buzzedGameRoute = (gameId: string) => `/buzzed/${gameId}`;
 export const buzzedResultsRoute = (gameId: string) => `/buzzed/${gameId}/results`;
+export const PLOWED_ROUTE = '/plowed';
 export const SCOREBOOK_ROUTE = '/scorebook';
 export const SCOREBOOK_FRISBEE_GOLF_ROUTE = '/scorebook/frisbee-golf';
 export const SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE = '/scorebook/frisbee-golf/new';
