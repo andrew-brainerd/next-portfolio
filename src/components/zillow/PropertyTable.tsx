@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import type { ZillowProperty } from '@/types/zillow';
 import { setPropertyRank } from '@/api/propertyRankings';
+import { ZILLOW_RANKING_ENABLED } from '@/constants/zillow';
 
 type SortField = keyof ZillowProperty;
 type SortDirection = 'asc' | 'desc';
@@ -22,6 +23,7 @@ export const PropertyTable = ({ properties, isLoggedIn }: PropertyTableProps) =>
   const [editingRank, setEditingRank] = useState<string | null>(null);
   const [rankInputValue, setRankInputValue] = useState<string>('');
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+  const canEditRank = ZILLOW_RANKING_ENABLED && isLoggedIn;
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -81,8 +83,8 @@ export const PropertyTable = ({ properties, isLoggedIn }: PropertyTableProps) =>
   };
 
   const { rankedProperties, backupProperties } = useMemo(() => {
-    const ranked = propertiesWithRanks.filter(p => p.rank != null);
-    const backups = propertiesWithRanks.filter(p => p.rank == null);
+    const ranked = ZILLOW_RANKING_ENABLED ? propertiesWithRanks.filter(p => p.rank != null) : propertiesWithRanks;
+    const backups = ZILLOW_RANKING_ENABLED ? propertiesWithRanks.filter(p => p.rank == null) : [];
 
     const createSortFn = (field: SortField, direction: SortDirection) => {
       return (a: ZillowProperty, b: ZillowProperty) => {
@@ -159,12 +161,14 @@ export const PropertyTable = ({ properties, isLoggedIn }: PropertyTableProps) =>
         <table className="min-w-full bg-[var(--color-brand-100)]/85 rounded-lg overflow-hidden shadow-2xl backdrop-blur-sm">
           <thead className="bg-[var(--color-brand-700)] text-white">
             <tr>
-              <th
-                className="px-2 py-3 text-center cursor-pointer hover:bg-[var(--color-brand-800)]/80 transition-colors select-none w-20"
-                onClick={() => handleSort('rank')}
-              >
-                Rank {getSortIcon('rank')}
-              </th>
+              {ZILLOW_RANKING_ENABLED && (
+                <th
+                  className="px-2 py-3 text-center cursor-pointer hover:bg-[var(--color-brand-800)]/80 transition-colors select-none w-20"
+                  onClick={() => handleSort('rank')}
+                >
+                  Rank {getSortIcon('rank')}
+                </th>
+              )}
               <th className="px-4 py-3 text-left"></th>
               <th
                 className="px-4 py-3 text-left cursor-pointer hover:bg-[var(--color-brand-800)]/80 transition-colors select-none"
@@ -204,49 +208,51 @@ export const PropertyTable = ({ properties, isLoggedIn }: PropertyTableProps) =>
               <tr
                 key={`${property.address}-${index}`}
                 className={`hover:bg-[var(--color-brand-200)]/60 transition-colors text-neutral-700 ${
-                  isLoggedIn && editingRank !== property.address ? 'cursor-pointer' : ''
+                  canEditRank && editingRank !== property.address ? 'cursor-pointer' : ''
                 }`}
                 onClick={() => {
-                  if (isLoggedIn && editingRank !== property.address) {
+                  if (canEditRank && editingRank !== property.address) {
                     handleRankEdit(property.address, property.rank);
                   }
                 }}
               >
-                <td className="px-2 py-3 text-center" onClick={e => e.stopPropagation()}>
-                  {isLoggedIn && editingRank === property.address ? (
-                    <div className="flex gap-1 justify-center">
-                      <input
-                        type="number"
-                        min="1"
-                        value={rankInputValue}
-                        onChange={e => setRankInputValue(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') {
-                            handleRankSave(property.address);
-                          } else if (e.key === 'Escape') {
-                            handleRankCancel();
-                          }
-                        }}
-                        className="w-12 px-1 py-1 border border-[var(--color-brand-300)] rounded bg-white text-neutral-700 text-center focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)]"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => handleRankSave(property.address)}
-                        className="px-1.5 py-1 bg-[var(--color-brand-600)] text-white rounded text-xs hover:bg-[var(--color-brand-700)] select-none cursor-pointer"
-                      >
-                        ✓
-                      </button>
-                      <button
-                        onClick={handleRankCancel}
-                        className="px-1.5 py-1 bg-neutral-500 text-white rounded text-xs hover:bg-neutral-600 select-none cursor-pointer"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="font-semibold">{property.rank || '-'}</span>
-                  )}
-                </td>
+                {ZILLOW_RANKING_ENABLED && (
+                  <td className="px-2 py-3 text-center" onClick={e => e.stopPropagation()}>
+                    {isLoggedIn && editingRank === property.address ? (
+                      <div className="flex gap-1 justify-center">
+                        <input
+                          type="number"
+                          min="1"
+                          value={rankInputValue}
+                          onChange={e => setRankInputValue(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              handleRankSave(property.address);
+                            } else if (e.key === 'Escape') {
+                              handleRankCancel();
+                            }
+                          }}
+                          className="w-12 px-1 py-1 border border-[var(--color-brand-300)] rounded bg-white text-neutral-700 text-center focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)]"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleRankSave(property.address)}
+                          className="px-1.5 py-1 bg-[var(--color-brand-600)] text-white rounded text-xs hover:bg-[var(--color-brand-700)] select-none cursor-pointer"
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={handleRankCancel}
+                          className="px-1.5 py-1 bg-neutral-500 text-white rounded text-xs hover:bg-neutral-600 select-none cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="font-semibold">{property.rank || '-'}</span>
+                    )}
+                  </td>
+                )}
                 <td className="px-2 py-3 text-center">
                   {property.image ? (
                     <div className="inline-block">

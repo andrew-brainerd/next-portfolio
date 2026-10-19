@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import type { ZillowProperty } from '@/types/zillow';
 import { setPropertyRank } from '@/api/propertyRankings';
+import { ZILLOW_RANKING_ENABLED } from '@/constants/zillow';
 
 interface MobilePropertyCardsProps {
   properties: ZillowProperty[];
@@ -16,11 +17,11 @@ export const MobilePropertyCards = ({ properties, isLoggedIn }: MobilePropertyCa
   const [rankInputValue, setRankInputValue] = useState<string>('');
 
   // Split into ranked and backup properties
-  const rankedProperties = [...propertiesWithRanks]
-    .filter(p => p.rank != null)
-    .sort((a, b) => (a.rank as number) - (b.rank as number));
+  const rankedProperties = ZILLOW_RANKING_ENABLED
+    ? [...propertiesWithRanks].filter(p => p.rank != null).sort((a, b) => (a.rank as number) - (b.rank as number))
+    : propertiesWithRanks;
 
-  const backupProperties = propertiesWithRanks.filter(p => p.rank == null);
+  const backupProperties = ZILLOW_RANKING_ENABLED ? propertiesWithRanks.filter(p => p.rank == null) : [];
 
   const handleRankEdit = (address: string, currentRank: number | null) => {
     setEditingRank(address);
@@ -60,58 +61,62 @@ export const MobilePropertyCards = ({ properties, isLoggedIn }: MobilePropertyCa
         isBackup ? 'border border-gray-400' : 'border border-[var(--color-brand-200)]'
       }`}
     >
-      {/* Rank badge - always visible, editable only when logged in */}
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-[var(--color-brand-700)]">Rank:</span>
-          {isLoggedIn && editingRank === property.address ? (
-            <div className="flex gap-1">
-              <input
-                type="number"
-                min="1"
-                value={rankInputValue}
-                onChange={e => setRankInputValue(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    handleRankSave(property.address);
-                  } else if (e.key === 'Escape') {
-                    handleRankCancel();
-                  }
-                }}
-                className="w-16 px-2 py-1 border border-[var(--color-brand-300)] rounded bg-white text-neutral-700 text-center focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)]"
-                autoFocus
-              />
+      {/* Rank badge - editable only when logged in */}
+      {ZILLOW_RANKING_ENABLED && (
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-[var(--color-brand-700)]">Rank:</span>
+            {isLoggedIn && editingRank === property.address ? (
+              <div className="flex gap-1">
+                <input
+                  type="number"
+                  min="1"
+                  value={rankInputValue}
+                  onChange={e => setRankInputValue(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      handleRankSave(property.address);
+                    } else if (e.key === 'Escape') {
+                      handleRankCancel();
+                    }
+                  }}
+                  className="w-16 px-2 py-1 border border-[var(--color-brand-300)] rounded bg-white text-neutral-700 text-center focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)]"
+                  autoFocus
+                />
+                <button
+                  onClick={() => handleRankSave(property.address)}
+                  className="px-2 py-1 bg-[var(--color-brand-600)] text-white rounded text-xs hover:bg-[var(--color-brand-700)] select-none cursor-pointer"
+                >
+                  ✓
+                </button>
+                <button
+                  onClick={handleRankCancel}
+                  className="px-2 py-1 bg-neutral-500 text-white rounded text-xs hover:bg-neutral-600 select-none cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : isLoggedIn ? (
               <button
-                onClick={() => handleRankSave(property.address)}
-                className="px-2 py-1 bg-[var(--color-brand-600)] text-white rounded text-xs hover:bg-[var(--color-brand-700)] select-none cursor-pointer"
+                onClick={() => handleRankEdit(property.address, property.rank)}
+                className={`px-3 py-1 ${
+                  isBackup
+                    ? 'bg-gray-600 hover:bg-gray-700'
+                    : 'bg-[var(--color-brand-600)] hover:bg-[var(--color-brand-700)]'
+                } text-white rounded-full text-sm font-bold transition-colors select-none cursor-pointer`}
               >
-                ✓
+                {property.rank || '—'}
               </button>
-              <button
-                onClick={handleRankCancel}
-                className="px-2 py-1 bg-neutral-500 text-white rounded text-xs hover:bg-neutral-600 select-none cursor-pointer"
+            ) : (
+              <span
+                className={`px-3 py-1 ${isBackup ? 'bg-gray-600' : 'bg-[var(--color-brand-600)]'} text-white rounded-full text-sm font-bold`}
               >
-                ✕
-              </button>
-            </div>
-          ) : isLoggedIn ? (
-            <button
-              onClick={() => handleRankEdit(property.address, property.rank)}
-              className={`px-3 py-1 ${
-                isBackup ? 'bg-gray-600 hover:bg-gray-700' : 'bg-[var(--color-brand-600)] hover:bg-[var(--color-brand-700)]'
-              } text-white rounded-full text-sm font-bold transition-colors select-none cursor-pointer`}
-            >
-              {property.rank || '—'}
-            </button>
-          ) : (
-            <span
-              className={`px-3 py-1 ${isBackup ? 'bg-gray-600' : 'bg-[var(--color-brand-600)]'} text-white rounded-full text-sm font-bold`}
-            >
-              {property.rank || '—'}
-            </span>
-          )}
+                {property.rank || '—'}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {property.image && (
         <Image
@@ -133,10 +138,12 @@ export const MobilePropertyCards = ({ properties, isLoggedIn }: MobilePropertyCa
           <span className="text-neutral-700">{property.sqft?.toLocaleString()}</span>
         </div>
         <div>
-          <span className="text-[var(--color-brand-700)]">Beds:</span> <span className="text-neutral-700">{property.beds}</span>
+          <span className="text-[var(--color-brand-700)]">Beds:</span>{' '}
+          <span className="text-neutral-700">{property.beds}</span>
         </div>
         <div>
-          <span className="text-[var(--color-brand-700)]">Baths:</span> <span className="text-neutral-700">{property.baths}</span>
+          <span className="text-[var(--color-brand-700)]">Baths:</span>{' '}
+          <span className="text-neutral-700">{property.baths}</span>
         </div>
       </div>
       {property.amenities && property.amenities.length > 0 && (
