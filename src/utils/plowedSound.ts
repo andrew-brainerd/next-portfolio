@@ -124,9 +124,6 @@ const SOUNDS: Record<PlowedEvent, (multiplier: number) => void> = {
     noise({ duration: 0.18, frequency: 900, q: 8, gain: 0.25, delay: 0.26 });
     tone({ frequency: 110, duration: 0.18, gain: 0.08, delay: 0.26 });
   },
-  taunt: () => {
-    for (let i = 0; i < 6; i++) tone({ frequency: i % 2 ? 196 : 247, duration: 0.05, gain: 0.07, delay: i * 0.045 });
-  },
   cageBreak: () => {
     noise({ duration: 0.35, frequency: 3000, type: 'highpass', gain: 0.2 });
     tone({ frequency: 70, slideTo: 160, duration: 0.45, type: 'sawtooth', gain: 0.1 });

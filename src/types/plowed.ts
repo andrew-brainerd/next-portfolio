@@ -9,7 +9,6 @@ export type PlowedEvent =
   | 'tierUp'
   | 'streakLost'
   | 'cheese'
-  | 'taunt'
   | 'cageBreak'
   | 'beer'
   | 'beerSpawn'
@@ -54,7 +53,6 @@ export interface PlowedPlayer extends PlowedMover {
 export interface PlowedYeti extends PlowedMover {
   releaseMs: number;
   cagedMs: number;
-  taunted: boolean;
 }
 
 export interface PlowedBeer {

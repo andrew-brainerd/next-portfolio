@@ -269,15 +269,21 @@ describe('plowed power-ups', () => {
     expect(state.phase).toBe('levelClear');
   });
 
-  it('a caged Yeti is harmless and pays a one-time taunt bonus', () => {
-    const state = begin(CORRIDOR);
-    state.yeti.x = 3;
-    state.yeti.y = 1;
-    state.yeti.cagedMs = 5000;
+  it('cheese sends the Yeti to the den cage and releases it from there', () => {
+    const map: PlowedMapDef = { name: 'den', rows: ['######', '#PC#.#', '##S###'] };
+    const state = begin(map);
+    state.yeti = { ...state.yeti, x: 4, y: 1, releaseMs: 0 };
     queueDirection(state, 'right');
-    run(state, TILE_MS * 2 + 5);
+    run(state, TILE_MS + 5);
+    expect(state.yeti).toMatchObject({ x: 2, y: 2, dir: null, progress: 0 });
+    expect(state.yeti.cagedMs).toBeGreaterThan(cageMs(1) - 100);
+
+    run(state, cageMs(1) - 300);
+    expect(state.yeti).toMatchObject({ x: 2, y: 2 });
     expect(state.lives).toBe(START_LIVES);
-    expect(state.yeti.taunted).toBe(true);
+
+    run(state, 500);
+    expect(state.lives).toBe(START_LIVES - 1);
   });
 
   it('beer spawns on snow, grants the shield, and expires if ignored', () => {

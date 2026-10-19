@@ -15,7 +15,6 @@ export const MULTIPLIER_STEP = 3;
 export const MAX_MULTIPLIER = 8;
 export const SNOW_POINTS = 10;
 export const CHEESE_POINTS = 50;
-export const TAUNT_POINTS = 200;
 export const BEER_POINTS = 100;
 export const LEVEL_BONUS = 1000;
 export const READY_MS = 1500;
@@ -177,8 +176,7 @@ const resetPositions = (state: PlowedState) => {
     dir: null,
     progress: 0,
     releaseMs: YETI_START_DELAY_MS,
-    cagedMs: 0,
-    taunted: false
+    cagedMs: 0
   };
   state.streak = 0;
   state.comboMs = 0;
@@ -223,7 +221,7 @@ export const createGame = ({ maps = PLOWED_MAPS, rng = Math.random }: CreateGame
     snowLeft: 0,
     cheese: [],
     player: { x: 0, y: 0, dir: null, progress: 0, buffered: null },
-    yeti: { x: 0, y: 0, dir: null, progress: 0, releaseMs: 0, cagedMs: 0, taunted: false },
+    yeti: { x: 0, y: 0, dir: null, progress: 0, releaseMs: 0, cagedMs: 0 },
     beer: null,
     nextBeerMs: 0,
     shieldMs: 0,
@@ -355,8 +353,9 @@ const onPlayerEnter = (state: PlowedState) => {
   if (cheeseIndex !== -1) {
     state.cheese.splice(cheeseIndex, 1);
     state.score += CHEESE_POINTS * multiplierFor(state.streak);
-    state.yeti.cagedMs = cageMs(state.level);
-    state.yeti.taunted = false;
+    // The cage is in the den, so a caged Yeti never sits on piles the player still needs.
+    const { yetiSpawn } = state.map;
+    state.yeti = { x: yetiSpawn.x, y: yetiSpawn.y, dir: null, progress: 0, releaseMs: 0, cagedMs: cageMs(state.level) };
     state.events.push('cheese');
   }
 
@@ -477,17 +476,7 @@ const stepPlaying = (state: PlowedState, dtMs: number) => {
     advance(state, yeti, yetiSpeed(state.level) * seconds, () => chooseYetiDirection(state));
   }
 
-  if (moverDistance(state, player, yeti) < CATCH_DISTANCE) {
-    if (yeti.cagedMs > 0) {
-      if (!yeti.taunted) {
-        yeti.taunted = true;
-        state.score += TAUNT_POINTS * multiplierFor(state.streak);
-        state.events.push('taunt');
-      }
-    } else {
-      catchPlayer(state);
-    }
-  }
+  if (yeti.cagedMs === 0 && moverDistance(state, player, yeti) < CATCH_DISTANCE) catchPlayer(state);
 };
 
 export const step = (state: PlowedState, dtMs: number) => {
