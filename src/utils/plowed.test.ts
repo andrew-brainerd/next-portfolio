@@ -233,6 +233,16 @@ describe('plowed movement and scoring', () => {
     expect(state.player).toMatchObject({ x: 14, y: 1 });
   });
 
+  it('follows a bend without needing a new key press', () => {
+    const map: PlowedMapDef = { name: 'bend', rows: ['######', '#P...#', '####.#', '####.#', '#S####'] };
+    const state = begin(map);
+    freezeYeti(state);
+    queueDirection(state, 'right');
+    run(state, TILE_MS * 5 + 5);
+    expect(state.player).toMatchObject({ x: 4, y: 3 });
+    expect(state.piles).toBe(5);
+  });
+
   it('pauses and resumes', () => {
     const state = begin(CORRIDOR);
     queueDirection(state, 'right');

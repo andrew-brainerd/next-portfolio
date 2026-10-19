@@ -293,6 +293,17 @@ const choosePlayerDirection = (state: PlowedState) => {
   if (player.dir && playerCanEnter(state, neighbor(state, player.x, player.y, player.dir))) {
     return player.dir;
   }
+  // Bends follow the corridor instead of stopping; only a true dead end stops the shoveler.
+  if (player.dir) {
+    const reverse = OPPOSITE[player.dir];
+    const ways = DIRECTIONS.filter(
+      dir => dir !== reverse && playerCanEnter(state, neighbor(state, player.x, player.y, dir))
+    );
+    if (ways.length === 1) {
+      if (player.buffered === player.dir) player.buffered = null;
+      return ways[0];
+    }
+  }
   return null;
 };
 
