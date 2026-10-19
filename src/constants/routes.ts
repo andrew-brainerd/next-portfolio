@@ -36,3 +36,5 @@ export const SCOREBOOK_ROUTE = '/scorebook';
 export const SCOREBOOK_FRISBEE_GOLF_ROUTE = '/scorebook/frisbee-golf';
 export const SCOREBOOK_FRISBEE_GOLF_NEW_ROUTE = '/scorebook/frisbee-golf/new';
 export const SCOREBOOK_FRISBEE_GOLF_STATS_ROUTE = '/scorebook/frisbee-golf/stats';
+export const ZILLOW_ROUTE = '/zillow';
+export const US_ROUTE = '/us';
