@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 import { TOKEN_COOKIE } from '@/constants/authentication';
+import { brainerdApiBaseUrl } from '@/utils/brainerdApiUrl';
 
 interface PositionRouteParams {
   params: Promise<{ gameId: string }>;
@@ -24,7 +25,7 @@ export async function POST(request: Request, { params }: PositionRouteParams) {
   }
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BRAINERD_API_URL}/buzzed/games/${gameId}/position`,
+    `${brainerdApiBaseUrl()}/buzzed/games/${gameId}/position`,
     {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },

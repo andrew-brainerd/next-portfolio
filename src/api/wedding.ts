@@ -18,6 +18,7 @@ import type {
   WeddingRsvpMatch
 } from '@/types/wedding';
 import { deleteRequest, getRequest, patchRequest, putRequest } from '@/api/client';
+import { brainerdApiBaseUrl } from '@/utils/brainerdApiUrl';
 
 /**
  * Public wedding config for the guest storybook. The backend strips the
@@ -35,7 +36,7 @@ export const getPublicWeddingConfig = (): Promise<PublicWeddingConfig | undefine
  */
 export const verifyWeddingPasscode = async (code: string): Promise<boolean> => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BRAINERD_API_URL}/wedding/unlock`, {
+    const response = await fetch(`${brainerdApiBaseUrl()}/wedding/unlock`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code })
@@ -81,7 +82,7 @@ export const updateWeddingConfig = (config: WeddingConfig): Promise<WeddingConfi
  */
 export const submitWeddingRsvp = async (input: WeddingRsvpInput): Promise<WeddingRsvp | undefined> => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BRAINERD_API_URL}/wedding/rsvp`, {
+    const response = await fetch(`${brainerdApiBaseUrl()}/wedding/rsvp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(input)
@@ -130,7 +131,7 @@ export const setWeddingMessageRead = (id: string, read: boolean): Promise<Weddin
   );
 };
 
-const brainerdApiUrl = (path: string) => `${process.env.NEXT_PUBLIC_BRAINERD_API_URL}${path}`;
+const brainerdApiUrl = (path: string) => `${brainerdApiBaseUrl()}${path}`;
 
 /**
  * Submit the couple quiz. Public — plain fetch. The server scores it; 403 means closed.

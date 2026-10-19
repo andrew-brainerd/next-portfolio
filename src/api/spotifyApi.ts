@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { brainerdApiBaseUrl } from '@/utils/brainerdApiUrl';
 
 const SPOTIFY_ACCESS_TOKEN_KEY = 'spotifyAccessToken';
 
 const spotifyApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BRAINERD_API_URL,
+  baseURL: brainerdApiBaseUrl(),
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' }
 });

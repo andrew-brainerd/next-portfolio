@@ -15,6 +15,7 @@ import { getStorage } from 'firebase/storage';
 import type { AuthResponse } from 'types/firebase';
 import { bakeCookie } from 'api/authentication';
 import { TOKEN_COOKIE, USER_COOKIE } from 'constants/authentication';
+import { brainerdApiBaseUrl } from '@/utils/brainerdApiUrl';
 
 const friendlyAuthError = (code: string | undefined, fallback: string): string => {
   switch (code) {
@@ -134,7 +135,7 @@ export const signInWithGoogle = async (): Promise<AuthResponse> => {
 };
 
 export const validateInviteCode = async (code: string): Promise<AuthResponse> => {
-  const BASE_URL = process.env.NEXT_PUBLIC_BRAINERD_API_URL;
+  const BASE_URL = brainerdApiBaseUrl();
 
   try {
     const response = await fetch(`${BASE_URL}/register/invite`, {

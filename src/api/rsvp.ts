@@ -1,7 +1,8 @@
 import type { RsvpGuestBook, Rsvp, RsvpBreakdown, RsvpInput } from '@/types/rsvp';
 import { getRequest } from '@/api/client';
+import { brainerdApiBaseUrl } from '@/utils/brainerdApiUrl';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BRAINERD_API_URL;
+const BASE_URL = brainerdApiBaseUrl();
 
 /**
  * Create or update the guest's RSVP (upsert by clientId). Public endpoint —

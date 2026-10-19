@@ -4,13 +4,14 @@ import axios, { type AxiosError, type Method } from 'axios';
 import { cookies } from 'next/headers';
 
 import { TOKEN_COOKIE } from 'constants/authentication';
+import { brainerdApiBaseUrl } from '@/utils/brainerdApiUrl';
 
 export interface RequestParams {
   [key: string]: string | undefined;
 }
 
 const client = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BRAINERD_API_URL,
+  baseURL: brainerdApiBaseUrl(),
   withCredentials: true,
   timeout: 15000
 });

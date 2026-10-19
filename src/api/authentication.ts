@@ -1,5 +1,7 @@
+import { brainerdApiBaseUrl } from '@/utils/brainerdApiUrl';
+
 export const bakeCookie = async (token: string) => {
-  const BASE_URL = process.env.NEXT_PUBLIC_BRAINERD_API_URL;
+  const BASE_URL = brainerdApiBaseUrl();
   const response = await fetch(`${BASE_URL}/auth/session`, {
     method: 'POST',
     credentials: 'include',
