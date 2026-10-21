@@ -6,6 +6,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   sendPasswordResetEmail,
+  signInWithCustomToken,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut
@@ -131,6 +132,37 @@ export const signInWithGoogle = async (): Promise<AuthResponse> => {
       isError: true,
       message: friendlyAuthError(err.code, 'Google sign-in failed. Please try again.')
     };
+  }
+};
+
+// Sign in with Steam (condensate spec FR-40a): brainerd-api returns the Steam OpenID URL and a state to check on return.
+export const startSteamSignIn = async (): Promise<{ url: string; state: string } | null> => {
+  try {
+    const response = await fetch(`${brainerdApiBaseUrl()}/auth/steam/start`, { method: 'POST' });
+    return response.ok ? ((await response.json()) as { url: string; state: string }) : null;
+  } catch (error) {
+    console.error('Steam sign-in start error', error);
+    return null;
+  }
+};
+
+export const completeSteamSignIn = async (params: Record<string, string>): Promise<AuthResponse> => {
+  try {
+    const response = await fetch(`${brainerdApiBaseUrl()}/auth/steam/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ params })
+    });
+    if (!response.ok) return { isError: true, message: 'Steam sign-in failed. Please try again.' };
+
+    const { customToken } = (await response.json()) as { customToken: string };
+    const userCredential = await signInWithCustomToken(firebaseAuth, customToken);
+    await bakeCookie(await userCredential.user.getIdToken());
+
+    return { isError: false, message: 'Sign-in successful' };
+  } catch (error) {
+    console.error('Steam sign-in error', error);
+    return { isError: true, message: 'Steam sign-in failed. Please try again.' };
   }
 };
 

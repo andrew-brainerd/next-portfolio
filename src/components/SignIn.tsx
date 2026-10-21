@@ -8,6 +8,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import TextField from '@mui/material/TextField';
 
+import { SteamSignInButton } from 'components/SteamSignInButton';
 import { useSignInForm } from 'hooks/useAuthForms';
 
 const INPUT_WIDTH = 300;
@@ -76,13 +77,7 @@ export const SignIn = ({ redirectRoute }: SignInProps) => {
           }}
           sx={{ width: INPUT_WIDTH }}
         />
-        <Button
-          className="self-end"
-          variant="text"
-          size="small"
-          color="info"
-          onClick={goToForgotPassword}
-        >
+        <Button className="self-end" variant="text" size="small" color="info" onClick={goToForgotPassword}>
           Forgot password?
         </Button>
       </div>
@@ -92,13 +87,14 @@ export const SignIn = ({ redirectRoute }: SignInProps) => {
         disabled={isLoading}
         data-testid="signInButton"
         sx={{
-          width: INPUT_WIDTH,
-          backgroundColor: 'var(--color-brand-600)',
+          'width': INPUT_WIDTH,
+          'backgroundColor': 'var(--color-brand-600)',
           '&:hover': { backgroundColor: 'var(--color-brand-700)' }
         }}
       >
         Log In
       </Button>
+      <SteamSignInButton redirectRoute={redirectRoute} width={INPUT_WIDTH} />
       {authResponse.message && (
         <div className="mt-4" style={{ width: INPUT_WIDTH }}>
           {authResponse.isError ? (
