@@ -1,5 +1,6 @@
 'use client';
 
+import { CondensateDevicesSettings } from 'components/settings/CondensateDevicesSettings';
 import { ProfilePictureSettings } from 'components/settings/ProfilePictureSettings';
 import { DisplayNameSettings } from 'components/settings/DisplayNameSettings';
 import { ThemeSelector } from 'components/settings/ThemeSelector';
@@ -15,6 +16,8 @@ export const SettingsHub = () => (
         <ProfilePictureSettings />
         <DisplayNameSettings />
       </section>
+
+      <CondensateDevicesSettings />
 
       <section>
         <h2 className="text-xl font-semibold mb-2 text-neutral-200">Theme</h2>
