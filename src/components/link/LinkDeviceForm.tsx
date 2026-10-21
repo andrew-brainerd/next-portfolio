@@ -4,13 +4,13 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import { approveDevice } from '@/api/device';
-import { LINK_ROUTE, LOGIN_ROUTE } from 'constants/routes';
-import { linkErrorMessage, linkSuccessMessage, needsSignIn } from 'utils/linkDevice';
+import { LOGIN_ROUTE } from 'constants/routes';
+import { linkErrorMessage, linkPath, linkSuccessMessage, needsSignIn } from 'utils/linkDevice';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
-export const LinkDeviceForm = () => {
-  const [code, setCode] = useState('');
+export const LinkDeviceForm = ({ initialCode = '' }: { initialCode?: string }) => {
+  const [code, setCode] = useState(initialCode);
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
   const [signIn, setSignIn] = useState(false);
@@ -62,7 +62,7 @@ export const LinkDeviceForm = () => {
           {signIn && (
             <>
               {' '}
-              <Link href={`${LOGIN_ROUTE}?from=${encodeURIComponent(LINK_ROUTE)}`} className="underline">
+              <Link href={`${LOGIN_ROUTE}?from=${encodeURIComponent(linkPath(code))}`} className="underline">
                 Sign in
               </Link>
             </>
