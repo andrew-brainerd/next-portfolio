@@ -5,7 +5,7 @@ import { codeFromQuery, linkErrorMessage, linkPath, linkSuccessMessage, needsSig
 describe('linkDevice messages', () => {
   it('names what was paired', () => {
     expect(linkSuccessMessage('charter')).toContain('Charter Forever is paired');
-    expect(linkSuccessMessage('condensate')).toContain('Condensate is signed in');
+    expect(linkSuccessMessage('condensate')).toContain('Condensate is now signed in');
     expect(linkSuccessMessage('watch')).toBe('Device linked! It should continue in a few seconds.');
     expect(linkSuccessMessage(undefined)).toBe('Device linked! It should continue in a few seconds.');
   });
