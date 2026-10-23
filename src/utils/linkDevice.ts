@@ -9,7 +9,9 @@ export const linkSuccessMessage = (kind?: string): string => {
   if (kind === 'charter') {
     return 'Charter Forever is paired. The app finishes setting up in a few seconds; you can close this page.';
   }
-  if (kind === 'condensate') return 'Condensate is signed in. It continues in a few seconds; you can close this page.';
+  if (kind === 'condensate') {
+    return 'Condensate is now signed in to your account. The app updates in a few seconds, so you can close this page.';
+  }
   return 'Device linked! It should continue in a few seconds.';
 };
 
