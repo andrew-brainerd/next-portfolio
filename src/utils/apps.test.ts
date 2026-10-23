@@ -65,9 +65,7 @@ describe('normalizeReleaseManifest', () => {
   it('keeps a custom Windows label', () => {
     const result = normalizeReleaseManifest({
       version: '1.0.0',
-      downloads: [
-        { platform: 'windows', label: 'Windows 10/11 (x64)', url: 'https://example.com/app.exe' }
-      ]
+      downloads: [{ platform: 'windows', label: 'Windows 10/11 (x64)', url: 'https://example.com/app.exe' }]
     });
     expect(result?.downloads[0].label).toBe('Windows 10/11 (x64)');
   });
@@ -76,13 +74,28 @@ describe('normalizeReleaseManifest', () => {
     const result = normalizeReleaseManifest({
       version: '1.0.0',
       downloads: [
-        { platform: 'linux', url: 'https://example.com/app.AppImage' },
+        { platform: 'beos', url: 'https://example.com/app.pkg' },
         { platform: 'macos' },
         { platform: 'windows', url: 'https://example.com/app.exe' }
       ]
     });
     expect(result?.downloads).toHaveLength(1);
     expect(result?.downloads[0].platform).toBe('windows');
+  });
+
+  it('keeps Linux AppImage downloads with their label', () => {
+    const result = normalizeReleaseManifest({
+      version: '0.4.3-beta.38',
+      downloads: [{ platform: 'linux', label: 'Linux / SteamOS (test build)', url: 'https://example.com/app.AppImage' }]
+    });
+    expect(result?.downloads).toEqual([
+      {
+        platform: 'linux',
+        label: 'Linux / SteamOS (test build)',
+        url: 'https://example.com/app.AppImage',
+        sizeBytes: undefined
+      }
+    ]);
   });
 
   it('returns null when there is no usable version', () => {

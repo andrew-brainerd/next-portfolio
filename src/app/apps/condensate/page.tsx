@@ -120,7 +120,14 @@ export default async function CondensatePage() {
             href={APPS_ROUTE}
             className="mb-6 inline-flex items-center gap-1 text-sm text-[var(--color-hero-text)] transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-400 rounded"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
               <polyline points="15 18 9 12 15 6" />
             </svg>
             All apps
@@ -142,11 +149,7 @@ export default async function CondensatePage() {
           </div>
 
           <div className="mt-8">
-            <DownloadButtons
-              manifest={manifest}
-              platforms={CONDENSATE.platforms}
-              appName={CONDENSATE.name}
-            />
+            <DownloadButtons manifest={manifest} platforms={CONDENSATE.platforms} appName={CONDENSATE.name} />
             {manifest && (
               <p className="mt-3 text-sm text-[var(--color-hero-text)]/80">
                 Version {manifest.version}
@@ -156,9 +159,7 @@ export default async function CondensatePage() {
                 </a>
               </p>
             )}
-            {manifest?.notes && (
-              <p className="mt-1 text-sm text-[var(--color-hero-text)]/70">{manifest.notes}</p>
-            )}
+            {manifest?.notes && <p className="mt-1 text-sm text-[var(--color-hero-text)]/70">{manifest.notes}</p>}
           </div>
 
           {betaManifest && (
@@ -169,7 +170,7 @@ export default async function CondensatePage() {
               </h2>
               <DownloadButtons
                 manifest={betaManifest}
-                platforms={CONDENSATE.platforms}
+                platforms={[...CONDENSATE.platforms, 'linux']}
                 appName={`${CONDENSATE.name} beta`}
                 compact
               />
@@ -190,10 +191,7 @@ export default async function CondensatePage() {
           <SectionHeading id="features-heading">What it does</SectionHeading>
           <div className="grid gap-5 sm:grid-cols-2">
             {FEATURES.map(feature => (
-              <div
-                key={feature.title}
-                className="rounded-2xl border border-neutral-500/20 bg-neutral-700/20 p-6"
-              >
+              <div key={feature.title} className="rounded-2xl border border-neutral-500/20 bg-neutral-700/20 p-6">
                 <h3 className="mb-2 font-semibold text-white">{feature.title}</h3>
                 <p className="text-sm text-neutral-300">{feature.body}</p>
               </div>
@@ -222,8 +220,8 @@ export default async function CondensatePage() {
             </div>
           </div>
           <p className="mt-4 text-sm text-neutral-400">
-            Condensate works without a local Steam install too — you just won&apos;t see the
-            “installed on this machine” badges.
+            Condensate works without a local Steam install too — you just won&apos;t see the “installed on this machine”
+            badges.
           </p>
         </section>
 
@@ -231,27 +229,29 @@ export default async function CondensatePage() {
         <section className="py-12" aria-labelledby="install-heading">
           <SectionHeading id="install-heading">Installing</SectionHeading>
           <p className="mb-6 max-w-3xl text-neutral-300">
-            Condensate is currently distributed unsigned, so the first launch needs one extra click
-            to get past Gatekeeper (macOS) or SmartScreen (Windows). This is expected for a
-            pre-1.0 build — signed installers are planned.
+            Condensate is currently distributed unsigned, so the first launch needs one extra click to get past
+            Gatekeeper (macOS) or SmartScreen (Windows). This is expected for a pre-1.0 build — signed installers are
+            planned.
           </p>
           <div className="grid gap-5 lg:grid-cols-2">
             <div className="rounded-2xl border border-neutral-500/20 bg-neutral-700/20 p-6">
               <h3 className="mb-3 font-semibold text-white">macOS</h3>
               <ol className="list-decimal space-y-2 pl-5 text-sm text-neutral-300">
-                <li>Open the downloaded <code className="text-brand-300">.dmg</code>.</li>
-                <li>Drag <strong>Condensate</strong> into the Applications folder.</li>
+                <li>
+                  Open the downloaded <code className="text-brand-300">.dmg</code>.
+                </li>
+                <li>
+                  Drag <strong>Condensate</strong> into the Applications folder.
+                </li>
                 <li>
                   Launch it from Applications. If macOS says it “cannot be opened”,
-                  <strong> right-click the app → Open</strong>, then confirm <strong>Open</strong> in
-                  the dialog. You only need to do this once.
+                  <strong> right-click the app → Open</strong>, then confirm <strong>Open</strong> in the dialog. You
+                  only need to do this once.
                 </li>
                 <li>
                   Alternatively, run{' '}
-                  <code className="text-brand-300">
-                    xattr -dr com.apple.quarantine /Applications/Condensate.app
-                  </code>{' '}
-                  in Terminal, then open it normally.
+                  <code className="text-brand-300">xattr -dr com.apple.quarantine /Applications/Condensate.app</code> in
+                  Terminal, then open it normally.
                 </li>
               </ol>
             </div>
@@ -260,8 +260,7 @@ export default async function CondensatePage() {
               <ol className="list-decimal space-y-2 pl-5 text-sm text-neutral-300">
                 <li>Run the downloaded installer.</li>
                 <li>
-                  If Windows SmartScreen appears, click <strong>More info</strong> →{' '}
-                  <strong>Run anyway</strong>.
+                  If Windows SmartScreen appears, click <strong>More info</strong> → <strong>Run anyway</strong>.
                 </li>
                 <li>Follow the installer, then launch Condensate from the Start menu.</li>
               </ol>
@@ -293,17 +292,16 @@ export default async function CondensatePage() {
           <div className="rounded-2xl border border-neutral-500/20 bg-neutral-700/20 p-6">
             <ul className="space-y-2 text-sm text-neutral-300">
               <li>
-                Your Steam Web API key is stored only in the OS secret store (macOS Keychain /
-                Windows Credential Manager) — never in plaintext, logs, or cloud.
+                Your Steam Web API key is stored only in the OS secret store (macOS Keychain / Windows Credential
+                Manager) — never in plaintext, logs, or cloud.
               </li>
               <li>
-                Condensate talks only to Steam, Cloudflare (the speed test), and its own backend.
-                No third-party analytics or tracking.
+                Condensate talks only to Steam, Cloudflare (the speed test), and its own backend. No third-party
+                analytics or tracking.
               </li>
               <li>
-                Sharing anonymous game install sizes (to improve download estimates for everyone)
-                is opt-in and asked for explicitly on first run — never your SteamID, name, or
-                friends.
+                Sharing anonymous game install sizes (to improve download estimates for everyone) is opt-in and asked
+                for explicitly on first run — never your SteamID, name, or friends.
               </li>
               <li>Group membership and caches are stored locally on your machine.</li>
             </ul>
@@ -311,8 +309,7 @@ export default async function CondensatePage() {
         </section>
 
         <p className="text-sm text-neutral-400">
-          Condensate is a personal project and is not affiliated with or endorsed by Valve or
-          Steam.
+          Condensate is a personal project and is not affiliated with or endorsed by Valve or Steam.
         </p>
       </div>
     </main>

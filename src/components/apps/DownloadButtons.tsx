@@ -1,4 +1,5 @@
 import { AppleIcon } from '@/components/icons/AppleIcon';
+import { LinuxIcon } from '@/components/icons/LinuxIcon';
 import { WindowsIcon } from '@/components/icons/WindowsIcon';
 import { downloadFor, downloadHref, formatBytes } from '@/utils/apps';
 import type { AppPlatform, ReleaseManifest } from '@/types/apps';
@@ -16,7 +17,8 @@ interface DownloadButtonsProps {
 
 const PLATFORM_ICON: Record<AppPlatform, typeof AppleIcon> = {
   macos: AppleIcon,
-  windows: WindowsIcon
+  windows: WindowsIcon,
+  linux: LinuxIcon
 };
 
 export const DownloadButtons = ({
@@ -29,10 +31,7 @@ export const DownloadButtons = ({
 }: DownloadButtonsProps) => {
   if (!manifest) {
     return (
-      <p
-        className={`text-neutral-300 ${compact ? 'text-sm' : 'text-base'}`}
-        role="status"
-      >
+      <p className={`text-neutral-300 ${compact ? 'text-sm' : 'text-base'}`} role="status">
         {`Builds for ${appName} aren’t published yet — check back soon.`}
       </p>
     );
@@ -63,9 +62,7 @@ export const DownloadButtons = ({
           >
             <Icon className={`${iconSize} fill-current`} aria-hidden="true" />
             <span>{download.label}</span>
-            {size && !compact && (
-              <span className="text-white/70 font-normal">· {size}</span>
-            )}
+            {size && !compact && <span className="text-white/70 font-normal">· {size}</span>}
           </a>
         );
       })}

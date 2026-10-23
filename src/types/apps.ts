@@ -1,4 +1,4 @@
-export type AppPlatform = 'macos' | 'windows';
+export type AppPlatform = 'macos' | 'windows' | 'linux';
 
 /** A native desktop app listed on /apps. */
 export interface NativeApp {

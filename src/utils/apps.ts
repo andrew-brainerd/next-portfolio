@@ -3,18 +3,17 @@ import { APPS_S3_BASE } from '@/constants/apps';
 import type { AppPlatform, ReleaseDownload, ReleaseManifest } from '@/types/apps';
 
 /** URL of an app's stable (newest-stable) release manifest in the S3 bucket. */
-export const releaseManifestUrl = (slug: string): string =>
-  `${APPS_S3_BASE}/apps/${slug}/latest.json`;
+export const releaseManifestUrl = (slug: string): string => `${APPS_S3_BASE}/apps/${slug}/latest.json`;
 
-const PLATFORMS: AppPlatform[] = ['macos', 'windows'];
+const PLATFORMS: AppPlatform[] = ['macos', 'windows', 'linux'];
 
 const PLATFORM_LABELS: Record<AppPlatform, string> = {
   macos: 'macOS',
-  windows: 'Windows'
+  windows: 'Windows',
+  linux: 'Linux'
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
 const isPlatform = (value: unknown): value is AppPlatform =>
   typeof value === 'string' && (PLATFORMS as string[]).includes(value);
@@ -29,8 +28,7 @@ function normalizeDownload(raw: unknown): ReleaseDownload | null {
     raw.platform !== 'macos' && typeof raw.label === 'string' && raw.label.trim().length > 0
       ? raw.label.trim()
       : PLATFORM_LABELS[raw.platform];
-  const sizeBytes =
-    typeof raw.sizeBytes === 'number' && raw.sizeBytes > 0 ? raw.sizeBytes : undefined;
+  const sizeBytes = typeof raw.sizeBytes === 'number' && raw.sizeBytes > 0 ? raw.sizeBytes : undefined;
 
   return { platform: raw.platform, label, url: raw.url, sizeBytes };
 }
@@ -62,20 +60,13 @@ export function normalizeReleaseManifest(raw: unknown): ReleaseManifest | null {
 
   if (downloads.length === 0) return null;
 
-  const releasedAt =
-    typeof raw.releasedAt === 'string' && dayjs(raw.releasedAt).isValid()
-      ? raw.releasedAt
-      : undefined;
-  const notes =
-    typeof raw.notes === 'string' && raw.notes.trim().length > 0 ? raw.notes.trim() : undefined;
+  const releasedAt = typeof raw.releasedAt === 'string' && dayjs(raw.releasedAt).isValid() ? raw.releasedAt : undefined;
+  const notes = typeof raw.notes === 'string' && raw.notes.trim().length > 0 ? raw.notes.trim() : undefined;
 
   return { version: raw.version.trim(), releasedAt, notes, downloads };
 }
 
-export function downloadFor(
-  manifest: ReleaseManifest,
-  platform: AppPlatform
-): ReleaseDownload | undefined {
+export function downloadFor(manifest: ReleaseManifest, platform: AppPlatform): ReleaseDownload | undefined {
   return manifest.downloads.find(download => download.platform === platform);
 }
 
