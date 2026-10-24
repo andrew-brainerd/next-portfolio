@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getCondensateDownloads, getReleaseManifest } from '@/api/apps';
 import { CondensateIcon } from '@/components/icons/CondensateIcon';
+import { CondensateLinuxDownload } from '@/components/apps/CondensateLinuxDownload';
 import { DownloadButtons } from '@/components/apps/DownloadButtons';
 import { ScreenshotGallery } from '@/components/apps/ScreenshotGallery';
 import { CONDENSATE } from '@/constants/apps';
@@ -104,7 +105,7 @@ function SectionHeading({ id, children }: { id: string; children: React.ReactNod
 }
 
 export default async function CondensatePage() {
-  const { stable, beta: betaManifest } = await getCondensateDownloads();
+  const { stable, beta: betaManifest, linux } = await getCondensateDownloads();
   // S3 manifest keeps the page downloadable if brainerd-api is unreachable
   const manifest = stable ?? (await getReleaseManifest(CONDENSATE.slug));
   const releasedAt = formatReleaseDate(manifest?.releasedAt);
@@ -160,6 +161,7 @@ export default async function CondensatePage() {
               </p>
             )}
             {manifest?.notes && <p className="mt-1 text-sm text-[var(--color-hero-text)]/70">{manifest.notes}</p>}
+            <CondensateLinuxDownload manifest={linux} />
           </div>
 
           {betaManifest && (
@@ -170,7 +172,7 @@ export default async function CondensatePage() {
               </h2>
               <DownloadButtons
                 manifest={betaManifest}
-                platforms={[...CONDENSATE.platforms, 'linux']}
+                platforms={CONDENSATE.platforms}
                 appName={`${CONDENSATE.name} beta`}
                 compact
               />

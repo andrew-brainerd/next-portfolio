@@ -8,6 +8,7 @@ import { getCondensateDevices } from '@/api/condensateDevices';
 import { getCondensatePolls } from '@/api/condensatePolls';
 import { getCondensateDownloads, getReleaseManifest } from '@/api/apps';
 import { getPlayerSummary } from '@/api/steam';
+import { CondensateLinuxDownload } from '@/components/apps/CondensateLinuxDownload';
 import { DownloadButtons } from '@/components/apps/DownloadButtons';
 import { CondensateDevices } from '@/components/condensate/CondensateDevices';
 import { CondensateIcon } from '@/components/icons/CondensateIcon';
@@ -37,17 +38,18 @@ const Section = ({
 );
 
 const Downloads = async () => {
-  const { stable, beta } = await getCondensateDownloads();
+  const { stable, beta, linux } = await getCondensateDownloads();
   const manifest = stable ?? (await getReleaseManifest(CONDENSATE.slug));
   return (
     <Section title="Download">
       <DownloadButtons manifest={manifest} platforms={CONDENSATE.platforms} appName={CONDENSATE.name} compact />
+      <CondensateLinuxDownload manifest={linux} />
       {beta && (
         <div className="mt-4 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-4">
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-amber-300">Beta · {beta.version}</h3>
           <DownloadButtons
             manifest={beta}
-            platforms={[...CONDENSATE.platforms, 'linux']}
+            platforms={CONDENSATE.platforms}
             appName={`${CONDENSATE.name} beta`}
             compact
           />

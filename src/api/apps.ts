@@ -23,15 +23,15 @@ export async function getReleaseManifest(slug: string): Promise<ReleaseManifest 
 
 /**
  * Condensate's stable and beta downloads from brainerd-api, which reads the
- * private repo's GitHub Releases. The session token is forwarded so a site
- * admin also gets the newest beta; everyone else gets `beta: null`.
+ * private repo's GitHub Releases. The session token is forwarded so a
+ * signed-in user also gets the Linux / SteamOS build and a site admin the
+ * newest beta; everyone else gets `null` for both.
  */
 export async function getCondensateDownloads(): Promise<AppDownloads> {
-  const raw = await getRequest<{ stable?: unknown; beta?: unknown }>(
-    '/condensate/updates/downloads'
-  );
+  const raw = await getRequest<{ stable?: unknown; beta?: unknown; linux?: unknown }>('/condensate/updates/downloads');
   return {
     stable: normalizeReleaseManifest(raw?.stable),
-    beta: normalizeReleaseManifest(raw?.beta)
+    beta: normalizeReleaseManifest(raw?.beta),
+    linux: normalizeReleaseManifest(raw?.linux)
   };
 }
