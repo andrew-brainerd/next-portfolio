@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 
-import { HomeTabs } from 'components/HomeTabs';
+import { HomeSections } from 'components/HomeSections';
 import { UserMenu } from 'components/UserMenu';
 import { ModeSwitch } from 'components/win95/ModeSwitch';
 import { Win95Home } from 'components/win95/apps/Win95Home';
@@ -14,7 +14,7 @@ export default async function Home() {
 
   return (
     <ModeSwitch
-      win95={<Win95Home />}
+      win95={<Win95Home isLoggedIn={isLoggedIn} />}
       normal={
         <main className="relative min-h-screen flex flex-col">
           <div className="absolute right-4 top-4 z-20 flex items-center gap-3 sm:right-6 sm:top-6">
@@ -44,7 +44,7 @@ export default async function Home() {
             </div>
           </header>
 
-          <HomeTabs isLoggedIn={isLoggedIn} />
+          <HomeSections isLoggedIn={isLoggedIn} />
         </main>
       }
     />

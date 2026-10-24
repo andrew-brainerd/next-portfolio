@@ -270,7 +270,8 @@ html[data-mode='win95'] .win95-desktop-icon {
   cursor: default;
 }
 
-html[data-mode='win95'] .win95-desktop-icon:hover .win95-desktop-icon-label {
+html[data-mode='win95'] .win95-desktop-icon:hover .win95-desktop-icon-label,
+html[data-mode='win95'] .win95-desktop-icon:focus-visible .win95-desktop-icon-label {
   background: var(--win95-dialog-blue);
   color: #ffffff;
 }

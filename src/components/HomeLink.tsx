@@ -1,35 +1,57 @@
-interface HomeLinkProps {
-  name: string;
-  children?: React.ReactNode;
-  text?: string;
-  path?: string;
-  openNewTab?: boolean;
-}
+import Link from 'next/link';
+import type { HomeLinkItem } from '@/types/home';
+import { opensInNewTab } from '@/utils/home';
 
-export const HomeLink = ({ name, children, text, path, openNewTab = true }: HomeLinkProps) => {
+type HomeLinkProps = HomeLinkItem;
+
+const CARD_CLASS =
+  'group flex h-full items-center gap-4 rounded-2xl border border-neutral-500/20 bg-gradient-to-br from-neutral-600/40 to-neutral-700/40 p-4 shadow-sm backdrop-blur-sm transition duration-300 hover:border-brand-400/50 motion-safe:hover:-translate-y-0.5 focus:outline-none focus-visible:border-brand-400 focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900';
+
+export const HomeLink = ({ name, description, path, Icon }: HomeLinkProps) => {
+  const newTab = opensInNewTab(path);
+
+  const content = (
+    <>
+      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-neutral-900/30 transition-colors duration-300 group-hover:bg-brand-500/20 group-focus-visible:bg-brand-500/20">
+        <Icon className="h-9 w-9 fill-white" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 text-left">
+        <span className="block font-semibold text-white">
+          {name}
+          {newTab && (
+            <svg
+              viewBox="0 0 12 12"
+              className="ml-1 inline h-3 w-3 align-baseline text-neutral-400"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              aria-hidden="true"
+            >
+              <path d="M3.5 8.5l5-5M4.5 3.5h4v4" />
+            </svg>
+          )}
+        </span>
+        <span className="block text-sm text-neutral-300">{description}</span>
+        {newTab && <span className="sr-only"> (opens in a new tab)</span>}
+      </span>
+    </>
+  );
+
+  if (path.startsWith('/')) {
+    return (
+      <Link className={CARD_CLASS} href={path}>
+        {content}
+      </Link>
+    );
+  }
+
   return (
     <a
-      className="group relative animate-fade items-center cursor-pointer flex flex-col justify-center p-6 h-36 transition-all duration-500 ease-out hover:scale-105 active:scale-95 rounded-3xl bg-gradient-to-br from-neutral-600/40 to-neutral-700/40 backdrop-blur-sm border border-neutral-500/20 shadow-lg hover:shadow-2xl hover:shadow-brand-500/20 hover:border-brand-400/40 overflow-hidden"
-      aria-label={name}
+      className={CARD_CLASS}
       href={path}
-      target={openNewTab ? '_blank' : '_self'}
-      rel="noopener noreferrer"
+      {...(newTab && { target: '_blank', rel: 'noopener noreferrer' })}
     >
-      {/* Gradient overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-500/0 to-brand-600/0 group-hover:from-brand-500/10 group-hover:to-brand-600/20 transition-all duration-500 rounded-3xl"></div>
-
-      {/* Shimmer effect */}
-      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-
-      {/* Content */}
-      <div className="relative z-10 transform transition-transform duration-300 group-hover:-translate-y-3">
-        {children || text || path}
-      </div>
-
-      {/* Label */}
-      <span className="absolute bottom-4 z-10 text-sm font-medium text-neutral-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        {name}
-      </span>
+      {content}
     </a>
   );
 };
