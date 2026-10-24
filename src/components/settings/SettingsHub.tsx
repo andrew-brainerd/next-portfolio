@@ -1,8 +1,8 @@
 'use client';
 
-import { CondensateDevicesSettings } from 'components/settings/CondensateDevicesSettings';
 import { ProfilePictureSettings } from 'components/settings/ProfilePictureSettings';
 import { DisplayNameSettings } from 'components/settings/DisplayNameSettings';
+import { SteamLinkSettings } from 'components/settings/SteamLinkSettings';
 import { ThemeSelector } from 'components/settings/ThemeSelector';
 
 export const SettingsHub = () => (
@@ -17,7 +17,7 @@ export const SettingsHub = () => (
         <DisplayNameSettings />
       </section>
 
-      <CondensateDevicesSettings />
+      <SteamLinkSettings />
 
       <section>
         <h2 className="text-xl font-semibold mb-2 text-neutral-200">Theme</h2>

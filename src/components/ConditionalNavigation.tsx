@@ -29,9 +29,10 @@ const WEDDING_GUEST_ROUTES = new Set([
 
 interface ConditionalNavigationProps {
   isLoggedIn: boolean;
+  isSteamOnly: boolean;
 }
 
-export const ConditionalNavigation = ({ isLoggedIn }: ConditionalNavigationProps) => {
+export const ConditionalNavigation = ({ isLoggedIn, isSteamOnly }: ConditionalNavigationProps) => {
   const pathname = usePathname();
   const isTouch = useTouchInput();
   const isHomePage = pathname === '/';
@@ -46,5 +47,5 @@ export const ConditionalNavigation = ({ isLoggedIn }: ConditionalNavigationProps
     return null;
   }
 
-  return <Navigation isLoggedIn={isLoggedIn} pathname={pathname} />;
+  return <Navigation isLoggedIn={isLoggedIn} isSteamOnly={isSteamOnly} pathname={pathname} />;
 };

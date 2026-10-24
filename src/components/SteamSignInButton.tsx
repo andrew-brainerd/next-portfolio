@@ -4,36 +4,26 @@ import { useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 
-import { startSteamSignIn } from 'utils/firebase';
-import { STEAM_REDIRECT_KEY, STEAM_STATE_KEY, safeRedirect } from 'utils/steamSignIn';
+import { beginSteamSignIn } from 'utils/steamSignInFlow';
 
 interface SteamSignInButtonProps {
   redirectRoute: string;
   width?: number;
+  link?: boolean;
 }
 
-export const SteamSignInButton = ({ redirectRoute, width }: SteamSignInButtonProps) => {
+export const SteamSignInButton = ({ redirectRoute, width, link = false }: SteamSignInButtonProps) => {
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState('');
 
   const handleClick = async (): Promise<void> => {
     setIsStarting(true);
     setError('');
-    const started = await startSteamSignIn();
-    if (!started) {
-      setError('Could not reach Steam sign-in. Please try again.');
+    const problem = await beginSteamSignIn(redirectRoute, link ? 'link' : 'signIn');
+    if (problem) {
+      setError(problem);
       setIsStarting(false);
-      return;
     }
-    try {
-      sessionStorage.setItem(STEAM_STATE_KEY, started.state);
-      sessionStorage.setItem(STEAM_REDIRECT_KEY, safeRedirect(redirectRoute));
-    } catch {
-      setError('Steam sign-in needs browser storage turned on.');
-      setIsStarting(false);
-      return;
-    }
-    window.location.href = started.url;
   };
 
   return (
@@ -45,7 +35,7 @@ export const SteamSignInButton = ({ redirectRoute, width }: SteamSignInButtonPro
         data-testid="steamSignInButton"
         sx={{ width, color: 'var(--color-brand-700)', borderColor: 'var(--color-brand-700)' }}
       >
-        Sign in with Steam
+        {link ? 'Link Steam' : 'Sign in with Steam'}
       </Button>
       {error && <Alert severity="error">{error}</Alert>}
     </div>

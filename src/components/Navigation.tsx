@@ -11,8 +11,9 @@ import { AppsIcon } from '@/components/icons/AppsIcon';
 import { PeapodIcon } from '@/components/icons/PeapodIcon';
 import { SteamIcon } from '@/components/icons/SteamIcon';
 import { RollWithMeIcon } from '@/components/icons/RollWithMeIcon';
+import { CondensateIcon } from '@/components/icons/CondensateIcon';
 import type { NavLink } from '@/types/navigation';
-import { LOGIN_ROUTE } from 'constants/routes';
+import { CONDENSATE_ROUTE, LOGIN_ROUTE } from 'constants/routes';
 
 const NAV_LINKS: NavLink[] = [
   { href: '/apps', label: 'Apps', Icon: AppsIcon },
@@ -21,12 +22,17 @@ const NAV_LINKS: NavLink[] = [
   { href: '/roll-with-me', label: 'Roll With Me', Icon: RollWithMeIcon }
 ];
 
+// Steam-only accounts are Condensate-only (condensate spec FR-48).
+const STEAM_ONLY_NAV_LINKS: NavLink[] = [{ href: CONDENSATE_ROUTE, label: 'Condensate', Icon: CondensateIcon }];
+
 interface NavigationProps {
   isLoggedIn: boolean;
+  isSteamOnly: boolean;
   pathname: string;
 }
 
-export const Navigation = ({ isLoggedIn, pathname }: NavigationProps) => {
+export const Navigation = ({ isLoggedIn, isSteamOnly, pathname }: NavigationProps) => {
+  const links = isSteamOnly ? STEAM_ONLY_NAV_LINKS : NAV_LINKS;
   const iconColor = 'text-white hover:text-brand-300';
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -34,12 +40,16 @@ export const Navigation = ({ isLoggedIn, pathname }: NavigationProps) => {
     <nav className="bg-[var(--color-brand-300)]/10">
       <div className="container mx-auto px-3 py-4">
         <div className="flex justify-between items-center">
-          <Link href="/" aria-label="Home" className="hover:text-brand-300 transition-colors">
+          <Link
+            href={isSteamOnly ? CONDENSATE_ROUTE : '/'}
+            aria-label="Home"
+            className="hover:text-brand-300 transition-colors"
+          >
             <HomeIcon className="w-7 h-7" />
           </Link>
 
           <div className="flex items-center gap-5">
-            {NAV_LINKS.map(link => (
+            {links.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -79,7 +89,7 @@ export const Navigation = ({ isLoggedIn, pathname }: NavigationProps) => {
       </div>
 
       <div className="nav:hidden">
-        <MobileNavMenu open={menuOpen} onClose={() => setMenuOpen(false)} links={NAV_LINKS} />
+        <MobileNavMenu open={menuOpen} onClose={() => setMenuOpen(false)} links={links} />
       </div>
     </nav>
   );

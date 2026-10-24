@@ -16,5 +16,3 @@ export const deviceTitle = (device: CondensateDevice): string => {
   if (device.name && platform) return `${device.name} (${platform})`;
   return device.name || (platform ? `${platform} device` : 'Condensate device');
 };
-
-export const isSteamUid = (uid: string | undefined): boolean => !!uid?.startsWith('steam:');

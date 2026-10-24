@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import type { CondensatePoll } from 'types/condensatePoll';
-import { personLabel, previewDescription, rankedOptions, toggleTick } from './condensatePolls';
+import {
+  personLabel,
+  pollSummary,
+  pollsForHome,
+  previewDescription,
+  rankedOptions,
+  toggleTick
+} from './condensatePolls';
 
 const poll: CondensatePoll = {
   pollId: 'a'.repeat(32),
@@ -46,6 +53,43 @@ describe('Condensate poll helpers', () => {
     expect(
       previewDescription({ title: 'Friday', sessionAt: null, status: 'closed', optionCount: 1, leading: null })
     ).toBe('Voting closed · 1 game');
+  });
+
+  it('lists open polls by session time, then the five latest closed', () => {
+    const open = (id: string, sessionAt: number | null, createdAt: number) => ({
+      ...poll,
+      pollId: id,
+      sessionAt,
+      createdAt
+    });
+    const closed = (id: string, closedAt: number) => ({ ...poll, pollId: id, status: 'closed' as const, closedAt });
+    const list = [
+      closed('c1', 1),
+      open('o-late', 300, 1),
+      closed('c2', 2),
+      open('o-unscheduled', null, 200),
+      closed('c3', 3),
+      closed('c4', 4),
+      closed('c5', 5),
+      closed('c6', 6),
+      open('o-soon', 100, 1)
+    ];
+    expect(pollsForHome(list).map(p => p.pollId)).toEqual([
+      'o-soon',
+      'o-unscheduled',
+      'o-late',
+      'c6',
+      'c5',
+      'c4',
+      'c3',
+      'c2'
+    ]);
+  });
+
+  it('summarises a poll for the Condensate view', () => {
+    expect(pollSummary(poll)).toBe('Open · 3 games · Leading: C');
+    expect(pollSummary({ ...poll, status: 'closed', leader: 2 })).toBe('Closed · 3 games · Winner: B');
+    expect(pollSummary({ ...poll, options: poll.options.slice(0, 1), leader: null })).toBe('Open · 1 game');
   });
 
   it('toggles a tick', () => {

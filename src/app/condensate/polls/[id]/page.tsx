@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import type { Metadata } from 'next';
 
 import { TOKEN_COOKIE } from 'constants/authentication';
-import { LOGIN_ROUTE } from 'constants/routes';
+import { LOGIN_ROUTE, SETTINGS_ROUTE } from 'constants/routes';
 import { getPoll, getPollPreview } from '@/api/condensatePolls';
 import { CondensatePoll } from '@/components/condensate/CondensatePoll';
 import { condensatePollPath, previewDescription, steamHeaderArt } from '@/utils/condensatePolls';
@@ -65,9 +65,13 @@ export default async function CondensatePollPage({ params }: PollPageProps) {
         <>
           <h1 className="mb-2 text-3xl font-bold text-white">Condensate poll</h1>
           <p className="text-neutral-400">
-            Condensate polls need a Steam sign-in.{' '}
+            Condensate polls need a Steam account.{' '}
             <Link href={signIn} className="underline">
               Sign in with Steam
+            </Link>{' '}
+            or{' '}
+            <Link href={SETTINGS_ROUTE} className="underline">
+              link Steam in Settings
             </Link>{' '}
             to vote, or check the link is right.
           </p>

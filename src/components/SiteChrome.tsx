@@ -9,10 +9,11 @@ import { useWin95Mode } from '@/hooks/useWin95Mode';
 
 interface SiteChromeProps {
   isLoggedIn: boolean;
+  isSteamOnly: boolean;
   children: React.ReactNode;
 }
 
-export const SiteChrome = ({ isLoggedIn, children }: SiteChromeProps) => {
+export const SiteChrome = ({ isLoggedIn, isSteamOnly, children }: SiteChromeProps) => {
   const pathname = usePathname();
   const { enabled, initialize } = useWin95Mode();
 
@@ -32,7 +33,7 @@ export const SiteChrome = ({ isLoggedIn, children }: SiteChromeProps) => {
 
   return (
     <>
-      <ConditionalNavigation isLoggedIn={isLoggedIn} />
+      <ConditionalNavigation isLoggedIn={isLoggedIn} isSteamOnly={isSteamOnly} />
       <div id="main-content">{children}</div>
     </>
   );

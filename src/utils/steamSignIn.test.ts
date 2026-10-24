@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { openIdParams, safeRedirect, steamCallbackProblem, steamProblemMessage } from './steamSignIn';
+import { openIdParams, safeRedirect, steamCallbackProblem, steamLinkMessage, steamProblemMessage } from './steamSignIn';
+
+describe('steamLinkMessage', () => {
+  it('explains each link outcome', () => {
+    expect(steamLinkMessage('linked')).toContain('linked');
+    expect(steamLinkMessage('steam_linked_elsewhere')).toContain('another brainerd.dev account');
+    expect(steamLinkMessage('account_has_steam')).toContain('Unlink it first');
+    expect(steamLinkMessage('failed')).toContain('try again');
+  });
+});
 
 describe('steamSignIn', () => {
   it('only redirects to same-site paths', () => {

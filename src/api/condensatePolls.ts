@@ -20,13 +20,17 @@ export const getPollPreview = async (pollId: string): Promise<CondensatePollPrev
     .catch(() => null);
 };
 
-// Needs a Steam sign-in; any other sign-in gets 401 from brainerd-api.
+// Needs a Steam sign-in or an account linked to Steam; any other sign-in gets 401 from brainerd-api.
 export const getPoll = async (pollId: string): Promise<PollLoad> => {
   if (!POLL_ID.test(pollId)) return { ok: false, status: 404 };
   const poll = await getRequest<CondensatePoll>(path(pollId));
   if (poll) return { ok: true, poll };
   return { ok: false, status: 401 };
 };
+
+// null means the list couldn't be loaded.
+export const getCondensatePolls = async (): Promise<CondensatePoll[] | null> =>
+  (await getRequest<CondensatePoll[]>('/condensate/polls')) ?? null;
 
 export const setPollBallot = async (pollId: string, appIds: number[]): Promise<PollLoad> => {
   try {

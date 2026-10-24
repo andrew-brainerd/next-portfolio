@@ -7,9 +7,11 @@ import { signOutUser } from '@/utils/firebase';
 import { useFirebaseUser } from 'hooks/useFirebaseUser';
 import { UserAvatar } from 'components/UserAvatar';
 import { SettingsIcon } from 'components/icons/SettingsIcon';
+import { isSteamOnlyUid } from 'utils/steamOnly';
 import {
   BOARD_ROUTE,
   BUZZED_ROUTE,
+  CONDENSATE_ROUTE,
   KALSHME_ROUTE,
   KEIKEN_ROUTE,
   LINK_ROUTE,
@@ -27,6 +29,7 @@ import {
 const PAGE_LINKS = [
   { href: BOARD_ROUTE, label: 'Board' },
   { href: BUZZED_ROUTE, label: 'Buzzed' },
+  { href: CONDENSATE_ROUTE, label: 'Condensate' },
   { href: KALSHME_ROUTE, label: 'Kalshme' },
   { href: KEIKEN_ROUTE, label: 'Keiken' },
   { href: LINK_ROUTE, label: 'Link a device' },
@@ -39,6 +42,12 @@ const PAGE_LINKS = [
   { href: ZILLOW_ROUTE, label: 'Zillow' }
 ];
 
+// Steam-only accounts are Condensate-only (condensate spec FR-48).
+const STEAM_ONLY_PAGE_LINKS = [
+  { href: CONDENSATE_ROUTE, label: 'Condensate' },
+  { href: LINK_ROUTE, label: 'Link a device' }
+];
+
 // Avatar-triggered account menu. Assumes the caller only renders it when signed
 // in (the cookie-based `isLoggedIn` gate); reads the live Firebase user for the
 // picture/name. Surfaced in the nav and the home corner so settings + logout are
@@ -46,6 +55,7 @@ const PAGE_LINKS = [
 export const UserMenu = () => {
   const { user } = useFirebaseUser();
   const [open, setOpen] = useState(false);
+  const pageLinks = isSteamOnlyUid(user?.uid) ? STEAM_ONLY_PAGE_LINKS : PAGE_LINKS;
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,12 +86,7 @@ export const UserMenu = () => {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <UserAvatar
-          photoURL={user?.photoURL}
-          displayName={user?.displayName}
-          email={user?.email}
-          size={32}
-        />
+        <UserAvatar photoURL={user?.photoURL} displayName={user?.displayName} email={user?.email} size={32} />
       </button>
       {open && (
         <div
@@ -93,7 +98,7 @@ export const UserMenu = () => {
             {user?.email && <p className="truncate text-xs text-neutral-400">{user.email}</p>}
           </div>
           <div className="grid grid-cols-2 border-b border-neutral-700 py-1">
-            {PAGE_LINKS.map(link => (
+            {pageLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}

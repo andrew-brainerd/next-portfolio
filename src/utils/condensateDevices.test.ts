@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { deviceTitle, isSteamUid, lastUsedLabel } from './condensateDevices';
+import { deviceTitle, lastUsedLabel } from './condensateDevices';
 
 const DAY = 24 * 60 * 60 * 1000;
 const NOW = 100 * DAY;
@@ -17,11 +17,5 @@ describe('Condensate device list labels', () => {
     expect(lastUsedLabel({ id: '1', createdAt: NOW - 10 * DAY, lastUsedAt: NOW - 1000 }, NOW)).toBe('Last used today');
     expect(lastUsedLabel({ id: '1', createdAt: 0, lastUsedAt: NOW - DAY }, NOW)).toBe('Last used yesterday');
     expect(lastUsedLabel({ id: '1', createdAt: NOW - 3 * DAY }, NOW)).toBe('Signed in 3 days ago');
-  });
-
-  it('only Steam accounts have Condensate devices', () => {
-    expect(isSteamUid('steam:76561197960287930')).toBe(true);
-    expect(isSteamUid('abc123')).toBe(false);
-    expect(isSteamUid(undefined)).toBe(false);
   });
 });

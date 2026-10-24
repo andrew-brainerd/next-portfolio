@@ -4,9 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
-import { LOGIN_ROUTE } from 'constants/routes';
+import { LOGIN_ROUTE, SETTINGS_ROUTE } from 'constants/routes';
+import { linkSteamAccount } from '@/api/steamLink';
 import { completeSteamSignIn } from 'utils/firebase';
 import {
+  STEAM_LINK_RESULT_KEY,
+  STEAM_MODE_KEY,
   STEAM_REDIRECT_KEY,
   STEAM_STATE_KEY,
   openIdParams,
@@ -28,8 +31,17 @@ const readAndClear = (key: string): string | null => {
 const finishSteamSignIn = async (params: URLSearchParams): Promise<{ redirect: string } | { error: string }> => {
   const expectedState = readAndClear(STEAM_STATE_KEY);
   const redirect = safeRedirect(readAndClear(STEAM_REDIRECT_KEY));
+  const linking = readAndClear(STEAM_MODE_KEY) === 'link';
   const problem = steamCallbackProblem(params, expectedState);
   if (problem) return { error: steamProblemMessage(problem) };
+
+  if (linking) {
+    const outcome = await linkSteamAccount(openIdParams(params));
+    try {
+      sessionStorage.setItem(STEAM_LINK_RESULT_KEY, outcome);
+    } catch {}
+    return { redirect: SETTINGS_ROUTE };
+  }
 
   const response = await completeSteamSignIn(openIdParams(params));
   return response.isError ? { error: response.message } : { redirect };

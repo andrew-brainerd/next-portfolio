@@ -38,7 +38,7 @@ export const needsSignIn = (result: ApproveFailure): boolean =>
 
 export const linkErrorMessage = (result: ApproveFailure): string => {
   if (steamRequired(result)) {
-    return 'Condensate uses your Steam account. Sign in with Steam, then enter the code again.';
+    return 'Condensate uses your Steam account. Sign in with Steam, or link Steam in Settings, then enter the code again.';
   }
   if (result.status === 400) {
     return 'That code is invalid or has expired. Codes last 15 minutes; get a new one from your device or app and try again.';

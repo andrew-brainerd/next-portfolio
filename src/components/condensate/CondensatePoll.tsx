@@ -9,7 +9,7 @@ import { formatSession, personLabel, rankedOptions, steamHeaderArt, toggleTick }
 
 const ERRORS: Record<number, string> = {
   400: 'This poll is closed, or it already has as many games as it can hold.',
-  401: 'Sign in with Steam to vote. Other sign-ins can’t vote in Condensate polls.',
+  401: 'Sign in with Steam, or link Steam in Settings, to vote in Condensate polls.',
   404: 'That poll doesn’t exist any more.'
 };
 

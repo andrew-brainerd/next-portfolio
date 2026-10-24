@@ -7,7 +7,8 @@ import { headers } from 'next/headers';
 import { SiteChrome } from '@/components/SiteChrome';
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 import ThemeProvider from '@/providers/ThemeProvider';
-import { TOKEN_COOKIE } from '@/constants/authentication';
+import { TOKEN_COOKIE, USER_COOKIE } from '@/constants/authentication';
+import { cookieUid, isSteamOnlyUid } from '@/utils/steamOnly';
 import 'styles/index.css';
 
 const gaMeasurementId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID;
@@ -104,6 +105,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const cookieJar = await cookies();
   const token = cookieJar.get(TOKEN_COOKIE)?.value;
   const isLoggedIn = !!token;
+  const isSteamOnly = isLoggedIn && isSteamOnlyUid(cookieUid(cookieJar.get(USER_COOKIE)?.value));
   const randomTheme = await getRandomTheme();
 
   return (
@@ -126,7 +128,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to main content
         </a>
         <ThemeProvider>
-          <SiteChrome isLoggedIn={isLoggedIn}>{children}</SiteChrome>
+          <SiteChrome isLoggedIn={isLoggedIn} isSteamOnly={isSteamOnly}>
+            {children}
+          </SiteChrome>
         </ThemeProvider>
         <ServiceWorkerRegister />
       </body>

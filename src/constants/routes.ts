@@ -23,6 +23,7 @@ export const SETTINGS_ROUTE = '/settings';
 export const APPS_ROUTE = '/apps';
 export const ADDONS_ROUTE = '/addons';
 export const APPS_CONDENSATE_ROUTE = '/apps/condensate';
+export const CONDENSATE_ROUTE = '/condensate';
 export const APPS_DOWNLOAD_ALL_ROUTE = '/apps/download-all';
 export const OISHII_ROUTE = '/oishii';
 export const BOARD_ROUTE = '/board';
