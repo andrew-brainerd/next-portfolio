@@ -1,5 +1,7 @@
 import { COMPLETED_GAMES, MINIMUM_PLAYTIME } from 'constants/steam';
+import { selectSteamGames } from 'utils/steam';
 import { getOwnedGames, getPlayerSummary, getRecentGames } from 'api/steam';
+import { getDeck60AppIds } from 'api/steamDeck';
 import { HowLongToBeatService } from 'howlongtobeat';
 import type { ProcessedSteamGame, SteamGamesData } from 'types/steam';
 
@@ -7,6 +9,7 @@ interface LoadSteamGamesOptions {
   steamId?: string;
   count?: number;
   shouldFetchTTB: boolean;
+  deck60Only?: boolean;
 }
 
 const HIDDEN_GAMES = [1454400];
@@ -19,21 +22,25 @@ const MAX_TTB_REQUESTS = 20;
 export const loadSteamGames = async ({
   steamId,
   count,
-  shouldFetchTTB
+  shouldFetchTTB,
+  deck60Only = false
 }: LoadSteamGamesOptions): Promise<SteamGamesData> => {
-  const [{ personaname }, steamGames, recentGames] = await Promise.all([
+  const [{ personaname }, steamGames, recentGames, deck60AppIds] = await Promise.all([
     getPlayerSummary(steamId),
     getOwnedGames(steamId),
-    getRecentGames(steamId)
+    getRecentGames(steamId),
+    getDeck60AppIds()
   ]);
 
-  const userHeading = `${!steamId ? 'My ' : ''} Games${!steamId ? '' : ` for ${personaname}`}`;
+  const gamesLabel = deck60Only ? 'Steam Deck 60fps Games' : 'Games';
+  const userHeading = `${!steamId ? 'My ' : ''} ${gamesLabel}${!steamId ? '' : ` for ${personaname}`}`;
   const pageHeading = personaname === 'Invalid User' ? personaname : userHeading;
 
-  const sortedGames = steamGames
-    .filter(game => !HIDDEN_GAMES.includes(game.appid))
-    .filter(game => (game?.playtime_forever || 0) / 60 > MINIMUM_PLAYTIME)
-    .sort((a, b) => (b?.playtime_forever || 0) - (a?.playtime_forever || 0));
+  const sortedGames = selectSteamGames(steamGames, {
+    hiddenAppIds: HIDDEN_GAMES,
+    minimumHours: MINIMUM_PLAYTIME,
+    deck60AppIds: deck60Only ? deck60AppIds : undefined
+  });
 
   const limitedGames = sortedGames.slice(0, count || sortedGames.length);
 
@@ -60,9 +67,10 @@ export const loadSteamGames = async ({
     const recentGame = recentGames.find(rg => game.appid === rg.appid);
     const isRecent = (recentGame?.playtime_2weeks || 0) / 60 > MINIMUM_PLAYTIME;
     const isCompleted = !!COMPLETED_GAMES.find(completedGame => game.appid === Number(completedGame));
+    const isDeck60 = deck60AppIds.includes(game.appid);
     const hoursToBeat = ttbMap.get(game.appid);
 
-    return { ...game, isRecent, isCompleted, ...(hoursToBeat && { hoursToBeat }) };
+    return { ...game, isRecent, isCompleted, isDeck60, ...(hoursToBeat && { hoursToBeat }) };
   });
 
   return { pageHeading, games };

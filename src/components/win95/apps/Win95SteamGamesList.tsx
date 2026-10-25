@@ -7,6 +7,7 @@ interface Win95SteamGamesListProps {
   steamId?: string;
   count?: number;
   shouldFetchTTB: boolean;
+  deck60Only: boolean;
 }
 
 const cleanName = (name: string): string =>
@@ -16,8 +17,8 @@ const cleanName = (name: string): string =>
     .replaceAll('™', '')
     .replaceAll(': Game of the Year', '');
 
-export const Win95SteamGamesList = async ({ steamId, count, shouldFetchTTB }: Win95SteamGamesListProps) => {
-  const { pageHeading, games } = await loadSteamGames({ steamId, count, shouldFetchTTB });
+export const Win95SteamGamesList = async ({ steamId, count, shouldFetchTTB, deck60Only }: Win95SteamGamesListProps) => {
+  const { pageHeading, games } = await loadSteamGames({ steamId, count, shouldFetchTTB, deck60Only });
 
   return (
     <div className="p-2 text-[11px]">
@@ -54,9 +55,7 @@ export const Win95SteamGamesList = async ({ steamId, count, shouldFetchTTB }: Wi
                       <span className="truncate">{cleanName(game.name)}</span>
                     </span>
                   </td>
-                  <td className="px-2 py-1 text-right tabular-nums">
-                    {Math.round(game.playtime_forever / 60)}
-                  </td>
+                  <td className="px-2 py-1 text-right tabular-nums">{Math.round(game.playtime_forever / 60)}</td>
                   <td className="px-2 py-1">
                     {game.isCompleted ? (
                       <span className="font-bold text-[#008000]">✓ Done</span>
@@ -65,6 +64,7 @@ export const Win95SteamGamesList = async ({ steamId, count, shouldFetchTTB }: Wi
                     ) : (
                       ''
                     )}
+                    {game.isDeck60 && <span className="ml-1 text-[#008080]">Deck 60</span>}
                   </td>
                 </tr>
               ))}

@@ -1,7 +1,7 @@
 import { OwnedGame } from 'types/steam';
 import { GameDisplay } from 'components/steam/GameDisplay';
 
-type GameProps = OwnedGame & { isCompleted: boolean; isRecent: boolean; rank: number };
+type GameProps = OwnedGame & { isCompleted: boolean; isDeck60: boolean; isRecent: boolean; rank: number };
 
 const formatName = (name: string): string => {
   let formatted = name;
@@ -12,7 +12,16 @@ const formatName = (name: string): string => {
   return formatted;
 };
 
-export const Game = ({ appid, img_icon_url, name, isRecent, playtime_forever, rank, hoursToBeat }: GameProps) => {
+export const Game = ({
+  appid,
+  img_icon_url,
+  name,
+  isDeck60,
+  isRecent,
+  playtime_forever,
+  rank,
+  hoursToBeat
+}: GameProps) => {
   const formattedName = formatName(name);
 
   return (
@@ -21,6 +30,7 @@ export const Game = ({ appid, img_icon_url, name, isRecent, playtime_forever, ra
       appId={appid.toString()}
       name={formattedName}
       icon={img_icon_url}
+      isDeck60={isDeck60}
       isRecent={isRecent}
       playtime={playtime_forever}
       hoursToBeat={hoursToBeat}

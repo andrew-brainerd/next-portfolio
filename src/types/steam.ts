@@ -36,9 +36,21 @@ export interface OwnedGame {
 export interface ProcessedSteamGame extends OwnedGame {
   isRecent: boolean;
   isCompleted: boolean;
+  isDeck60: boolean;
 }
 
 export interface SteamGamesData {
   pageHeading: string;
   games: ProcessedSteamGame[];
+}
+
+export interface Deck60Game {
+  appId: number;
+  name: string;
+  note?: string;
+}
+
+export interface Deck60List {
+  criteria: string;
+  games: Deck60Game[];
 }

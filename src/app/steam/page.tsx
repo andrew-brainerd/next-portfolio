@@ -10,6 +10,7 @@ import type { Metadata } from 'next';
 interface SteamProps {
   searchParams: Promise<{
     count?: string;
+    deck60?: string;
     steamId?: string;
     ttb?: string;
   }>;
@@ -46,16 +47,22 @@ function SteamLoadingFallback() {
 }
 
 const Steam = async (props: SteamProps) => {
-  const { count, steamId, ttb } = await props.searchParams;
+  const { count, deck60, steamId, ttb } = await props.searchParams;
 
   const countNumber = count ? parseInt(count, 10) : undefined;
   const shouldFetchTTB = ttb === 'true';
+  const deck60Only = deck60 === 'true';
 
   return (
     <ModeSwitch
       win95={
         <Suspense fallback={<SteamLoadingFallback />}>
-          <Win95SteamGamesList steamId={steamId} count={countNumber} shouldFetchTTB={shouldFetchTTB} />
+          <Win95SteamGamesList
+            steamId={steamId}
+            count={countNumber}
+            shouldFetchTTB={shouldFetchTTB}
+            deck60Only={deck60Only}
+          />
         </Suspense>
       }
       normal={
@@ -64,7 +71,12 @@ const Steam = async (props: SteamProps) => {
           data-steam-id={steamId || MY_STEAM_ID}
         >
           <Suspense fallback={<SteamLoadingFallback />}>
-            <SteamGamesList steamId={steamId} count={countNumber} shouldFetchTTB={shouldFetchTTB} />
+            <SteamGamesList
+              steamId={steamId}
+              count={countNumber}
+              shouldFetchTTB={shouldFetchTTB}
+              deck60Only={deck60Only}
+            />
           </Suspense>
         </main>
       }
