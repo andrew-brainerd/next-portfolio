@@ -8,7 +8,6 @@ type GameProps = {
   href?: string;
   icon: string;
   image?: string;
-  isDeck60?: boolean;
   isRecent: boolean;
   name: string;
   rank: number;
@@ -16,18 +15,7 @@ type GameProps = {
   hoursToBeat?: number;
 };
 
-export const GameDisplay = ({
-  appId,
-  href,
-  icon,
-  image,
-  isDeck60,
-  isRecent,
-  name,
-  playtime,
-  rank,
-  hoursToBeat
-}: GameProps) => (
+export const GameDisplay = ({ appId, href, icon, image, isRecent, name, playtime, rank, hoursToBeat }: GameProps) => (
   <div
     key={appId}
     className="items-center bg-[#2f2f2f] bg-no-repeat rounded border-2 border-solid border-transparent flex justify-between mt-2.5 p-1 sm:py-1 sm:px-4"
@@ -49,15 +37,7 @@ export const GameDisplay = ({
         {name}
       </span>
     </div>
-    <div className="flex items-center justify-center gap-2 overflow-hidden">
-      {isDeck60 && (
-        <span
-          className="font-oswald rounded bg-[#1a9fff] px-1.5 text-xs text-white sm:text-sm"
-          title="Holds 60fps on Steam Deck"
-        >
-          60
-        </span>
-      )}
+    <div className="flex justify-center overflow-hidden">
       <Image
         className="border-white rounded border-1 sm:h-14 sm:w-14 w-6 h-6"
         alt={appId}

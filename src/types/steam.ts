@@ -36,7 +36,6 @@ export interface OwnedGame {
 export interface ProcessedSteamGame extends OwnedGame {
   isRecent: boolean;
   isCompleted: boolean;
-  isDeck60: boolean;
 }
 
 export interface SteamGamesData {
