@@ -12,6 +12,9 @@ export const linkSuccessMessage = (kind?: string): string => {
   if (kind === 'condensate') {
     return 'Condensate is now signed in to your account. The app updates in a few seconds, so you can close this page.';
   }
+  if (kind === 'drewtube') {
+    return 'DrewTube is now syncing with your account. You can close this page.';
+  }
   return 'Device linked! It should continue in a few seconds.';
 };
 

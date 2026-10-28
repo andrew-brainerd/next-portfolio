@@ -6,6 +6,7 @@ describe('linkDevice messages', () => {
   it('names what was paired', () => {
     expect(linkSuccessMessage('charter')).toContain('Charter Forever is paired');
     expect(linkSuccessMessage('condensate')).toContain('Condensate is now signed in');
+    expect(linkSuccessMessage('drewtube')).toContain('DrewTube is now syncing');
     expect(linkSuccessMessage('watch')).toBe('Device linked! It should continue in a few seconds.');
     expect(linkSuccessMessage(undefined)).toBe('Device linked! It should continue in a few seconds.');
   });
