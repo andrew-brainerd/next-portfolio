@@ -56,4 +56,13 @@ export interface AppDownloads {
   stable: ReleaseManifest | null;
   beta: ReleaseManifest | null;
   linux: ReleaseManifest | null;
+  /** Site admins only. */
+  counts: CondensateDownloadCounts | null;
+}
+
+export type DownloadSource = 'site' | 'updater' | 'direct';
+
+export interface CondensateDownloadCounts {
+  bySource: Record<DownloadSource, number>;
+  byVersion: { version: string; platform: AppPlatform; source: DownloadSource; count: number }[];
 }

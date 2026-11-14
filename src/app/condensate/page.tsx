@@ -11,6 +11,7 @@ import { getPlayerSummary } from '@/api/steam';
 import { CondensateLinuxDownload } from '@/components/apps/CondensateLinuxDownload';
 import { DownloadButtons } from '@/components/apps/DownloadButtons';
 import { CondensateDevices } from '@/components/condensate/CondensateDevices';
+import { CondensateDownloadCounts } from '@/components/condensate/CondensateDownloadCounts';
 import { CondensateIcon } from '@/components/icons/CondensateIcon';
 import { CONDENSATE } from '@/constants/apps';
 import { TOKEN_COOKIE } from '@/constants/authentication';
@@ -38,7 +39,7 @@ const Section = ({
 );
 
 const Downloads = async () => {
-  const { stable, beta, linux } = await getCondensateDownloads();
+  const { stable, beta, linux, counts } = await getCondensateDownloads();
   const manifest = stable ?? (await getReleaseManifest(CONDENSATE.slug));
   return (
     <Section title="Download">
@@ -55,6 +56,7 @@ const Downloads = async () => {
           />
         </div>
       )}
+      {counts && <CondensateDownloadCounts counts={counts} />}
       <p className="mt-3 text-sm text-neutral-500">
         <Link href={APPS_CONDENSATE_ROUTE} className="underline hover:text-neutral-300">
           About Condensate and first-launch steps
