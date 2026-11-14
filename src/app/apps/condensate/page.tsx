@@ -228,7 +228,7 @@ export default async function CondensatePage() {
         </section>
 
         {/* Install */}
-        <section className="py-12" aria-labelledby="install-heading">
+        <section id="install" className="py-12" aria-labelledby="install-heading">
           <SectionHeading id="install-heading">Installing</SectionHeading>
           <p className="mb-6 max-w-3xl text-neutral-300">
             Condensate is currently distributed unsigned, so the first launch needs one extra click to get past
