@@ -25,24 +25,29 @@ export const metadata: Metadata = {
 
 const SCREENSHOTS: AppScreenshot[] = [
   {
-    src: '/apps/condensate/sign-in.png',
-    alt: 'Condensate sign-in screen prompting for a Steam Web API key',
-    caption: 'Sign in with your own Steam Web API key — stored in your OS keychain.'
+    src: '/apps/condensate/library.jpg',
+    alt: 'Condensate library in the Covers view, with install status and multiplayer badges on each game',
+    caption: 'Your whole Steam library, with what is installed here and what is multiplayer.'
   },
   {
-    src: '/apps/condensate/library.png',
-    alt: 'Condensate library view listing owned Steam games with install badges',
-    caption: 'Your full library with install status, playtime, and multiplayer badges.'
+    src: '/apps/condensate/group.jpg',
+    alt: 'Condensate Group tab showing friends who are playing, a game night poll and the games everyone owns',
+    caption: 'See what friends are playing, vote on game night, and find the games everyone owns.'
   },
   {
-    src: '/apps/condensate/group.png',
-    alt: 'Condensate group view showing games shared across friends',
-    caption: 'Build a group and see the games everyone owns.'
+    src: '/apps/condensate/lounge.jpg',
+    alt: 'Condensate Lounge, a fullscreen media bar of installed games over game art',
+    caption: 'Lounge: a fullscreen, controller-friendly library for the TV.'
   },
   {
-    src: '/apps/condensate/settings.png',
-    alt: 'Condensate settings with the connection speed test',
-    caption: 'Measure your connection to estimate download times.'
+    src: '/apps/condensate/settings.jpg',
+    alt: 'Condensate Appearance settings with colour themes and Lounge styles',
+    caption: 'Pick a colour theme and a Lounge style.'
+  },
+  {
+    src: '/apps/condensate/sign-in.jpg',
+    alt: 'Condensate welcome screen asking for a Steam Web API key',
+    caption: 'Sign in with your own Steam Web API key, stored in your OS keychain.'
   }
 ];
 
