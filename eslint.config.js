@@ -14,7 +14,8 @@ const config = [
       'no-multiple-empty-lines': ['error', { max: 2 }],
       'no-extra-boolean-cast': 'off',
       'space-before-function-paren': 'off',
-      'multiline-ternary': 'off'
+      'multiline-ternary': 'off',
+      'react-hooks/set-state-in-effect': 'warn'
     }
   },
   // Forbid default exports in components (use `export const Name = ...`)
